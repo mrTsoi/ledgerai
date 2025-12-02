@@ -1,0 +1,176 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "search": "搜索",
+    "filter": "筛选",
+    "export": "导出",
+    "download": "下载",
+    "upload": "上传",
+    "close": "关闭",
+    "submit": "提交",
+    "reset": "重置",
+    "back": "返回",
+    "next": "下一步",
+    "previous": "上一步",
+    "all": "全部",
+    "active": "活跃",
+    "inactive": "停用",
+    "status": "状态",
+    "actions": "操作",
+    "date": "日期",
+    "amount": "金额",
+    "description": "描述",
+    "total": "总计",
+    "subtotal": "小计"
+  },
+  "navigation": {
+    "dashboard": "控制面板",
+    "documents": "文档",
+    "transactions": "交易",
+    "accounts": "会计科目",
+    "reports": "报表",
+    "team": "团队",
+    "settings": "设置",
+    "admin": "管理面板",
+    "logout": "登出",
+    "banking": "银行"
+  },
+  "admin": {
+    "title": "平台管理",
+    "description": "管理租户、用户并监控系统活动",
+    "tabs": {
+      "overview": "系统概览",
+      "tenants": "租户管理",
+      "audit": "审计日志",
+      "languages": "语言管理"
+    }
+  },
+  "auth": {
+    "login": "登录",
+    "signup": "注册",
+    "email": "电子邮箱",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "forgotPassword": "忘记密码？",
+    "noAccount": "还没有账户？",
+    "hasAccount": "已有账户？",
+    "signUpNow": "立即注册",
+    "logInNow": "立即登录"
+  },
+  "accounts": {
+    "title": "会计科目表",
+    "description": "管理您的会计科目结构和层级",
+    "addAccount": "添加科目",
+    "editAccount": "编辑科目",
+    "accountCode": "科目代码",
+    "accountName": "科目名称",
+    "accountType": "类型",
+    "accountSubtype": "子类型",
+    "parentAccount": "上级科目",
+    "balance": "余额",
+    "debit": "借方",
+    "credit": "贷方",
+    "types": {
+      "asset": "资产",
+      "liability": "负债",
+      "equity": "权益",
+      "revenue": "收入",
+      "expense": "费用"
+    },
+    "noAccounts": "未找到科目"
+  },
+  "transactions": {
+    "title": "交易记录",
+    "description": "查看、编辑和过账会计交易",
+    "addTransaction": "添加交易",
+    "editTransaction": "编辑交易",
+    "postTransaction": "过账",
+    "voidTransaction": "作废",
+    "transactionDate": "交易日期",
+    "referenceNumber": "参考编号",
+    "lineItems": "分录明细",
+    "totalDebits": "借方合计",
+    "totalCredits": "贷方合计",
+    "balanced": "平衡",
+    "outOfBalance": "不平衡",
+    "status": {
+      "draft": "草稿",
+      "posted": "已过账",
+      "void": "已作废"
+    },
+    "noTransactions": "未找到交易记录"
+  },
+  "documents": {
+    "title": "文档管理",
+    "description": "上传和管理财务文档",
+    "uploadDocument": "上传文档",
+    "uploadDescription": "拖放文件到这里，或点击浏览",
+    "supportedFormats": "支持格式：PDF、图片、Excel、CSV",
+    "fileName": "文件名",
+    "fileType": "文件类型",
+    "uploadedAt": "上传时间",
+    "processedAt": "处理时间",
+    "status": {
+      "uploaded": "已上传",
+      "processing": "处理中",
+      "processed": "已处理",
+      "failed": "失败"
+    },
+    "noDocuments": "未找到文档"
+  },
+  "reports": {
+    "title": "财务报表",
+    "description": "生成和导出财务报表",
+    "selectReport": "选择报表",
+    "dateRange": "日期范围",
+    "startDate": "开始日期",
+    "endDate": "结束日期",
+    "asOfDate": "截至日期",
+    "generateReport": "生成报表",
+    "exportPDF": "导出PDF",
+    "exportCSV": "导出CSV",
+    "trialBalance": {
+      "title": "试算平衡表",
+      "description": "查看所有科目余额以验证借贷平衡"
+    },
+    "profitLoss": {
+      "title": "损益表",
+      "description": "查看期间内的收入和费用",
+      "revenue": "收入",
+      "expenses": "费用",
+      "grossProfit": "毛利润",
+      "operatingIncome": "营业收入",
+      "netIncome": "净利润"
+    },
+    "balanceSheet": {
+      "title": "资产负债表",
+      "description": "查看特定时间点的资产、负债和权益",
+      "assets": "资产",
+      "liabilities": "负债",
+      "equity": "权益",
+      "totalAssets": "资产总计",
+      "totalLiabilities": "负债总计",
+      "totalEquity": "权益总计"
+    },
+    "cashFlow": {
+      "title": "现金流量表",
+      "description": "查看现金流入和流出",
+      "operating": "经营活动",
+      "investing": "投资活动",
+      "financing": "筹资活动"
+    },
+    "noData": "所选期间无可用数据"
+  },
+  "errors": {
+    "generic": "发生错误，请重试。",
+    "networkError": "网络错误，请检查您的连接。",
+    "unauthorized": "您无权执行此操作。",
+    "notFound": "未找到请求的资源。",
+    "validationError": "请检查您的输入并重试。"
+  }
+}

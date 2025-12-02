@@ -1,0 +1,176 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "download": "Download",
+    "upload": "Upload",
+    "close": "Close",
+    "submit": "Submit",
+    "reset": "Reset",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "all": "All",
+    "active": "Active",
+    "inactive": "Inactive",
+    "status": "Status",
+    "actions": "Actions",
+    "date": "Date",
+    "amount": "Amount",
+    "description": "Description",
+    "total": "Total",
+    "subtotal": "Subtotal"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "documents": "Documents",
+    "transactions": "Transactions",
+    "accounts": "Accounts",
+    "reports": "Reports",
+    "team": "Team",
+    "settings": "Settings",
+    "admin": "Admin Panel",
+    "logout": "Logout",
+    "banking": "Banking"
+  },
+  "admin": {
+    "title": "Platform Administration",
+    "description": "Manage tenants, users, and monitor system activity",
+    "tabs": {
+      "overview": "System Overview",
+      "tenants": "Tenant Management",
+      "audit": "Audit Logs",
+      "languages": "Languages"
+    }
+  },
+  "auth": {
+    "login": "Log In",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "signUpNow": "Sign up now",
+    "logInNow": "Log in now"
+  },
+  "accounts": {
+    "title": "Chart of Accounts",
+    "description": "Manage your account structure and hierarchy",
+    "addAccount": "Add Account",
+    "editAccount": "Edit Account",
+    "accountCode": "Account Code",
+    "accountName": "Account Name",
+    "accountType": "Type",
+    "accountSubtype": "Subtype",
+    "parentAccount": "Parent Account",
+    "balance": "Balance",
+    "debit": "Debit",
+    "credit": "Credit",
+    "types": {
+      "asset": "Asset",
+      "liability": "Liability",
+      "equity": "Equity",
+      "revenue": "Revenue",
+      "expense": "Expense"
+    },
+    "noAccounts": "No accounts found"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "description": "Review, edit, and post accounting transactions",
+    "addTransaction": "Add Transaction",
+    "editTransaction": "Edit Transaction",
+    "postTransaction": "Post Transaction",
+    "voidTransaction": "Void Transaction",
+    "transactionDate": "Transaction Date",
+    "referenceNumber": "Reference Number",
+    "lineItems": "Line Items",
+    "totalDebits": "Total Debits",
+    "totalCredits": "Total Credits",
+    "balanced": "Balanced",
+    "outOfBalance": "Out of Balance",
+    "status": {
+      "draft": "Draft",
+      "posted": "Posted",
+      "void": "Void"
+    },
+    "noTransactions": "No transactions found"
+  },
+  "documents": {
+    "title": "Documents",
+    "description": "Upload and manage financial documents",
+    "uploadDocument": "Upload Document",
+    "uploadDescription": "Drag and drop files here, or click to browse",
+    "supportedFormats": "Supported formats: PDF, Images, Excel, CSV",
+    "fileName": "File Name",
+    "fileType": "File Type",
+    "uploadedAt": "Uploaded At",
+    "processedAt": "Processed At",
+    "status": {
+      "uploaded": "Uploaded",
+      "processing": "Processing",
+      "processed": "Processed",
+      "failed": "Failed"
+    },
+    "noDocuments": "No documents found"
+  },
+  "reports": {
+    "title": "Financial Reports",
+    "description": "Generate and export financial reports",
+    "selectReport": "Select Report",
+    "dateRange": "Date Range",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "asOfDate": "As of Date",
+    "generateReport": "Generate Report",
+    "exportPDF": "Export to PDF",
+    "exportCSV": "Export to CSV",
+    "trialBalance": {
+      "title": "Trial Balance",
+      "description": "View all account balances to verify debits equal credits"
+    },
+    "profitLoss": {
+      "title": "Profit & Loss Statement",
+      "description": "View revenue and expenses for a period",
+      "revenue": "Revenue",
+      "expenses": "Expenses",
+      "grossProfit": "Gross Profit",
+      "operatingIncome": "Operating Income",
+      "netIncome": "Net Income"
+    },
+    "balanceSheet": {
+      "title": "Balance Sheet",
+      "description": "View assets, liabilities, and equity at a point in time",
+      "assets": "Assets",
+      "liabilities": "Liabilities",
+      "equity": "Equity",
+      "totalAssets": "Total Assets",
+      "totalLiabilities": "Total Liabilities",
+      "totalEquity": "Total Equity"
+    },
+    "cashFlow": {
+      "title": "Cash Flow Statement",
+      "description": "View cash inflows and outflows",
+      "operating": "Operating Activities",
+      "investing": "Investing Activities",
+      "financing": "Financing Activities"
+    },
+    "noData": "No data available for the selected period"
+  },
+  "errors": {
+    "generic": "An error occurred. Please try again.",
+    "networkError": "Network error. Please check your connection.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "notFound": "The requested resource was not found.",
+    "validationError": "Please check your input and try again."
+  }
+}

@@ -1,0 +1,149 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
+
+export async function importInvoiceToTransactions(invoiceId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Unauthorized' }
+  }
+
+  // 1. Get the invoice details
+  const { data: invoice, error: invoiceError } = await supabase
+    .from('billing_invoices')
+    .select('*')
+    .eq('id', invoiceId)
+    .single()
+
+  if (invoiceError || !invoice) {
+    return { error: 'Invoice not found' }
+  }
+
+  // 2. Find the user's primary tenant (Company)
+  // We assume the user wants to import this into their "active" or "primary" tenant.
+  // Since we don't have the tenant context here easily, we'll pick the first one they own or are admin of.
+  // Ideally, the UI should pass the tenant ID, but let's try to find one.
+  
+  const { data: membership } = await supabase
+    .from('memberships')
+    .select('tenant_id')
+    .eq('user_id', user.id)
+    .eq('is_active', true)
+    .in('role', ['OWNER', 'COMPANY_ADMIN', 'ACCOUNTANT'])
+    .limit(1)
+    .single()
+
+  if (!membership) {
+    return { error: 'No active company found to import expenses to.' }
+  }
+
+  const tenantId = membership.tenant_id
+
+  // 3. Check if already imported (optional, but good practice)
+  // We can check if a transaction exists with this reference number
+  const { data: existing } = await supabase
+    .from('transactions')
+    .select('id')
+    .eq('tenant_id', tenantId)
+    .eq('reference_number', invoice.stripe_invoice_id)
+    .single()
+
+  if (existing) {
+    return { error: 'This invoice has already been imported.' }
+  }
+
+  // 4. Create the Transaction (Expense)
+  const { data: transaction, error: transError } = await supabase
+    .from('transactions')
+    .insert({
+      tenant_id: tenantId,
+      transaction_date: new Date(invoice.created_at).toISOString().split('T')[0],
+      description: `Subscription Payment (Invoice #${invoice.stripe_invoice_id.slice(-6)})`,
+      reference_number: invoice.stripe_invoice_id,
+      status: 'DRAFT', // Start as draft so they can review
+      created_by: user.id,
+      notes: `Imported from Billing History. Amount: $${invoice.amount_paid}`
+    })
+    .select()
+    .single()
+
+  if (transError) {
+    console.error('Transaction creation error:', transError)
+    return { error: 'Failed to create transaction record.' }
+  }
+
+  // 5. Create Line Items (Double Entry)
+  // We need to find appropriate accounts.
+  // Debit: Software Subscription Expense (or generic Expense)
+  // Credit: Cash/Bank (or Accounts Payable if unpaid, but this is paid)
+  
+  // Let's try to find a "Software" or "Office Supplies" expense account
+  const { data: expenseAccount } = await supabase
+    .from('chart_of_accounts')
+    .select('id')
+    .eq('tenant_id', tenantId)
+    .eq('account_type', 'EXPENSE')
+    .ilike('name', '%Software%')
+    .limit(1)
+    .single()
+
+  // Fallback to any expense
+  let expenseAccountId = expenseAccount?.id
+  if (!expenseAccountId) {
+    const { data: anyExpense } = await supabase
+      .from('chart_of_accounts')
+      .select('id')
+      .eq('tenant_id', tenantId)
+      .eq('account_type', 'EXPENSE')
+      .limit(1)
+      .single()
+    expenseAccountId = anyExpense?.id
+  }
+
+  // Find Bank/Cash account
+  const { data: bankAccount } = await supabase
+    .from('chart_of_accounts')
+    .select('id')
+    .eq('tenant_id', tenantId)
+    .eq('account_type', 'ASSET')
+    .ilike('name', '%Cash%')
+    .limit(1)
+    .single()
+    
+  let bankAccountId = bankAccount?.id
+  if (!bankAccountId) {
+     const { data: anyAsset } = await supabase
+      .from('chart_of_accounts')
+      .select('id')
+      .eq('tenant_id', tenantId)
+      .eq('account_type', 'ASSET')
+      .limit(1)
+      .single()
+    bankAccountId = anyAsset?.id
+  }
+
+  if (expenseAccountId && bankAccountId) {
+    await supabase.from('line_items').insert([
+      {
+        transaction_id: transaction.id,
+        account_id: expenseAccountId,
+        debit: invoice.amount_paid,
+        credit: 0,
+        description: 'Subscription Expense'
+      },
+      {
+        transaction_id: transaction.id,
+        account_id: bankAccountId,
+        debit: 0,
+        credit: invoice.amount_paid,
+        description: 'Payment from Bank'
+      }
+    ])
+  }
+
+  revalidatePath('/dashboard/settings/billing')
+  return { success: true, transactionId: transaction.id }
+}
