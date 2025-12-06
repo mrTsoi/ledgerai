@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Loader2, Download, FileText, FileDown } from 'lucide-react'
 import { format } from 'date-fns'
 import { generateTrialBalancePDF } from '@/lib/pdf-generator'
+import { toast } from "sonner"
 
 interface TrialBalanceRow {
   account_id: string
@@ -46,7 +47,7 @@ export function TrialBalanceReport() {
       setData(reportData || [])
     } catch (error) {
       console.error('Error generating trial balance:', error)
-      alert('Failed to generate report')
+      toast.error('Failed to generate report')
     } finally {
       setLoading(false)
     }

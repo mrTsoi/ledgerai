@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Loader2, Search, UserPlus, Shield, Building2, Mail, User } from 'lucide-react'
 import { format } from 'date-fns'
 import { Database } from '@/types/database.types'
+import { toast } from "sonner"
 
 type AdminUserView = {
   user_id: string
@@ -80,12 +81,12 @@ export function UserManagement() {
 
       if (error) throw error
 
-      alert('User assigned successfully')
+      toast.success('User assigned successfully')
       // Don't close modal, just refresh data so user can see the new assignment
       fetchData()
     } catch (error: any) {
       console.error('Error assigning user:', error)
-      alert('Failed to assign user: ' + error.message)
+      toast.error('Failed to assign user: ' + error.message)
     }
   }
 
@@ -100,11 +101,11 @@ export function UserManagement() {
 
       if (error) throw error
 
-      alert('Access removed successfully')
+      toast.success('Access removed successfully')
       fetchData()
     } catch (error: any) {
       console.error('Error removing access:', error)
-      alert('Failed to remove access: ' + error.message)
+      toast.error('Failed to remove access: ' + error.message)
     }
   }
 

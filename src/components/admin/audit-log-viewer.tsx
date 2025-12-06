@@ -7,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Loader2, Filter, Download, RefreshCw } from 'lucide-react'
+import { Loader2, Filter, Download, RefreshCw, Copy } from 'lucide-react'
 import { format } from 'date-fns'
+import { toast } from "sonner"
 
 type AuditLog = Database['public']['Tables']['audit_logs']['Row']
 
@@ -265,10 +266,15 @@ export function AuditLogViewer() {
                       <td className="px-4 py-3 text-sm">
                         {log.old_data || log.new_data ? (
                           <button
-                            onClick={() => alert(JSON.stringify({ old: log.old_data, new: log.new_data }, null, 2))}
-                            className="text-blue-600 hover:underline"
+                            onClick={() => {
+                              const data = JSON.stringify({ old: log.old_data, new: log.new_data }, null, 2)
+                              navigator.clipboard.writeText(data)
+                              toast.success('Audit data copied to clipboard')
+                            }}
+                            className="text-blue-600 hover:underline flex items-center gap-1"
                           >
-                            View Details
+                            <Copy className="w-3 h-3" />
+                            Copy Details
                           </button>
                         ) : (
                           <span className="text-gray-400">No changes</span>

@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Loader2, Save, Bot, AlertCircle, CheckCircle2, XCircle, Zap } from 'lucide-react'
 import { Database } from '@/types/database.types'
+import { toast } from "sonner"
 
 type AIProvider = Database['public']['Tables']['ai_providers']['Row']
 
@@ -237,7 +238,7 @@ export function AISettings() {
 
   const handleTestConnection = async () => {
     if (!config.providerId || !config.apiKey) {
-      alert('Please select a provider and enter an API key')
+      toast.error('Please select a provider and enter an API key')
       return
     }
 
@@ -289,7 +290,7 @@ export function AISettings() {
       try {
         parsedConfig = JSON.parse(config.customConfig)
       } catch (e) {
-        alert('Invalid JSON in Custom Config')
+        toast.error('Invalid JSON in Custom Config')
         return
       }
 
@@ -306,10 +307,10 @@ export function AISettings() {
 
       if (error) throw error
       
-      alert('AI Configuration saved successfully')
+      toast.success('AI Configuration saved successfully')
     } catch (error: any) {
       console.error('Error saving AI config:', error)
-      alert('Failed to save AI config: ' + error.message)
+      toast.error('Failed to save AI config: ' + error.message)
     } finally {
       setLoading(false)
     }

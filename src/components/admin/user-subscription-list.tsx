@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { format } from 'date-fns'
+import { toast } from "sonner"
 
 interface UserSubscription {
   id: string
@@ -88,8 +89,9 @@ export function UserSubscriptionList() {
 
       if (error) throw error
       fetchSubscriptions()
+      toast.success('Subscription status updated')
     } catch (error: any) {
-      alert('Error updating status: ' + error.message)
+      toast.error('Error updating status: ' + error.message)
     }
   }
 
@@ -102,8 +104,9 @@ export function UserSubscriptionList() {
 
       if (error) throw error
       fetchSubscriptions()
+      toast.success('Subscription plan updated')
     } catch (error: any) {
-      alert('Error updating plan: ' + error.message)
+      toast.error('Error updating plan: ' + error.message)
     }
   }
 

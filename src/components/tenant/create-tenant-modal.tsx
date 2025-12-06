@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Loader2, Plus } from 'lucide-react'
 import { useSubscription } from '@/hooks/use-subscription'
 import { useTenant } from '@/hooks/use-tenant'
+import { toast } from "sonner"
 
 export function CreateTenantModal() {
   const [open, setOpen] = useState(false)
@@ -53,14 +54,14 @@ export function CreateTenantModal() {
 
       if (memberError) throw memberError
 
-      alert('Company created successfully!')
+      toast.success('Company created successfully!')
       setOpen(false)
       setFormData({ name: '', slug: '', locale: 'en' })
       refreshSubscription() // Update usage counts
       refreshTenants() // Update tenant list
     } catch (error: any) {
       console.error('Creation error:', error)
-      alert('Failed to create company: ' + error.message)
+      toast.error('Failed to create company: ' + error.message)
     } finally {
       setLoading(false)
     }

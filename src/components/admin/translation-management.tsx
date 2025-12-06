@@ -23,6 +23,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, Plus, Save, Trash2, Search } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { toast } from "sonner"
 
 interface Translation {
   id: string
@@ -128,8 +129,9 @@ export function TranslationManagement() {
 
     if (error) {
       console.error('Error adding translation:', error)
-      alert('Failed to add translation. Key might already exist.')
+      toast.error('Failed to add translation. Key might already exist.')
     } else {
+      toast.success('Translation added successfully')
       setNewKey('')
       setNewValue('')
       setIsAdding(false)
@@ -142,12 +144,14 @@ export function TranslationManagement() {
       .from('app_translations')
       .update({ value: editValue })
       .eq('id', id)
-
     if (error) {
       console.error('Error updating translation:', error)
+      toast.error('Failed to update translation')
     } else {
+      toast.success('Translation updated successfully')
       setEditingId(null)
       fetchTranslations()
+    } fetchTranslations()
     }
   }
 
@@ -157,10 +161,12 @@ export function TranslationManagement() {
     const { error } = await supabase
       .from('app_translations')
       .delete()
-      .eq('id', id)
-
     if (error) {
       console.error('Error deleting translation:', error)
+      toast.error('Failed to delete translation')
+    } else {
+      toast.success('Translation deleted successfully')
+      fetchTranslations()
     } else {
       fetchTranslations()
     }

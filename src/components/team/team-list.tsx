@@ -23,6 +23,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 // import { Loader2, Trash2, UserPlus } from 'lucide-react'
 import { Database } from '@/types/database.types'
+import { toast } from "sonner"
 
 type Membership = Database['public']['Tables']['memberships']['Row'] & {
   profiles: Database['public']['Tables']['profiles']['Row']
@@ -78,7 +79,7 @@ export function TeamList() {
         .single()
 
       if (userError || !users) {
-        alert('User not found. They must sign up first.')
+        toast.error('User not found. They must sign up first.')
         return
       }
 
@@ -91,7 +92,7 @@ export function TeamList() {
         .single()
 
       if (existingMember) {
-        alert('User is already a member of this team.')
+        toast.error('User is already a member of this team.')
         return
       }
 
@@ -109,11 +110,11 @@ export function TeamList() {
 
       setInviteEmail('')
       fetchMembers()
-      alert('Member added successfully!')
+      toast.success('Member added successfully!')
 
     } catch (error: any) {
       console.error('Error inviting member:', error)
-      alert('Failed to invite member: ' + error.message)
+      toast.error('Failed to invite member: ' + error.message)
     } finally {
       setInviting(false)
     }
@@ -130,9 +131,10 @@ export function TeamList() {
 
       if (error) throw error
       fetchMembers()
+      toast.success('Member removed successfully')
     } catch (error) {
       console.error('Error removing member:', error)
-      alert('Failed to remove member')
+      toast.error('Failed to remove member')
     }
   }
 
@@ -145,9 +147,10 @@ export function TeamList() {
 
       if (error) throw error
       fetchMembers()
+      toast.success('Role updated successfully')
     } catch (error) {
       console.error('Error updating role:', error)
-      alert('Failed to update role')
+      toast.error('Failed to update role')
     }
   }
 

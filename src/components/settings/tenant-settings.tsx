@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Loader2, Save } from 'lucide-react'
 import { CurrencySelect } from '@/components/ui/currency-select'
+import { toast } from "sonner"
 
 export function TenantSettings() {
   const { currentTenant, refreshTenants, isSuperAdmin } = useTenant()
@@ -55,10 +56,10 @@ export function TenantSettings() {
       if (error) throw error
       
       await refreshTenants()
-      alert('Settings saved successfully')
+      toast.success('Settings saved successfully')
     } catch (error: any) {
       console.error('Error saving settings:', error)
-      alert('Failed to save settings: ' + error.message)
+      toast.error('Failed to save settings: ' + error.message)
     } finally {
       setLoading(false)
     }

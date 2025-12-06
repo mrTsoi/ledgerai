@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, Save, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { CurrencySelect } from '@/components/ui/currency-select'
+import { toast } from "sonner"
 
 type BankAccount = Database['public']['Tables']['bank_accounts']['Row']
 
@@ -73,10 +74,10 @@ export function BankAccountSettings({ accountId }: Props) {
         .eq('id', accountId)
 
       if (error) throw error
-      alert('Settings saved successfully')
+      toast.success('Settings saved successfully')
     } catch (error: any) {
       console.error('Error saving settings:', error)
-      alert('Failed to save settings: ' + error.message)
+      toast.error('Failed to save settings: ' + error.message)
     } finally {
       setSaving(false)
     }
@@ -93,9 +94,10 @@ export function BankAccountSettings({ accountId }: Props) {
 
       if (error) throw error
       router.push('/dashboard/banking')
+      toast.success('Account deleted successfully')
     } catch (error: any) {
       console.error('Error deleting account:', error)
-      alert('Failed to delete account: ' + error.message)
+      toast.error('Failed to delete account: ' + error.message)
     }
   }
 

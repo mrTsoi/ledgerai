@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Loader2, Plus, Edit, Trash2, Building2, Users, FileText, DollarSign } from 'lucide-react'
 import { format } from 'date-fns'
+import { toast } from "sonner"
 
 type Tenant = Database['public']['Tables']['tenants']['Row'] & {
   is_active?: boolean
@@ -93,10 +94,10 @@ export function TenantManagement() {
       
       setShowCreateForm(false)
       fetchTenants()
-      alert('Tenant created successfully!')
+      toast.success('Tenant created successfully!')
     } catch (error: any) {
       console.error('Error creating tenant:', error)
-      alert('Failed to create tenant: ' + error.message)
+      toast.error('Failed to create tenant: ' + error.message)
     }
   }
 
@@ -109,9 +110,10 @@ export function TenantManagement() {
 
       if (error) throw error
       fetchTenants()
+      toast.success(`Tenant ${!currentStatus ? 'activated' : 'deactivated'} successfully`)
     } catch (error: any) {
       console.error('Error updating tenant:', error)
-      alert('Failed to update tenant: ' + error.message)
+      toast.error('Failed to update tenant: ' + error.message)
     }
   }
 

@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Loader2, Check, AlertCircle, Download, FileInput } from 'lucide-react'
 import { useSubscription } from '@/hooks/use-subscription'
 import { importInvoiceToTransactions } from '@/app/actions/billing-actions'
+import { toast } from "sonner"
 
 type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
 
@@ -50,13 +51,13 @@ export function BillingSettings() {
       setImporting(invoiceId)
       const result = await importInvoiceToTransactions(invoiceId)
       if (result.error) {
-        alert(result.error)
+        toast.error(result.error)
       } else {
-        alert('Invoice imported successfully as an expense!')
+        toast.success('Invoice imported successfully as an expense!')
       }
     } catch (error: any) {
       console.error('Import error:', error)
-      alert('Failed to import invoice: ' + error.message)
+      toast.error('Failed to import invoice: ' + error.message)
     } finally {
       setImporting(null)
     }
@@ -108,7 +109,7 @@ export function BillingSettings() {
       }
     } catch (error: any) {
       console.error('Upgrade error:', error)
-      alert('Failed to start upgrade: ' + error.message)
+      toast.error('Failed to start upgrade: ' + error.message)
     } finally {
       setUpgrading(null)
     }

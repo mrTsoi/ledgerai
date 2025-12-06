@@ -8,12 +8,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { FileText, Download, Trash2, Search, Filter, Loader2, Eye, RefreshCw, X, CheckSquare, Square, AlertTriangle } from 'lucide-react'
+import { FileText, Download, Trash2, Search, Filter, Loader2, Eye, RefreshCw, X, CheckSquare, Square, AlertTriangle, Sparkles } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { DocumentVerificationModal } from './document-verification-modal'
 import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from 'sonner'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 
-type Document = Database['public']['Tables']['documents']['Row']
+type Document = Database['public']['Tables']['documents']['Row'] & {
+  document_data?: {
+    confidence_score: number | null
+    extracted_data: any
+    bank_transactions?: any[] // Helper for type safety
+  }[] | any // Allow for potential single object return or array
+}
 
 const STATUS_COLORS = {
   UPLOADED: 'bg-blue-100 text-blue-800',
@@ -38,6 +46,16 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
   // const [verifyingDocId, setVerifyingDocId] = useState<string | null>(null) // Moved to parent
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   
+  // Confirmation Dialog State
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [confirmConfig, setConfirmConfig] = useState<{
+    title: string
+    description: string
+    action: () => Promise<void>
+    actionLabel: string
+    variant?: 'default' | 'destructive'
+  } | null>(null)
+
   const { currentTenant } = useTenant()
   const supabase = createClient()
 
@@ -75,14 +93,14 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
       setLoading(true)
       let query = supabase
         .from('documents')
-        .select('*')
+        .select('*, document_data(confidence_score, extracted_data)')
         .eq('tenant_id', currentTenant.id)
         .order('created_at', { ascending: false })
 
       const { data, error } = await query
 
       if (error) throw error
-      setDocuments(data || [])
+      setDocuments((data as unknown as Document[]) || [])
     } catch (error) {
       console.error('Error fetching documents:', error)
     } finally {
@@ -109,34 +127,130 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
       URL.revokeObjectURL(url)
     } catch (error: any) {
       console.error('Download error:', error)
-      alert('Failed to download document: ' + error.message)
+      toast.error('Failed to download document: ' + error.message)
+    }
+  }
+
+  const checkAssociations = async (docId: string) => {
+    const { count: txCount } = await supabase
+      .from('transactions')
+      .select('*', { count: 'exact', head: true })
+      .eq('document_id', docId)
+
+    const { data: statements } = await supabase
+      .from('bank_statements')
+      .select('id')
+      .eq('document_id', docId)
+
+    const statementIds = statements?.map(s => s.id) || []
+    let bankTxCount = 0
+    
+    if (statementIds.length > 0) {
+      const { count } = await supabase
+        .from('bank_transactions')
+        .select('*', { count: 'exact', head: true })
+        .in('bank_statement_id', statementIds)
+      bankTxCount = count || 0
+    }
+
+    return {
+      transactions: txCount || 0,
+      bankStatements: statementIds.length,
+      bankTransactions: bankTxCount
+    }
+  }
+
+  const checkBulkAssociations = async (docIds: string[]) => {
+    const { count: txCount } = await supabase
+      .from('transactions')
+      .select('*', { count: 'exact', head: true })
+      .in('document_id', docIds)
+
+    const { data: statements } = await supabase
+      .from('bank_statements')
+      .select('id')
+      .in('document_id', docIds)
+
+    const statementIds = statements?.map(s => s.id) || []
+    let bankTxCount = 0
+    
+    if (statementIds.length > 0) {
+      const { count } = await supabase
+        .from('bank_transactions')
+        .select('*', { count: 'exact', head: true })
+        .in('bank_statement_id', statementIds)
+      bankTxCount = count || 0
+    }
+
+    return {
+      transactions: txCount || 0,
+      bankStatements: statementIds.length,
+      bankTransactions: bankTxCount
     }
   }
 
   const deleteDocument = async (doc: Document) => {
-    if (!confirm(`Delete "${doc.file_name}"?`)) return
+    const associations = await checkAssociations(doc.id)
+    const hasAssociations = associations.transactions > 0 || associations.bankStatements > 0
 
-    try {
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('documents')
-        .remove([doc.file_path])
-
-      if (storageError) throw storageError
-
-      // Delete from database (will cascade to document_data)
-      const { error: dbError } = await supabase
-        .from('documents')
-        .delete()
-        .eq('id', doc.id)
-
-      if (dbError) throw dbError
-
-      setDocuments(prev => prev.filter(d => d.id !== doc.id))
-    } catch (error: any) {
-      console.error('Delete error:', error)
-      alert('Failed to delete document: ' + error.message)
+    let description = `Are you sure you want to delete "${doc.file_name}"?`
+    if (hasAssociations) {
+      description += ` This will also delete:`
+      if (associations.transactions > 0) description += `\n• ${associations.transactions} Transaction(s)`
+      if (associations.bankStatements > 0) description += `\n• ${associations.bankStatements} Bank Statement(s)`
+      if (associations.bankTransactions > 0) description += `\n• ${associations.bankTransactions} Bank Transaction(s)`
     }
+
+    setConfirmConfig({
+      title: 'Delete Document',
+      description: description,
+      action: async () => {
+        try {
+          // 1. Delete Transactions
+          if (associations.transactions > 0) {
+            const { error: txError } = await supabase
+              .from('transactions')
+              .delete()
+              .eq('document_id', doc.id)
+            if (txError) throw txError
+          }
+
+          // 2. Delete Bank Statements (Cascades to Bank Transactions)
+          if (associations.bankStatements > 0) {
+            const { error: bsError } = await supabase
+              .from('bank_statements')
+              .delete()
+              .eq('document_id', doc.id)
+            if (bsError) throw bsError
+          }
+
+          // 3. Delete from storage
+          const { error: storageError } = await supabase.storage
+            .from('documents')
+            .remove([doc.file_path])
+
+          if (storageError) throw storageError
+
+          // 4. Delete from database
+          const { error: dbError } = await supabase
+            .from('documents')
+            .delete()
+            .eq('id', doc.id)
+
+          if (dbError) throw dbError
+
+          setDocuments(prev => prev.filter(d => d.id !== doc.id))
+          setShowConfirmDialog(false)
+          toast.success('Document and associated records deleted')
+        } catch (error: any) {
+          console.error('Delete error:', error)
+          toast.error('Failed to delete document: ' + error.message)
+        }
+      },
+      actionLabel: 'Delete',
+      variant: 'destructive'
+    })
+    setShowConfirmDialog(true)
   }
 
   const previewDocument = async (doc: Document) => {
@@ -152,7 +266,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
       setPreviewDoc(doc)
     } catch (error: any) {
       console.error('Preview error:', error)
-      alert('Failed to load preview: ' + error.message)
+      toast.error('Failed to load preview: ' + error.message)
     }
   }
 
@@ -162,6 +276,17 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
       setPreviewUrl(null)
       setPreviewDoc(null)
     }
+  }
+
+  const getDocData = (doc: Document) => {
+    if (Array.isArray(doc.document_data) && doc.document_data.length > 0) {
+      return doc.document_data[0]
+    }
+    // Handle case where Supabase might return a single object instead of array
+    if (doc.document_data && !Array.isArray(doc.document_data)) {
+      return doc.document_data as any
+    }
+    return null
   }
 
   const reprocessDocument = async (doc: Document) => {
@@ -185,21 +310,25 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
         throw new Error(msg)
       }
       
-      const result = await response.json()
+      // Fetch the updated document to get the new AI data
+      const { data: updatedDoc, error: fetchError } = await supabase
+        .from('documents')
+        .select('*, document_data(confidence_score, extracted_data)')
+        .eq('id', doc.id)
+        .single()
 
-      // Update status to PROCESSED on success
-      setDocuments(prev => prev.map(d => 
-        d.id === doc.id ? { 
-          ...d, 
-          status: 'PROCESSED',
-          validation_status: result.validationStatus || d.validation_status,
-          validation_flags: result.validationFlags || d.validation_flags
-        } : d
-      ))
+      if (fetchError) throw fetchError
+
+      // Update state with fresh data
+      if (updatedDoc) {
+        setDocuments(prev => prev.map(d => 
+          d.id === doc.id ? (updatedDoc as unknown as Document) : d
+        ))
+      }
       
     } catch (error: any) {
       console.error('Reprocess error:', error)
-      alert('Failed to reprocess: ' + error.message)
+      toast.error('Failed to reprocess: ' + error.message)
       // Set to FAILED on error
       setDocuments(prev => prev.map(d => 
         d.id === doc.id ? { ...d, status: 'FAILED' } : d
@@ -232,32 +361,70 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
   }
 
   const bulkDelete = async () => {
-    if (!confirm(`Delete ${selectedIds.size} documents?`)) return
+    const ids = Array.from(selectedIds)
+    const associations = await checkBulkAssociations(ids)
+    const hasAssociations = associations.transactions > 0 || associations.bankStatements > 0
 
-    try {
-      const ids = Array.from(selectedIds)
-      const docsToDelete = documents.filter(d => selectedIds.has(d.id))
-      
-      // Delete from storage
-      const paths = docsToDelete.map(d => d.file_path)
-      if (paths.length > 0) {
-        await supabase.storage.from('documents').remove(paths)
-      }
-
-      // Delete from DB
-      const { error } = await supabase
-        .from('documents')
-        .delete()
-        .in('id', ids)
-
-      if (error) throw error
-
-      setDocuments(prev => prev.filter(d => !selectedIds.has(d.id)))
-      setSelectedIds(new Set())
-    } catch (error: any) {
-      console.error('Bulk delete error:', error)
-      alert('Failed to delete documents: ' + error.message)
+    let description = `Are you sure you want to delete ${selectedIds.size} documents?`
+    if (hasAssociations) {
+      description += ` This will also delete:`
+      if (associations.transactions > 0) description += `\n• ${associations.transactions} Transaction(s)`
+      if (associations.bankStatements > 0) description += `\n• ${associations.bankStatements} Bank Statement(s)`
+      if (associations.bankTransactions > 0) description += `\n• ${associations.bankTransactions} Bank Transaction(s)`
     }
+
+    setConfirmConfig({
+      title: 'Delete Documents',
+      description: description,
+      action: async () => {
+        try {
+          const docsToDelete = documents.filter(d => selectedIds.has(d.id))
+          
+          // 1. Delete Transactions
+          if (associations.transactions > 0) {
+            const { error: txError } = await supabase
+              .from('transactions')
+              .delete()
+              .in('document_id', ids)
+            if (txError) throw txError
+          }
+
+          // 2. Delete Bank Statements (Cascades to Bank Transactions)
+          if (associations.bankStatements > 0) {
+            const { error: bsError } = await supabase
+              .from('bank_statements')
+              .delete()
+              .in('document_id', ids)
+            if (bsError) throw bsError
+          }
+
+          // 3. Delete from storage
+          const paths = docsToDelete.map(d => d.file_path)
+          if (paths.length > 0) {
+            await supabase.storage.from('documents').remove(paths)
+          }
+
+          // 4. Delete from DB
+          const { error } = await supabase
+            .from('documents')
+            .delete()
+            .in('id', ids)
+
+          if (error) throw error
+
+          setDocuments(prev => prev.filter(d => !selectedIds.has(d.id)))
+          setSelectedIds(new Set())
+          setShowConfirmDialog(false)
+          toast.success('Documents and associated records deleted')
+        } catch (error: any) {
+          console.error('Bulk delete error:', error)
+          toast.error('Failed to delete documents: ' + error.message)
+        }
+      },
+      actionLabel: 'Delete',
+      variant: 'destructive'
+    })
+    setShowConfirmDialog(true)
   }
 
   const bulkReprocess = async () => {
@@ -277,7 +444,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
       ))
       
       setSelectedIds(new Set())
-      alert('Bulk processing started. Documents will update as they complete.')
+      toast.info('Bulk processing started. Documents will update as they complete.')
 
       // Process sequentially to avoid rate limits
       for (const id of ids) {
@@ -289,15 +456,18 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
           })
 
           if (response.ok) {
-            const result = await response.json()
-            setDocuments(prev => prev.map(d => 
-              d.id === id ? { 
-                ...d, 
-                status: 'PROCESSED',
-                validation_status: result.validationStatus || d.validation_status,
-                validation_flags: result.validationFlags || d.validation_flags
-              } : d
-            ))
+            // Fetch updated doc
+            const { data: updatedDoc } = await supabase
+              .from('documents')
+              .select('*, document_data(confidence_score, extracted_data)')
+              .eq('id', id)
+              .single()
+
+            if (updatedDoc) {
+               setDocuments(prev => prev.map(d => 
+                d.id === id ? (updatedDoc as unknown as Document) : d
+              ))
+            }
           } else {
              setDocuments(prev => prev.map(d => 
               d.id === id ? { ...d, status: 'FAILED' } : d
@@ -320,7 +490,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
       
     } catch (error: any) {
       console.error('Bulk reprocess error:', error)
-      alert('Failed to reprocess: ' + error.message)
+      toast.error('Failed to reprocess: ' + error.message)
     }
   }
 
@@ -466,6 +636,40 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                           <span className="capitalize">{doc.document_type}</span>
                         </>
                       )}
+                      {(() => {
+                        const data = getDocData(doc)
+                        if (data?.confidence_score != null) {
+                          const score = data.confidence_score * 100
+                          return (
+                            <>
+                              <span className="hidden md:inline">•</span>
+                              <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium border ${
+                                score >= 80 
+                                  ? 'bg-green-50 text-green-700 border-green-200' 
+                                  : score >= 50 
+                                    ? 'bg-yellow-50 text-yellow-700 border-yellow-200' 
+                                    : 'bg-red-50 text-red-700 border-red-200'
+                              }`}>
+                                <Sparkles className="w-3 h-3" />
+                                <span>{Math.round(score)}% AI Confidence</span>
+                              </div>
+                            </>
+                          )
+                        }
+                        return null
+                      })()}
+                      {(() => {
+                        const data = getDocData(doc)
+                        if (doc.document_type === 'BANK_STATEMENT' && data?.extracted_data?.bank_transactions?.length > 0) {
+                           return (
+                             <>
+                              <span className="hidden md:inline">•</span>
+                              <span>{data.extracted_data.bank_transactions.length} Txns</span>
+                             </>
+                           )
+                        }
+                        return null
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -571,6 +775,28 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
           </div>
         </div>
       )}
+
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{confirmConfig?.title}</DialogTitle>
+            <DialogDescription className="whitespace-pre-wrap">
+              {confirmConfig?.description}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant={confirmConfig?.variant || 'default'} 
+              onClick={confirmConfig?.action}
+            >
+              {confirmConfig?.actionLabel}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }

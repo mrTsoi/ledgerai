@@ -65,7 +65,7 @@ export class AIProcessingService {
       // 1. Get document details
       const { data: document, error: docError } = await supabase
         .from('documents')
-        .select('*, tenants(name)')
+        .select('*, tenants(name, currency)')
         .eq('id', documentId)
         .single()
 
@@ -75,6 +75,7 @@ export class AIProcessingService {
       }
 
       const tenantName = (document as any).tenants?.name || 'the company'
+      const tenantCurrency = (document as any).tenants?.currency || 'USD'
 
       // 2. Update status to PROCESSING
       await supabase
@@ -254,6 +255,15 @@ export class AIProcessingService {
                   }
               }
               
+              // Fallback: Check if AI put the name in customer_name or vendor_name by mistake
+              if (!isTenantMatch && !accountHolder) {
+                  const vendor = extractedData.vendor_name?.toLowerCase() || ''
+                  const customer = extractedData.customer_name?.toLowerCase() || ''
+                  if (vendor.includes(tenantName) || customer.includes(tenantName)) {
+                      isTenantMatch = true
+                  }
+              }
+
               // If we still don't have a match, but it's a bank statement, we might be more lenient
               // UNLESS the AI didn't find any account holder name at all (common in some statements)
               if (!isTenantMatch && !accountHolder) {
@@ -298,7 +308,7 @@ export class AIProcessingService {
         vendor_name: extractedData.vendor_name || null,
         document_date: extractedData.document_date || extractedData.statement_period_end || null,
         total_amount: extractedData.total_amount || extractedData.closing_balance || null,
-        currency: extractedData.currency || 'USD',
+        currency: extractedData.currency || tenantCurrency,
         line_items: (extractedData.line_items || []) as any,
         metadata: {
           processed_by: aiConfig?.ai_providers?.name || 'mock-ai-service',
@@ -639,20 +649,27 @@ export class AIProcessingService {
       If this is a BANK STATEMENT:
       - Set "document_type" to "bank_statement"
       - Extract "bank_name" and "account_number" (last 4 digits if possible)
-      - Extract "account_holder_name" (the name of the account owner shown on the statement)
-      - Extract "statement_period_start" and "statement_period_end" (YYYY-MM-DD)
-      - Extract "opening_balance" and "closing_balance" (number)
+      - Extract "account_holder_name" (the name of the account owner shown on the statement). Look for "Account Name", "Name", or the address block.
+      - Extract "statement_period_start" (YYYY-MM-DD). Look for "From", "Period Beginning", "Start Date", "Opening Date".
+      - Extract "statement_period_end" (YYYY-MM-DD). Look for "To", "Period Ending", "End Date", "Statement Date", "Closing Date".
+      - Extract "opening_balance" (number). Look for "Beginning Balance", "Previous Balance", "Brought Forward", "Start Balance", "Opening Balance".
+      - Extract "closing_balance" (number). Look for "Ending Balance", "New Balance", "Current Balance", "Closing Balance".
       - Extract "bank_transactions" as an array of objects with:
         - "date" (YYYY-MM-DD)
         - "description" (string)
         - "amount" (number, absolute value)
         - "type" ("DEBIT" for withdrawals/fees, "CREDIT" for deposits/interest)
+      - NOTE: For bank statements, "customer_name" and "vendor_name" are usually NOT applicable. Do not hallucinate them.
       
       If this is an INVOICE, RECEIPT, or CREDIT NOTE:
       - Set "document_type" to "invoice", "receipt", or "credit_note"
       - Extract "vendor_name" (the sender/supplier)
       - Extract "customer_name" (the receiver/bill to)
-      - Extract "document_date" (YYYY-MM-DD), "total_amount" (number), "currency" (ISO code), "invoice_number"
+      - Extract "document_date" (YYYY-MM-DD), "total_amount" (number), "invoice_number"
+      - Extract "currency" (ISO code). If the currency symbol is ambiguous (e.g. "$") or missing:
+        - Infer the currency based on the address/country of the vendor or customer.
+        - Example: If address is in Hong Kong, infer "HKD". If in UK, infer "GBP". If in Europe, infer "EUR".
+        - If explicitly stated (e.g. "USD", "CAD"), use that.
       - Extract "line_items" (array of {description, amount, quantity})
       
       CRITICAL - DETERMINE TRANSACTION TYPE:
@@ -697,8 +714,9 @@ export class AIProcessingService {
         
         try {
           const data = JSON.parse(jsonStr)
+          const sanitizedData = this.sanitizeExtractedData(data)
           return {
-            ...data,
+            ...sanitizedData,
             confidence_score: 0.85 // Placeholder as generic APIs don't always return confidence
           }
         } catch (e) {
@@ -713,8 +731,9 @@ export class AIProcessingService {
              const potentialJson = content.substring(firstBrace, lastBrace + 1)
              try {
                 const data = JSON.parse(potentialJson)
+                const sanitizedData = this.sanitizeExtractedData(data)
                 return {
-                   ...data,
+                   ...sanitizedData,
                    confidence_score: 0.85
                 }
              } catch (e2) {
@@ -739,6 +758,72 @@ export class AIProcessingService {
       console.error(`OpenAI Compatible Vision Error (${model}):`, error)
       throw error
     }
+  }
+
+  /**
+   * Sanitize extracted data to ensure correct types
+   */
+  private static sanitizeExtractedData(data: any): any {
+    const cleanNumber = (val: any) => {
+      if (typeof val === 'number') return val
+      if (typeof val === 'string') {
+        // Remove currency symbols and commas, keep negative sign and decimal point
+        const num = parseFloat(val.replace(/[^0-9.-]+/g, ''))
+        return isNaN(num) ? null : num
+      }
+      return null
+    }
+
+    const cleanDate = (val: any) => {
+        if (!val) return null
+        try {
+            // If it's already YYYY-MM-DD, it's fine. 
+            // If it's "Jan 1, 2024", Date.parse might handle it.
+            const d = new Date(val)
+            if (isNaN(d.getTime())) return val // Return original if parse fails, maybe DB can handle or it's garbage
+            return d.toISOString().split('T')[0]
+        } catch (e) {
+            return val
+        }
+    }
+
+    // Map synonyms for bank statements
+    if (!data.statement_period_start && data.start_date) data.statement_period_start = data.start_date
+    if (!data.statement_period_end && data.end_date) data.statement_period_end = data.end_date
+    
+    // Opening Balance Synonyms
+    if (!data.opening_balance) {
+        if (data.start_balance) data.opening_balance = data.start_balance
+        else if (data.beginning_balance) data.opening_balance = data.beginning_balance
+        else if (data.previous_balance) data.opening_balance = data.previous_balance
+        else if (data.brought_forward) data.opening_balance = data.brought_forward
+    }
+
+    // Closing Balance Synonyms
+    if (!data.closing_balance) {
+        if (data.end_balance) data.closing_balance = data.end_balance
+        else if (data.ending_balance) data.closing_balance = data.ending_balance
+        else if (data.new_balance) data.closing_balance = data.new_balance
+        else if (data.current_balance) data.closing_balance = data.current_balance
+    }
+
+    if (data.opening_balance !== undefined) data.opening_balance = cleanNumber(data.opening_balance)
+    if (data.closing_balance !== undefined) data.closing_balance = cleanNumber(data.closing_balance)
+    if (data.total_amount !== undefined) data.total_amount = cleanNumber(data.total_amount)
+    
+    if (data.statement_period_start) data.statement_period_start = cleanDate(data.statement_period_start)
+    if (data.statement_period_end) data.statement_period_end = cleanDate(data.statement_period_end)
+    if (data.document_date) data.document_date = cleanDate(data.document_date)
+
+    if (data.bank_transactions && Array.isArray(data.bank_transactions)) {
+      data.bank_transactions = data.bank_transactions.map((tx: any) => ({
+        ...tx,
+        amount: cleanNumber(tx.amount) || 0,
+        date: cleanDate(tx.date)
+      }))
+    }
+    
+    return data
   }
 
   /**
@@ -914,6 +999,20 @@ export class AIProcessingService {
           console.error('Error updating bank statement:', updateError)
           return
         }
+
+        // Delete existing transactions for this statement to prevent duplicates
+        // This ensures that re-processing a statement overrides the old feed
+        const { error: deleteError } = await supabase
+          .from('bank_transactions')
+          .delete()
+          .eq('bank_statement_id', statementId)
+        
+        if (deleteError) {
+          console.error('Error deleting existing bank transactions:', deleteError)
+          // We continue even if delete fails, though it might cause duplicates. 
+          // Ideally we should transaction this, but Supabase client doesn't support transactions easily.
+        }
+
       } else {
         // Create new Bank Statement Record
         const { data: statement, error: stmtError } = await supabase
@@ -984,7 +1083,7 @@ export class AIProcessingService {
         .single()
       
       const tenantCurrency = tenant?.currency || 'USD'
-      const txCurrency = extractedData.currency || 'USD'
+      const txCurrency = extractedData.currency || tenantCurrency
       const isForeign = txCurrency !== tenantCurrency
 
       let transactionId = existingTransactionId

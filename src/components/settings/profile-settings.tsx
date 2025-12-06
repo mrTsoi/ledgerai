@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Loader2, User } from "lucide-react"
+import { toast } from "sonner"
 
 export function ProfileSettings() {
   const [loading, setLoading] = useState(false)
@@ -64,10 +65,10 @@ export function ProfileSettings() {
 
       if (error) throw error
       
-      alert("Profile updated successfully.")
+      toast.success("Profile updated successfully.")
     } catch (error) {
       console.error('Error updating profile:', error)
-      alert("Failed to update profile.")
+      toast.error("Failed to update profile.")
     } finally {
       setLoading(false)
     }

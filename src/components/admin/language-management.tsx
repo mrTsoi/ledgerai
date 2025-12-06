@@ -17,6 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Loader2, Plus, Save, Trash2, Check } from 'lucide-react'
+import { toast } from "sonner"
 
 interface Language {
   code: string
@@ -73,8 +74,9 @@ export function LanguageManagement() {
 
     if (error) {
       console.error('Error adding language:', error)
-      alert('Failed to add language')
+      toast.error('Failed to add language')
     } else {
+      toast.success('Language added successfully')
       setNewLanguage({
         code: '',
         name: '',
@@ -91,7 +93,7 @@ export function LanguageManagement() {
     // Don't allow deactivating the default language
     const lang = languages.find((l) => l.code === code)
     if (lang?.is_default && currentState) {
-      alert('Cannot deactivate the default language')
+      toast.error('Cannot deactivate the default language')
       return
     }
 
@@ -164,8 +166,9 @@ export function LanguageManagement() {
 
     if (error) {
       console.error('Error deleting language:', error)
-      alert('Failed to delete language')
+      toast.error('Failed to delete language')
     } else {
+      toast.success('Language deleted successfully')
       fetchLanguages()
     }
   }

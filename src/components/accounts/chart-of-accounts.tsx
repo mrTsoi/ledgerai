@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Loader2, Plus, Edit, Trash2, FolderTree } from 'lucide-react'
+import { toast } from "sonner"
 
 type Account = Database['public']['Tables']['chart_of_accounts']['Row']
 
@@ -114,9 +115,10 @@ export function ChartOfAccounts() {
       setShowForm(false)
       setEditingAccount(null)
       fetchAccounts()
+      toast.success(editingAccount ? 'Account updated successfully' : 'Account created successfully')
     } catch (error: any) {
       console.error('Error saving account:', error)
-      alert('Failed to save: ' + error.message)
+      toast.error('Failed to save: ' + error.message)
     }
   }
 
@@ -131,9 +133,10 @@ export function ChartOfAccounts() {
 
       if (error) throw error
       fetchAccounts()
+      toast.success('Account deleted successfully')
     } catch (error: any) {
       console.error('Error deleting account:', error)
-      alert('Failed to delete: ' + error.message)
+      toast.error('Failed to delete: ' + error.message)
     }
   }
 

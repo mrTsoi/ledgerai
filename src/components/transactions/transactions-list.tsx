@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { toast } from 'sonner'
 
 type Transaction = Database['public']['Tables']['transactions']['Row']
 
@@ -39,6 +40,21 @@ export function TransactionsList({ status }: Props) {
   const [auditResults, setAuditResults] = useState<AuditIssue[]>([])
   const [showAuditResults, setShowAuditResults] = useState(false)
   const [auditIssuesMap, setAuditIssuesMap] = useState<Record<string, AuditIssue[]>>({})
+  
+  // Audit Dialog State
+  const [returnToAudit, setReturnToAudit] = useState(false)
+  const [auditSearchTerm, setAuditSearchTerm] = useState('')
+  const [selectedAuditKeys, setSelectedAuditKeys] = useState<Set<string>>(new Set())
+
+  // Confirmation Dialog State
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [confirmConfig, setConfirmConfig] = useState<{
+    title: string
+    description: string
+    action: () => Promise<void>
+    actionLabel: string
+    variant?: 'default' | 'destructive'
+  } | null>(null)
 
   const { currentTenant } = useTenant()
   const supabase = createClient()
@@ -98,7 +114,27 @@ export function TransactionsList({ status }: Props) {
     try {
       let query = supabase
         .from('transactions')
-        .select('*, documents(validation_status, validation_flags)')
+        .select(`
+          *,
+          documents (
+            validation_status,
+            validation_flags,
+            document_data (
+              confidence_score,
+              total_amount,
+              currency,
+              extracted_data
+            )
+          ),
+          line_items (
+            debit,
+            credit,
+            chart_of_accounts (
+              name,
+              account_type
+            )
+          )
+        `)
         .eq('tenant_id', currentTenant.id)
         .order('transaction_date', { ascending: false })
         .order('created_at', { ascending: false })
@@ -135,20 +171,57 @@ export function TransactionsList({ status }: Props) {
   }
 
   const voidTransaction = async (id: string) => {
-    if (!confirm('Are you sure you want to void this transaction?')) return
+    setConfirmConfig({
+      title: 'Void Transaction',
+      description: 'Are you sure you want to void this transaction?',
+      action: async () => {
+        try {
+          const { error } = await supabase
+            .from('transactions')
+            .update({ status: 'VOID' })
+            .eq('id', id)
 
-    try {
-      const { error } = await supabase
-        .from('transactions')
-        .update({ status: 'VOID' })
-        .eq('id', id)
+          if (error) throw error
+          fetchTransactions()
+          setAuditResults(prev => prev.filter(i => i.transactionId !== id))
+          setShowConfirmDialog(false)
+        } catch (error: any) {
+          console.error('Error voiding transaction:', error)
+          toast.error('Failed to void: ' + error.message)
+        }
+      },
+      actionLabel: 'Void',
+      variant: 'destructive'
+    })
+    setShowConfirmDialog(true)
+  }
 
-      if (error) throw error
-      fetchTransactions()
-    } catch (error: any) {
-      console.error('Error voiding transaction:', error)
-      alert('Failed to void: ' + error.message)
-    }
+  const deleteTransaction = async (id: string) => {
+    setConfirmConfig({
+      title: 'Delete Transaction',
+      description: 'Are you sure you want to delete this transaction?',
+      action: async () => {
+        try {
+          const { error } = await supabase
+            .from('transactions')
+            .delete()
+            .eq('id', id)
+
+          if (error) throw error
+          
+          toast.success('Transaction deleted')
+          fetchTransactions()
+          setAuditResults(prev => prev.filter(i => i.transactionId !== id))
+          setShowConfirmDialog(false)
+        } catch (error: any) {
+          console.error('Error deleting transaction:', error)
+          toast.error('Failed to delete: ' + error.message)
+        }
+      },
+      actionLabel: 'Delete',
+      variant: 'destructive'
+    })
+    setShowConfirmDialog(true)
   }
 
   const toggleSelection = (id: string) => {
@@ -169,53 +242,142 @@ export function TransactionsList({ status }: Props) {
     }
   }
 
-  const bulkVoid = async () => {
-    if (!confirm(`Void ${selectedIds.size} transactions?`)) return
+  const selectVerified = () => {
+    const verifiedIds = new Set<string>()
+    filteredTransactions.forEach(tx => {
+      if (tx.status !== 'DRAFT') return
 
-    try {
-      const ids = Array.from(selectedIds)
-      const { error } = await supabase
-        .from('transactions')
-        .update({ status: 'VOID' })
-        .in('id', ids)
-
-      if (error) throw error
+      // Check confidence score
+      const doc = (tx as any).documents
+      const docData = doc?.document_data
+      const confidence = Array.isArray(docData) && docData.length > 0 ? docData[0].confidence_score : null
       
-      fetchTransactions()
-      setSelectedIds(new Set())
-    } catch (error: any) {
-      console.error('Bulk void error:', error)
-      alert('Failed to void transactions: ' + error.message)
-    }
+      // Check validation flags
+      const hasValidationIssues = doc?.validation_flags?.some((flag: string) => 
+        ['DUPLICATE_DOCUMENT', 'WRONG_TENANT'].includes(flag)
+      )
+
+      // Check audit issues if available
+      const auditIssues = auditIssuesMap[tx.id] || []
+      const hasHighSeverityAuditIssues = auditIssues.some(i => i.severity === 'HIGH')
+
+      // Criteria for "Verified":
+      // 1. High confidence (> 0.8) OR Manual entry (no doc)
+      // 2. No validation issues
+      // 3. No high severity audit issues
+      
+      const isHighConfidence = confidence !== null ? confidence >= 0.8 : true // If no doc, assume manual entry is ok? Or maybe require review? Let's say if no doc, we don't auto-select unless we are sure. But for now, let's focus on AI ones.
+      // Actually, if no doc, confidence is null.
+      
+      if (isHighConfidence && !hasValidationIssues && !hasHighSeverityAuditIssues) {
+        verifiedIds.add(tx.id)
+      }
+    })
+    
+    setSelectedIds(verifiedIds)
+    toast.success(`Selected ${verifiedIds.size} verified transactions`)
+  }
+
+  const bulkPost = async () => {
+    setConfirmConfig({
+      title: 'Post Transactions',
+      description: `Post ${selectedIds.size} transactions?`,
+      action: async () => {
+        try {
+          const ids = Array.from(selectedIds)
+          // Only allow posting drafts
+          const draftsToPost = transactions.filter(t => selectedIds.has(t.id) && t.status === 'DRAFT')
+          
+          if (draftsToPost.length === 0) {
+            toast.warning('No DRAFT transactions selected.')
+            return
+          }
+
+          const { error } = await supabase
+            .from('transactions')
+            .update({ status: 'POSTED', posted_at: new Date().toISOString() })
+            .in('id', draftsToPost.map(t => t.id))
+
+          if (error) throw error
+          
+          fetchTransactions()
+          setSelectedIds(new Set())
+          toast.success(`Posted ${draftsToPost.length} transactions`)
+          setShowConfirmDialog(false)
+        } catch (error: any) {
+          console.error('Bulk post error:', error)
+          toast.error('Failed to post transactions: ' + error.message)
+        }
+      },
+      actionLabel: 'Post',
+      variant: 'default'
+    })
+    setShowConfirmDialog(true)
+  }
+
+  const bulkVoid = async () => {
+    setConfirmConfig({
+      title: 'Void Transactions',
+      description: `Void ${selectedIds.size} transactions?`,
+      action: async () => {
+        try {
+          const ids = Array.from(selectedIds)
+          const { error } = await supabase
+            .from('transactions')
+            .update({ status: 'VOID' })
+            .in('id', ids)
+
+          if (error) throw error
+          
+          fetchTransactions()
+          setSelectedIds(new Set())
+          setShowConfirmDialog(false)
+        } catch (error: any) {
+          console.error('Bulk void error:', error)
+          toast.error('Failed to void transactions: ' + error.message)
+        }
+      },
+      actionLabel: 'Void',
+      variant: 'destructive'
+    })
+    setShowConfirmDialog(true)
   }
 
   const bulkDeleteDrafts = async () => {
-    if (!confirm(`Delete ${selectedIds.size} draft transactions?`)) return
+    setConfirmConfig({
+      title: 'Delete Draft Transactions',
+      description: `Delete ${selectedIds.size} draft transactions?`,
+      action: async () => {
+        try {
+          const ids = Array.from(selectedIds)
+          // Only allow deleting drafts
+          const draftsToDelete = transactions.filter(t => selectedIds.has(t.id) && t.status === 'DRAFT')
+          
+          if (draftsToDelete.length !== ids.length) {
+            toast.warning('Only DRAFT transactions can be deleted. Others will be skipped.')
+          }
 
-    try {
-      const ids = Array.from(selectedIds)
-      // Only allow deleting drafts
-      const draftsToDelete = transactions.filter(t => selectedIds.has(t.id) && t.status === 'DRAFT')
-      
-      if (draftsToDelete.length !== ids.length) {
-        alert('Only DRAFT transactions can be deleted. Others will be skipped.')
-      }
+          if (draftsToDelete.length === 0) return
 
-      if (draftsToDelete.length === 0) return
+          const { error } = await supabase
+            .from('transactions')
+            .delete()
+            .in('id', draftsToDelete.map(t => t.id))
 
-      const { error } = await supabase
-        .from('transactions')
-        .delete()
-        .in('id', draftsToDelete.map(t => t.id))
-
-      if (error) throw error
-      
-      fetchTransactions()
-      setSelectedIds(new Set())
-    } catch (error: any) {
-      console.error('Bulk delete error:', error)
-      alert('Failed to delete transactions: ' + error.message)
-    }
+          if (error) throw error
+          
+          fetchTransactions()
+          setSelectedIds(new Set())
+          setShowConfirmDialog(false)
+        } catch (error: any) {
+          console.error('Bulk delete error:', error)
+          toast.error('Failed to delete transactions: ' + error.message)
+        }
+      },
+      actionLabel: 'Delete',
+      variant: 'destructive'
+    })
+    setShowConfirmDialog(true)
   }
 
   const toggleExpand = (id: string) => {
@@ -234,6 +396,8 @@ export function TransactionsList({ status }: Props) {
     try {
       const issues = await auditTransactions(currentTenant.id)
       setAuditResults(issues)
+      setSelectedAuditKeys(new Set()) // Reset selection
+      setAuditSearchTerm('') // Reset search
       
       // Group issues by transaction ID
       const issuesMap: Record<string, AuditIssue[]> = {}
@@ -248,10 +412,119 @@ export function TransactionsList({ status }: Props) {
       setShowAuditResults(true)
     } catch (e) {
       console.error(e)
-      alert('Audit failed')
+      toast.error('Audit failed')
     } finally {
       setIsAuditing(false)
     }
+  }
+
+  // Audit Helper Functions
+  const getAuditKey = (issue: AuditIssue) => `${issue.transactionId}-${issue.issueType}`
+
+  const filteredAuditResults = auditResults.filter(issue => {
+    if (!auditSearchTerm) return true
+    const search = auditSearchTerm.toLowerCase()
+    const tx = transactions.find(t => t.id === issue.transactionId)
+    return (
+      issue.description.toLowerCase().includes(search) ||
+      issue.issueType.toLowerCase().includes(search) ||
+      tx?.description?.toLowerCase().includes(search) ||
+      tx?.reference_number?.toLowerCase().includes(search)
+    )
+  })
+
+  const toggleAuditSelection = (key: string) => {
+    const newSelected = new Set(selectedAuditKeys)
+    if (newSelected.has(key)) {
+      newSelected.delete(key)
+    } else {
+      newSelected.add(key)
+    }
+    setSelectedAuditKeys(newSelected)
+  }
+
+  const toggleAllAuditSelection = () => {
+    const allKeys = new Set(filteredAuditResults.map(issue => getAuditKey(issue)))
+    const allSelected = allKeys.size > 0 && Array.from(allKeys).every(key => selectedAuditKeys.has(key))
+
+    if (allSelected) {
+      setSelectedAuditKeys(new Set())
+    } else {
+      setSelectedAuditKeys(allKeys)
+    }
+  }
+
+  const bulkFixAudit = async () => {
+    if (selectedAuditKeys.size === 0) return
+    
+    // Identify actionable issues (Duplicate/Wrong Tenant)
+    const issuesToFix = auditResults.filter(issue => 
+      selectedAuditKeys.has(getAuditKey(issue)) && 
+      ['DUPLICATE', 'WRONG_TENANT'].includes(issue.issueType)
+    )
+
+    if (issuesToFix.length === 0) {
+      toast.warning('No auto-fixable issues selected (Duplicate or Wrong Tenant).')
+      return
+    }
+
+    setConfirmConfig({
+      title: 'Fix Selected Issues',
+      description: `Auto-fix ${issuesToFix.length} selected issues? This will Delete drafts and Void posted transactions.`,
+      action: async () => {
+        try {
+          const txIdsToDelete: string[] = []
+          const txIdsToVoid: string[] = []
+
+          issuesToFix.forEach(issue => {
+            const tx = transactions.find(t => t.id === issue.transactionId)
+            if (!tx) return
+            
+            if (tx.status === 'DRAFT') {
+              txIdsToDelete.push(tx.id)
+            } else {
+              txIdsToVoid.push(tx.id)
+            }
+          })
+
+          // Perform Delete
+          if (txIdsToDelete.length > 0) {
+            const { error } = await supabase
+              .from('transactions')
+              .delete()
+              .in('id', txIdsToDelete)
+            if (error) throw error
+          }
+
+          // Perform Void
+          if (txIdsToVoid.length > 0) {
+            const { error } = await supabase
+              .from('transactions')
+              .update({ status: 'VOID' })
+              .in('id', txIdsToVoid)
+            if (error) throw error
+          }
+
+          toast.success(`Fixed ${issuesToFix.length} issues`)
+          
+          // Refresh and update local state
+          await fetchTransactions()
+          
+          // Remove fixed issues from the list
+          const fixedTxIds = new Set([...txIdsToDelete, ...txIdsToVoid])
+          setAuditResults(prev => prev.filter(i => !fixedTxIds.has(i.transactionId)))
+          setSelectedAuditKeys(new Set())
+          setShowConfirmDialog(false)
+
+        } catch (error: any) {
+          console.error('Bulk fix error:', error)
+          toast.error('Failed to fix issues: ' + error.message)
+        }
+      },
+      actionLabel: 'Fix Issues',
+      variant: 'destructive'
+    })
+    setShowConfirmDialog(true)
   }
 
   const getStatusIcon = (status: string) => {
@@ -280,6 +553,65 @@ export function TransactionsList({ status }: Props) {
     )
   }
 
+  const getTransactionDetails = (tx: any) => {
+    const lineItems = tx.line_items || []
+    // Handle potential array/object structure for documents
+    const doc = Array.isArray(tx.documents) ? tx.documents[0] : tx.documents
+    const rawDocData = doc?.document_data
+    const docData = Array.isArray(rawDocData) ? rawDocData[0] : rawDocData
+    
+    // 1. Determine Amount & Currency
+    let amount = 0
+    // Prioritize the structured currency column as it's the canonical source
+    let currency = docData?.currency || 
+                   (docData?.extracted_data as any)?.currency || 
+                   tx.currency || 
+                   (currentTenant as any)?.currency || 
+                   'USD'
+    
+    // Try explicit column first
+    if (docData?.total_amount != null) {
+      amount = docData.total_amount
+    } 
+    // Try extracted_data JSON as fallback
+    else if (docData?.extracted_data?.total_amount != null) {
+       const rawAmount = docData.extracted_data.total_amount
+       amount = typeof rawAmount === 'number' ? rawAmount : parseFloat(rawAmount) || 0
+    }
+    // Fallback to line items
+    else if (lineItems.length > 0) {
+      amount = lineItems.reduce((sum: number, item: any) => sum + (item.debit || 0), 0)
+    }
+
+    // 2. Determine Category (Account) & Type
+    // Strategy: Find the line item that is NOT the bank/cash account.
+    // For now, we just take the first line item that has a name, or "Uncategorized"
+    // Ideally, we'd know which account is the "source" (bank) and which is "destination" (expense).
+    // Heuristic: If it's an expense, the category is the Debit side (usually).
+    
+    let category = 'Uncategorized'
+    let type = 'Expense' // Default
+    
+    // Try to find a non-asset account (likely the expense/revenue category)
+    const categoryItem = lineItems.find((item: any) => 
+      item.chart_of_accounts?.account_type !== 'ASSET' && 
+      item.chart_of_accounts?.account_type !== 'LIABILITY' // Exclude AP/CreditCard for now if possible, but often CC is Liability.
+    )
+    
+    if (categoryItem) {
+      category = categoryItem.chart_of_accounts?.name || 'Unknown Account'
+      // If the category account was credited, it's likely Revenue
+      if (categoryItem.credit > 0) {
+        type = 'Income'
+      }
+    } else if (lineItems.length > 0) {
+      // Fallback to first item
+      category = lineItems[0].chart_of_accounts?.name || 'Unknown'
+    }
+
+    return { amount, currency, category, type }
+  }
+
   if (loading) {
     return (
       <Card>
@@ -306,8 +638,16 @@ export function TransactionsList({ status }: Props) {
                 {isAuditing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ShieldAlert className="w-4 h-4 mr-2" />}
                 AI Audit
               </Button>
+              <Button size="sm" variant="outline" onClick={selectVerified}>
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Select Verified
+              </Button>
               {selectedIds.size > 0 && (
                 <>
+                  <Button size="sm" variant="default" onClick={bulkPost}>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Post ({selectedIds.size})
+                  </Button>
                   <Button size="sm" variant="outline" onClick={bulkVoid}>
                     <XCircle className="w-4 h-4 mr-2" />
                     Void ({selectedIds.size})
@@ -355,7 +695,9 @@ export function TransactionsList({ status }: Props) {
                   checked={selectedIds.size === filteredTransactions.length && filteredTransactions.length > 0}
                   onCheckedChange={toggleAll}
                 />
-                <span className="flex-1">Description</span>
+                <span className="flex-[2]">Description</span>
+                <span className="flex-1">Category</span>
+                <span className="flex-1 text-right">Amount</span>
                 <span className="w-32 text-right">Actions</span>
               </div>
               {filteredTransactions.map((tx) => {
@@ -365,6 +707,9 @@ export function TransactionsList({ status }: Props) {
                 
                 // Check document validation status
                 const doc = (tx as any).documents
+                const docData = doc?.document_data
+                const confidence = Array.isArray(docData) && docData.length > 0 ? docData[0].confidence_score : null
+
                 if (doc && doc.validation_flags && Array.isArray(doc.validation_flags)) {
                   doc.validation_flags.forEach((flag: string) => {
                     if (flag === 'DUPLICATE_DOCUMENT') {
@@ -398,6 +743,8 @@ export function TransactionsList({ status }: Props) {
                 const hasHighSeverity = allIssues.some(i => i.severity === 'HIGH')
                 const hasIssues = allIssues.length > 0
                 const isExpanded = expandedIds.has(tx.id)
+                
+                const { amount, currency, category, type } = getTransactionDetails(tx)
 
                 return (
                 <div
@@ -460,10 +807,21 @@ export function TransactionsList({ status }: Props) {
                       ) : (
                         getStatusIcon(tx.status)
                       )}
-                      <div className="flex-1">
+                      
+                      {/* Description & Meta */}
+                      <div className="flex-[2]">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="font-medium">{tx.description || 'No description'}</p>
                           {getStatusBadge(tx.status)}
+                          {confidence !== null && (
+                            <Badge variant="outline" className={`
+                              ${confidence >= 0.8 ? 'text-green-600 border-green-200 bg-green-50' : 
+                                confidence >= 0.5 ? 'text-yellow-600 border-yellow-200 bg-yellow-50' : 
+                                'text-red-600 border-red-200 bg-red-50'}
+                            `}>
+                              {Math.round(confidence * 100)}% AI
+                            </Badge>
+                          )}
                           {hasIssues && (
                             <TooltipProvider>
                               <Tooltip>
@@ -499,12 +857,22 @@ export function TransactionsList({ status }: Props) {
                           {tx.reference_number && ` • Ref: ${tx.reference_number}`}
                         </p>
                       </div>
-                      <div className="text-right hidden md:block">
-                        <p className="text-sm text-gray-500">Created</p>
-                        <p className="text-xs text-gray-400">
-                          {format(new Date(tx.created_at), 'MMM dd, yyyy')}
-                        </p>
+
+                      {/* Category */}
+                      <div className="flex-1 hidden md:block">
+                        <p className="text-sm font-medium">{category}</p>
+                        <p className="text-xs text-gray-500">{type}</p>
                       </div>
+
+                      {/* Amount */}
+                      <div className="flex-1 text-right hidden md:block">
+                        <p className={`font-medium ${type === 'Income' ? 'text-green-600' : ''}`}>
+                          {type === 'Income' ? '+' : ''}
+                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(amount)}
+                        </p>
+                        <p className="text-xs text-gray-500">{currency}</p>
+                      </div>
+
                     </div>
                     <div className="flex items-center gap-4 mt-4 md:mt-0 md:ml-4 pl-8 md:pl-0">
                       <div className="flex gap-2 flex-1 md:flex-none">
@@ -538,6 +906,21 @@ export function TransactionsList({ status }: Props) {
                   {isExpanded && (
                     <div className="px-4 pb-4 pt-0 pl-14 animate-in slide-in-from-top-2">
                         <div className="pt-4 border-t border-gray-100">
+                            {/* Mobile View Details */}
+                            <div className="md:hidden grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <p className="text-xs text-gray-500">Category</p>
+                                    <p className="text-sm font-medium">{category}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500">Amount</p>
+                                    <p className={`text-sm font-medium ${type === 'Income' ? 'text-green-600' : ''}`}>
+                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(amount)}
+                                        <span className="ml-1 text-xs text-gray-500">{currency}</span>
+                                    </p>
+                                </div>
+                            </div>
+
                             {hasIssues ? (
                                 <div className="space-y-2">
                                     <p className="font-semibold text-sm text-gray-700">Detected Issues</p>
@@ -579,34 +962,89 @@ export function TransactionsList({ status }: Props) {
       {editingId && (
         <TransactionEditor
           transactionId={editingId}
-          onClose={() => setEditingId(null)}
+          onClose={() => {
+            setEditingId(null)
+            if (returnToAudit) {
+              setShowAuditResults(true)
+              setReturnToAudit(false)
+            }
+          }}
           onSaved={() => {
             setEditingId(null)
             fetchTransactions()
+            if (returnToAudit) {
+              setShowAuditResults(true)
+              setReturnToAudit(false)
+            }
           }}
         />
       )}
 
       <Dialog open={showAuditResults} onOpenChange={setShowAuditResults}>
-        <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+        <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>Transaction Audit Results</DialogTitle>
-            <DialogDescription>
-              AI-powered analysis of your transactions found {auditResults.length} potential issues.
-            </DialogDescription>
+            <div className="flex items-center justify-between pr-8">
+              <div>
+                <DialogTitle>Transaction Audit Results</DialogTitle>
+                <DialogDescription>
+                  AI-powered analysis found {auditResults.length} potential issues.
+                </DialogDescription>
+              </div>
+              {selectedAuditKeys.size > 0 && (
+                <Button variant="destructive" size="sm" onClick={bulkFixAudit}>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Fix Selected ({selectedAuditKeys.size})
+                </Button>
+              )}
+            </div>
+            
+            <div className="mt-4 flex gap-2">
+              <Input 
+                placeholder="Search issues..." 
+                value={auditSearchTerm}
+                onChange={(e) => setAuditSearchTerm(e.target.value)}
+                className="flex-1"
+              />
+            </div>
           </DialogHeader>
           
-          <ScrollArea className="flex-1 mt-4 pr-4">
-            {auditResults.length === 0 ? (
-              <div className="text-center py-8 text-green-600">
-                <CheckCircle className="w-12 h-12 mx-auto mb-4" />
-                <p className="font-medium">No issues found!</p>
-                <p className="text-sm text-gray-500">Your transactions look healthy.</p>
+          <div className="flex-1 overflow-y-auto mt-2 pr-4 -mr-4 pl-1">
+            {filteredAuditResults.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                {auditResults.length === 0 ? (
+                  <>
+                    <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-600" />
+                    <p className="font-medium text-green-600">No issues found!</p>
+                    <p className="text-sm">Your transactions look healthy.</p>
+                  </>
+                ) : (
+                  <p>No issues match your search.</p>
+                )}
               </div>
             ) : (
               <div className="space-y-4">
-                {auditResults.map((issue, i) => (
-                  <div key={i} className="p-4 border rounded-lg bg-gray-50 flex gap-4">
+                <div className="flex items-center gap-4 p-2 border-b text-sm font-medium text-gray-500 sticky top-0 bg-white z-10">
+                  <Checkbox 
+                    checked={filteredAuditResults.length > 0 && Array.from(new Set(filteredAuditResults.map(i => getAuditKey(i)))).every(k => selectedAuditKeys.has(k))}
+                    onCheckedChange={toggleAllAuditSelection}
+                  />
+                  <span>Select All</span>
+                </div>
+
+                {filteredAuditResults.map((issue, i) => {
+                  const tx = transactions.find(t => t.id === issue.transactionId)
+                  if (!tx) return null
+                  const selectionKey = getAuditKey(issue)
+                  const uniqueKey = `${selectionKey}-${i}`
+
+                  return (
+                  <div key={uniqueKey} className={`p-4 border rounded-lg flex gap-4 transition-colors ${selectedAuditKeys.has(selectionKey) ? 'bg-blue-50 border-blue-200' : 'bg-gray-50'}`}>
+                    <div className="mt-1">
+                      <Checkbox 
+                        checked={selectedAuditKeys.has(selectionKey)}
+                        onCheckedChange={() => toggleAuditSelection(selectionKey)}
+                      />
+                    </div>
                     <div className="mt-1">
                       {issue.severity === 'HIGH' ? (
                         <XCircle className="w-5 h-5 text-red-500" />
@@ -616,7 +1054,10 @@ export function TransactionsList({ status }: Props) {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-medium text-sm">{issue.issueType.replace('_', ' ')}</h4>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium text-sm">{issue.issueType.replace('_', ' ')}</h4>
+                          <span className="text-xs text-gray-500">• {tx.description || 'No Description'}</span>
+                        </div>
                         <Badge variant={issue.severity === 'HIGH' ? 'destructive' : 'secondary'}>
                           {issue.severity}
                         </Badge>
@@ -625,23 +1066,92 @@ export function TransactionsList({ status }: Props) {
                       <p className="text-xs text-gray-500 bg-white p-2 rounded border">
                         {issue.details}
                       </p>
-                      <Button 
-                        variant="link" 
-                        size="sm" 
-                        className="px-0 mt-2 h-auto text-primary"
-                        onClick={() => {
-                          setShowAuditResults(false)
-                          setEditingId(issue.transactionId)
-                        }}
-                      >
-                        Review Transaction
-                      </Button>
+                      
+                      <div className="flex gap-2 mt-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => {
+                            setReturnToAudit(true)
+                            setShowAuditResults(false)
+                            setEditingId(issue.transactionId)
+                          }}
+                        >
+                          Review
+                        </Button>
+                        
+                        {issue.issueType === 'DUPLICATE' && (
+                          tx.status === 'DRAFT' ? (
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => deleteTransaction(tx.id)}
+                            >
+                              <Trash2 className="w-3 h-3 mr-1" />
+                              Delete Duplicate
+                            </Button>
+                          ) : (
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => voidTransaction(tx.id)}
+                            >
+                              <XCircle className="w-3 h-3 mr-1" />
+                              Void Duplicate
+                            </Button>
+                          )
+                        )}
+
+                         {issue.issueType === 'WRONG_TENANT' && (
+                          tx.status === 'DRAFT' ? (
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => deleteTransaction(tx.id)}
+                            >
+                              <Trash2 className="w-3 h-3 mr-1" />
+                              Delete
+                            </Button>
+                          ) : (
+                             <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => voidTransaction(tx.id)}
+                            >
+                              <XCircle className="w-3 h-3 mr-1" />
+                              Void
+                            </Button>
+                          )
+                        )}
+                      </div>
                     </div>
                   </div>
-                ))}
+                )})}
               </div>
             )}
-          </ScrollArea>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{confirmConfig?.title}</DialogTitle>
+            <DialogDescription>
+              {confirmConfig?.description}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant={confirmConfig?.variant || 'default'} 
+              onClick={confirmConfig?.action}
+            >
+              {confirmConfig?.actionLabel}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>

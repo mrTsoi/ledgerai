@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { X, Loader2, Save } from 'lucide-react'
 import { useTenant } from '@/hooks/use-tenant'
 import { CurrencySelect } from '@/components/ui/currency-select'
+import { toast } from "sonner"
 
 type BankAccount = Database['public']['Tables']['bank_accounts']['Row']
 type ChartOfAccount = Database['public']['Tables']['chart_of_accounts']['Row']
@@ -63,7 +64,7 @@ export function BankAccountForm({ onClose, onSaved, initialData }: Props) {
   const handleSave = async () => {
     if (!currentTenant) return
     if (!formData.account_name) {
-      alert('Account Name is required')
+      toast.error('Account Name is required')
       return
     }
 
@@ -98,9 +99,10 @@ export function BankAccountForm({ onClose, onSaved, initialData }: Props) {
 
       onSaved()
       onClose()
+      toast.success('Bank account saved successfully')
     } catch (error: any) {
       console.error('Error saving bank account:', error)
-      alert('Failed to save: ' + error.message)
+      toast.error('Failed to save: ' + error.message)
     } finally {
       setSaving(false)
     }

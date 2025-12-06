@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Loader2, Download, FileText, FileDown } from 'lucide-react'
 import { format } from 'date-fns'
 import { generateBalanceSheetPDF } from '@/lib/pdf-generator'
+import { toast } from "sonner"
 
 interface BSRow {
   account_id: string
@@ -42,7 +43,7 @@ export function BalanceSheetReport() {
       setData(reportData || [])
     } catch (error) {
       console.error('Error generating balance sheet:', error)
-      alert('Failed to generate report')
+      toast.error('Failed to generate report')
     } finally {
       setLoading(false)
     }

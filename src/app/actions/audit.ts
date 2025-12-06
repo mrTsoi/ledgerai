@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { AuditIssue } from '@/types/audit'
 
 export async function auditTransactions(tenantId: string): Promise<AuditIssue[]> {
+  console.log('Starting auditTransactions for tenant:', tenantId)
   const supabase = await createClient()
   const issues: AuditIssue[] = []
 
@@ -25,13 +26,19 @@ export async function auditTransactions(tenantId: string): Promise<AuditIssue[]>
         validation_flags,
         document_data (
           vendor_name,
-          customer_name,
-          extracted_data
+          extracted_data,
+          confidence_score
         )
       )
     `)
     .eq('tenant_id', tenantId)
     .neq('status', 'VOID') // Ignore voided
+    .order('created_at', { ascending: true }) // Process oldest first to flag newer duplicates
+
+  if (error) {
+    console.error('Error fetching transactions for audit:', error)
+  }
+  console.log('Fetched transactions:', transactions?.length)
 
   if (error || !transactions) return []
 
@@ -41,23 +48,48 @@ export async function auditTransactions(tenantId: string): Promise<AuditIssue[]>
 
   // 3. Analyze
   const seenRefs = new Map<string, string>() // ref -> txId
-  const seenHashes = new Map<string, string>() // content_hash -> txId
+  // const seenHashes = new Map<string, string>() // REMOVED: We use txByHash for smarter duplicate detection
   const seenFingerprints = new Map<string, string>() // date|amount -> txId
   const seenVendorDateAmount = new Map<string, string>() // vendor|date|amount -> txId
   
   // For fuzzy duplicate detection
   const transactionsByAmount = new Map<number, any[]>()
+  // For same-document duplicate detection
+  const txByHash = new Map<string, any[]>()
 
   for (const tx of transactions) {
     const totalDebits = tx.line_items.reduce((sum: number, li: any) => sum + (li.debit || 0), 0)
     const totalCredits = tx.line_items.reduce((sum: number, li: any) => sum + (li.credit || 0), 0)
     const amount = Math.max(totalDebits, totalCredits)
     
+    // Robust Document Access
+    const doc = Array.isArray(tx.documents) ? tx.documents[0] : tx.documents
+    const docData = doc?.document_data
+    const dd = Array.isArray(docData) ? docData[0] : docData
+
+    // Debug: Log first transaction structure
+    if (transactions.indexOf(tx) === 0) {
+      console.log('Sample Transaction Structure:', JSON.stringify({
+        id: tx.id,
+        documents: tx.documents,
+        docData: docData,
+        dd: dd
+      }, null, 2))
+    }
+
     // Group by amount for fuzzy date check
     if (amount > 0) {
       const existing = transactionsByAmount.get(amount) || []
       existing.push(tx)
       transactionsByAmount.set(amount, existing)
+    }
+
+    // Group by Content Hash for Same-Document check
+    if (doc && doc.content_hash) {
+      const hash = doc.content_hash
+      const group = txByHash.get(hash) || []
+      group.push(tx)
+      txByHash.set(hash, group)
     }
 
     // A. Check Missing Data
@@ -119,34 +151,47 @@ export async function auditTransactions(tenantId: string): Promise<AuditIssue[]>
 
     // B. Check Duplicates (Ref Number)
     if (tx.reference_number) {
-      const key = tx.reference_number.toLowerCase().trim()
-      if (seenRefs.has(key)) {
-         issues.push({
-          transactionId: tx.id,
-          description: tx.description || 'Unknown Transaction',
-          issueType: 'DUPLICATE',
-          severity: 'HIGH',
-          details: `Duplicate Reference Number: ${tx.reference_number}`
-        })
-      } else {
-        seenRefs.set(key, tx.id)
+      // Normalize ref number: remove special chars, lowercase
+      const key = tx.reference_number.toLowerCase().replace(/[^a-z0-9]/g, '')
+      if (key.length > 0) {
+        if (seenRefs.has(key)) {
+           issues.push({
+            transactionId: tx.id,
+            description: tx.description || 'Unknown Transaction',
+            issueType: 'DUPLICATE',
+            severity: 'HIGH',
+            details: `Duplicate Reference Number: ${tx.reference_number}`
+          })
+        } else {
+          seenRefs.set(key, tx.id)
+        }
       }
     }
 
-    // C. Check Duplicates (Document Content Hash)
-    if (tx.documents && (tx.documents as any).content_hash) {
-      const hash = (tx.documents as any).content_hash
-      if (seenHashes.has(hash)) {
-         issues.push({
-          transactionId: tx.id,
-          description: tx.description || 'Unknown Transaction',
-          issueType: 'DUPLICATE',
-          severity: 'HIGH',
-          details: `Duplicate Document File: Identical file content detected`
-        })
-      } else {
-        seenHashes.set(hash, tx.id)
-      }
+    // C. Check Duplicates (Document Content Hash & Document ID)
+    // Replaced by smarter logic at the end of the function (txByHash processing)
+    // This allows us to compare all duplicates and suggest the best one to keep.
+
+    // Check Vendor + Date + Amount (Strong Duplicate)
+    // docData and dd are already defined above
+    const vendor = dd?.vendor_name?.toLowerCase() || tx.description?.toLowerCase() || ''
+    
+    if (vendor && amount > 0) {
+        const dateStr = new Date(tx.transaction_date).toISOString().split('T')[0]
+        const key = `${vendor}|${dateStr}|${amount}`
+        
+        if (seenVendorDateAmount.has(key)) {
+             console.log('Found Strong Duplicate:', key, 'Current:', tx.id, 'Existing:', seenVendorDateAmount.get(key))
+             issues.push({
+              transactionId: tx.id,
+              description: tx.description || 'Unknown Transaction',
+              issueType: 'DUPLICATE',
+              severity: 'HIGH',
+              details: `Duplicate Transaction: Same Vendor, Date, and Amount`
+            })
+        } else {
+            seenVendorDateAmount.set(key, tx.id)
+        }
     }
 
     // D. Check Suspicious Timing (Weekend)
@@ -188,12 +233,14 @@ export async function auditTransactions(tenantId: string): Promise<AuditIssue[]>
     }
 
     // G. Check Wrong Tenant (using existing document data)
-    const docData = (tx.documents as any)?.document_data
-    const dd = Array.isArray(docData) ? docData[0] : docData
+    // docData and dd are already defined above
 
     if (dd && tenantName) {
        const vendor = dd.vendor_name?.toLowerCase() || ''
-       const customer = dd.customer_name?.toLowerCase() || ''
+       // customer_name is not a column, try to get from extracted_data
+       const customer = (dd.extracted_data as any)?.customer_name?.toLowerCase() || 
+                        (dd.extracted_data as any)?.receiver_name?.toLowerCase() || 
+                        (dd.extracted_data as any)?.client_name?.toLowerCase() || ''
        
        const isTenantInvolved = vendor.includes(tenantName) || customer.includes(tenantName) || tenantName.includes(vendor) || tenantName.includes(customer)
        
@@ -282,5 +329,86 @@ export async function auditTransactions(tenantId: string): Promise<AuditIssue[]>
     }
   }
 
+  // I. Same Document Duplicate Detection (Smart Suggestion)
+  console.log('Checking Same Document Duplicates. Groups found:', txByHash.size)
+  for (const [hash, group] of txByHash.entries()) {
+    if (group.length > 1) {
+      console.log('Found Same Document Group:', hash, 'Count:', group.length)
+      // Sort to find the "Best" transaction to keep
+      // Criteria:
+      // 1. Status: POSTED > DRAFT (Always keep the one that is already processed/verified)
+      // 2. Confidence Score: Higher is better
+      // 3. Created At: Older is better (Original) - unless newer has significantly better confidence? 
+      //    Let's stick to: Keep High Confidence. If equal, keep Original.
+      
+      const sorted = [...group].sort((a, b) => {
+        // Helper to get confidence
+        const getConf = (tx: any) => {
+            const d = Array.isArray(tx.documents) ? tx.documents[0] : tx.documents
+            const dd = Array.isArray(d?.document_data) ? d?.document_data[0] : d?.document_data
+            return dd?.confidence_score || 0
+        }
+
+        // 1. Status
+        if (a.status === 'POSTED' && b.status !== 'POSTED') return -1
+        if (b.status === 'POSTED' && a.status !== 'POSTED') return 1
+        
+        // 2. Confidence Score
+        const confA = getConf(a)
+        const confB = getConf(b)
+        if (Math.abs(confA - confB) > 0.01) return confB - confA // Descending
+        
+        // 3. Created At (Ascending - Keep Original)
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      })
+
+      const winner = sorted[0]
+      const losers = sorted.slice(1)
+
+      for (const loser of losers) {
+        // Avoid double-flagging if already caught by Ref ID check
+        const alreadyFlagged = issues.some(i => i.transactionId === loser.id && i.issueType === 'DUPLICATE')
+        if (alreadyFlagged) continue
+
+        const getConf = (tx: any) => {
+            const d = Array.isArray(tx.documents) ? tx.documents[0] : tx.documents
+            const dd = Array.isArray(d?.document_data) ? d?.document_data[0] : d?.document_data
+            return dd?.confidence_score || 0
+        }
+
+        const winnerConf = getConf(winner)
+        const loserConf = getConf(loser)
+        
+        let suggestion = `Suggestion: Keep transaction dated ${formatDate(winner.transaction_date)}`
+        if (winner.reference_number) suggestion = `Suggestion: Keep transaction ${winner.reference_number}`
+        
+        if (winnerConf > loserConf) {
+            suggestion += ` (Higher Confidence: ${Math.round(winnerConf * 100)}% vs ${Math.round(loserConf * 100)}%)`
+        } else if (winner.status === 'POSTED') {
+            suggestion += ` (Already Posted)`
+        } else {
+            suggestion += ` (Original Record)`
+        }
+
+        issues.push({
+            transactionId: loser.id,
+            description: loser.description || 'Duplicate Transaction',
+            issueType: 'DUPLICATE',
+            severity: 'HIGH',
+            details: `Duplicate Source Document. ${suggestion}`
+        })
+      }
+    }
+  }
+
+  console.log('Audit complete. Issues found:', issues.length)
   return issues
+}
+
+function formatDate(dateStr: string) {
+    try {
+        return new Date(dateStr).toLocaleDateString()
+    } catch {
+        return dateStr
+    }
 }

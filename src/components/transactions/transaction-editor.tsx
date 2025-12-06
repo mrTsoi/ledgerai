@@ -16,6 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { toast } from "sonner"
 
 import { getExchangeRate } from '@/lib/currency'
 
@@ -510,7 +511,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
       
     } catch (error: any) {
       console.error('Error adding line item:', error)
-      alert('Failed to add line item: ' + error.message)
+      toast.error('Failed to add line item: ' + error.message)
     } finally {
       setSaving(false)
     }
@@ -555,9 +556,10 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
       }
 
       onSaved()
+      toast.success('Transaction saved successfully')
     } catch (error: any) {
       console.error('Error saving transaction:', error)
-      alert('Failed to save: ' + error.message)
+      toast.error('Failed to save: ' + error.message)
     } finally {
       setSaving(false)
     }
@@ -571,7 +573,9 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
     const totalCredits = transaction.line_items.reduce((sum, li) => sum + li.credit, 0)
 
     if (Math.abs(totalDebits - totalCredits) > 0.01) {
-      alert(`Transaction is not balanced!\nDebits: $${totalDebits.toFixed(2)}\nCredits: $${totalCredits.toFixed(2)}`)
+      toast.error('Transaction is not balanced!', {
+        description: `Debits: $${totalDebits.toFixed(2)} | Credits: $${totalCredits.toFixed(2)}`
+      })
       return
     }
 
@@ -594,9 +598,10 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
       if (error) throw error
 
       onSaved()
+      toast.success('Transaction posted successfully')
     } catch (error: any) {
       console.error('Error posting transaction:', error)
-      alert('Failed to post: ' + error.message)
+      toast.error('Failed to post: ' + error.message)
     } finally {
       setSaving(false)
     }

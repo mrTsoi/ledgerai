@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Loader2, Plus, Edit, Trash2, Save, X, RefreshCw } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { toast } from "sonner"
 
 type PromoCode = Database['public']['Tables']['promo_codes']['Row']
 
@@ -46,10 +47,10 @@ export function PromoCodeManagement() {
       const res = await fetch('/api/admin/sync-promo', { method: 'POST' })
       if (!res.ok) throw new Error(await res.text())
       const result = await res.json()
-      alert(`Sync complete! Created: ${result.results.filter((r: any) => r.status === 'created').length}, Exists: ${result.results.filter((r: any) => r.status === 'exists').length}`)
+      toast.success(`Sync complete! Created: ${result.results.filter((r: any) => r.status === 'created').length}, Exists: ${result.results.filter((r: any) => r.status === 'exists').length}`)
     } catch (error: any) {
       console.error('Sync error:', error)
-      alert('Sync failed: ' + error.message)
+      toast.error('Sync failed: ' + error.message)
     } finally {
       setLoading(false)
     }
@@ -73,9 +74,10 @@ export function PromoCodeManagement() {
       setEditingCode(null)
       setIsCreating(false)
       fetchCodes()
+      toast.success('Promo code saved successfully')
     } catch (error: any) {
       console.error('Error saving promo code:', error)
-      alert('Failed to save promo code: ' + error.message)
+      toast.error('Failed to save promo code: ' + error.message)
     }
   }
 
@@ -85,13 +87,14 @@ export function PromoCodeManagement() {
       const { error } = await supabase
         .from('promo_codes')
         .delete()
-        .eq('id', id)
       if (error) throw error
       fetchCodes()
+      toast.success('Promo code deleted successfully')
     } catch (error: any) {
       console.error('Error deleting promo code:', error)
-      alert('Failed to delete promo code: ' + error.message)
+      toast.error('Failed to delete promo code: ' + error.message)
     }
+  } }
   }
 
   if (loading) {

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Loader2, Save, Eye, EyeOff } from 'lucide-react'
+import { toast } from "sonner"
 
 export function StripeSettings() {
   const [loading, setLoading] = useState(false)
@@ -56,10 +57,10 @@ export function StripeSettings() {
         })
 
       if (error) throw error
-      alert('Stripe settings saved successfully')
+      toast.success('Stripe settings saved successfully')
     } catch (error: any) {
       console.error('Error saving settings:', error)
-      alert('Failed to save settings: ' + error.message)
+      toast.error('Failed to save settings: ' + error.message)
     } finally {
       setLoading(false)
     }

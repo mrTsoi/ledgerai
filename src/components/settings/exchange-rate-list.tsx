@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Loader2, Plus, Trash2, Save, X } from 'lucide-react'
 import { Database } from '@/types/database.types'
+import { toast } from "sonner"
 
 type ExchangeRate = Database['public']['Tables']['exchange_rates']['Row']
 
@@ -85,8 +86,9 @@ export function ExchangeRateList() {
       await fetchRates()
       setIsAdding(false)
       setNewRate({ currency: 'EUR', rate: '' })
+      toast.success('Exchange rate added successfully')
     } catch (error: any) {
-      alert('Failed to add rate: ' + error.message)
+      toast.error('Failed to add rate: ' + error.message)
     } finally {
       setSaving(false)
     }
@@ -103,8 +105,9 @@ export function ExchangeRateList() {
 
       if (error) throw error
       await fetchRates()
+      toast.success('Exchange rate deleted successfully')
     } catch (error: any) {
-      alert('Failed to delete rate: ' + error.message)
+      toast.error('Failed to delete rate: ' + error.message)
     }
   }
 
@@ -117,8 +120,9 @@ export function ExchangeRateList() {
 
       if (error) throw error
       await fetchRates()
+      toast.success('Exchange rate updated successfully')
     } catch (error: any) {
-      alert('Failed to update rate: ' + error.message)
+      toast.error('Failed to update rate: ' + error.message)
     }
   }
 

@@ -21,13 +21,48 @@ export default function BankAccountPage() {
   const accountId = params.accountId as string
   const [account, setAccount] = useState<BankAccount | null>(null)
   const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState({
+    currentBalance: 0,
+    unreconciledCount: 0,
+    lastStatementDate: null as string | null
+  })
   const supabase = createClient()
 
   useEffect(() => {
     if (accountId) {
       fetchAccount()
+      fetchStats()
     }
   }, [accountId])
+
+  const fetchStats = async () => {
+    try {
+      // 1. Get latest statement for balance and date
+      const { data: latestStatement } = await supabase
+        .from('bank_statements')
+        .select('closing_balance, end_date')
+        .eq('bank_account_id', accountId)
+        .order('end_date', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      // 2. Get unreconciled count
+      // We filter transactions by joining with bank_statements
+      const { count: pendingCount } = await supabase
+        .from('bank_transactions')
+        .select('id, bank_statements!inner(bank_account_id)', { count: 'exact', head: true })
+        .eq('status', 'PENDING')
+        .eq('bank_statements.bank_account_id', accountId)
+
+      setStats({
+        currentBalance: latestStatement?.closing_balance || 0,
+        lastStatementDate: latestStatement?.end_date || null,
+        unreconciledCount: pendingCount || 0
+      })
+    } catch (error) {
+      console.error('Error fetching stats:', error)
+    }
+  }
 
   const fetchAccount = async () => {
     try {
@@ -81,7 +116,9 @@ export default function BankAccountPage() {
             <CardTitle className="text-sm font-medium">Current Balance</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
+            <div className="text-2xl font-bold">
+              {stats.currentBalance.toLocaleString('en-US', { style: 'currency', currency: account.currency })}
+            </div>
             <p className="text-xs text-muted-foreground">
               Calculated from statements
             </p>
@@ -92,7 +129,7 @@ export default function BankAccountPage() {
             <CardTitle className="text-sm font-medium">Unreconciled Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
+            <div className="text-2xl font-bold">{stats.unreconciledCount}</div>
             <p className="text-xs text-muted-foreground">
               Transactions pending review
             </p>
@@ -103,9 +140,11 @@ export default function BankAccountPage() {
             <CardTitle className="text-sm font-medium">Last Statement</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
+            <div className="text-2xl font-bold">
+              {stats.lastStatementDate ? new Date(stats.lastStatementDate).toLocaleDateString() : 'N/A'}
+            </div>
             <p className="text-xs text-muted-foreground">
-              No statements uploaded
+              {stats.lastStatementDate ? 'Statement end date' : 'No statements uploaded'}
             </p>
           </CardContent>
         </Card>

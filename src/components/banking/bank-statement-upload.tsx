@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Upload, Loader2, FileText } from 'lucide-react'
 import { useTenant } from '@/hooks/use-tenant'
+import { toast } from "sonner"
 
 interface Props {
   accountId: string
@@ -93,10 +94,11 @@ export function BankStatementUpload({ accountId, onUploadComplete }: Props) {
       if (stmtError) console.error('Error linking statement:', stmtError)
 
       onUploadComplete()
+      toast.success('Statement uploaded successfully')
 
     } catch (error) {
       console.error('Upload error:', error)
-      alert('Upload failed')
+      toast.error('Upload failed')
     } finally {
       setUploading(false)
     }

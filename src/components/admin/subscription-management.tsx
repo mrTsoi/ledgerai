@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PromoCodeManagement } from './promo-code-management'
 import { UserSubscriptionList } from './user-subscription-list'
 import { StripeSettings } from './stripe-settings'
+import { toast } from "sonner"
 
 type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
 
@@ -67,9 +68,10 @@ export function SubscriptionManagement() {
       setEditingPlan(null)
       setIsCreating(false)
       fetchPlans()
+      toast.success('Plan saved successfully')
     } catch (error: any) {
       console.error('Error saving plan:', error)
-      alert('Failed to save plan: ' + error.message)
+      toast.error('Failed to save plan: ' + error.message)
     }
   }
 
@@ -79,13 +81,14 @@ export function SubscriptionManagement() {
       const { error } = await supabase
         .from('subscription_plans')
         .delete()
-        .eq('id', id)
       if (error) throw error
       fetchPlans()
+      toast.success('Plan deleted successfully')
     } catch (error: any) {
       console.error('Error deleting plan:', error)
-      alert('Failed to delete plan: ' + error.message)
+      toast.error('Failed to delete plan: ' + error.message)
     }
+  } }
   }
 
   if (loading) {
