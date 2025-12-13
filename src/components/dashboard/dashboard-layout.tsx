@@ -22,9 +22,10 @@ import {
   FolderTree,
   Landmark,
   Check,
-  ChevronsUpDown
+  ChevronsUpDown,
+  Loader2
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { cn } from "@/lib/utils"
 import {
   Command,
@@ -61,9 +62,28 @@ export default function DashboardLayout({
   const userRole = useUserRole()
   const router = useRouter()
   const pathname = usePathname() // Use usePathname hook
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [open, setOpen] = useState(false)
+  const [isNavigating, setIsNavigating] = useState(false)
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Clear the optimistic loader once navigation completes.
+    if (isNavigating) setIsNavigating(false)
+    if (navigatingTo) setNavigatingTo(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname])
+
+  const handleNavClick = (href: string) => {
+    setSidebarOpen(false)
+
+    // Only show loader when a real navigation is about to happen.
+    if (href !== pathname) {
+      setNavigatingTo(href)
+      setIsNavigating(true)
+    }
+  }
 
   const navigationItems: NavItem[] = [
     {
@@ -238,15 +258,20 @@ export default function DashboardLayout({
                   <Link
                     key={item.href}
                     href={item.href}
+                    prefetch
                     className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                       pathname === item.href 
                         ? 'bg-primary/10 text-primary' 
                         : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                    }`}
-                    onClick={() => setSidebarOpen(false)}
+                    } ${navigatingTo === item.href ? 'opacity-80' : ''}`}
+                    onClick={() => handleNavClick(item.href)}
+                    aria-busy={navigatingTo === item.href}
                   >
                     {item.icon}
                     <span className="ml-3">{item.name}</span>
+                    {navigatingTo === item.href && (
+                      <Loader2 className="ml-auto h-4 w-4 animate-spin text-gray-500" />
+                    )}
                   </Link>
                 ))}
               </div>
@@ -262,15 +287,20 @@ export default function DashboardLayout({
                   <Link
                     key={item.href}
                     href={item.href}
+                    prefetch
                     className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                       pathname === item.href 
                         ? 'bg-primary/10 text-primary' 
                         : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                    }`}
-                    onClick={() => setSidebarOpen(false)}
+                    } ${navigatingTo === item.href ? 'opacity-80' : ''}`}
+                    onClick={() => handleNavClick(item.href)}
+                    aria-busy={navigatingTo === item.href}
                   >
                     {item.icon}
                     <span className="ml-3">{item.name}</span>
+                    {navigatingTo === item.href && (
+                      <Loader2 className="ml-auto h-4 w-4 animate-spin text-gray-500" />
+                    )}
                   </Link>
                 ))}
               </div>
@@ -309,7 +339,12 @@ export default function DashboardLayout({
             </div>
             <div className="flex items-center space-x-4">
               {userRole === 'SUPER_ADMIN' && (
-                <Link href="/admin">
+                <Link
+                  href="/admin"
+                  prefetch
+                  onClick={() => handleNavClick('/admin')}
+                  aria-busy={navigatingTo === '/admin'}
+                >
                   <Button variant="outline" size="sm">
                     <Building2 className="w-4 h-4 md:mr-2" />
                     <span className="hidden md:inline">{t('admin')}</span>
@@ -317,6 +352,14 @@ export default function DashboardLayout({
                 </Link>
               )}
               <LanguageSwitcher />
+              {isNavigating && (
+                <div className="flex items-center text-sm text-gray-500" aria-live="polite">
+                  <span className="inline-flex items-center">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <span className="hidden md:inline">{tCommon('loading')}</span>
+                  </span>
+                </div>
+              )}
               <span className="text-sm font-medium text-gray-700">
                 {currentTenant?.name || 'No Company Selected'}
               </span>
