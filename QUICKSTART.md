@@ -2,6 +2,49 @@
 
 ## ⚡ Get Started in 5 Minutes
 
+## Prerequisite (Windows): Docker Desktop (recommended)
+
+Some Supabase CLI operations (notably `supabase db dump`, and all local Supabase containers) require Docker Desktop to be installed and running.
+
+1. Install Docker Desktop for Windows
+2. Start Docker Desktop
+3. Verify Docker works:
+   ```bash
+   docker version
+   ```
+4. Optional: run the included checker:
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File scripts/doctor-docker.ps1
+   ```
+
+### Prerequisite (Windows): WSL2 distro (recommended)
+
+Docker Desktop works best on Windows 11 using WSL2. If you don’t have a WSL2 distro yet (the doctor script warns about this), install one:
+
+1. Install WSL (if not already installed):
+   ```powershell
+   wsl --install
+   ```
+
+2. Install an Ubuntu distro (example):
+   ```powershell
+   wsl --install -d Ubuntu
+   ```
+
+3. Ensure WSL2 is the default:
+   ```powershell
+   wsl --set-default-version 2
+   ```
+
+4. Verify your distro is running as version 2:
+   ```powershell
+   wsl -l -v
+   ```
+
+5. In Docker Desktop → Settings → Resources → WSL Integration:
+   - Enable integration for your distro (e.g., Ubuntu)
+
+
 ### Step 1: Set Up Supabase Project (2 minutes)
 
 1. Go to [supabase.com](https://supabase.com) and create a free account
@@ -62,6 +105,47 @@ This creates document management and AI configuration tables.
 6. Run the storage policies from `supabase/STORAGE_SETUP.md` in SQL Editor
 
 (See `supabase/STORAGE_SETUP.md` for detailed policy SQL)
+
+### Step 3.6: Schedule External Source Imports (optional)
+
+This enables automatic ingestion from SFTP/FTPS/Google Drive/OneDrive using Supabase Scheduled Triggers.
+
+1. In your **Next.js app** environment variables, set:
+   ```env
+   # Optional global cron auth (backwards compatible)
+   EXTERNAL_FETCH_CRON_SECRET=some-long-random-string
+
+   # Required for per-tenant cron keys stored (hashed) in the database
+   EXTERNAL_SOURCES_CRON_KEY_PEPPER=some-long-random-string
+   ```
+
+2. In **Supabase Dashboard** → **Edge Functions**:
+   - Deploy the function in `supabase/functions/external-sources-runner`
+   - Set secrets for the Edge Function:
+     - `LEDGERAI_APP_URL` (or `APP_URL`) = your deployed app base URL
+   - `EXTERNAL_FETCH_CRON_SECRET` = must match the app value (if using the global secret)
+     - Optional: `EXTERNAL_SOURCES_CRON_SECRET` (protects the function itself)
+
+3. Create a **Scheduled Trigger** for `external-sources-runner`:
+   - Recommended interval: every 5 minutes
+   - If you set `EXTERNAL_SOURCES_CRON_SECRET`, configure header:
+     - `x-ledgerai-runner-secret: <your secret>`
+
+Per-tenant scheduling option
+- In the External Sources settings (per tenant), generate a **Cron Secret**.
+- Store the secret in your scheduler and call `POST /api/external-sources/run` with:
+   - header `x-ledgerai-cron-secret: <tenant cron secret>`
+   - body `{ "tenant_id": "<tenant_uuid>" }`
+
+RLS verification (per-tenant cron keys)
+- Runtime proof (PostgREST access check):
+   ```bash
+   node scripts/check-cron-secrets-rls.mjs
+   ```
+- Stronger proof (schema dump requires Docker Desktop):
+   ```bash
+   node scripts/check-cron-secrets-rls-strong.mjs
+   ```
 
 ### Step 4: Start the Development Server (1 minute)
 

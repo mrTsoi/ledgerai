@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { Button } from '@/components/ui/button'
@@ -47,32 +47,20 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
   const [accounts, setAccounts] = useState<ChartOfAccount[]>([])
   const [newTxAccount, setNewTxAccount] = useState('')
   const [newTxDesc, setNewTxDesc] = useState('')
-  
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    if (isOpen && bankTransaction) {
-      setNewTxDesc(bankTransaction.description || '')
-      fetchAccounts()
-      const timer = setTimeout(() => {
-        findPotentialMatches()
-      }, 500) // Debounce search
-      return () => clearTimeout(timer)
-    }
-  }, [isOpen, bankTransaction, dateWindow, searchTerm])
+  const fetchAccounts = useCallback(async () => {
+    const { data } = await supabase
+      .from('chart_of_accounts')
+      .select('*')
+      .eq('tenant_id', bankTransaction.tenant_id)
+      .eq('is_active', true)
+      .order('code')
+    
+    if (data) setAccounts(data)
+  }, [bankTransaction.tenant_id, supabase])
 
-  const fetchAccounts = async () => {
-      const { data } = await supabase
-        .from('chart_of_accounts')
-        .select('*')
-        .eq('tenant_id', bankTransaction.tenant_id)
-        .eq('is_active', true)
-        .order('code')
-      
-      if (data) setAccounts(data)
-  }
-
-  const findPotentialMatches = async () => {
+  const findPotentialMatches = useCallback(async () => {
     try {
       setLoading(true)
       // Search for transactions with same amount (within 0.01 diff) and date range (+- dateWindow days)
@@ -125,13 +113,6 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
          )
       }
 
-      // If we filtered everything out, maybe show the closest ones?
-      // For now, if filtered is empty but we have candidates, let's show them but with low score?
-      // Actually, let's just pass the filtered list to AI.
-      
-      // If list is empty after filter, and we had candidates, maybe the user wants to see them?
-      // Let's relax the filter if it's too strict? 
-      // For now, let's just use the filtered list.
       const candidates = filteredCandidates.length > 0 ? filteredCandidates : candidatesWithAmount.slice(0, 5)
 
       // Call AI Reconciliation API
@@ -148,14 +129,28 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
       if (!response.ok) throw new Error('Failed to fetch AI matches')
       
       const result = await response.json()
-      setMatches(result.matches || [])
 
-    } catch (error) {
+      setMatches(result.matches || [])
+    } catch (error: any) {
       console.error('Error finding matches:', error)
+      toast.error('Failed to find matches: ' + error.message)
     } finally {
       setLoading(false)
     }
-  }
+  }, [bankTransaction, dateWindow, searchTerm, supabase])
+
+  useEffect(() => {
+    if (!isOpen || !bankTransaction) return
+
+    setNewTxDesc(bankTransaction.description || '')
+    fetchAccounts()
+
+    const timer = setTimeout(() => {
+      findPotentialMatches()
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [bankTransaction, fetchAccounts, findPotentialMatches, isOpen])
 
   const toggleMatchSelection = (id: string) => {
     const newSet = new Set(selectedMatchIds)

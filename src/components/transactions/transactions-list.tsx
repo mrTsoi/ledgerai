@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTenant } from '@/hooks/use-tenant'
+import { useBatchConfig, chunkArray } from '@/hooks/use-batch-config'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -57,7 +58,51 @@ export function TransactionsList({ status }: Props) {
   } | null>(null)
 
   const { currentTenant } = useTenant()
-  const supabase = createClient()
+  const { batchSize } = useBatchConfig()
+  const supabase = useMemo(() => createClient(), [])
+
+  const fetchTransactions = useCallback(async () => {
+    if (!currentTenant) return
+
+    try {
+      setLoading(true)
+      let query = (supabase
+        .from('transactions') as any)
+        .select(`
+          *,
+          documents (
+            validation_status,
+            validation_flags,
+            document_data (
+              confidence_score,
+              total_amount,
+              currency,
+              extracted_data
+            )
+          ),
+          line_items (
+            debit,
+            credit,
+            chart_of_accounts (
+              name,
+              account_type
+            )
+          )
+        `)
+        .eq('tenant_id', currentTenant.id)
+        .order('transaction_date', { ascending: false })
+        .order('created_at', { ascending: false })
+
+      const { data, error } = await query
+
+      if (error) throw error
+      setTransactions(data || [])
+    } catch (error) {
+      console.error('Error fetching transactions:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [currentTenant, supabase])
 
   useEffect(() => {
     if (currentTenant) {
@@ -102,55 +147,9 @@ export function TransactionsList({ status }: Props) {
         supabase.removeChannel(docChannel)
       }
     }
-  }, [currentTenant])
+  }, [currentTenant, fetchTransactions, supabase])
 
-  useEffect(() => {
-    filterTransactions()
-  }, [transactions, searchTerm, selectedStatus])
-
-  const fetchTransactions = async () => {
-    if (!currentTenant) return
-
-    try {
-      let query = (supabase
-        .from('transactions') as any)
-        .select(`
-          *,
-          documents (
-            validation_status,
-            validation_flags,
-            document_data (
-              confidence_score,
-              total_amount,
-              currency,
-              extracted_data
-            )
-          ),
-          line_items (
-            debit,
-            credit,
-            chart_of_accounts (
-              name,
-              account_type
-            )
-          )
-        `)
-        .eq('tenant_id', currentTenant.id)
-        .order('transaction_date', { ascending: false })
-        .order('created_at', { ascending: false })
-
-      const { data, error } = await query
-
-      if (error) throw error
-      setTransactions(data || [])
-    } catch (error) {
-      console.error('Error fetching transactions:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const filterTransactions = () => {
+  const filterTransactions = useCallback(() => {
     let filtered = transactions
 
     // Filter by status
@@ -168,7 +167,11 @@ export function TransactionsList({ status }: Props) {
     }
 
     setFilteredTransactions(filtered)
-  }
+  }, [transactions, selectedStatus, searchTerm])
+
+  useEffect(() => {
+    filterTransactions()
+  }, [filterTransactions])
 
   const voidTransaction = async (id: string) => {
     setConfirmConfig({
@@ -293,16 +296,23 @@ export function TransactionsList({ status }: Props) {
             return
           }
 
-          const { error } = await (supabase
-            .from('transactions') as any)
-            .update({ status: 'POSTED', posted_at: new Date().toISOString() })
-            .in('id', draftsToPost.map(t => t.id))
+          // Process in batches
+          const chunks = chunkArray(draftsToPost.map(t => t.id), batchSize)
+          let processedCount = 0
 
-          if (error) throw error
+          for (const chunk of chunks) {
+            const { error } = await (supabase
+              .from('transactions') as any)
+              .update({ status: 'POSTED', posted_at: new Date().toISOString() })
+              .in('id', chunk)
+
+            if (error) throw error
+            processedCount += chunk.length
+          }
           
           fetchTransactions()
           setSelectedIds(new Set())
-          toast.success(`Posted ${draftsToPost.length} transactions`)
+          toast.success(`Posted ${processedCount} transactions`)
           setShowConfirmDialog(false)
         } catch (error: any) {
           console.error('Bulk post error:', error)
@@ -322,12 +332,16 @@ export function TransactionsList({ status }: Props) {
       action: async () => {
         try {
           const ids = Array.from(selectedIds)
-          const { error } = await (supabase
-            .from('transactions') as any)
-            .update({ status: 'VOID' })
-            .in('id', ids)
+          const chunks = chunkArray(ids, batchSize)
 
-          if (error) throw error
+          for (const chunk of chunks) {
+            const { error } = await (supabase
+              .from('transactions') as any)
+              .update({ status: 'VOID' })
+              .in('id', chunk)
+
+            if (error) throw error
+          }
           
           fetchTransactions()
           setSelectedIds(new Set())
@@ -359,12 +373,16 @@ export function TransactionsList({ status }: Props) {
 
           if (draftsToDelete.length === 0) return
 
-          const { error } = await (supabase
-            .from('transactions') as any)
-            .delete()
-            .in('id', draftsToDelete.map(t => t.id))
+          const chunks = chunkArray(draftsToDelete.map(t => t.id), batchSize)
 
-          if (error) throw error
+          for (const chunk of chunks) {
+            const { error } = await (supabase
+              .from('transactions') as any)
+              .delete()
+              .in('id', chunk)
+
+            if (error) throw error
+          }
           
           fetchTransactions()
           setSelectedIds(new Set())
@@ -487,22 +505,28 @@ export function TransactionsList({ status }: Props) {
             }
           })
 
-          // Perform Delete
+          // Perform Delete in batches
           if (txIdsToDelete.length > 0) {
-            const { error } = await (supabase
-              .from('transactions') as any)
-              .delete()
-              .in('id', txIdsToDelete)
-            if (error) throw error
+            const deleteChunks = chunkArray(txIdsToDelete, batchSize)
+            for (const chunk of deleteChunks) {
+              const { error } = await (supabase
+                .from('transactions') as any)
+                .delete()
+                .in('id', chunk)
+              if (error) throw error
+            }
           }
 
-          // Perform Void
+          // Perform Void in batches
           if (txIdsToVoid.length > 0) {
-            const { error } = await (supabase
-              .from('transactions') as any)
-              .update({ status: 'VOID' })
-              .in('id', txIdsToVoid)
-            if (error) throw error
+            const voidChunks = chunkArray(txIdsToVoid, batchSize)
+            for (const chunk of voidChunks) {
+              const { error } = await (supabase
+                .from('transactions') as any)
+                .update({ status: 'VOID' })
+                .in('id', chunk)
+              if (error) throw error
+            }
           }
 
           toast.success(`Fixed ${issuesToFix.length} issues`)

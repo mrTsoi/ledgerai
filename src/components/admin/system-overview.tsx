@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, Users, Building2, FileText, CreditCard, HardDrive, TrendingUp, DollarSign, Activity } from 'lucide-react'
@@ -56,15 +56,9 @@ export function SystemOverview() {
     revenue: true,
     active_subs: true
   })
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    fetchData()
-    const interval = setInterval(fetchData, 60000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       const [statsRes, trendsRes, revenueRes] = await Promise.all([
@@ -82,7 +76,13 @@ export function SystemOverview() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchData()
+    const interval = setInterval(fetchData, 60000)
+    return () => clearInterval(interval)
+  }, [fetchData])
 
   const toggleCard = (key: string, value: boolean) => {
     setVisibleCards(prev => ({ ...prev, [key]: value }))

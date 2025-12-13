@@ -91,10 +91,40 @@ export function TenantProvider({ children }: { children: ReactNode }) {
 
       setTenants(tenantData)
 
-      // Set current tenant from localStorage or first tenant
+      // Set current tenant from localStorage, then try host-based custom domain mapping, else fallback to first tenant
       const storedTenantId = localStorage.getItem('currentTenantId')
-      const tenant = tenantData.find((t) => t.id === storedTenantId) || tenantData[0]
-      setCurrentTenant(tenant || null)
+
+      let tenant = tenantData.find((t) => t.id === storedTenantId) || null
+
+      if (!tenant) {
+        const hostname = typeof window !== 'undefined' ? window.location.hostname : null
+        const isLocal = !!hostname && (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.local'))
+
+        if (hostname && !isLocal) {
+          const { data: domainRow } = await (supabase
+            .from('tenant_domains') as any)
+            .select('tenant_id, verified_at')
+            .eq('domain', hostname)
+            .maybeSingle()
+
+          const mappedTenantId = (domainRow as any)?.tenant_id as string | undefined
+          const verifiedAt = (domainRow as any)?.verified_at as string | null | undefined
+
+          if (mappedTenantId && verifiedAt) {
+            const mappedTenant = tenantData.find((t) => t.id === mappedTenantId) || null
+            if (mappedTenant) {
+              tenant = mappedTenant
+              localStorage.setItem('currentTenantId', mappedTenantId)
+            }
+          }
+        }
+      }
+
+      if (!tenant) {
+        tenant = tenantData[0] || null
+      }
+
+      setCurrentTenant(tenant)
     } catch (error) {
       console.error('Error in fetchTenantsAndMemberships:', error)
     } finally {

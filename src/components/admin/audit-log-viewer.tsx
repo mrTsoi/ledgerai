@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,13 +28,9 @@ export function AuditLogViewer() {
     startDate: '',
     endDate: ''
   })
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    fetchLogs()
-  }, [])
-
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async (nextFilters: typeof filters) => {
     setLoading(true)
     try {
       let query = supabase
@@ -50,17 +46,17 @@ export function AuditLogViewer() {
         .limit(200)
 
       // Apply filters
-      if (filters.action) {
-        query = query.eq('action', filters.action)
+      if (nextFilters.action) {
+        query = query.eq('action', nextFilters.action)
       }
-      if (filters.userId) {
-        query = query.eq('user_id', filters.userId)
+      if (nextFilters.userId) {
+        query = query.eq('user_id', nextFilters.userId)
       }
-      if (filters.startDate) {
-        query = query.gte('created_at', filters.startDate)
+      if (nextFilters.startDate) {
+        query = query.gte('created_at', nextFilters.startDate)
       }
-      if (filters.endDate) {
-        query = query.lte('created_at', filters.endDate)
+      if (nextFilters.endDate) {
+        query = query.lte('created_at', nextFilters.endDate)
       }
 
       const { data, error } = await query
@@ -80,7 +76,11 @@ export function AuditLogViewer() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchLogs(filters)
+  }, [fetchLogs, filters])
 
   const exportToCSV = () => {
     const headers = ['Timestamp', 'User', 'Email', 'Action', 'Table', 'Record ID', 'IP Address', 'Old Data', 'New Data']
@@ -132,7 +132,7 @@ export function AuditLogViewer() {
             </CardDescription>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={fetchLogs}>
+            <Button variant="outline" size="sm" onClick={() => fetchLogs(filters)}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
             </Button>
@@ -200,8 +200,9 @@ export function AuditLogViewer() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setFilters({ search: '', action: '', userId: '', startDate: '', endDate: '' })
-                  fetchLogs()
+                  const cleared = { search: '', action: '', userId: '', startDate: '', endDate: '' }
+                  setFilters(cleared)
+                  fetchLogs(cleared)
                 }}
                 className="h-9 w-full"
               >

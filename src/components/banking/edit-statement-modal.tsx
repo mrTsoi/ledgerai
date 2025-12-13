@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -39,18 +39,9 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    if (isOpen && statement.documents?.file_path) {
-      loadPreview(statement.documents.file_path)
-    }
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl)
-    }
-  }, [isOpen, statement])
-
-  const loadPreview = async (path: string) => {
+  const loadPreview = useCallback(async (path: string) => {
     try {
       const { data, error } = await supabase.storage
         .from('documents')
@@ -64,7 +55,19 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
       console.error('Error loading preview:', error)
       toast.error('Failed to load document preview')
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [previewUrl])
+
+  useEffect(() => {
+    if (isOpen && statement.documents?.file_path) {
+      loadPreview(statement.documents.file_path)
+    }
+  }, [isOpen, loadPreview, statement.documents?.file_path])
 
   const handleSave = async () => {
     try {

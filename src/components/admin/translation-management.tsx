@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -70,19 +70,9 @@ export function TranslationManagement() {
   const [newKey, setNewKey] = useState('')
   const [newValue, setNewValue] = useState('')
 
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    fetchLanguages()
-  }, [])
-
-  useEffect(() => {
-    if (selectedLocale && selectedNamespace) {
-      fetchTranslations()
-    }
-  }, [selectedLocale, selectedNamespace])
-
-  const fetchLanguages = async () => {
+  const fetchLanguages = useCallback(async () => {
     const { data } = await supabase
       .from('system_languages')
       .select('*')
@@ -96,9 +86,9 @@ export function TranslationManagement() {
         setSelectedLocale((data[0] as any).code)
       }
     }
-  }
+  }, [supabase, selectedLocale])
 
-  const fetchTranslations = async () => {
+  const fetchTranslations = useCallback(async () => {
     setLoading(true)
     const { data, error } = await supabase
       .from('app_translations')
@@ -113,7 +103,17 @@ export function TranslationManagement() {
       setTranslations(data || [])
     }
     setLoading(false)
-  }
+  }, [supabase, selectedLocale, selectedNamespace])
+
+  useEffect(() => {
+    fetchLanguages()
+  }, [fetchLanguages])
+
+  useEffect(() => {
+    if (selectedLocale && selectedNamespace) {
+      fetchTranslations()
+    }
+  }, [selectedLocale, selectedNamespace, fetchTranslations])
 
   const handleAdd = async () => {
     if (!newKey || !newValue) return

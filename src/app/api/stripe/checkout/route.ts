@@ -60,38 +60,41 @@ export async function POST(req: NextRequest) {
     let existingSubscriptionId = (subscription as any)?.stripe_subscription_id
     let existingSub: any = null
 
-    // Fallback: If DB says no subscription, but we have a customer ID, check Stripe directly
-    // This handles race conditions where webhook hasn't fired yet but user is upgrading
-    if (!existingSubscriptionId && customerId) {
+    // ROBUSTNESS FIX: Always check Stripe for active subscriptions if we have a customer ID.
+    // This handles cases where DB is stale, webhook failed, or user has multiple subs (we pick the first active one).
+    if (customerId) {
       try {
         const subs = await stripe.subscriptions.list({
           customer: customerId,
           status: 'active',
           limit: 1
         })
+        
         if (subs.data.length > 0) {
+          // Found an active subscription in Stripe!
           existingSub = subs.data[0]
           existingSubscriptionId = existingSub.id
           
-          // Self-heal: Update DB with found subscription
-          await (supabase
-            .from('user_subscriptions') as any)
-            .update({ stripe_subscription_id: existingSubscriptionId })
-            .eq('user_id', user.id)
+          // Sync DB if needed
+          if ((subscription as any)?.stripe_subscription_id !== existingSubscriptionId) {
+             await (supabase
+              .from('user_subscriptions') as any)
+              .update({ stripe_subscription_id: existingSubscriptionId })
+              .eq('user_id', user.id)
+          }
+        } else {
+          // No active subscriptions in Stripe, even if DB thought so.
+          existingSubscriptionId = null
+          existingSub = null
         }
       } catch (e) {
         console.error('Error fetching subscriptions from Stripe:', e)
       }
     }
 
-    if (existingSubscriptionId) {
+    if (existingSubscriptionId && existingSub) {
       try {
-        // If we haven't fetched it yet (from fallback above), fetch it now
-        if (!existingSub) {
-          existingSub = await stripe.subscriptions.retrieve(existingSubscriptionId)
-        }
-        
-        if (existingSub && (existingSub.status === 'active' || existingSub.status === 'trialing')) {
+        if (existingSub.status === 'active' || existingSub.status === 'trialing') {
           // This is an UPGRADE or DOWNGRADE
           // We will update the existing subscription directly
           

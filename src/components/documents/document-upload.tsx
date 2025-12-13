@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTenant } from '@/hooks/use-tenant'
+import { useBatchConfig, chunkArray } from '@/hooks/use-batch-config'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -46,24 +47,26 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
   const [selectedBankAccountId, setSelectedBankAccountId] = useState<string>('none')
   const [bankAccounts, setBankAccounts] = useState<any[]>([])
   const { currentTenant } = useTenant()
+  const { batchSize } = useBatchConfig()
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
+  const tenantId = currentTenant?.id
 
-  useEffect(() => {
-    if (currentTenant) {
-      fetchBankAccounts()
-    }
-  }, [currentTenant])
+  const fetchBankAccounts = useCallback(async () => {
+    if (!tenantId) return
 
-  const fetchBankAccounts = async () => {
     const { data } = await supabase
       .from('bank_accounts')
       .select('id, account_name, bank_name')
-      .eq('tenant_id', currentTenant!.id)
+      .eq('tenant_id', tenantId)
       .eq('is_active', true)
     
     if (data) setBankAccounts(data)
-  }
+  }, [supabase, tenantId])
+
+  useEffect(() => {
+    fetchBankAccounts()
+  }, [fetchBankAccounts])
 
   const validateFile = (file: File): string | null => {
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -206,9 +209,12 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
 
   const handleUploadAll = async () => {
     const pendingFiles = files.filter(f => f.status === 'pending' && !f.error)
-    for (const file of pendingFiles) {
-      await uploadFile(file)
+    const chunks = chunkArray(pendingFiles, batchSize)
+
+    for (const chunk of chunks) {
+      await Promise.all(chunk.map(file => uploadFile(file)))
     }
+
     setTimeout(() => {
       router.refresh()
     }, 1000)

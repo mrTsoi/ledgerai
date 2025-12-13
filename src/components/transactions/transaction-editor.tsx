@@ -313,10 +313,13 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
           })
       }
     }
+  }, [currentTenant, transactionId, fetchTransaction, fetchAccounts, supabase])
+
+  useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl)
     }
-  }, [currentTenant, transactionId, fetchTransaction, fetchAccounts, supabase])
+  }, [previewUrl])
 
   const handleCurrencyChange = async (newCurrency: string) => {
     if (!transaction) return

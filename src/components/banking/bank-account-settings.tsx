@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { Button } from '@/components/ui/button'
@@ -29,14 +29,10 @@ export function BankAccountSettings({ accountId }: Props) {
     currency: 'USD'
   })
   
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const router = useRouter()
 
-  useEffect(() => {
-    fetchAccount()
-  }, [accountId])
-
-  const fetchAccount = async () => {
+  const fetchAccount = useCallback(async () => {
     try {
       setLoading(true)
       const { data, error } = await supabase
@@ -58,7 +54,11 @@ export function BankAccountSettings({ accountId }: Props) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [accountId, supabase])
+
+  useEffect(() => {
+    fetchAccount()
+  }, [fetchAccount])
 
   const handleSave = async () => {
     try {

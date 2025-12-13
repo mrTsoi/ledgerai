@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { Button } from '@/components/ui/button'
@@ -19,21 +19,18 @@ export function BankAccountList() {
   const [editingAccount, setEditingAccount] = useState<BankAccount | undefined>(undefined)
 
   const { currentTenant } = useTenant()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
+  const tenantId = currentTenant?.id
 
-  useEffect(() => {
-    if (currentTenant) {
-      fetchAccounts()
-    }
-  }, [currentTenant])
+  const fetchAccounts = useCallback(async () => {
+    if (!tenantId) return
 
-  const fetchAccounts = async () => {
     try {
       setLoading(true)
       const { data, error } = await supabase
         .from('bank_accounts')
         .select('*')
-        .eq('tenant_id', currentTenant!.id)
+        .eq('tenant_id', tenantId)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
 
@@ -44,7 +41,13 @@ export function BankAccountList() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, tenantId])
+
+  useEffect(() => {
+    if (tenantId) {
+      fetchAccounts()
+    }
+  }, [fetchAccounts, tenantId])
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this bank account?')) return
@@ -56,7 +59,7 @@ export function BankAccountList() {
         .eq('id', id)
 
       if (error) throw error
-      fetchAccounts()
+      await fetchAccounts()
     } catch (error) {
       console.error('Error deleting account:', error)
     }

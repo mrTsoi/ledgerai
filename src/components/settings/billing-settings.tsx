@@ -1,18 +1,24 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { Loader2, Check, AlertCircle, Download, FileInput } from 'lucide-react'
+import { Loader2, Check, X, AlertCircle, Download, FileInput, Phone, Mail } from 'lucide-react'
 import { useSubscription } from '@/hooks/use-subscription'
 import { importInvoiceToTransactions } from '@/app/actions/billing-actions'
 import { toast } from "sonner"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
 
 type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
+
+interface ContactConfig {
+  whatsapp: string
+  email: string
+}
 
 export function BillingSettings() {
   const { subscription, loading: subLoading, refreshSubscription } = useSubscription()
@@ -22,7 +28,76 @@ export function BillingSettings() {
   const [importing, setImporting] = useState<string | null>(null)
   const [billingCycle, setBillingCycle] = useState<'month' | 'year'>('month')
   const [invoices, setInvoices] = useState<any[]>([])
-  const supabase = createClient()
+  const [contactConfig, setContactConfig] = useState<ContactConfig>({ whatsapp: '', email: '' })
+  const supabase = useMemo(() => createClient(), [])
+
+  const formatStorage = (bytes: number) => {
+    if (bytes === -1) return 'Unlimited'
+    const gb = bytes / (1024 * 1024 * 1024)
+    return `${gb} GB`
+  }
+
+  const formatPrice = (price: number | null) => {
+    if (price === 0 || price === null) return 'Free'
+    return `$${price}`
+  }
+
+  const getFeaturesList = (plan: SubscriptionPlan) => {
+    const features: { text: string; included: boolean; isNew?: boolean }[] = []
+
+    // Limits
+    features.push({
+      text: plan.max_tenants === -1 ? 'Unlimited Tenants' : `${plan.max_tenants} Tenant${plan.max_tenants > 1 ? 's' : ''}`,
+      included: true
+    })
+    features.push({
+      text: plan.max_documents === -1 ? 'Unlimited Documents' : `${plan.max_documents.toLocaleString()} Documents/mo`,
+      included: true
+    })
+    features.push({
+      text: `${formatStorage(plan.max_storage_bytes)} Storage`,
+      included: true
+    })
+
+    // JSON Features
+    const featureFlags = (plan.features as any) || {}
+
+    features.push({
+      text: 'AI Automation',
+      included: !!featureFlags.ai_access
+    })
+    features.push({
+      text: 'AI Agent (Voice/Text)',
+      included: !!featureFlags.ai_agent
+    })
+    features.push({
+      text: 'Bank Feed Integration',
+      included: !!featureFlags.bank_integration
+    })
+    features.push({
+      text: 'Tax Automation',
+      included: !!featureFlags.tax_automation
+    })
+    features.push({
+      text: 'Custom Domain',
+      included: !!featureFlags.custom_domain
+    })
+    features.push({
+      text: 'SSO / Enterprise Security',
+      included: !!featureFlags.sso
+    })
+    features.push({
+      text: 'Concurrent Batch Processing',
+      included: !!featureFlags.concurrent_batch_processing,
+      isNew: true
+    })
+    features.push({
+      text: 'Custom features and more',
+      included: !!featureFlags.custom_features
+    })
+
+    return features
+  }
 
   // Determine current interval based on period duration (approx > 40 days = year)
   const currentInterval = subscription?.current_period_start && subscription?.current_period_end
@@ -31,20 +106,50 @@ export function BillingSettings() {
       : 'month'
     : 'month'
 
-  useEffect(() => {
-    fetchPlans()
-    fetchInvoices()
-  }, [])
+  const fetchContactConfig = useCallback(async () => {
+    const { data } = await (supabase
+      .from('system_settings') as any)
+      .select('setting_value')
+      .eq('setting_key', 'contact_sales_config')
+      .single()
+    
+    if (data?.setting_value) {
+      setContactConfig(data.setting_value as ContactConfig)
+    }
+  }, [supabase])
 
-  const fetchInvoices = async () => {
-    const { data } = await supabase
+  const fetchInvoices = useCallback(async () => {
+    const { data: invoicesData } = await supabase
       .from('billing_invoices')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(5)
     
-    if (data) setInvoices(data)
-  }
+    if (invoicesData) {
+      // Check for existing transactions
+      const stripeInvoiceIds = invoicesData.map((inv: any) => inv.stripe_invoice_id).filter(Boolean)
+      
+      let importedIds = new Set()
+      if (stripeInvoiceIds.length > 0) {
+        const { data: transactions } = await (supabase
+          .from('transactions') as any)
+          .select('reference_number')
+          .in('reference_number', stripeInvoiceIds)
+          .neq('status', 'VOID')
+        
+        if (transactions) {
+          transactions.forEach((t: any) => importedIds.add(t.reference_number))
+        }
+      }
+
+      const invoicesWithStatus = invoicesData.map((inv: any) => ({
+        ...inv,
+        is_imported: importedIds.has(inv.stripe_invoice_id)
+      }))
+      
+      setInvoices(invoicesWithStatus)
+    }
+  }, [supabase])
 
   const handleImport = async (invoiceId: string) => {
     try {
@@ -63,7 +168,7 @@ export function BillingSettings() {
     }
   }
 
-  const fetchPlans = async () => {
+  const fetchPlans = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('subscription_plans')
@@ -78,7 +183,13 @@ export function BillingSettings() {
     } finally {
       setLoadingPlans(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchPlans()
+    fetchInvoices()
+    fetchContactConfig()
+  }, [fetchPlans, fetchInvoices, fetchContactConfig])
 
   const handleUpgrade = async (planId: string) => {
     try {
@@ -248,13 +359,18 @@ export function BillingSettings() {
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="h-8 px-2 text-gray-600"
+                        className={`h-8 px-2 ${invoice.is_imported ? 'text-green-600' : 'text-gray-600'}`}
                         onClick={() => handleImport(invoice.id)}
                         disabled={importing === invoice.id}
-                        title="Import to Expenses"
+                        title={invoice.is_imported ? "Already imported (Click to re-import)" : "Import to Expenses"}
                       >
                         {importing === invoice.id ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : invoice.is_imported ? (
+                           <div className="flex items-center gap-1">
+                            <Check className="w-4 h-4" />
+                            <span className="hidden sm:inline">Imported</span>
+                          </div>
                         ) : (
                           <div className="flex items-center gap-1">
                             <FileInput className="w-4 h-4" />
@@ -287,7 +403,7 @@ export function BillingSettings() {
               checked={billingCycle === 'year'}
               onCheckedChange={(checked) => setBillingCycle(checked ? 'year' : 'month')}
             />
-            <Label htmlFor="billing-cycle" className={billingCycle === 'year' ? 'font-bold' : ''}>Yearly <span className="text-green-600 text-xs">(Save ~17%)</span></Label>
+            <Label htmlFor="billing-cycle" className={billingCycle === 'year' ? 'font-bold' : ''}>Yearly <span className="text-green-600 text-xs">(Save ~20%)</span></Label>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -307,6 +423,7 @@ export function BillingSettings() {
 
             const isUpgrade = (plan.price_monthly || 0) > currentPrice
             const isDowngrade = (plan.price_monthly || 0) < currentPrice
+            const isEnterprise = plan.name.toLowerCase().includes('enterprise')
             
             let buttonText = 'Switch Plan'
             if (isCurrent) {
@@ -352,43 +469,101 @@ export function BillingSettings() {
                 </CardHeader>
                 <CardContent className="flex-1">
                   <div className="mb-4">
-                    <span className="text-3xl font-bold">${displayPrice}</span>
-                    <span className="text-gray-500">/{billingCycle}</span>
-                    {billingCycle === 'year' && (
-                      <div className="text-sm text-gray-500 mt-1">
-                        (${price.toFixed(2)}/mo billed yearly)
-                      </div>
-                    )}
-                    {estimatedProration !== null && (
-                      <div className="mt-2 text-xs bg-green-50 text-green-700 p-2 rounded border border-green-100">
-                        <strong>Upgrade Offer:</strong> Pay only ~${estimatedProration.toFixed(2)} today (prorated)
-                      </div>
+                    {isEnterprise ? (
+                      <span className="text-3xl font-bold">Contact Sales</span>
+                    ) : (
+                      <>
+                        <span className="text-3xl font-bold">{formatPrice(displayPrice)}</span>
+                        {displayPrice > 0 && <span className="text-gray-500">/{billingCycle}</span>}
+                        {billingCycle === 'year' && displayPrice > 0 && (
+                          <div className="text-sm text-gray-500 mt-1">
+                            (${price.toFixed(2)}/mo billed yearly)
+                          </div>
+                        )}
+                        {estimatedProration !== null && (
+                          <div className="mt-2 text-xs bg-green-50 text-green-700 p-2 rounded border border-green-100">
+                            <strong>Upgrade Offer:</strong> Pay only ~${estimatedProration.toFixed(2)} today (prorated)
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                   <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-green-500" />
-                      {plan.max_tenants === -1 ? 'Unlimited' : plan.max_tenants} Companies
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-green-500" />
-                      {plan.max_documents === -1 ? 'Unlimited' : plan.max_documents.toLocaleString()} Documents
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-green-500" />
-                      {(plan.max_storage_bytes / 1024 / 1024 / 1024).toFixed(0)} GB Storage
-                    </li>
+                    {getFeaturesList(plan).map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        {feature.included ? (
+                          <Check className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <X className="w-4 h-4 text-gray-300" />
+                        )}
+                        <span className={feature.included ? 'text-gray-900' : 'text-gray-400'}>
+                          {feature.text}
+                          {(feature as any).isNew && feature.included && (
+                            <span className="ml-2 px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">New</span>
+                          )}
+                        </span>
+                      </li>
+                    ))}
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button 
-                    className="w-full" 
-                    variant={isCurrent ? "outline" : "default"}
-                    disabled={isCurrent || upgrading !== null}
-                    onClick={() => handleUpgrade(plan.id)}
-                  >
-                    {upgrading === plan.id ? <Loader2 className="animate-spin" /> : buttonText}
-                  </Button>
+                  {isEnterprise ? (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="w-full" variant="outline">Contact Sales</Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Contact Enterprise Sales</DialogTitle>
+                          <DialogDescription>
+                            Get in touch with our team to discuss a custom plan for your organization.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          {contactConfig.whatsapp && (
+                            <a 
+                              href={`https://wa.me/${contactConfig.whatsapp}`} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              <div className="bg-green-100 p-2 rounded-full">
+                                <Phone className="w-5 h-5 text-green-600" />
+                              </div>
+                              <div>
+                                <div className="font-semibold">WhatsApp</div>
+                                <div className="text-sm text-gray-500">Chat with us instantly</div>
+                              </div>
+                            </a>
+                          )}
+                          
+                          {contactConfig.email && (
+                            <a 
+                              href={`mailto:${contactConfig.email}`}
+                              className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              <div className="bg-blue-100 p-2 rounded-full">
+                                <Mail className="w-5 h-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <div className="font-semibold">Email</div>
+                                <div className="text-sm text-gray-500">{contactConfig.email}</div>
+                              </div>
+                            </a>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  ) : (
+                    <Button 
+                      className="w-full" 
+                      variant={isCurrent ? "outline" : "default"}
+                      disabled={isCurrent || upgrading !== null}
+                      onClick={() => handleUpgrade(plan.id)}
+                    >
+                      {upgrading === plan.id ? <Loader2 className="animate-spin" /> : buttonText}
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
             )

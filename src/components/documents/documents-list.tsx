@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTenant } from '@/hooks/use-tenant'
+import { useBatchConfig, chunkArray } from '@/hooks/use-batch-config'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -57,7 +58,30 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
   } | null>(null)
 
   const { currentTenant } = useTenant()
-  const supabase = createClient()
+  const { batchSize } = useBatchConfig()
+  const supabase = useMemo(() => createClient(), [])
+
+  const fetchDocuments = useCallback(async () => {
+    if (!currentTenant) return
+
+    try {
+      setLoading(true)
+      let query = (supabase
+        .from('documents') as any)
+        .select('*, document_data(confidence_score, extracted_data)')
+        .eq('tenant_id', currentTenant.id)
+        .order('created_at', { ascending: false })
+
+      const { data, error } = await query
+
+      if (error) throw error
+      setDocuments((data as unknown as Document[]) || [])
+    } catch (error) {
+      console.error('Error fetching documents:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [currentTenant, supabase])
 
   useEffect(() => {
     if (!currentTenant) return
@@ -84,29 +108,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [currentTenant, refreshKey])
-
-  const fetchDocuments = async () => {
-    if (!currentTenant) return
-
-    try {
-      setLoading(true)
-      let query = (supabase
-        .from('documents') as any)
-        .select('*, document_data(confidence_score, extracted_data)')
-        .eq('tenant_id', currentTenant.id)
-        .order('created_at', { ascending: false })
-
-      const { data, error } = await query
-
-      if (error) throw error
-      setDocuments((data as unknown as Document[]) || [])
-    } catch (error) {
-      console.error('Error fetching documents:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [currentTenant, refreshKey, fetchDocuments, supabase])
 
   const downloadDocument = async (doc: Document) => {
     try {
@@ -444,48 +446,52 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
       ))
       
       setSelectedIds(new Set())
-      toast.info('Bulk processing started. Documents will update as they complete.')
+      toast.info(`Bulk processing started. Processing in batches of ${batchSize}.`)
 
-      // Process sequentially to avoid rate limits
-      for (const id of ids) {
-        try {
-          const response = await fetch('/api/documents/process', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ documentId: id }),
-          })
+      // Process in batches
+      const chunks = chunkArray(ids, batchSize)
 
-          if (response.ok) {
-            // Fetch updated doc
-            const { data: updatedDoc } = await (supabase
-              .from('documents') as any)
-              .select('*, document_data(confidence_score, extracted_data)')
-              .eq('id', id)
-              .single()
+      for (const chunk of chunks) {
+        await Promise.all(chunk.map(async (id) => {
+          try {
+            const response = await fetch('/api/documents/process', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ documentId: id }),
+            })
 
-            if (updatedDoc) {
-               setDocuments(prev => prev.map(d => 
-                d.id === id ? (updatedDoc as unknown as Document) : d
+            if (response.ok) {
+              // Fetch updated doc
+              const { data: updatedDoc } = await (supabase
+                .from('documents') as any)
+                .select('*, document_data(confidence_score, extracted_data)')
+                .eq('id', id)
+                .single()
+
+              if (updatedDoc) {
+                setDocuments(prev => prev.map(d => 
+                  d.id === id ? (updatedDoc as unknown as Document) : d
+                ))
+              }
+            } else {
+              setDocuments(prev => prev.map(d => 
+                d.id === id ? { ...d, status: 'FAILED' } : d
               ))
             }
-          } else {
-             setDocuments(prev => prev.map(d => 
-              d.id === id ? { ...d, status: 'FAILED' } : d
-            ))
+          } catch (e) {
+            console.error(`Failed to process ${id}`, e)
+            setDocuments(prev => prev.map(d => 
+                d.id === id ? { ...d, status: 'FAILED' } : d
+              ))
+          } finally {
+            // Remove from set as they finish
+            setReprocessingIds(prev => {
+              const next = new Set(prev)
+              next.delete(id)
+              return next
+            })
           }
-        } catch (e) {
-           console.error(`Failed to process ${id}`, e)
-           setDocuments(prev => prev.map(d => 
-              d.id === id ? { ...d, status: 'FAILED' } : d
-            ))
-        } finally {
-          // Remove from set as they finish
-          setReprocessingIds(prev => {
-            const next = new Set(prev)
-            next.delete(id)
-            return next
-          })
-        }
+        }))
       }
       
     } catch (error: any) {

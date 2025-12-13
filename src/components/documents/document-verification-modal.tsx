@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { Button } from '@/components/ui/button'
@@ -65,103 +65,15 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
   const [lastZoomLevel, setLastZoomLevel] = useState(100)
 
   const { currentTenant } = useTenant()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
-    fetchDocumentDetails()
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl)
     }
-  }, [documentId])
+  }, [previewUrl])
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y })
-  }
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return
-    e.preventDefault()
-    setPosition({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y
-    })
-  }
-
-  const handleMouseUp = () => {
-    setIsDragging(false)
-  }
-
-  // Touch Event Handlers
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
-      // Single touch - start dragging
-      setIsDragging(true)
-      setDragStart({ 
-        x: e.touches[0].clientX - position.x, 
-        y: e.touches[0].clientY - position.y 
-      })
-    } else if (e.touches.length === 2) {
-      // Two touches - start pinch/zoom
-      const touch1 = e.touches[0]
-      const touch2 = e.touches[1]
-      const dist = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY)
-      setInitialPinchDistance(dist)
-      setLastZoomLevel(zoomLevel)
-      
-      // Also track center for panning with two fingers
-      const centerX = (touch1.clientX + touch2.clientX) / 2
-      const centerY = (touch1.clientY + touch2.clientY) / 2
-      setDragStart({ 
-        x: centerX - position.x, 
-        y: centerY - position.y 
-      })
-      setIsDragging(true)
-    }
-  }
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    // e.preventDefault() - Removed to avoid passive event listener error. 
-    // 'touch-none' CSS class handles scroll prevention.
-    
-    if (e.touches.length === 1 && isDragging) {
-      // Single touch pan
-      setPosition({
-        x: e.touches[0].clientX - dragStart.x,
-        y: e.touches[0].clientY - dragStart.y
-      })
-    } else if (e.touches.length === 2 && initialPinchDistance !== null) {
-      // Two touch pinch zoom & pan
-      const touch1 = e.touches[0]
-      const touch2 = e.touches[1]
-      
-      // 1. Calculate new zoom
-      const dist = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY)
-      const scaleFactor = dist / initialPinchDistance
-      const newZoom = Math.min(Math.max(lastZoomLevel * scaleFactor, 50), 300) // Limit zoom 50% - 300%
-      setZoomLevel(newZoom)
-      
-      // 2. Calculate new position (pan)
-      const centerX = (touch1.clientX + touch2.clientX) / 2
-      const centerY = (touch1.clientY + touch2.clientY) / 2
-      
-      if (isDragging) {
-        setPosition({
-          x: centerX - dragStart.x,
-          y: centerY - dragStart.y
-        })
-      }
-    }
-  }
-
-  const handleTouchEnd = () => {
-    setIsDragging(false)
-    setInitialPinchDistance(null)
-    setLastZoomLevel(zoomLevel)
-  }
-
-  const fetchDocumentDetails = async () => {
+  const fetchDocumentDetails = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -239,21 +151,97 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
           account_number: extracted.account_number || ''
         })
 
+        // Bank transactions
         if (extracted.bank_transactions && Array.isArray(extracted.bank_transactions)) {
-          setBankTransactions(extracted.bank_transactions.map((tx: any) => ({
-            date: formatDate(tx.date),
-            description: tx.description || '',
-            amount: tx.amount?.toString() || '0',
-            type: tx.type || 'DEBIT'
+          setBankTransactions(extracted.bank_transactions.map((t: any) => ({
+            date: t.date || '',
+            description: t.description || '',
+            amount: (t.amount ?? '').toString(),
+            type: t.type === 'CREDIT' ? 'CREDIT' : 'DEBIT'
           })))
+        } else {
+          setBankTransactions([])
         }
       }
-
     } catch (error) {
       console.error('Error fetching document details:', error)
     } finally {
       setLoading(false)
     }
+  }, [documentId, supabase])
+
+  useEffect(() => {
+    fetchDocumentDetails()
+  }, [fetchDocumentDetails])
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y })
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return
+    e.preventDefault()
+    setPosition({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y
+    })
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      setIsDragging(true)
+      setDragStart({
+        x: e.touches[0].clientX - position.x,
+        y: e.touches[0].clientY - position.y
+      })
+    } else if (e.touches.length === 2) {
+      const touch1 = e.touches[0]
+      const touch2 = e.touches[1]
+      const dist = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY)
+      setInitialPinchDistance(dist)
+      setLastZoomLevel(zoomLevel)
+
+      const centerX = (touch1.clientX + touch2.clientX) / 2
+      const centerY = (touch1.clientY + touch2.clientY) / 2
+      setDragStart({ x: centerX - position.x, y: centerY - position.y })
+      setIsDragging(true)
+    }
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 1 && isDragging) {
+      setPosition({
+        x: e.touches[0].clientX - dragStart.x,
+        y: e.touches[0].clientY - dragStart.y
+      })
+    } else if (e.touches.length === 2 && initialPinchDistance !== null) {
+      const touch1 = e.touches[0]
+      const touch2 = e.touches[1]
+
+      const dist = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY)
+      const scale = dist / initialPinchDistance
+      const newZoom = Math.max(50, Math.min(200, Math.round(lastZoomLevel * scale)))
+      setZoomLevel(newZoom)
+
+      const centerX = (touch1.clientX + touch2.clientX) / 2
+      const centerY = (touch1.clientY + touch2.clientY) / 2
+      setPosition({
+        x: centerX - dragStart.x,
+        y: centerY - dragStart.y
+      })
+    }
+  }
+
+  const handleTouchEnd = () => {
+    setIsDragging(false)
+    setInitialPinchDistance(null)
+    setLastZoomLevel(zoomLevel)
   }
 
   const handleSave = async () => {

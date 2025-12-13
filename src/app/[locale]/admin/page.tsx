@@ -7,6 +7,8 @@ import { AuditLogViewer } from '@/components/admin/audit-log-viewer'
 import { LanguageManagement } from '@/components/admin/language-management'
 import { TranslationManagement } from '@/components/admin/translation-management'
 import { AIProviderManagement } from '@/components/admin/ai-provider-management'
+import { PlatformCustomizer } from '@/components/admin/platform-customizer'
+import { ProcessingSettings } from '@/components/admin/processing-settings'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
@@ -46,6 +48,8 @@ export default function AdminPage() {
           <TabsTrigger value="languages">{t('tabs.languages')}</TabsTrigger>
           <TabsTrigger value="translations">Translations</TabsTrigger>
           <TabsTrigger value="ai-providers">AI Providers</TabsTrigger>
+          <TabsTrigger value="processing">Processing</TabsTrigger>
+          <TabsTrigger value="customization">Customization</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -78,6 +82,14 @@ export default function AdminPage() {
 
         <TabsContent value="ai-providers">
           <AIProviderManagement />
+        </TabsContent>
+
+        <TabsContent value="processing">
+          <ProcessingSettings />
+        </TabsContent>
+
+        <TabsContent value="customization">
+          <PlatformCustomizer />
         </TabsContent>
       </Tabs>
     </div>

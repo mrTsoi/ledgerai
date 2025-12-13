@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTenant } from '@/hooks/use-tenant'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
@@ -22,26 +22,17 @@ export function ChartOfAccounts() {
   const [editingAccount, setEditingAccount] = useState<Account | null>(null)
   const [showForm, setShowForm] = useState(false)
   const { currentTenant } = useTenant()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
+  const tenantId = currentTenant?.id
 
-  useEffect(() => {
-    if (currentTenant) {
-      fetchAccounts()
-    }
-  }, [currentTenant])
-
-  useEffect(() => {
-    filterAccounts()
-  }, [accounts, searchTerm, selectedType])
-
-  const fetchAccounts = async () => {
-    if (!currentTenant) return
+  const fetchAccounts = useCallback(async () => {
+    if (!tenantId) return
 
     try {
       const { data, error } = await supabase
         .from('chart_of_accounts')
         .select('*')
-        .eq('tenant_id', currentTenant.id)
+        .eq('tenant_id', tenantId)
         .order('code')
 
       if (error) throw error
@@ -51,9 +42,9 @@ export function ChartOfAccounts() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, tenantId])
 
-  const filterAccounts = () => {
+  const filterAccounts = useCallback(() => {
     let filtered = accounts
 
     // Filter by type
@@ -72,10 +63,20 @@ export function ChartOfAccounts() {
     }
 
     setFilteredAccounts(filtered)
-  }
+  }, [accounts, searchTerm, selectedType])
+
+  useEffect(() => {
+    if (tenantId) {
+      fetchAccounts()
+    }
+  }, [fetchAccounts, tenantId])
+
+  useEffect(() => {
+    filterAccounts()
+  }, [filterAccounts])
 
   const saveAccount = async (account: Partial<Account>) => {
-    if (!currentTenant) return
+    if (!tenantId) return
 
     try {
       if (editingAccount) {
@@ -99,7 +100,7 @@ export function ChartOfAccounts() {
         const { error } = await (supabase
           .from('chart_of_accounts') as any)
           .insert({
-            tenant_id: currentTenant.id,
+            tenant_id: tenantId,
             code: account.code!,
             name: account.name!,
             account_type: account.account_type!,
@@ -114,7 +115,7 @@ export function ChartOfAccounts() {
 
       setShowForm(false)
       setEditingAccount(null)
-      fetchAccounts()
+      await fetchAccounts()
       toast.success(editingAccount ? 'Account updated successfully' : 'Account created successfully')
     } catch (error: any) {
       console.error('Error saving account:', error)

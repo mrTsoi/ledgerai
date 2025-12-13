@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,13 +18,9 @@ export function PromoCodeManagement() {
   const [loading, setLoading] = useState(true)
   const [editingCode, setEditingCode] = useState<PromoCode | null>(null)
   const [isCreating, setIsCreating] = useState(false)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    fetchCodes()
-  }, [])
-
-  const fetchCodes = async () => {
+  const fetchCodes = useCallback(async () => {
     try {
       setLoading(true)
       const { data, error } = await supabase
@@ -39,7 +35,11 @@ export function PromoCodeManagement() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchCodes()
+  }, [fetchCodes])
 
   const handleSync = async () => {
     try {

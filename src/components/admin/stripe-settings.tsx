@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -19,17 +19,13 @@ export function StripeSettings() {
     secret_key: '',
     webhook_secret: ''
   })
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    loadSettings()
-  }, [])
-
-  const loadSettings = async () => {
+  const loadSettings = useCallback(async () => {
     try {
       setLoading(true)
-      const { data, error } = await supabase
-        .from('system_settings')
+      const { data, error } = await (supabase
+        .from('system_settings') as any)
         .select('setting_value')
         .eq('setting_key', 'stripe_config')
         .single()
@@ -42,7 +38,11 @@ export function StripeSettings() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    loadSettings()
+  }, [loadSettings])
 
   const handleSave = async () => {
     try {

@@ -1,0 +1,73 @@
+import crypto from 'crypto'
+import path from 'path'
+import { createServiceClient } from '@/lib/supabase/service'
+import type { ExternalFetchedFile, ExternalSourceConfig } from './types'
+
+function sanitizeFileName(name: string) {
+  return name.replace(/[^a-zA-Z0-9._-]/g, '_')
+}
+
+export async function importFetchedFile(params: {
+  tenantId: string
+  fetched: ExternalFetchedFile
+  config: ExternalSourceConfig
+  sourceId: string
+}) {
+  const { tenantId, fetched, config, sourceId } = params
+  const supabase = createServiceClient()
+
+  const documentId = crypto.randomUUID()
+
+  const ext = path.extname(fetched.filename)
+  const safeName = sanitizeFileName(fetched.filename)
+  const filePath = `${tenantId}/${documentId}${ext || ''}`
+
+  // Upload bytes to Supabase storage bucket
+  const { error: storageError } = await supabase.storage
+    .from('documents')
+    .upload(filePath, fetched.bytes, {
+      contentType: fetched.mimeType,
+      upsert: false,
+    } as any)
+
+  if (storageError) {
+    throw new Error(storageError.message)
+  }
+
+  const documentType = config.document_type ?? null
+
+  const { error: docError } = await (supabase.from('documents') as any).insert({
+    id: documentId,
+    tenant_id: tenantId,
+    file_path: filePath,
+    file_name: safeName,
+    file_size: fetched.bytes.byteLength,
+    file_type: fetched.mimeType,
+    status: 'UPLOADED',
+    document_type: documentType,
+    uploaded_by: null,
+  })
+
+  if (docError) {
+    // best-effort cleanup
+    await supabase.storage.from('documents').remove([filePath])
+    throw new Error(docError.message)
+  }
+
+  if (documentType === 'bank_statement' && config.bank_account_id) {
+    await (supabase.from('bank_statements') as any).insert({
+      tenant_id: tenantId,
+      bank_account_id: config.bank_account_id,
+      document_id: documentId,
+      status: 'IMPORTED',
+    })
+  }
+
+  // Record source item ledger link (caller will provide identity via upsert)
+  return {
+    documentId,
+    filePath,
+    originalName: safeName,
+    sourceId,
+  }
+}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -21,7 +21,7 @@ type AIProvider = Database['public']['Tables']['ai_providers']['Row'] & {
 }
 
 export function AIProviderManagement() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [providers, setProviders] = useState<AIProvider[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -34,11 +34,7 @@ export function AIProviderManagement() {
   const [editPerHour, setEditPerHour] = useState<number | ''>('')
   const [editPerDay, setEditPerDay] = useState<number | ''>('')
 
-  useEffect(() => {
-    fetchProviders()
-  }, [])
-
-  const fetchProviders = async () => {
+  const fetchProviders = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -70,7 +66,11 @@ export function AIProviderManagement() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchProviders()
+  }, [fetchProviders])
 
   const updateProviderConfig = (index: number, changes: Partial<AIProvider>) => {
     setProviders(prev => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTenant } from '@/hooks/use-tenant'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -26,16 +26,17 @@ export function BalanceSheetReport() {
   const [loading, setLoading] = useState(false)
   const [asOfDate, setAsOfDate] = useState(format(new Date(), 'yyyy-MM-dd'))
   const { currentTenant } = useTenant()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
+  const tenantId = currentTenant?.id
 
-  const generateReport = async () => {
-    if (!currentTenant || !asOfDate) return
+  const generateReport = useCallback(async () => {
+    if (!tenantId || !asOfDate) return
 
     try {
       setLoading(true)
 
       const { data: reportData, error } = await (supabase.rpc as any)('get_balance_sheet', {
-        p_tenant_id: currentTenant.id,
+        p_tenant_id: tenantId,
         p_as_of_date: asOfDate
       })
 
@@ -47,13 +48,11 @@ export function BalanceSheetReport() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [asOfDate, supabase, tenantId])
 
   useEffect(() => {
-    if (currentTenant) {
-      generateReport()
-    }
-  }, [currentTenant])
+    generateReport()
+  }, [generateReport])
 
   const assets = data.filter(row => row.account_type === 'ASSET')
   const liabilities = data.filter(row => row.account_type === 'LIABILITY')

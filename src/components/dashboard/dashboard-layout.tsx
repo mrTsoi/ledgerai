@@ -1,10 +1,12 @@
 'use client'
 
 import { useTenant, useUserRole } from '@/hooks/use-tenant'
+import { useSubscription } from '@/hooks/use-subscription'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, usePathname, Link } from '@/i18n/navigation'
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
+import { AiAgentWidget } from '@/components/ai-agent/ai-agent-widget'
 import { useTranslations } from 'next-intl'
 import {
   Home,
@@ -55,6 +57,7 @@ export default function DashboardLayout({
   const t = useTranslations('navigation')
   const tCommon = useTranslations('common')
   const { currentTenant, tenants, switchTenant, loading } = useTenant()
+  const { subscription } = useSubscription()
   const userRole = useUserRole()
   const router = useRouter()
   const pathname = usePathname() // Use usePathname hook
@@ -325,6 +328,13 @@ export default function DashboardLayout({
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           {children}
         </main>
+
+        {/* AI Agent Widget */}
+        {subscription?.features?.ai_agent && (
+          <AiAgentWidget 
+            tenantId={currentTenant?.id} 
+          />
+        )}
       </div>
     </div>
   )

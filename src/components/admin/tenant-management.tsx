@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -40,13 +40,9 @@ export function TenantManagement() {
   const [loading, setLoading] = useState(true)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    fetchTenants()
-  }, [])
-
-  const fetchTenants = async () => {
+  const fetchTenants = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('tenants')
@@ -60,7 +56,11 @@ export function TenantManagement() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchTenants()
+  }, [fetchTenants])
 
   const fetchTenantDetails = async (tenantId: string) => {
     try {

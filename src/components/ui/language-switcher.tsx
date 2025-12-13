@@ -4,7 +4,7 @@ import { useLocale } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Globe } from 'lucide-react';
-import { useTransition, useEffect, useState } from 'react';
+import { useTransition, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 interface Language {
@@ -23,7 +23,7 @@ export function LanguageSwitcher() {
     { code: 'zh-CN', name: '简体中文', flag_emoji: '🇨🇳' },
     { code: 'zh-TW', name: '繁體中文', flag_emoji: '🇹🇼' }
   ]);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     const fetchLanguages = async () => {
@@ -37,7 +37,7 @@ export function LanguageSwitcher() {
       }
     };
     fetchLanguages();
-  }, []);
+  }, [supabase]);
 
   const handleChange = (nextLocale: string) => {
     startTransition(() => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
@@ -26,16 +26,9 @@ export default function BankAccountPage() {
     unreconciledCount: 0,
     lastStatementDate: null as string | null
   })
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    if (accountId) {
-      fetchAccount()
-      fetchStats()
-    }
-  }, [accountId])
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       // 1. Get latest statement for balance and date
       const { data: latestStatement } = await supabase
@@ -62,9 +55,9 @@ export default function BankAccountPage() {
     } catch (error) {
       console.error('Error fetching stats:', error)
     }
-  }
+  }, [accountId, supabase])
 
-  const fetchAccount = async () => {
+  const fetchAccount = useCallback(async () => {
     try {
       setLoading(true)
       const { data, error } = await supabase
@@ -80,7 +73,14 @@ export default function BankAccountPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [accountId, supabase])
+
+  useEffect(() => {
+    if (accountId) {
+      fetchAccount()
+      fetchStats()
+    }
+  }, [accountId, fetchAccount, fetchStats])
 
   if (loading) return <div className="p-8">Loading...</div>
   if (!account) return <div className="p-8">Account not found</div>

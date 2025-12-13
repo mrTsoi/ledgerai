@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { 
@@ -40,13 +40,9 @@ export function BankStatementList({ accountId }: Props) {
   const [reprocessingId, setReprocessingId] = useState<string | null>(null)
   const [editingStatement, setEditingStatement] = useState<BankStatement | null>(null)
   const [isVerificationOpen, setIsVerificationOpen] = useState(false)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    fetchStatements()
-  }, [accountId])
-
-  const fetchStatements = async () => {
+  const fetchStatements = useCallback(async () => {
     try {
       setLoading(true)
       const { data, error } = await supabase
@@ -72,7 +68,11 @@ export function BankStatementList({ accountId }: Props) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [accountId, supabase])
+
+  useEffect(() => {
+    fetchStatements()
+  }, [fetchStatements])
 
   const handleDownload = async (filePath: string, fileName: string) => {
     try {
@@ -107,7 +107,7 @@ export function BankStatementList({ accountId }: Props) {
 
       if (error) throw error
       toast.success('Statement deleted')
-      fetchStatements()
+      await fetchStatements()
     } catch (error) {
       console.error('Error deleting statement:', error)
       toast.error('Failed to delete statement')

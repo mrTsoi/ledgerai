@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { Button } from '@/components/ui/button'
@@ -41,16 +41,15 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
 
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
-    fetchDetails()
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl)
     }
-  }, [documentId])
+  }, [previewUrl])
 
-  const fetchDetails = async () => {
+  const fetchDetails = useCallback(async () => {
     if (!documentId) return
 
     try {
@@ -140,7 +139,11 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [documentId, supabase])
+
+  useEffect(() => {
+    fetchDetails()
+  }, [fetchDetails])
 
   const handleSave = async () => {
     try {

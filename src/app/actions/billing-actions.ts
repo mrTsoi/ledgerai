@@ -55,18 +55,68 @@ export async function importInvoiceToTransactions(invoiceId: string) {
     return { error: 'This invoice has already been imported.' }
   }
 
+  // 3.5 Download and Upload Invoice PDF
+  let documentId = null
+  if ((invoice as any).invoice_pdf) {
+    try {
+      const pdfUrl = (invoice as any).invoice_pdf
+      const pdfResponse = await fetch(pdfUrl)
+      
+      if (pdfResponse.ok) {
+        const pdfBuffer = await pdfResponse.arrayBuffer()
+        const fileName = `invoice_${(invoice as any).stripe_invoice_id}.pdf`
+        const filePath = `${tenantId}/${new Date().getFullYear()}/${fileName}`
+
+        // Upload to Storage
+        const { error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(filePath, pdfBuffer, {
+            contentType: 'application/pdf',
+            upsert: true
+          })
+
+        if (!uploadError) {
+          // Create Document Record
+          const { data: doc } = await (supabase
+            .from('documents') as any)
+            .insert({
+              tenant_id: tenantId,
+              file_path: filePath,
+              file_name: fileName,
+              file_size: pdfBuffer.byteLength,
+              file_type: 'application/pdf',
+              status: 'PROCESSED',
+              document_type: 'INVOICE',
+              uploaded_by: user.id
+            })
+            .select()
+            .single()
+
+          if (doc) {
+            documentId = doc.id
+          }
+        } else {
+            console.error('Upload error:', uploadError)
+        }
+      }
+    } catch (e) {
+      console.error('Failed to process invoice PDF:', e)
+    }
+  }
+
   // 4. Create the Transaction (Expense)
-  const { data: transaction, error: transError } = await supabase
-    .from('transactions')
+  const { data: transaction, error: transError } = await (supabase
+    .from('transactions') as any)
     .insert({
       tenant_id: tenantId,
       transaction_date: new Date((invoice as any).created_at).toISOString().split('T')[0],
       description: `Subscription Payment (Invoice #${(invoice as any).stripe_invoice_id.slice(-6)})`,
       reference_number: (invoice as any).stripe_invoice_id,
       status: 'DRAFT', // Start as draft so they can review
+      document_id: documentId,
       created_by: user.id,
       notes: `Imported from Billing History. Amount: $${(invoice as any).amount_paid}`
-    } as any)
+    })
     .select()
     .single()
 

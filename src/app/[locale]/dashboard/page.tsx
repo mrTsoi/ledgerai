@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTenant } from '@/hooks/use-tenant'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,7 +28,8 @@ interface ActivityItem {
 export default function DashboardPage() {
   const { currentTenant } = useTenant()
   const { subscription } = useSubscription()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
+  const tenantId = currentTenant?.id
   const [stats, setStats] = useState<DashboardStats>({
     documentCount: 0,
     pendingTransactions: 0,
@@ -38,14 +39,8 @@ export default function DashboardPage() {
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (currentTenant) {
-      fetchDashboardData()
-    }
-  }, [currentTenant])
-
-  const fetchDashboardData = async () => {
-    if (!currentTenant) return
+  const fetchDashboardData = useCallback(async () => {
+    if (!tenantId) return
 
     try {
       setLoading(true)
@@ -54,14 +49,14 @@ export default function DashboardPage() {
 
       // 1. Fetch Counts
       const [docsRes, txRes, membersRes] = await Promise.all([
-        supabase.from('documents').select('*', { count: 'exact', head: true }).eq('tenant_id', currentTenant.id),
-        supabase.from('transactions').select('*', { count: 'exact', head: true }).eq('tenant_id', currentTenant.id).eq('status', 'DRAFT'),
-        supabase.from('memberships').select('*', { count: 'exact', head: true }).eq('tenant_id', currentTenant.id)
+        supabase.from('documents').select('*', { count: 'exact', head: true }).eq('tenant_id', tenantId),
+        supabase.from('transactions').select('*', { count: 'exact', head: true }).eq('tenant_id', tenantId).eq('status', 'DRAFT'),
+        supabase.from('memberships').select('*', { count: 'exact', head: true }).eq('tenant_id', tenantId)
       ])
 
       // 2. Fetch Revenue
       const { data: plDataRaw } = await supabase.rpc('get_profit_loss', {
-        p_tenant_id: currentTenant.id,
+        p_tenant_id: tenantId,
         p_start_date: startDate,
         p_end_date: endDate
       } as any)
@@ -83,12 +78,12 @@ export default function DashboardPage() {
       const [recentDocs, recentTx] = await Promise.all([
         supabase.from('documents')
           .select('id, file_name, created_at, status')
-          .eq('tenant_id', currentTenant.id)
+          .eq('tenant_id', tenantId)
           .order('created_at', { ascending: false })
           .limit(5),
         supabase.from('transactions')
           .select('id, description, created_at, status, reference_number')
-          .eq('tenant_id', currentTenant.id)
+          .eq('tenant_id', tenantId)
           .order('created_at', { ascending: false })
           .limit(5)
       ])
@@ -120,7 +115,13 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, tenantId])
+
+  useEffect(() => {
+    if (tenantId) {
+      fetchDashboardData()
+    }
+  }, [fetchDashboardData, tenantId])
 
   const statCards = [
     {

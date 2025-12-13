@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 
@@ -18,6 +18,12 @@ export type SubscriptionDetails = {
   current_period_end: string
   next_plan_name?: string
   next_plan_start_date?: string
+  features?: {
+    ai_agent?: boolean
+    bank_integration?: boolean
+    tax_automation?: boolean
+    [key: string]: any
+  }
 }
 
 type SubscriptionContextType = {
@@ -31,9 +37,9 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [subscription, setSubscription] = useState<SubscriptionDetails | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  const fetchSubscription = async () => {
+  const fetchSubscription = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
@@ -47,6 +53,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
       if (error) throw error
       if (data && data.length > 0) {
+        console.log('Subscription Data:', data[0])
         setSubscription(data[0])
       } else {
         setSubscription(null)
@@ -57,11 +64,11 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
 
   useEffect(() => {
     fetchSubscription()
-  }, [])
+  }, [fetchSubscription])
 
   return (
     <SubscriptionContext.Provider value={{ subscription, loading, refreshSubscription: fetchSubscription }}>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { Button } from '@/components/ui/button'
@@ -34,20 +34,17 @@ export function BankAccountForm({ onClose, onSaved, initialData }: Props) {
   })
 
   const { currentTenant } = useTenant()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
+  const tenantId = currentTenant?.id
 
-  useEffect(() => {
-    fetchChartOfAccounts()
-  }, [])
-
-  const fetchChartOfAccounts = async () => {
-    if (!currentTenant) return
+  const fetchChartOfAccounts = useCallback(async () => {
+    if (!tenantId) return
     try {
       setLoading(true)
       const { data, error } = await supabase
         .from('chart_of_accounts')
         .select('*')
-        .eq('tenant_id', currentTenant.id)
+        .eq('tenant_id', tenantId)
         .eq('account_type', 'ASSET') // Only show Asset accounts
         .eq('is_active', true)
         .order('code')
@@ -59,10 +56,14 @@ export function BankAccountForm({ onClose, onSaved, initialData }: Props) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, tenantId])
+
+  useEffect(() => {
+    fetchChartOfAccounts()
+  }, [fetchChartOfAccounts])
 
   const handleSave = async () => {
-    if (!currentTenant) return
+    if (!tenantId) return
     if (!formData.account_name) {
       toast.error('Account Name is required')
       return
@@ -72,7 +73,7 @@ export function BankAccountForm({ onClose, onSaved, initialData }: Props) {
       setSaving(true)
 
       const dataToSave = {
-        tenant_id: currentTenant.id,
+        tenant_id: tenantId,
         account_name: formData.account_name,
         account_number: formData.account_number || null,
         bank_name: formData.bank_name || null,

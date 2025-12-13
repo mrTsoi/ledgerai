@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useMemo, useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useTenant } from '@/hooks/use-tenant'
 import { Button } from '@/components/ui/button'
@@ -15,7 +15,7 @@ type AIProvider = Database['public']['Tables']['ai_providers']['Row']
 
 export function AISettings() {
   const { currentTenant } = useTenant()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [loading, setLoading] = useState(false)
   const [testing, setTesting] = useState(false)
   const [testStatus, setTestStatus] = useState<'idle' | 'success' | 'error'>('idle')
@@ -34,99 +34,16 @@ export function AISettings() {
 
   const [isFetchingModels, setIsFetchingModels] = useState(false)
 
-  useEffect(() => {
-    if (currentTenant) {
-      fetchProviders()
-      fetchCurrentConfig()
-    }
-  }, [currentTenant])
-
-  useEffect(() => {
-    if (config.providerId && providers.length > 0) {
-      const provider = providers.find(p => p.id === config.providerId)
-      if (provider) {
-        const providerConfig = provider.config as any
-        
-        // Special handling for OpenRouter to fetch models dynamically
-        if (provider.name === 'openrouter') {
-           fetchOpenRouterModels()
-        } else if (providerConfig?.models && Array.isArray(providerConfig.models)) {
-          setAvailableModels(providerConfig.models)
-          // Check if current model is custom
-          if (config.modelName && !providerConfig.models.includes(config.modelName)) {
-            setIsCustomModel(true)
-          } else {
-            setIsCustomModel(false)
-          }
-        } else {
-          setAvailableModels([])
-          setIsCustomModel(true)
-        }
-      }
-    }
-  }, [config.providerId, providers]) // Removed config.modelName dependency to avoid loops
-
-  const fetchOpenRouterModels = async () => {
-    try {
-      setIsFetchingModels(true)
-      const response = await fetch('https://openrouter.ai/api/v1/models')
-      if (!response.ok) throw new Error('Failed to fetch models')
-      
-      const data = await response.json()
-      const models = data.data
-        .filter((m: any) => {
-           // Filter for models that support image input (multimodal)
-           // OpenRouter architecture field usually indicates this, or we check for 'vision' in ID
-           // The 'architecture' field might contain 'modality': 'text->image' or similar
-           // But simpler check is checking if it's a known vision model or has 'vision'/'vl' in name
-           // Or check 'architecture.modality' includes 'image_in'
-           const id = m.id.toLowerCase()
-           const arch = m.architecture || {}
-           const modality = arch.modality || ''
-           
-           return id.includes('vision') || 
-                  id.includes('vl') || 
-                  id.includes('gemini') || 
-                  id.includes('claude-3') ||
-                  id.includes('gpt-4-turbo') ||
-                  id.includes('gpt-4o') ||
-                  modality.includes('image->text') ||
-                  modality.includes('text+image->text')
-        })
-        .map((m: any) => m.id)
-        .sort()
-      
-      setAvailableModels(models)
-      
-      // If current model is not in list, mark as custom
-      if (config.modelName && !models.includes(config.modelName)) {
-        setIsCustomModel(true)
-      } else {
-        setIsCustomModel(false)
-      }
-    } catch (error) {
-      console.error('Error fetching OpenRouter models:', error)
-      // Fallback to hardcoded list if fetch fails
-      const provider = providers.find(p => p.id === config.providerId)
-      const providerConfig = provider?.config as any
-      if (providerConfig?.models) {
-        setAvailableModels(providerConfig.models)
-      }
-    } finally {
-      setIsFetchingModels(false)
-    }
-  }
-
-  const fetchProviders = async () => {
+  const fetchProviders = useCallback(async () => {
     const { data } = await (supabase
       .from('ai_providers') as any)
       .select('*')
       .eq('is_active', true)
-    
-    if (data) setProviders(data)
-  }
 
-  const fetchCurrentConfig = async () => {
+    if (data) setProviders(data)
+  }, [supabase])
+
+  const fetchCurrentConfig = useCallback(async () => {
     if (!currentTenant) return
 
     const { data } = await (supabase
@@ -144,7 +61,81 @@ export function AISettings() {
         customConfig: JSON.stringify(data.custom_config || {}, null, 2)
       })
     }
-  }
+  }, [currentTenant, supabase])
+
+  const fetchOpenRouterModels = useCallback(async () => {
+    try {
+      setIsFetchingModels(true)
+      const response = await fetch('https://openrouter.ai/api/v1/models')
+      if (!response.ok) throw new Error('Failed to fetch models')
+
+      const data = await response.json()
+      const models = data.data
+        .filter((m: any) => {
+          const id = m.id.toLowerCase()
+          const arch = m.architecture || {}
+          const modality = arch.modality || ''
+
+          return id.includes('vision') ||
+            id.includes('vl') ||
+            id.includes('gemini') ||
+            id.includes('claude-3') ||
+            id.includes('gpt-4-turbo') ||
+            id.includes('gpt-4o') ||
+            modality.includes('image->text') ||
+            modality.includes('text+image->text')
+        })
+        .map((m: any) => m.id)
+        .sort()
+
+      setAvailableModels(models)
+
+      if (config.modelName && !models.includes(config.modelName)) {
+        setIsCustomModel(true)
+      } else {
+        setIsCustomModel(false)
+      }
+    } catch (error) {
+      console.error('Error fetching OpenRouter models:', error)
+      const provider = providers.find(p => p.id === config.providerId)
+      const providerConfig = provider?.config as any
+      if (providerConfig?.models) {
+        setAvailableModels(providerConfig.models)
+      }
+    } finally {
+      setIsFetchingModels(false)
+    }
+  }, [config.modelName, config.providerId, providers])
+
+  useEffect(() => {
+    if (currentTenant) {
+      fetchProviders()
+      fetchCurrentConfig()
+    }
+  }, [currentTenant, fetchProviders, fetchCurrentConfig])
+
+  useEffect(() => {
+    if (config.providerId && providers.length > 0) {
+      const provider = providers.find(p => p.id === config.providerId)
+      if (provider) {
+        const providerConfig = provider.config as any
+
+        if (provider.name === 'openrouter') {
+          fetchOpenRouterModels()
+        } else if (providerConfig?.models && Array.isArray(providerConfig.models)) {
+          setAvailableModels(providerConfig.models)
+          if (config.modelName && !providerConfig.models.includes(config.modelName)) {
+            setIsCustomModel(true)
+          } else {
+            setIsCustomModel(false)
+          }
+        } else {
+          setAvailableModels([])
+          setIsCustomModel(true)
+        }
+      }
+    }
+  }, [config.providerId, config.modelName, providers, fetchOpenRouterModels])
 
   const handleProviderChange = (providerId: string) => {
     const provider = providers.find(p => p.id === providerId)

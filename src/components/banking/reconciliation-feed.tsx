@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
+import { useBatchConfig, chunkArray } from '@/hooks/use-batch-config'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
@@ -77,15 +78,13 @@ export function ReconciliationFeed({ accountId }: Props) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
   
   const { currentTenant } = useTenant()
-  const supabase = createClient()
+  const { batchSize } = useBatchConfig()
+  const supabase = useMemo(() => createClient(), [])
+  const tenantId = currentTenant?.id
 
-  useEffect(() => {
-    if (currentTenant && accountId) {
-      fetchTransactions()
-    }
-  }, [currentTenant, accountId])
+  const fetchTransactions = useCallback(async () => {
+    if (!tenantId || !accountId) return
 
-  const fetchTransactions = async () => {
     try {
       setLoading(true)
       // Join with bank_statements to filter by accountId and get source file
@@ -126,7 +125,11 @@ export function ReconciliationFeed({ accountId }: Props) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [accountId, supabase, tenantId])
+
+  useEffect(() => {
+    fetchTransactions()
+  }, [fetchTransactions])
 
   const handleMatch = (transaction: BankTransaction) => {
     setSelectedTransaction(transaction)
@@ -309,12 +312,17 @@ export function ReconciliationFeed({ accountId }: Props) {
     if (!confirm(`Are you sure you want to delete ${selectedIds.size} transactions?`)) return
 
     try {
-      const { error } = await supabase
-        .from('bank_transactions')
-        .delete()
-        .in('id', Array.from(selectedIds))
+      const ids = Array.from(selectedIds)
+      const chunks = chunkArray(ids, batchSize)
 
-      if (error) throw error
+      for (const chunk of chunks) {
+        const { error } = await supabase
+          .from('bank_transactions')
+          .delete()
+          .in('id', chunk)
+
+        if (error) throw error
+      }
 
       toast.success(`Deleted ${selectedIds.size} transactions`)
       fetchTransactions()
@@ -326,12 +334,17 @@ export function ReconciliationFeed({ accountId }: Props) {
 
   const handleBulkExclude = async () => {
     try {
-      const { error } = await (supabase
-        .from('bank_transactions') as any)
-        .update({ status: 'EXCLUDED' })
-        .in('id', Array.from(selectedIds))
+      const ids = Array.from(selectedIds)
+      const chunks = chunkArray(ids, batchSize)
 
-      if (error) throw error
+      for (const chunk of chunks) {
+        const { error } = await (supabase
+          .from('bank_transactions') as any)
+          .update({ status: 'EXCLUDED' })
+          .in('id', chunk)
+
+        if (error) throw error
+      }
 
       toast.success(`Excluded ${selectedIds.size} transactions`)
       fetchTransactions()

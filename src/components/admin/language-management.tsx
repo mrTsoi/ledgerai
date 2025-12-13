@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -38,13 +38,9 @@ export function LanguageManagement() {
     is_default: false,
   })
   const [isAdding, setIsAdding] = useState(false)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    fetchLanguages()
-  }, [])
-
-  const fetchLanguages = async () => {
+  const fetchLanguages = useCallback(async () => {
     setLoading(true)
     const { data, error } = await supabase
       .from('system_languages')
@@ -57,7 +53,11 @@ export function LanguageManagement() {
       setLanguages(data || [])
     }
     setLoading(false)
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchLanguages()
+  }, [fetchLanguages])
 
   const handleAddLanguage = async () => {
     if (!newLanguage.code || !newLanguage.name) return

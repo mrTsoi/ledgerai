@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,13 +14,9 @@ export function ProfileSettings() {
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [userId, setUserId] = useState<string | null>(null)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    getProfile()
-  }, [])
-
-  const getProfile = async () => {
+  const getProfile = useCallback(async () => {
     try {
       setLoading(true)
       const { data: { user } } = await supabase.auth.getUser()
@@ -48,7 +44,11 @@ export function ProfileSettings() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    getProfile()
+  }, [getProfile])
 
   const updateProfile = async () => {
     try {

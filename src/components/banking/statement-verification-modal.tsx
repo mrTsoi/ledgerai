@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -33,15 +33,9 @@ export function StatementVerificationModal({ isOpen, onClose, accountId }: Props
   const [loading, setLoading] = useState(true)
   const [viewDocumentId, setViewDocumentId] = useState<string | null>(null)
   
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    if (isOpen && accountId) {
-      fetchData()
-    }
-  }, [isOpen, accountId])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -117,7 +111,13 @@ export function StatementVerificationModal({ isOpen, onClose, accountId }: Props
     } finally {
       setLoading(false)
     }
-  }
+  }, [accountId, supabase])
+
+  useEffect(() => {
+    if (isOpen && accountId) {
+      fetchData()
+    }
+  }, [accountId, fetchData, isOpen])
 
   return (
     <>

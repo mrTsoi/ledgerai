@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTenant } from '@/hooks/use-tenant'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -27,16 +27,17 @@ export function ProfitLossReport() {
   const [startDate, setStartDate] = useState(format(new Date(new Date().getFullYear(), 0, 1), 'yyyy-MM-dd'))
   const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'))
   const { currentTenant } = useTenant()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
+  const tenantId = currentTenant?.id
 
-  const generateReport = async () => {
-    if (!currentTenant || !startDate || !endDate) return
+  const generateReport = useCallback(async () => {
+    if (!tenantId || !startDate || !endDate) return
 
     try {
       setLoading(true)
 
       const { data: reportData, error } = await (supabase.rpc as any)('get_profit_loss', {
-        p_tenant_id: currentTenant.id,
+        p_tenant_id: tenantId,
         p_start_date: startDate,
         p_end_date: endDate
       })
@@ -49,13 +50,11 @@ export function ProfitLossReport() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [endDate, startDate, supabase, tenantId])
 
   useEffect(() => {
-    if (currentTenant) {
-      generateReport()
-    }
-  }, [currentTenant])
+    generateReport()
+  }, [generateReport])
 
   const revenues = data.filter(row => row.account_type === 'REVENUE')
   const expenses = data.filter(row => row.account_type === 'EXPENSE')

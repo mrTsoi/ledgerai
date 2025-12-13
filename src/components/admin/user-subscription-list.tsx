@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -41,19 +41,14 @@ export function UserSubscriptionList() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [plans, setPlans] = useState<any[]>([])
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    fetchSubscriptions()
-    fetchPlans()
-  }, [])
-
-  const fetchPlans = async () => {
+  const fetchPlans = useCallback(async () => {
     const { data } = await supabase.from('subscription_plans').select('id, name')
     if (data) setPlans(data)
-  }
+  }, [supabase])
 
-  const fetchSubscriptions = async () => {
+  const fetchSubscriptions = useCallback(async () => {
     try {
       setLoading(true)
       // We need to join user_subscriptions with profiles and subscription_plans
@@ -78,7 +73,12 @@ export function UserSubscriptionList() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchSubscriptions()
+    fetchPlans()
+  }, [fetchSubscriptions, fetchPlans])
 
   const handleStatusChange = async (subId: string, newStatus: string) => {
     try {

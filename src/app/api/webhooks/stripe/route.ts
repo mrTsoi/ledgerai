@@ -38,6 +38,22 @@ export async function POST(req: Request) {
         const planId = session.metadata?.planId
 
         if (userId && planId) {
+          // Fetch the actual subscription to get correct dates
+          const stripe = await getStripe()
+          let currentPeriodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+          let currentPeriodStart = new Date().toISOString()
+          
+          if (session.subscription) {
+            try {
+              const subResp = await stripe.subscriptions.retrieve(session.subscription as string)
+              const sub: any = (subResp as any).data ?? subResp
+              currentPeriodStart = new Date(sub.current_period_start * 1000).toISOString()
+              currentPeriodEnd = new Date(sub.current_period_end * 1000).toISOString()
+            } catch (e) {
+              console.error('Failed to retrieve subscription in webhook:', e)
+            }
+          }
+
           // 1. Upsert Subscription
           await supabase
             .from('user_subscriptions')
@@ -47,9 +63,8 @@ export async function POST(req: Request) {
               stripe_customer_id: session.customer as string,
               stripe_subscription_id: session.subscription as string,
               status: 'active',
-              current_period_start: new Date().toISOString(),
-              // We should ideally get this from the subscription object, but for now:
-              current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+              current_period_start: currentPeriodStart,
+              current_period_end: currentPeriodEnd
             } as any, { onConflict: 'user_id' })
 
           // 2. Handle Initial Invoice (Race Condition Fix)

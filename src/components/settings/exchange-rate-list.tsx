@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useTenant, useUserRole } from '@/hooks/use-tenant'
 import { Button } from '@/components/ui/button'
@@ -28,7 +28,8 @@ const SUPPORTED_CURRENCIES = [
 export function ExchangeRateList() {
   const { currentTenant } = useTenant()
   const userRole = useUserRole()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
+  const tenantId = currentTenant?.id
   
   const [rates, setRates] = useState<ExchangeRate[]>([])
   const [loading, setLoading] = useState(true)
@@ -43,19 +44,15 @@ export function ExchangeRateList() {
   const canEdit = userRole === 'COMPANY_ADMIN' || userRole === 'SUPER_ADMIN' || userRole === 'ACCOUNTANT'
   const baseCurrency = (currentTenant as any)?.currency || 'USD'
 
-  useEffect(() => {
-    if (currentTenant) {
-      fetchRates()
-    }
-  }, [currentTenant])
+  const fetchRates = useCallback(async () => {
+    if (!tenantId) return
 
-  const fetchRates = async () => {
     try {
       setLoading(true)
       const { data, error } = await (supabase
         .from('exchange_rates') as any)
         .select('*')
-        .eq('tenant_id', currentTenant!.id)
+        .eq('tenant_id', tenantId)
         .order('currency')
 
       if (error) throw error
@@ -65,17 +62,23 @@ export function ExchangeRateList() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, tenantId])
+
+  useEffect(() => {
+    if (tenantId) {
+      fetchRates()
+    }
+  }, [fetchRates, tenantId])
 
   const handleAddRate = async () => {
-    if (!currentTenant || !newRate.rate) return
+    if (!tenantId || !newRate.rate) return
 
     try {
       setSaving(true)
       const { error } = await (supabase
         .from('exchange_rates') as any)
         .insert({
-          tenant_id: currentTenant.id,
+          tenant_id: tenantId,
           currency: newRate.currency,
           rate: parseFloat(newRate.rate),
           is_manual: true

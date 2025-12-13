@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useTenant } from '@/hooks/use-tenant'
 import { Button } from '@/components/ui/button'
@@ -31,20 +31,17 @@ type Membership = Database['public']['Tables']['memberships']['Row'] & {
 
 export function TeamList() {
   const { currentTenant } = useTenant()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
+  const tenantId = currentTenant?.id
   const [members, setMembers] = useState<Membership[]>([])
   const [loading, setLoading] = useState(true)
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState<'COMPANY_ADMIN' | 'ACCOUNTANT' | 'OPERATOR'>('OPERATOR')
   const [inviting, setInviting] = useState(false)
 
-  useEffect(() => {
-    if (currentTenant) {
-      fetchMembers()
-    }
-  }, [currentTenant])
+  const fetchMembers = useCallback(async () => {
+    if (!tenantId) return
 
-  const fetchMembers = async () => {
     try {
       setLoading(true)
       const { data, error } = await (supabase
@@ -53,7 +50,7 @@ export function TeamList() {
           *,
           profiles (*)
         `)
-        .eq('tenant_id', currentTenant!.id)
+        .eq('tenant_id', tenantId)
 
       if (error) throw error
       setMembers(data as any)
@@ -62,7 +59,11 @@ export function TeamList() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, tenantId])
+
+  useEffect(() => {
+    fetchMembers()
+  }, [fetchMembers])
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -109,7 +110,7 @@ export function TeamList() {
       if (inviteError) throw inviteError
 
       setInviteEmail('')
-      fetchMembers()
+      await fetchMembers()
       toast.success('Member added successfully!')
 
     } catch (error: any) {

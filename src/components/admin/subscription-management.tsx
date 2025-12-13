@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PromoCodeManagement } from './promo-code-management'
 import { UserSubscriptionList } from './user-subscription-list'
 import { StripeSettings } from './stripe-settings'
+import { ContactSettings } from './contact-settings'
 import { toast } from "sonner"
 
 type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
@@ -21,13 +22,9 @@ export function SubscriptionManagement() {
   const [loading, setLoading] = useState(true)
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null)
   const [isCreating, setIsCreating] = useState(false)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    fetchPlans()
-  }, [])
-
-  const fetchPlans = async () => {
+  const fetchPlans = useCallback(async () => {
     try {
       setLoading(true)
       const { data, error } = await supabase
@@ -42,7 +39,11 @@ export function SubscriptionManagement() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchPlans()
+  }, [fetchPlans])
 
   const handleSave = async (plan: Partial<SubscriptionPlan>) => {
     try {
@@ -102,6 +103,7 @@ export function SubscriptionManagement() {
         <TabsTrigger value="users">User Subscriptions</TabsTrigger>
         <TabsTrigger value="promocodes">Promo Codes</TabsTrigger>
         <TabsTrigger value="stripe">Stripe Settings</TabsTrigger>
+        <TabsTrigger value="contact">Contact Info</TabsTrigger>
       </TabsList>
 
       <TabsContent value="plans">
@@ -149,8 +151,13 @@ export function SubscriptionManagement() {
                         </div>
                         <div className="mt-2 flex gap-2 text-xs text-gray-500">
                           {(plan.features as any)?.ai_access && <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100">AI Access</span>}
+                          {(plan.features as any)?.ai_agent && <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-100">AI Agent</span>}
+                          {(plan.features as any)?.bank_integration && <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded border border-green-100">Bank Feed</span>}
+                          {(plan.features as any)?.tax_automation && <span className="bg-amber-50 text-amber-700 px-2 py-0.5 rounded border border-amber-100">Tax Auto</span>}
                           {(plan.features as any)?.custom_domain && <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-100">Custom Domain</span>}
                           {(plan.features as any)?.sso && <span className="bg-orange-50 text-orange-700 px-2 py-0.5 rounded border border-orange-100">SSO</span>}
+                          {(plan.features as any)?.concurrent_batch_processing && <span className="bg-teal-50 text-teal-700 px-2 py-0.5 rounded border border-teal-100">Batch Processing</span>}
+                          {(plan.features as any)?.custom_features && <span className="bg-slate-50 text-slate-700 px-2 py-0.5 rounded border border-slate-100">Custom Features</span>}
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -180,6 +187,10 @@ export function SubscriptionManagement() {
 
       <TabsContent value="stripe">
         <StripeSettings />
+      </TabsContent>
+
+      <TabsContent value="contact">
+        <ContactSettings />
       </TabsContent>
     </Tabs>
   )
@@ -291,8 +302,8 @@ function PlanEditor({ initialData, onSave, onCancel }: {
       </div>
 
       <div className="border-t pt-4 mt-2">
-        <Label className="mb-2 block">Features</Label>
-        <div className="flex gap-6">
+        <Label className="mb-2 block font-semibold">Feature Flags</Label>
+        <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2">
             <input 
               type="checkbox" 
@@ -301,7 +312,37 @@ function PlanEditor({ initialData, onSave, onCancel }: {
               onChange={e => updateFeature('ai_access', e.target.checked)}
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <Label htmlFor="feat_ai" className="font-normal">AI Automation</Label>
+            <Label htmlFor="feat_ai" className="font-normal">AI Document Processing</Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input 
+              type="checkbox" 
+              id="feat_agent" 
+              checked={(formData.features as any)?.ai_agent} 
+              onChange={e => updateFeature('ai_agent', e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <Label htmlFor="feat_agent" className="font-normal">AI Agent (Voice/Text)</Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input 
+              type="checkbox" 
+              id="feat_bank" 
+              checked={(formData.features as any)?.bank_integration} 
+              onChange={e => updateFeature('bank_integration', e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <Label htmlFor="feat_bank" className="font-normal">Bank Feed Integration</Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input 
+              type="checkbox" 
+              id="feat_tax" 
+              checked={(formData.features as any)?.tax_automation} 
+              onChange={e => updateFeature('tax_automation', e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <Label htmlFor="feat_tax" className="font-normal">Tax Automation</Label>
           </div>
           <div className="flex items-center gap-2">
             <input 
@@ -321,7 +362,30 @@ function PlanEditor({ initialData, onSave, onCancel }: {
               onChange={e => updateFeature('sso', e.target.checked)}
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <Label htmlFor="feat_sso" className="font-normal">SSO / Enterprise</Label>
+            <Label htmlFor="feat_sso" className="font-normal">SSO / Enterprise Security</Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input 
+              type="checkbox" 
+              id="feat_batch" 
+              checked={(formData.features as any)?.concurrent_batch_processing} 
+              onChange={e => updateFeature('concurrent_batch_processing', e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <Label htmlFor="feat_batch" className="font-normal flex items-center gap-2">
+              Concurrent Batch Processing
+              <span className="px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">New</span>
+            </Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input 
+              type="checkbox" 
+              id="feat_custom_features" 
+              checked={(formData.features as any)?.custom_features} 
+              onChange={e => updateFeature('custom_features', e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <Label htmlFor="feat_custom_features" className="font-normal">custom features and more</Label>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTenant } from '@/hooks/use-tenant'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -29,16 +29,17 @@ export function TrialBalanceReport() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'))
   const { currentTenant } = useTenant()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
+  const tenantId = currentTenant?.id
 
-  const generateReport = async () => {
-    if (!currentTenant) return
+  const generateReport = useCallback(async () => {
+    if (!tenantId) return
 
     try {
       setLoading(true)
 
       const { data: reportData, error } = await (supabase.rpc as any)('get_trial_balance', {
-        p_tenant_id: currentTenant.id,
+        p_tenant_id: tenantId,
         p_start_date: startDate || null,
         p_end_date: endDate || null
       })
@@ -51,13 +52,11 @@ export function TrialBalanceReport() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [endDate, startDate, supabase, tenantId])
 
   useEffect(() => {
-    if (currentTenant) {
-      generateReport()
-    }
-  }, [currentTenant])
+    generateReport()
+  }, [generateReport])
 
   const totalDebits = data.reduce((sum, row) => sum + row.debit_amount, 0)
   const totalCredits = data.reduce((sum, row) => sum + row.credit_amount, 0)

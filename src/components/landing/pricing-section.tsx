@@ -1,26 +1,41 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Check, X, Loader2 } from 'lucide-react'
+import { Check, X, Loader2, Phone, Mail } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
 
 type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
+
+interface ContactConfig {
+  whatsapp: string
+  email: string
+}
 
 export function PricingSection() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([])
   const [loading, setLoading] = useState(true)
   const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly')
-  const supabase = createClient()
+  const [contactConfig, setContactConfig] = useState<ContactConfig>({ whatsapp: '', email: '' })
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    fetchPlans()
-  }, [])
+  const fetchContactConfig = useCallback(async () => {
+    const { data } = await (supabase
+      .from('system_settings') as any)
+      .select('setting_value')
+      .eq('setting_key', 'contact_sales_config')
+      .single()
+    
+    if (data?.setting_value) {
+      setContactConfig(data.setting_value as ContactConfig)
+    }
+  }, [supabase])
 
-  const fetchPlans = async () => {
+  const fetchPlans = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('subscription_plans')
@@ -35,7 +50,12 @@ export function PricingSection() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchPlans()
+    fetchContactConfig()
+  }, [fetchPlans, fetchContactConfig])
 
   const formatPrice = (price: number | null) => {
     if (price === 0 || price === null) return 'Free'
@@ -49,7 +69,7 @@ export function PricingSection() {
   }
 
   const getFeaturesList = (plan: SubscriptionPlan) => {
-    const features: { text: string; included: boolean }[] = []
+    const features: { text: string; included: boolean; isNew?: boolean }[] = []
 
     // Limits
     features.push({
@@ -73,12 +93,33 @@ export function PricingSection() {
       included: !!featureFlags.ai_access
     })
     features.push({
+      text: 'AI Agent (Voice/Text)',
+      included: !!featureFlags.ai_agent
+    })
+    features.push({
+      text: 'Bank Feed Integration',
+      included: !!featureFlags.bank_integration
+    })
+    features.push({
+      text: 'Tax Automation',
+      included: !!featureFlags.tax_automation
+    })
+    features.push({
       text: 'Custom Domain',
       included: !!featureFlags.custom_domain
     })
     features.push({
       text: 'SSO / Enterprise Security',
       included: !!featureFlags.sso
+    })
+    features.push({
+      text: 'Concurrent Batch Processing',
+      included: !!featureFlags.concurrent_batch_processing,
+      isNew: true
+    })
+    features.push({
+      text: 'Custom features and more',
+      included: !!featureFlags.custom_features
     })
 
     return features
@@ -133,6 +174,7 @@ export function PricingSection() {
             const price = billingInterval === 'monthly' ? (plan.price_monthly || 0) : Math.round(yearlyPrice / 12) // Show monthly equivalent for yearly billing
 
             const isPopular = plan.name === 'Agency Pro' // Hardcoded for visual pop, or could be a DB flag
+            const isEnterprise = plan.name.toLowerCase().includes('enterprise')
 
             return (
               <Card 
@@ -150,12 +192,18 @@ export function PricingSection() {
                 </CardHeader>
                 <CardContent className="flex-grow">
                   <div className="mb-6">
-                    <span className="text-4xl font-bold">{formatPrice(price)}</span>
-                    <span className="text-gray-500">/mo</span>
-                    {billingInterval === 'yearly' && price > 0 && (
-                      <div className="text-xs text-green-600 font-medium mt-1">
-                        Billed ${yearlyPrice} yearly (Save {discountPercent}%)
-                      </div>
+                    {isEnterprise ? (
+                      <span className="text-4xl font-bold">Contact Sales</span>
+                    ) : (
+                      <>
+                        <span className="text-4xl font-bold">{formatPrice(price)}</span>
+                        <span className="text-gray-500">/mo</span>
+                        {billingInterval === 'yearly' && price > 0 && (
+                          <div className="text-xs text-green-600 font-medium mt-1">
+                            Billed ${yearlyPrice} yearly (Save {discountPercent}%)
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                   <ul className="space-y-3">
@@ -168,20 +216,72 @@ export function PricingSection() {
                         )}
                         <span className={feature.included ? 'text-gray-700' : 'text-gray-400'}>
                           {feature.text}
+                          {(feature as any).isNew && feature.included && (
+                            <span className="ml-2 px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">New</span>
+                          )}
                         </span>
                       </li>
                     ))}
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Link href="/signup" className="w-full">
-                    <Button 
-                      className="w-full" 
-                      variant={isPopular ? 'default' : 'outline'}
-                    >
-                      {price === 0 ? 'Get Started Free' : 'Start Free Trial'}
-                    </Button>
-                  </Link>
+                  {isEnterprise ? (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="w-full" variant="outline">Contact Sales</Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Contact Enterprise Sales</DialogTitle>
+                          <DialogDescription>
+                            Get in touch with our team to discuss a custom plan for your organization.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          {contactConfig.whatsapp && (
+                            <a 
+                              href={`https://wa.me/${contactConfig.whatsapp}`} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              <div className="bg-green-100 p-2 rounded-full">
+                                <Phone className="w-5 h-5 text-green-600" />
+                              </div>
+                              <div>
+                                <div className="font-semibold">WhatsApp</div>
+                                <div className="text-sm text-gray-500">Chat with us instantly</div>
+                              </div>
+                            </a>
+                          )}
+                          
+                          {contactConfig.email && (
+                            <a 
+                              href={`mailto:${contactConfig.email}`}
+                              className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              <div className="bg-blue-100 p-2 rounded-full">
+                                <Mail className="w-5 h-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <div className="font-semibold">Email</div>
+                                <div className="text-sm text-gray-500">{contactConfig.email}</div>
+                              </div>
+                            </a>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  ) : (
+                    <Link href="/signup" className="w-full">
+                      <Button 
+                        className="w-full" 
+                        variant={isPopular ? 'default' : 'outline'}
+                      >
+                        {price === 0 ? 'Get Started Free' : 'Start Free Trial'}
+                      </Button>
+                    </Link>
+                  )}
                 </CardFooter>
               </Card>
             )

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useTenant } from '@/hooks/use-tenant'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -16,7 +16,8 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'
 
 export function FinancialCharts() {
   const { currentTenant } = useTenant()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
+  const tenantId = currentTenant?.id
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState('year') // month, quarter, year
   
@@ -24,62 +25,7 @@ export function FinancialCharts() {
   const [categoryData, setCategoryData] = useState<any[]>([])
   const [vendorData, setVendorData] = useState<any[]>([])
 
-  useEffect(() => {
-    if (currentTenant) {
-      fetchData()
-    }
-  }, [currentTenant, timeRange])
-
-  const fetchData = async () => {
-    try {
-      setLoading(true)
-      
-      // 1. Fetch Transactions with Line Items for Trend & Category
-      // We need to join transactions -> line_items -> chart_of_accounts
-      // Supabase JS client doesn't support deep nested joins easily for aggregation
-      // So we'll fetch raw data and aggregate client-side (assuming reasonable volume for now)
-      
-      const startDate = new Date()
-      if (timeRange === 'month') startDate.setMonth(startDate.getMonth() - 1)
-      if (timeRange === 'quarter') startDate.setMonth(startDate.getMonth() - 3)
-      if (timeRange === 'year') startDate.setFullYear(startDate.getFullYear() - 1)
-
-      const { data: transactions, error: txError } = await supabase
-        .from('transactions')
-        .select(`
-          id,
-          transaction_date,
-          line_items (
-            debit,
-            credit,
-            chart_of_accounts (
-              name,
-              account_type
-            )
-          ),
-          documents (
-            document_data (
-              vendor_name
-            )
-          )
-        `)
-        .eq('tenant_id', currentTenant!.id)
-        .eq('status', 'POSTED')
-        .gte('transaction_date', startDate.toISOString().split('T')[0])
-        .order('transaction_date')
-
-      if (txError) throw txError
-
-      processData(transactions)
-
-    } catch (error) {
-      console.error('Error fetching chart data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const processData = (transactions: any[]) => {
+  const processData = useCallback((transactions: any[]) => {
     const trends: Record<string, { income: number, expense: number }> = {}
     const categories: Record<string, number> = {}
     const vendors: Record<string, number> = {}
@@ -141,7 +87,62 @@ export function FinancialCharts() {
       .sort((a, b) => b.value - a.value)
       .slice(0, 10) // Top 10
     setVendorData(vendorArray)
-  }
+  }, [timeRange])
+
+  const fetchData = useCallback(async () => {
+    if (!tenantId) return
+
+    try {
+      setLoading(true)
+      
+      // 1. Fetch Transactions with Line Items for Trend & Category
+      // We need to join transactions -> line_items -> chart_of_accounts
+      // Supabase JS client doesn't support deep nested joins easily for aggregation
+      // So we'll fetch raw data and aggregate client-side (assuming reasonable volume for now)
+      
+      const startDate = new Date()
+      if (timeRange === 'month') startDate.setMonth(startDate.getMonth() - 1)
+      if (timeRange === 'quarter') startDate.setMonth(startDate.getMonth() - 3)
+      if (timeRange === 'year') startDate.setFullYear(startDate.getFullYear() - 1)
+
+      const { data: transactions, error: txError } = await supabase
+        .from('transactions')
+        .select(`
+          id,
+          transaction_date,
+          line_items (
+            debit,
+            credit,
+            chart_of_accounts (
+              name,
+              account_type
+            )
+          ),
+          documents (
+            document_data (
+              vendor_name
+            )
+          )
+        `)
+        .eq('tenant_id', tenantId)
+        .eq('status', 'POSTED')
+        .gte('transaction_date', startDate.toISOString().split('T')[0])
+        .order('transaction_date')
+
+      if (txError) throw txError
+
+      processData(transactions)
+
+    } catch (error) {
+      console.error('Error fetching chart data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [processData, supabase, tenantId, timeRange])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   if (loading) {
     return (
