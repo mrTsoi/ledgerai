@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getPlaidClient } from '@/lib/plaid'
+import { userHasFeature } from '@/lib/subscription/server'
 
 export const runtime = 'nodejs'
 
@@ -23,6 +24,15 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser()
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  try {
+    const ok = await userHasFeature(supabase as any, user.id, 'bank_integration')
+    if (!ok) {
+      return NextResponse.json({ error: 'Bank feeds are not available on your plan' }, { status: 403 })
+    }
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+  }
 
   let tenantId: string
   let connectionId: string | undefined
@@ -55,7 +65,15 @@ export async function POST(req: Request) {
   }
 
   // Load connections via service role so we can join secrets
-  const service = createServiceClient()
+  let service: ReturnType<typeof createServiceClient>
+  try {
+    service = createServiceClient()
+  } catch {
+    return NextResponse.json(
+      { error: 'Server is not configured for this action (missing SUPABASE_SERVICE_ROLE_KEY)' },
+      { status: 503 }
+    )
+  }
 
   const connQuery = (service.from('bank_feed_connections') as any)
     .select('id, tenant_id, provider, provider_item_id, provider_cursor')
@@ -159,16 +177,13 @@ export async function POST(req: Request) {
           })
 
         if (rows.length > 0) {
-          const { data: inserted, error: upsertError } = await (service
-            .from('bank_transactions') as any)
-            .upsert(rows, {
-              onConflict: 'tenant_id,provider,external_transaction_id',
-              ignoreDuplicates: true,
-            })
-            .select('id')
+          const { data: insertedCount, error: rpcError } = await (service as any).rpc(
+            'insert_bank_feed_transactions',
+            { p_rows: rows }
+          )
 
-          if (upsertError) throw upsertError
-          totalInserted += (inserted as any[])?.length ?? 0
+          if (rpcError) throw rpcError
+          totalInserted += Number(insertedCount || 0)
         }
 
         nextCursor = sync.data.next_cursor

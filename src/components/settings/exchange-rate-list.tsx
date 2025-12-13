@@ -1,7 +1,6 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useTenant, useUserRole } from '@/hooks/use-tenant'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -28,7 +27,6 @@ const SUPPORTED_CURRENCIES = [
 export function ExchangeRateList() {
   const { currentTenant } = useTenant()
   const userRole = useUserRole()
-  const supabase = useMemo(() => createClient(), [])
   const tenantId = currentTenant?.id
   
   const [rates, setRates] = useState<ExchangeRate[]>([])
@@ -49,20 +47,16 @@ export function ExchangeRateList() {
 
     try {
       setLoading(true)
-      const { data, error } = await (supabase
-        .from('exchange_rates') as any)
-        .select('*')
-        .eq('tenant_id', tenantId)
-        .order('currency')
-
-      if (error) throw error
-      setRates(data || [])
+      const res = await fetch(`/api/exchange-rates?tenant_id=${encodeURIComponent(tenantId)}`)
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error || 'Failed to load exchange rates')
+      setRates(json?.rates || [])
     } catch (error) {
       console.error('Error fetching rates:', error)
     } finally {
       setLoading(false)
     }
-  }, [supabase, tenantId])
+  }, [tenantId])
 
   useEffect(() => {
     if (tenantId) {
@@ -75,16 +69,17 @@ export function ExchangeRateList() {
 
     try {
       setSaving(true)
-      const { error } = await (supabase
-        .from('exchange_rates') as any)
-        .insert({
+      const res = await fetch('/api/exchange-rates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           tenant_id: tenantId,
           currency: newRate.currency,
           rate: parseFloat(newRate.rate),
-          is_manual: true
-        })
-
-      if (error) throw error
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error || 'Failed to add rate')
       
       await fetchRates()
       setIsAdding(false)
@@ -101,12 +96,9 @@ export function ExchangeRateList() {
     if (!confirm('Are you sure you want to remove this custom exchange rate?')) return
 
     try {
-      const { error } = await (supabase
-        .from('exchange_rates') as any)
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
+      const res = await fetch(`/api/exchange-rates?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error || 'Failed to delete rate')
       await fetchRates()
       toast.success('Exchange rate deleted successfully')
     } catch (error: any) {
@@ -116,12 +108,13 @@ export function ExchangeRateList() {
 
   const handleUpdateRate = async (id: string, newRateValue: number) => {
     try {
-      const { error } = await (supabase
-        .from('exchange_rates') as any)
-        .update({ rate: newRateValue })
-        .eq('id', id)
-
-      if (error) throw error
+      const res = await fetch('/api/exchange-rates', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, rate: newRateValue }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error || 'Failed to update rate')
       await fetchRates()
       toast.success('Exchange rate updated successfully')
     } catch (error: any) {

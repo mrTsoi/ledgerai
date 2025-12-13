@@ -15,6 +15,7 @@ import { DocumentVerificationModal } from './document-verification-modal'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { ImagePreview } from '@/components/ui/image-preview'
 
 type Document = Database['public']['Tables']['documents']['Row'] & {
   document_data?: {
@@ -757,10 +758,10 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
             </div>
             <div className="flex-1 bg-gray-100 p-4 overflow-auto flex items-center justify-center">
               {previewDoc.file_type.startsWith('image/') ? (
-                <img 
-                  src={previewUrl} 
-                  alt={previewDoc.file_name} 
-                  className="max-w-full max-h-full object-contain shadow-md" 
+                <ImagePreview
+                  src={previewUrl}
+                  alt={previewDoc.file_name}
+                  className="max-w-full max-h-full object-contain shadow-md"
                 />
               ) : previewDoc.file_type === 'application/pdf' ? (
                 <iframe 

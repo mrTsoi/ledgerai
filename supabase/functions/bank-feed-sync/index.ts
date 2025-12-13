@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Supabase Edge Function: bank-feed-sync
 // Syncs Plaid transactions for all active connections.
 
@@ -60,7 +61,17 @@ function toTxType(amount: number): 'DEBIT' | 'CREDIT' {
   return amount < 0 ? 'CREDIT' : 'DEBIT'
 }
 
-Deno.serve(async (req) => {
+function json(body: unknown, init?: ResponseInit) {
+  return new Response(JSON.stringify(body), {
+    ...init,
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      ...(init?.headers ?? {}),
+    },
+  })
+}
+
+Deno.serve(async (req: Request) => {
   if (req.method !== 'POST') {
     return new Response('Method Not Allowed', { status: 405 })
   }
@@ -69,7 +80,10 @@ Deno.serve(async (req) => {
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
   if (!url || !serviceKey) {
-    return new Response('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY', { status: 500 })
+    return json(
+      { error: 'Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY' },
+      { status: 503 }
+    )
   }
 
   const supabase = createClient(url, serviceKey)
@@ -90,7 +104,7 @@ Deno.serve(async (req) => {
     .eq('status', 'ACTIVE')
 
   if (connError) {
-    return Response.json({ error: connError.message }, { status: 500 })
+    return json({ error: connError.message }, { status: 500 })
   }
 
   const conns = (connections || []) as unknown as ConnectionRow[]
@@ -168,16 +182,13 @@ Deno.serve(async (req) => {
           })
 
         if (rows.length > 0) {
-          const { data: upserted, error: upsertError } = await supabase
-            .from('bank_transactions')
-            .upsert(rows, {
-              onConflict: 'tenant_id,provider,external_transaction_id',
-              ignoreDuplicates: true,
-            })
-            .select('id')
+          const { data: insertedCount, error: rpcError } = await (supabase as any).rpc(
+            'insert_bank_feed_transactions',
+            { p_rows: rows }
+          )
 
-          if (upsertError) throw upsertError
-          inserted += (upserted as any[])?.length ?? 0
+          if (rpcError) throw rpcError
+          inserted += Number(insertedCount || 0)
         }
 
         nextCursor = syncRes?.next_cursor || null
@@ -208,5 +219,5 @@ Deno.serve(async (req) => {
     }
   }
 
-  return Response.json({ synced, inserted, errors })
+  return json({ synced, inserted, errors })
 })

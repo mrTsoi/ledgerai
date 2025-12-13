@@ -28,7 +28,15 @@ export async function POST(req: Request) {
     return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 })
   }
 
-  const supabase = createServiceClient()
+  let supabase: ReturnType<typeof createServiceClient>
+  try {
+    supabase = createServiceClient()
+  } catch {
+    return NextResponse.json(
+      { error: 'Server is not configured for this action (missing SUPABASE_SERVICE_ROLE_KEY)' },
+      { status: 503 }
+    )
+  }
 
   try {
     switch (event.type) {

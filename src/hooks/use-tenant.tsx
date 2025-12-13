@@ -1,7 +1,6 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 
 type Tenant = Database['public']['Tables']['tenants']['Row']
@@ -25,105 +24,49 @@ export function TenantProvider({ children }: { children: ReactNode }) {
   const [memberships, setMemberships] = useState<Membership[]>([])
   const [loading, setLoading] = useState(true)
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
-  const supabase = createClient()
 
   const fetchTenantsAndMemberships = async () => {
     try {
       setLoading(true)
 
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        setLoading(false)
+      if (typeof window === 'undefined') return
+
+      const storedTenantId = localStorage.getItem('currentTenantId')
+      const hostname = window.location.hostname
+
+      const qs = hostname ? `?hostname=${encodeURIComponent(hostname)}` : ''
+      const res = await fetch(`/api/tenant-context${qs}`)
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setTenants([])
+        setMemberships([])
+        setIsSuperAdmin(false)
+        setCurrentTenant(null)
         return
       }
 
-      // Fetch user's memberships
-      const { data: membershipData, error: membershipError } = await (supabase
-        .from('memberships') as any)
-        .select('*')
-        .eq('user_id', user.id)
-
-      if (membershipError) {
-        console.error('Error fetching memberships:', membershipError)
-        setLoading(false)
-        return
-      }
-
-      // Filter active memberships client-side
-      const activeMemberships = (membershipData || []).filter((m: any) => m.is_active !== false)
-      setMemberships(activeMemberships)
-
-      // Check for Super Admin role
-      const superAdminStatus = activeMemberships.some((m: any) => m.role === 'SUPER_ADMIN')
-      setIsSuperAdmin(superAdminStatus)
-
-      let tenantData: Tenant[] = []
-
-      if (superAdminStatus) {
-        // Super Admin sees ALL tenants
-        const { data, error } = await (supabase
-          .from('tenants') as any)
-          .select('*')
-          .order('name')
-        
-        if (error) {
-          console.error('Error fetching all tenants:', error)
-        } else {
-          tenantData = data || []
-        }
-      } else {
-        // Regular users see only their tenants
-        const tenantIds = activeMemberships?.map((m: any) => m.tenant_id) || []
-        if (tenantIds.length > 0) {
-          const { data, error } = await (supabase
-            .from('tenants') as any)
-            .select('*')
-            .in('id', tenantIds)
-
-          if (error) {
-            console.error('Error fetching tenants:', error)
-          } else {
-            tenantData = data || []
-          }
-        }
-      }
+      const tenantData = (json?.tenants || []) as Tenant[]
+      const membershipData = (json?.memberships || []) as Membership[]
 
       setTenants(tenantData)
+      setMemberships(membershipData)
+      setIsSuperAdmin(!!json?.isSuperAdmin)
 
-      // Set current tenant from localStorage, then try host-based custom domain mapping, else fallback to first tenant
-      const storedTenantId = localStorage.getItem('currentTenantId')
-
+      // Select current tenant: localStorage -> verified custom domain mapping -> first tenant
       let tenant = tenantData.find((t) => t.id === storedTenantId) || null
 
       if (!tenant) {
-        const hostname = typeof window !== 'undefined' ? window.location.hostname : null
-        const isLocal = !!hostname && (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.local'))
-
-        if (hostname && !isLocal) {
-          const { data: domainRow } = await (supabase
-            .from('tenant_domains') as any)
-            .select('tenant_id, verified_at')
-            .eq('domain', hostname)
-            .maybeSingle()
-
-          const mappedTenantId = (domainRow as any)?.tenant_id as string | undefined
-          const verifiedAt = (domainRow as any)?.verified_at as string | null | undefined
-
-          if (mappedTenantId && verifiedAt) {
-            const mappedTenant = tenantData.find((t) => t.id === mappedTenantId) || null
-            if (mappedTenant) {
-              tenant = mappedTenant
-              localStorage.setItem('currentTenantId', mappedTenantId)
-            }
+        const mappedTenantId = (json?.mapped_tenant_id as string | null | undefined) || null
+        if (mappedTenantId) {
+          const mapped = tenantData.find((t) => t.id === mappedTenantId) || null
+          if (mapped) {
+            tenant = mapped
+            localStorage.setItem('currentTenantId', mappedTenantId)
           }
         }
       }
 
-      if (!tenant) {
-        tenant = tenantData[0] || null
-      }
-
+      if (!tenant) tenant = tenantData[0] || null
       setCurrentTenant(tenant)
     } catch (error) {
       console.error('Error in fetchTenantsAndMemberships:', error)

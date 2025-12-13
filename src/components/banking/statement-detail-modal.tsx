@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ImagePreview } from '@/components/ui/image-preview'
 
 type Document = Database['public']['Tables']['documents']['Row']
 type BankTransaction = Database['public']['Tables']['bank_transactions']['Row']
@@ -391,12 +392,12 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
         >
           {previewUrl ? (
             document?.file_type.startsWith('image/') ? (
-              <img 
-                src={previewUrl} 
-                alt="Preview" 
-                style={{ 
+              <ImagePreview
+                src={previewUrl}
+                alt="Preview"
+                style={{
                   transform: `translate(${position.x}px, ${position.y}px) scale(${zoomLevel / 100})`,
-                  transition: isDragging ? 'none' : 'transform 0.2s'
+                  transition: isDragging ? 'none' : 'transform 0.2s',
                 }}
                 className="max-w-full max-h-full object-contain pointer-events-none"
               />

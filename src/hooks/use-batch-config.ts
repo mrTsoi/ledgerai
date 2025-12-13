@@ -1,5 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useState, useEffect } from 'react'
 import { useTenant } from '@/hooks/use-tenant'
 
 interface BatchConfig {
@@ -15,7 +14,6 @@ export function useBatchConfig() {
   const { currentTenant } = useTenant()
   const [batchSize, setBatchSize] = useState<number>(5) // Safe default
   const [loading, setLoading] = useState(true)
-  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     async function fetchConfig() {
@@ -26,38 +24,21 @@ export function useBatchConfig() {
 
       try {
         setLoading(true)
-        
-        // 1. Get System Config for defaults
-        const { data: systemData, error: systemError } = await (supabase
-          .from('system_settings') as any)
-          .select('setting_value')
-          .eq('setting_key', 'batch_processing_config')
-          .maybeSingle()
 
-        if (systemError) {
-          throw systemError
-        }
-        
-        const sysConfig = (systemData?.setting_value as SystemBatchConfig) || { 
-          default_batch_size: 5, 
-          max_batch_size: 50 
+        const res = await fetch(
+          `/api/batch-processing/config?tenant_id=${encodeURIComponent(currentTenant.id)}`
+        )
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(json?.error || 'Failed to load batch config')
+
+        const sysConfig = (json?.system_config as SystemBatchConfig) || {
+          default_batch_size: 5,
+          max_batch_size: 50,
         }
 
-        // 2. Get Tenant Config for override
-        const { data: tenantData, error: tenantError } = await (supabase
-          .from('tenant_settings') as any)
-          .select('setting_value')
-          .eq('tenant_id', currentTenant.id)
-          .eq('setting_key', 'batch_processing_config')
-          .maybeSingle()
+        const tenantConfig = (json?.tenant_config as BatchConfig | null) || null
 
-        if (tenantError) {
-          throw tenantError
-        }
-
-        if (tenantData?.setting_value) {
-          const tenantConfig = tenantData.setting_value as BatchConfig
-          // Ensure we don't exceed max even if DB says so (safety)
+        if (tenantConfig?.batch_size) {
           setBatchSize(Math.min(tenantConfig.batch_size, sysConfig.max_batch_size))
         } else {
           setBatchSize(sysConfig.default_batch_size)
@@ -71,7 +52,7 @@ export function useBatchConfig() {
     }
 
     fetchConfig()
-  }, [currentTenant, supabase])
+  }, [currentTenant])
 
   return { batchSize, loading }
 }

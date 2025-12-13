@@ -3,15 +3,23 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { Loader2, Save, ServerCog } from 'lucide-react'
 
 interface BatchConfig {
   default_batch_size: number
   max_batch_size: number
+}
+
+type TenantRow = {
+  id: string
+  name: string
+  is_active: boolean | null
 }
 
 const DEFAULT_CONFIG: BatchConfig = {
@@ -23,6 +31,10 @@ export function ProcessingSettings() {
   const [config, setConfig] = useState<BatchConfig>(DEFAULT_CONFIG)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [applying, setApplying] = useState(false)
+  const [tenants, setTenants] = useState<TenantRow[]>([])
+  const [applyScope, setApplyScope] = useState<'all_platform' | 'selected_platform'>('all_platform')
+  const [selectedTenantIds, setSelectedTenantIds] = useState<string[]>([])
   const supabase = useMemo(() => createClient(), [])
 
   const loadSettings = useCallback(async () => {
@@ -51,6 +63,23 @@ export function ProcessingSettings() {
     loadSettings()
   }, [loadSettings])
 
+  useEffect(() => {
+    async function loadTenants() {
+      try {
+        const { data, error } = await (supabase.from('tenants') as any)
+          .select('id, name, is_active')
+          .order('name')
+        if (error) throw error
+        setTenants((data || []) as TenantRow[])
+      } catch (e: any) {
+        console.error('Error loading tenants:', e)
+        // Avoid noisy toasts on initial load; admin may not have access if not SUPER_ADMIN.
+      }
+    }
+
+    loadTenants()
+  }, [supabase])
+
   const handleSave = async () => {
     try {
       setSaving(true)
@@ -77,6 +106,49 @@ export function ProcessingSettings() {
       toast.error('Failed to save settings')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const applyToTenants = async () => {
+    try {
+      setApplying(true)
+
+      // Validation
+      if (config.default_batch_size > config.max_batch_size) {
+        toast.error('Default batch size cannot exceed max batch size')
+        return
+      }
+
+      let tenantIds: string[] | undefined
+      if (applyScope === 'selected_platform') {
+        if (selectedTenantIds.length === 0) {
+          toast.error('Select at least one tenant')
+          return
+        }
+        tenantIds = selectedTenantIds
+      }
+
+      const res = await fetch('/api/tenant-settings/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          setting_key: 'batch_processing_config',
+          setting_value: config,
+          scope: applyScope,
+          tenant_ids: tenantIds,
+        }),
+      })
+
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error || 'Failed to apply settings')
+
+      const updated = Number(json?.updated || 0)
+      toast.success(`Applied to ${updated} tenant${updated === 1 ? '' : 's'}`)
+    } catch (e: any) {
+      console.error('Error applying settings:', e)
+      toast.error(e?.message || 'Failed to apply settings')
+    } finally {
+      setApplying(false)
     }
   }
 
@@ -129,6 +201,65 @@ export function ProcessingSettings() {
             {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
             Save Configuration
           </Button>
+        </div>
+
+        <div className="border-t pt-6 space-y-3">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <div className="font-medium">Apply to tenants</div>
+              <div className="text-sm text-muted-foreground">
+                Push this configuration into tenant overrides (tenant_settings).
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-2">
+            <Label>Scope</Label>
+            <Select value={applyScope} onValueChange={(v) => setApplyScope(v as any)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select scope" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all_platform">All tenants (platform-wide)</SelectItem>
+                <SelectItem value="selected_platform">Selected tenants</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {applyScope === 'selected_platform' && (
+            <div className="space-y-2 rounded-md border p-3">
+              <div className="text-sm text-muted-foreground">Select tenants</div>
+              <div className="space-y-2">
+                {tenants.map((t) => {
+                  const checked = selectedTenantIds.includes(t.id)
+                  return (
+                    <label key={t.id} className="flex items-center gap-2 text-sm">
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={(next) => {
+                          const on = next === true
+                          setSelectedTenantIds((prev) => {
+                            const set = new Set(prev)
+                            if (on) set.add(t.id)
+                            else set.delete(t.id)
+                            return Array.from(set)
+                          })
+                        }}
+                      />
+                      <span className={t.is_active === false ? 'text-muted-foreground' : ''}>{t.name}</span>
+                    </label>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            <Button onClick={applyToTenants} disabled={applying}>
+              {applying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Apply Settings
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

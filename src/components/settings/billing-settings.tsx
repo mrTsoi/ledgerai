@@ -12,6 +12,7 @@ import { useSubscription } from '@/hooks/use-subscription'
 import { importInvoiceToTransactions } from '@/app/actions/billing-actions'
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
+import { FEATURE_DEFINITIONS, isFeatureEnabled } from '@/lib/subscription/features'
 
 type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
 
@@ -59,42 +60,14 @@ export function BillingSettings() {
       included: true
     })
 
-    // JSON Features
     const featureFlags = (plan.features as any) || {}
-
-    features.push({
-      text: 'AI Automation',
-      included: !!featureFlags.ai_access
-    })
-    features.push({
-      text: 'AI Agent (Voice/Text)',
-      included: !!featureFlags.ai_agent
-    })
-    features.push({
-      text: 'Bank Feed Integration',
-      included: !!featureFlags.bank_integration
-    })
-    features.push({
-      text: 'Tax Automation',
-      included: !!featureFlags.tax_automation
-    })
-    features.push({
-      text: 'Custom Domain',
-      included: !!featureFlags.custom_domain
-    })
-    features.push({
-      text: 'SSO / Enterprise Security',
-      included: !!featureFlags.sso
-    })
-    features.push({
-      text: 'Concurrent Batch Processing',
-      included: !!featureFlags.concurrent_batch_processing,
-      isNew: true
-    })
-    features.push({
-      text: 'Custom features and more',
-      included: !!featureFlags.custom_features
-    })
+    for (const def of FEATURE_DEFINITIONS) {
+      features.push({
+        text: def.label,
+        included: isFeatureEnabled(featureFlags, def.key),
+        isNew: def.isNew,
+      })
+    }
 
     return features
   }

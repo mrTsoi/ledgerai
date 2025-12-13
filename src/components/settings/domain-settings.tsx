@@ -1,7 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useCallback, useEffect, useState } from 'react'
 import { useTenant, useUserRole } from '@/hooks/use-tenant'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -38,13 +37,13 @@ function normalizeDomain(input: string): string {
 export function DomainSettings() {
   const { currentTenant } = useTenant()
   const userRole = useUserRole()
-  const supabase = useMemo(() => createClient(), [])
   const tenantId = currentTenant?.id
 
   const [domains, setDomains] = useState<TenantDomainRow[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [domainInput, setDomainInput] = useState('')
+  const [schemaMissing, setSchemaMissing] = useState(false)
 
   const canManage = userRole === 'COMPANY_ADMIN' || userRole === 'SUPER_ADMIN'
 
@@ -53,20 +52,30 @@ export function DomainSettings() {
 
     try {
       setLoading(true)
-      const { data, error } = await (supabase.from('tenant_domains') as any)
-        .select('id, domain, is_primary, verified_at, verification_token, created_at')
-        .eq('tenant_id', tenantId)
-        .order('created_at', { ascending: false })
+      setSchemaMissing(false)
+      const res = await fetch(`/api/domains?tenant_id=${encodeURIComponent(tenantId)}`)
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        const err: any = new Error(json?.error || 'Failed to load domains')
+        ;(err as any).code = json?.code
+        throw err
+      }
 
-      if (error) throw error
-      setDomains((data || []) as TenantDomainRow[])
+      setDomains((json?.domains || []) as TenantDomainRow[])
     } catch (e: any) {
       console.error('Error fetching domains:', e)
-      toast.error('Failed to load domains')
+      const code = e?.code as string | undefined
+      const message = String(e?.message || '')
+      if (code === 'PGRST205' || message.includes("Could not find the table 'public.tenant_domains'")) {
+        setSchemaMissing(true)
+        toast.error('Domains table is missing. Apply migrations (supabase db push) and refresh.')
+      } else {
+        toast.error('Failed to load domains')
+      }
     } finally {
       setLoading(false)
     }
-  }, [supabase, tenantId])
+  }, [tenantId])
 
   useEffect(() => {
     fetchDomains()
@@ -84,20 +93,30 @@ export function DomainSettings() {
 
     try {
       setSaving(true)
-      const { error } = await (supabase.from('tenant_domains') as any).insert({
-        tenant_id: tenantId,
-        domain,
-        is_primary: domains.length === 0,
+      const res = await fetch('/api/domains', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenant_id: tenantId, domain }),
       })
-
-      if (error) throw error
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        const err: any = new Error(json?.error || 'Failed to add domain')
+        ;(err as any).code = json?.code
+        throw err
+      }
 
       setDomainInput('')
       await fetchDomains()
       toast.success('Domain added. Add the DNS TXT record to verify.')
     } catch (e: any) {
       console.error('Error adding domain:', e)
-      toast.error(e.message || 'Failed to add domain')
+      const code = e?.code as string | undefined
+      if (code === 'PGRST205') {
+        setSchemaMissing(true)
+        toast.error('Domains table is missing. Apply migrations (supabase db push) and refresh.')
+      } else {
+        toast.error(e.message || 'Failed to add domain')
+      }
     } finally {
       setSaving(false)
     }
@@ -135,8 +154,11 @@ export function DomainSettings() {
 
     try {
       setSaving(true)
-      const { error } = await (supabase.from('tenant_domains') as any).delete().eq('id', id)
-      if (error) throw error
+      const res = await fetch(`/api/domains?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json?.error || 'Failed to remove domain')
       await fetchDomains()
       toast.success('Domain removed')
     } catch (e: any) {
@@ -181,6 +203,11 @@ export function DomainSettings() {
 
         {loading ? (
           <div className="text-sm text-muted-foreground">Loading domains…</div>
+        ) : schemaMissing ? (
+          <div className="text-sm text-muted-foreground">
+            Custom domains are not available because the database is missing the required table.
+            Apply migrations to your Supabase project and refresh.
+          </div>
         ) : domains.length === 0 ? (
           <div className="text-sm text-muted-foreground">No custom domains added.</div>
         ) : (

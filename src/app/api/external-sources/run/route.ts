@@ -8,6 +8,7 @@ import { googleDriveList, googleDriveDownload } from '@/lib/external-sources/goo
 import { oneDriveList, oneDriveDownload } from '@/lib/external-sources/onedrive'
 import { hashExternalSourcesCronKey, timingSafeEqualHex } from '@/lib/external-sources/cron-keys'
 import { minimatch } from 'minimatch'
+import { userHasFeature } from '@/lib/subscription/server'
 
 export const runtime = 'nodejs'
 
@@ -45,7 +46,15 @@ export async function POST(req: Request) {
     // allow empty
   }
 
-  const service = createServiceClient()
+  let service: ReturnType<typeof createServiceClient>
+  try {
+    service = createServiceClient()
+  } catch {
+    return NextResponse.json(
+      { error: 'Server is not configured for this action (missing SUPABASE_SERVICE_ROLE_KEY)' },
+      { status: 503 }
+    )
+  }
 
   let hasTenantCronAuth = false
   let tenantCronDefaults: { enabled: boolean; default_run_limit: number } | null = null
@@ -79,6 +88,17 @@ export async function POST(req: Request) {
 
   if (!hasCronAuth && !user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  if (!hasCronAuth && user) {
+    try {
+      const ok = await userHasFeature(supabase as any, user.id, 'ai_access')
+      if (!ok) {
+        return NextResponse.json({ error: 'AI automation is not available on your plan' }, { status: 403 })
+      }
+    } catch (e: any) {
+      return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+    }
   }
 
   let sourcesQuery = (service.from('external_document_sources') as any)

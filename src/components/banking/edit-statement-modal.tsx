@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ImagePreview } from '@/components/ui/image-preview'
 import { Database } from '@/types/database.types'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -163,12 +164,12 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
         >
           {previewUrl ? (
             isImage ? (
-              <img 
-                src={previewUrl} 
-                alt="Document Preview" 
-                style={{ 
+              <ImagePreview
+                src={previewUrl}
+                alt="Document Preview"
+                style={{
                   transform: `translate(${position.x}px, ${position.y}px) scale(${zoomLevel / 100})`,
-                  transition: isDragging ? 'none' : 'transform 0.2s'
+                  transition: isDragging ? 'none' : 'transform 0.2s',
                 }}
                 className="max-w-full max-h-full object-contain shadow-2xl select-none pointer-events-none"
               />

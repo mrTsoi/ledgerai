@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { AIProcessingService } from '@/lib/ai/document-processor'
+import { userHasFeature } from '@/lib/subscription/server'
 
 /**
  * POST /api/documents/process
@@ -17,6 +18,15 @@ export async function POST(request: NextRequest) {
         { error: 'Unauthorized' },
         { status: 401 }
       )
+    }
+
+    try {
+      const ok = await userHasFeature(supabase as any, user.id, 'ai_access')
+      if (!ok) {
+        return NextResponse.json({ error: 'AI automation is not available on your plan' }, { status: 403 })
+      }
+    } catch (e: any) {
+      return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
     }
 
     // Get document ID from request body

@@ -4,8 +4,7 @@ import { useLocale } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Globe } from 'lucide-react';
-import { useTransition, useEffect, useMemo, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useTransition, useEffect, useState } from 'react';
 
 interface Language {
   code: string;
@@ -23,21 +22,24 @@ export function LanguageSwitcher() {
     { code: 'zh-CN', name: '简体中文', flag_emoji: '🇨🇳' },
     { code: 'zh-TW', name: '繁體中文', flag_emoji: '🇹🇼' }
   ]);
-  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     const fetchLanguages = async () => {
-      const { data } = await supabase
-        .from('system_languages')
-        .select('code, name, flag_emoji')
-        .eq('is_active', true);
-      
-      if (data && data.length > 0) {
-        setLanguages(data);
+      try {
+        const res = await fetch('/api/system/languages');
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) return;
+
+        const active = (json?.languages || []).filter((l: any) => l?.is_active !== false);
+        if (active.length > 0) {
+          setLanguages(active);
+        }
+      } catch {
+        // Keep default languages on failure
       }
     };
     fetchLanguages();
-  }, [supabase]);
+  }, []);
 
   const handleChange = (nextLocale: string) => {
     startTransition(() => {

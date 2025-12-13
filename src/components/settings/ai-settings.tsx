@@ -1,7 +1,6 @@
 'use client'
 
 import { useCallback, useMemo, useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useTenant } from '@/hooks/use-tenant'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,7 +14,6 @@ type AIProvider = Database['public']['Tables']['ai_providers']['Row']
 
 export function AISettings() {
   const { currentTenant } = useTenant()
-  const supabase = useMemo(() => createClient(), [])
   const [loading, setLoading] = useState(false)
   const [testing, setTesting] = useState(false)
   const [testStatus, setTestStatus] = useState<'idle' | 'success' | 'error'>('idle')
@@ -35,33 +33,31 @@ export function AISettings() {
   const [isFetchingModels, setIsFetchingModels] = useState(false)
 
   const fetchProviders = useCallback(async () => {
-    const { data } = await (supabase
-      .from('ai_providers') as any)
-      .select('*')
-      .eq('is_active', true)
-
-    if (data) setProviders(data)
-  }, [supabase])
+    if (!currentTenant) return
+    const res = await fetch(`/api/ai/config?tenant_id=${encodeURIComponent(currentTenant.id)}`)
+    const json = await res.json()
+    if (res.ok) {
+      setProviders(json?.providers || [])
+    }
+  }, [currentTenant])
 
   const fetchCurrentConfig = useCallback(async () => {
     if (!currentTenant) return
 
-    const { data } = await (supabase
-      .from('tenant_ai_configurations') as any)
-      .select('*')
-      .eq('tenant_id', currentTenant.id)
-      .eq('is_active', true)
-      .maybeSingle()
+    const res = await fetch(`/api/ai/config?tenant_id=${encodeURIComponent(currentTenant.id)}`)
+    const json = await res.json()
+    if (!res.ok) return
 
+    const data = json?.tenant_config
     if (data) {
       setConfig({
         providerId: data.ai_provider_id || '',
         apiKey: data.api_key_encrypted || '', // In real app, don't return full key
         modelName: data.model_name || '',
-        customConfig: JSON.stringify(data.custom_config || {}, null, 2)
+        customConfig: JSON.stringify(data.custom_config || {}, null, 2),
       })
     }
-  }, [currentTenant, supabase])
+  }, [currentTenant])
 
   const fetchOpenRouterModels = useCallback(async () => {
     try {
@@ -285,18 +281,20 @@ export function AISettings() {
         return
       }
 
-      const { error } = await (supabase
-        .from('tenant_ai_configurations') as any)
-        .upsert({
+      const res = await fetch('/api/ai/config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           tenant_id: currentTenant.id,
           ai_provider_id: config.providerId,
-          api_key_encrypted: config.apiKey, // Should be encrypted in backend
+          api_key_encrypted: config.apiKey,
           model_name: config.modelName,
           custom_config: parsedConfig,
-          is_active: true
-        }, { onConflict: 'tenant_id' }) // Assuming one active config per tenant for simplicity, or use unique constraint
-
-      if (error) throw error
+          is_active: true,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error || 'Failed to save AI configuration')
       
       toast.success('AI Configuration saved successfully')
     } catch (error: any) {

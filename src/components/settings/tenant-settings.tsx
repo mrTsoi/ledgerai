@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useTenant, useUserRole } from '@/hooks/use-tenant'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,7 +13,6 @@ import { toast } from "sonner"
 export function TenantSettings() {
   const { currentTenant, refreshTenants, isSuperAdmin } = useTenant()
   const userRole = useUserRole()
-  const supabase = createClient()
   const [loading, setLoading] = useState(false)
   
   const canEdit = isSuperAdmin || userRole === 'COMPANY_ADMIN' || userRole === 'SUPER_ADMIN'
@@ -43,17 +41,18 @@ export function TenantSettings() {
 
     try {
       setLoading(true)
-      const { error } = await (supabase
-        .from('tenants') as any)
-        .update({
+      const res = await fetch('/api/tenants', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenant_id: currentTenant.id,
           name: formData.name,
           locale: formData.locale,
-          currency: formData.currency
-          // Slug is usually immutable or requires special handling, skipping for now
-        })
-        .eq('id', currentTenant.id)
-
-      if (error) throw error
+          currency: formData.currency,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error || 'Failed to save settings')
       
       await refreshTenants()
       toast.success('Settings saved successfully')

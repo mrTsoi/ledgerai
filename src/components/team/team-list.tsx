@@ -1,7 +1,6 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useTenant } from '@/hooks/use-tenant'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,7 +30,6 @@ type Membership = Database['public']['Tables']['memberships']['Row'] & {
 
 export function TeamList() {
   const { currentTenant } = useTenant()
-  const supabase = useMemo(() => createClient(), [])
   const tenantId = currentTenant?.id
   const [members, setMembers] = useState<Membership[]>([])
   const [loading, setLoading] = useState(true)
@@ -44,22 +42,16 @@ export function TeamList() {
 
     try {
       setLoading(true)
-      const { data, error } = await (supabase
-        .from('memberships') as any)
-        .select(`
-          *,
-          profiles (*)
-        `)
-        .eq('tenant_id', tenantId)
-
-      if (error) throw error
-      setMembers(data as any)
+      const res = await fetch(`/api/team/members?tenant_id=${encodeURIComponent(tenantId)}`)
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error || 'Failed to load team members')
+      setMembers((json?.members || []) as any)
     } catch (error) {
       console.error('Error fetching members:', error)
     } finally {
       setLoading(false)
     }
-  }, [supabase, tenantId])
+  }, [tenantId])
 
   useEffect(() => {
     fetchMembers()
@@ -71,43 +63,18 @@ export function TeamList() {
 
     try {
       setInviting(true)
-      
-      // 1. Check if user exists
-      const { data: users, error: userError } = await (supabase
-        .from('profiles') as any)
-        .select('id')
-        .eq('email', inviteEmail)
-        .single()
 
-      if (userError || !users) {
-        toast.error('User not found. They must sign up first.')
-        return
-      }
-
-      // 2. Check if already a member
-      const { data: existingMember } = await (supabase
-        .from('memberships') as any)
-        .select('id')
-        .eq('tenant_id', currentTenant.id)
-        .eq('user_id', (users as any).id)
-        .single()
-
-      if (existingMember) {
-        toast.error('User is already a member of this team.')
-        return
-      }
-
-      // 3. Add membership
-      const { error: inviteError } = await (supabase
-        .from('memberships') as any)
-        .insert({
+      const res = await fetch('/api/team/members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           tenant_id: currentTenant.id,
-          user_id: (users as any).id,
+          email: inviteEmail,
           role: inviteRole,
-          is_active: true
-        })
-
-      if (inviteError) throw inviteError
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error || 'Failed to invite member')
 
       setInviteEmail('')
       await fetchMembers()
@@ -125,12 +92,9 @@ export function TeamList() {
     if (!confirm('Are you sure you want to remove this member?')) return
 
     try {
-      const { error } = await (supabase
-        .from('memberships') as any)
-        .delete()
-        .eq('id', memberId)
-
-      if (error) throw error
+      const res = await fetch(`/api/team/members?id=${encodeURIComponent(memberId)}`, { method: 'DELETE' })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error || 'Failed to remove member')
       fetchMembers()
       toast.success('Member removed successfully')
     } catch (error) {
@@ -141,12 +105,13 @@ export function TeamList() {
 
   const handleRoleChange = async (memberId: string, newRole: string) => {
     try {
-      const { error } = await (supabase
-        .from('memberships') as any)
-        .update({ role: newRole as any })
-        .eq('id', memberId)
-
-      if (error) throw error
+      const res = await fetch('/api/team/members', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: memberId, role: newRole }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error || 'Failed to update role')
       fetchMembers()
       toast.success('Role updated successfully')
     } catch (error) {

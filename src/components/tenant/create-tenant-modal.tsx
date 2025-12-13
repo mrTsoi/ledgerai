@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,42 +16,22 @@ export function CreateTenantModal() {
   const [formData, setFormData] = useState({ name: '', slug: '', locale: 'en' })
   const { subscription, refreshSubscription, loading: subLoading } = useSubscription()
   const { refreshTenants } = useTenant()
-  const supabase = createClient()
 
   const handleCreate = async () => {
     try {
       setLoading(true)
-      
-      // 1. Get current user
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
 
-      // 2. Create Tenant (Trigger will check limits)
-      const { data: tenant, error: tenantError } = await (supabase
-        .from('tenants') as any)
-        .insert({
+      const res = await fetch('/api/tenants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           name: formData.name,
           slug: formData.slug,
           locale: formData.locale,
-          owner_id: user.id,
-          is_active: true
-        })
-        .select()
-        .single()
-
-      if (tenantError) throw tenantError
-
-      // 3. Create Membership for creator
-      const { error: memberError } = await (supabase
-        .from('memberships') as any)
-        .insert({
-          user_id: user.id,
-          tenant_id: tenant.id,
-          role: 'COMPANY_ADMIN',
-          is_active: true
-        })
-
-      if (memberError) throw memberError
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error || 'Failed to create company')
 
       toast.success('Company created successfully!')
       setOpen(false)

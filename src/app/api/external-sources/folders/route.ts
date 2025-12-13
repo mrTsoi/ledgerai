@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { googleDriveListFolders } from '@/lib/external-sources/google-drive'
 import { oneDriveListFolders } from '@/lib/external-sources/onedrive'
+import { userHasFeature } from '@/lib/subscription/server'
 
 export const runtime = 'nodejs'
 
@@ -14,13 +15,30 @@ export async function GET(req: Request) {
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  try {
+    const ok = await userHasFeature(supabase as any, user.id, 'ai_access')
+    if (!ok) {
+      return NextResponse.json({ error: 'AI automation is not available on your plan' }, { status: 403 })
+    }
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+  }
+
   const url = new URL(req.url)
   const sourceId = url.searchParams.get('source_id')
   const parentId = url.searchParams.get('parent_id') || 'root'
 
   if (!sourceId) return NextResponse.json({ error: 'source_id is required' }, { status: 400 })
 
-  const service = createServiceClient()
+  let service: ReturnType<typeof createServiceClient>
+  try {
+    service = createServiceClient()
+  } catch {
+    return NextResponse.json(
+      { error: 'Server is not configured for this action (missing SUPABASE_SERVICE_ROLE_KEY)' },
+      { status: 503 }
+    )
+  }
 
   const { data: source, error: sourceError } = await (service.from('external_document_sources') as any)
     .select('id, tenant_id, provider')

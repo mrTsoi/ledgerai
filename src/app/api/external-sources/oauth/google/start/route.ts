@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { signOAuthState } from '@/lib/external-sources/oauth-state'
+import { userHasFeature } from '@/lib/subscription/server'
 
 export const runtime = 'nodejs'
 
@@ -13,6 +14,15 @@ export async function GET(req: Request) {
   } = await supabase.auth.getUser()
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  try {
+    const ok = await userHasFeature(supabase as any, user.id, 'ai_access')
+    if (!ok) {
+      return NextResponse.json({ error: 'AI automation is not available on your plan' }, { status: 403 })
+    }
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+  }
 
   const url = new URL(req.url)
   const sourceId = url.searchParams.get('source_id')
@@ -27,7 +37,15 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Google OAuth is not configured' }, { status: 503 })
   }
 
-  const service = createServiceClient()
+  let service: ReturnType<typeof createServiceClient>
+  try {
+    service = createServiceClient()
+  } catch {
+    return NextResponse.json(
+      { error: 'Server is not configured for this action (missing SUPABASE_SERVICE_ROLE_KEY)' },
+      { status: 503 }
+    )
+  }
   const { data: source, error: sourceError } = await (service.from('external_document_sources') as any)
     .select('id, tenant_id, provider')
     .eq('id', sourceId)

@@ -14,6 +14,7 @@ import {
 import { useTenant } from '@/hooks/use-tenant'
 import { getExchangeRate } from '@/lib/currency'
 import { CurrencySelect } from '@/components/ui/currency-select'
+import { ImagePreview } from '@/components/ui/image-preview'
 import { toast } from "sonner"
 
 type Document = Database['public']['Tables']['documents']['Row']
@@ -509,12 +510,12 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
         >
           {previewUrl ? (
             document?.file_type.startsWith('image/') ? (
-              <img 
-                src={previewUrl} 
-                alt="Document Preview" 
-                style={{ 
+              <ImagePreview
+                src={previewUrl}
+                alt="Document Preview"
+                style={{
                   transform: `translate(${position.x}px, ${position.y}px) scale(${zoomLevel / 100})`,
-                  transition: isDragging ? 'none' : 'transform 0.2s'
+                  transition: isDragging ? 'none' : 'transform 0.2s',
                 }}
                 className="max-w-full max-h-full object-contain shadow-2xl select-none pointer-events-none"
               />

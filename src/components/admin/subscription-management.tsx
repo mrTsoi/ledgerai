@@ -14,6 +14,7 @@ import { UserSubscriptionList } from './user-subscription-list'
 import { StripeSettings } from './stripe-settings'
 import { ContactSettings } from './contact-settings'
 import { toast } from "sonner"
+import { FEATURE_DEFINITIONS, isFeatureEnabled } from '@/lib/subscription/features'
 
 type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
 
@@ -149,15 +150,15 @@ export function SubscriptionManagement() {
                           <span>Price: <strong>${plan.price_monthly}/mo</strong></span>
                           <span>Yearly Discount: <strong>{plan.yearly_discount_percent || 0}%</strong></span>
                         </div>
-                        <div className="mt-2 flex gap-2 text-xs text-gray-500">
-                          {(plan.features as any)?.ai_access && <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100">AI Access</span>}
-                          {(plan.features as any)?.ai_agent && <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-100">AI Agent</span>}
-                          {(plan.features as any)?.bank_integration && <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded border border-green-100">Bank Feed</span>}
-                          {(plan.features as any)?.tax_automation && <span className="bg-amber-50 text-amber-700 px-2 py-0.5 rounded border border-amber-100">Tax Auto</span>}
-                          {(plan.features as any)?.custom_domain && <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-100">Custom Domain</span>}
-                          {(plan.features as any)?.sso && <span className="bg-orange-50 text-orange-700 px-2 py-0.5 rounded border border-orange-100">SSO</span>}
-                          {(plan.features as any)?.concurrent_batch_processing && <span className="bg-teal-50 text-teal-700 px-2 py-0.5 rounded border border-teal-100">Batch Processing</span>}
-                          {(plan.features as any)?.custom_features && <span className="bg-slate-50 text-slate-700 px-2 py-0.5 rounded border border-slate-100">Custom Features</span>}
+                        <div className="mt-2 flex gap-2 text-xs text-gray-500 flex-wrap">
+                          {FEATURE_DEFINITIONS.filter((def) => isFeatureEnabled(plan.features, def.key)).map((def) => (
+                            <span
+                              key={def.key}
+                              className="bg-gray-50 text-gray-700 px-2 py-0.5 rounded border border-gray-100"
+                            >
+                              {def.label}
+                            </span>
+                          ))}
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -210,20 +211,18 @@ function PlanEditor({ initialData, onSave, onCancel }: {
     price_monthly: 0,
     yearly_discount_percent: 20,
     is_active: true,
-    features: {
-      ai_access: false,
-      custom_domain: false,
-      sso: false
-    }
+    features: FEATURE_DEFINITIONS.reduce((acc, def) => {
+      ;(acc as any)[def.key] = false
+      return acc
+    }, {} as Record<string, boolean>)
   })
 
   // Ensure features object exists
   if (!formData.features) {
-    formData.features = {
-      ai_access: false,
-      custom_domain: false,
-      sso: false
-    }
+    formData.features = FEATURE_DEFINITIONS.reduce((acc, def) => {
+      ;(acc as any)[def.key] = false
+      return acc
+    }, {} as Record<string, boolean>)
   }
 
   const updateFeature = (key: string, value: boolean) => {

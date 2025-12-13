@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { userHasFeature } from '@/lib/subscription/server'
 
 type Body = {
   tenantId: string
@@ -22,6 +23,29 @@ export async function POST(req: NextRequest) {
         { error: 'tenantId, startDate, endDate are required' },
         { status: 400 }
       )
+    }
+
+    const { data: membership, error: membershipError } = await (supabase.from('memberships') as any)
+      .select('role')
+      .eq('tenant_id', body.tenantId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (membershipError) {
+      return NextResponse.json({ error: membershipError.message }, { status: 400 })
+    }
+
+    if (!membership) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    try {
+      const ok = await userHasFeature(supabase as any, user.id, 'tax_automation')
+      if (!ok) {
+        return NextResponse.json({ error: 'Tax automation is not available on your plan' }, { status: 403 })
+      }
+    } catch (e: any) {
+      return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
     }
 
     const { data, error } = await (supabase as any).rpc('get_tax_estimate', {

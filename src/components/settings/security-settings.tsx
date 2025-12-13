@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, Shield, ShieldCheck, ShieldAlert, Copy } from "lucide-react"
 import { toast } from "sonner"
+import { ImagePreview } from "@/components/ui/image-preview"
 
 export function SecuritySettings() {
   const [loading, setLoading] = useState(false)
@@ -165,7 +166,7 @@ export function SecuritySettings() {
                   Use an authenticator app like Google Authenticator or Authy to scan this QR code.
                 </p>
                 <div className="p-4 bg-white border rounded-lg w-fit">
-                  <img src={qrCode} alt="QR Code" className="w-48 h-48" />
+                  <ImagePreview src={qrCode} alt="QR Code" className="w-48 h-48" />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs text-muted-foreground">Or enter code manually:</Label>

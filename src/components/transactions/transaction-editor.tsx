@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner"
 
 import { getExchangeRate } from '@/lib/currency'
+import { ImagePreview } from '@/components/ui/image-preview'
 
 type Transaction = Database['public']['Tables']['transactions']['Row'] & {
   currency?: string
@@ -678,12 +679,12 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
             onTouchEnd={handleTouchEnd}
           >
             {fileType.startsWith('image/') ? (
-              <img 
-                src={previewUrl} 
-                alt="Document Preview" 
-                style={{ 
+              <ImagePreview
+                src={previewUrl}
+                alt="Document Preview"
+                style={{
                   transform: `translate(${position.x}px, ${position.y}px) scale(${zoomLevel / 100})`,
-                  transition: isDragging ? 'none' : 'transform 0.2s'
+                  transition: isDragging ? 'none' : 'transform 0.2s',
                 }}
                 className="max-w-full max-h-full object-contain shadow-2xl select-none pointer-events-none"
               />

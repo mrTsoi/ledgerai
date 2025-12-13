@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { resolveTxt } from 'dns/promises'
 import { createClient } from '@/lib/supabase/server'
+import { userHasFeature } from '@/lib/subscription/server'
 
 export const runtime = 'nodejs'
 
@@ -47,6 +48,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  try {
+    const ok = await userHasFeature(supabase as any, user.id, 'custom_domain')
+    if (!ok) {
+      return NextResponse.json({ error: 'Custom domains are not available on your plan' }, { status: 403 })
+    }
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+  }
+
   let domain: string
   try {
     const body = await req.json()
@@ -60,7 +70,7 @@ export async function POST(req: Request) {
   }
 
   const { data: row, error } = await (supabase.from('tenant_domains') as any)
-    .select('id, domain, verification_token, verified_at')
+    .select('id, tenant_id, domain, verification_token, verified_at')
     .eq('domain', domain)
     .maybeSingle()
 
@@ -70,6 +80,20 @@ export async function POST(req: Request) {
 
   if (!row) {
     return NextResponse.json({ error: 'Domain not found' }, { status: 404 })
+  }
+
+  const { data: membership, error: membershipError } = await (supabase.from('memberships') as any)
+    .select('role')
+    .eq('tenant_id', (row as any).tenant_id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (membershipError) {
+    return NextResponse.json({ error: membershipError.message }, { status: 400 })
+  }
+
+  if (!membership) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   if (row.verified_at) {

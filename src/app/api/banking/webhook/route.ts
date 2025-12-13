@@ -33,7 +33,15 @@ export async function POST(request: Request) {
       )
     }
 
-    const supabase = createServiceClient()
+    let supabase: ReturnType<typeof createServiceClient>
+    try {
+      supabase = createServiceClient()
+    } catch {
+      return NextResponse.json(
+        { error: 'Server is not configured for this action (missing SUPABASE_SERVICE_ROLE_KEY)' },
+        { status: 503 }
+      )
+    }
 
     // Auth: allow either a platform-wide secret OR a per-tenant API key.
     const globalSecret = process.env.BANK_FEED_WEBHOOK_SECRET

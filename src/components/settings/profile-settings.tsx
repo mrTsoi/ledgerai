@@ -1,7 +1,6 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,37 +13,23 @@ export function ProfileSettings() {
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [userId, setUserId] = useState<string | null>(null)
-  const supabase = useMemo(() => createClient(), [])
 
   const getProfile = useCallback(async () => {
     try {
       setLoading(true)
-      const { data: { user } } = await supabase.auth.getUser()
+      const res = await fetch('/api/profile')
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error || 'Failed to load profile')
 
-      if (user) {
-        setUserId(user.id)
-        setEmail(user.email || "")
-        
-        const { data, error } = await (supabase
-          .from('profiles') as any)
-          .select('full_name')
-          .eq('id', user.id)
-          .single()
-
-        if (error && error.code !== 'PGRST116') {
-          throw error
-        }
-
-        if (data) {
-          setFullName((data as any).full_name || "")
-        }
-      }
+      setUserId(json?.user?.id || null)
+      setEmail(json?.user?.email || "")
+      setFullName(json?.profile?.full_name || "")
     } catch (error) {
       console.error('Error loading profile:', error)
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     getProfile()
@@ -55,15 +40,13 @@ export function ProfileSettings() {
       setLoading(true)
       if (!userId) return
 
-      const { error } = await (supabase
-        .from('profiles') as any)
-        .upsert({
-          id: userId,
-          full_name: fullName,
-          updated_at: new Date().toISOString(),
-        })
-
-      if (error) throw error
+      const res = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name: fullName }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error || 'Failed to update profile')
       
       toast.success("Profile updated successfully.")
     } catch (error) {

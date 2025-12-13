@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { userHasFeature } from '@/lib/subscription/server'
 
 export const runtime = 'nodejs'
 
@@ -11,6 +12,15 @@ export async function GET(req: Request) {
   } = await supabase.auth.getUser()
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  try {
+    const ok = await userHasFeature(supabase as any, user.id, 'ai_access')
+    if (!ok) {
+      return NextResponse.json({ error: 'AI automation is not available on your plan' }, { status: 403 })
+    }
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+  }
 
   const url = new URL(req.url)
   const tenantId = url.searchParams.get('tenant_id')
@@ -26,7 +36,15 @@ export async function GET(req: Request) {
 
   if (!membership) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const service = createServiceClient()
+  let service: ReturnType<typeof createServiceClient>
+  try {
+    service = createServiceClient()
+  } catch {
+    return NextResponse.json(
+      { error: 'Server is not configured for this action (missing SUPABASE_SERVICE_ROLE_KEY)' },
+      { status: 503 }
+    )
+  }
   const { data } = await (service.from('external_sources_cron_secrets') as any)
     .select('enabled, default_run_limit, key_prefix, updated_at')
     .eq('tenant_id', tenantId)
@@ -52,6 +70,15 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser()
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  try {
+    const ok = await userHasFeature(supabase as any, user.id, 'ai_access')
+    if (!ok) {
+      return NextResponse.json({ error: 'AI automation is not available on your plan' }, { status: 403 })
+    }
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+  }
 
   let body: any
   try {
@@ -80,7 +107,15 @@ export async function POST(req: Request) {
       ? Math.max(1, Math.min(50, Number(defaultRunLimitRaw)))
       : undefined
 
-  const service = createServiceClient()
+  let service: ReturnType<typeof createServiceClient>
+  try {
+    service = createServiceClient()
+  } catch {
+    return NextResponse.json(
+      { error: 'Server is not configured for this action (missing SUPABASE_SERVICE_ROLE_KEY)' },
+      { status: 503 }
+    )
+  }
 
   // Only allow updating config if already configured (key exists)
   const { data: existing } = await (service.from('external_sources_cron_secrets') as any)

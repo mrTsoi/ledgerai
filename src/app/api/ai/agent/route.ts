@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { userHasFeature } from '@/lib/subscription/server'
 
 // Helper to get AI config
 async function getTenantAIConfig(supabase: any, tenantId: string) {
@@ -47,34 +48,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check subscription features
-    // We need to get the plan_id from user_subscriptions and then check features in subscription_plans
-    // Note: We use a two-step query to avoid potential foreign key relationship issues in PostgREST
-    const { data: userSub, error: subError } = await (supabase
-      .from('user_subscriptions') as any)
-      .select('plan_id, status')
-      .eq('user_id', user.id)
-      .single()
-
-    if (subError || !userSub) {
-      console.error('Subscription Error:', subError)
-      return NextResponse.json({ error: 'Subscription not found', details: subError }, { status: 403 })
-    }
-
-    const { data: plan, error: planError } = await (supabase
-      .from('subscription_plans') as any)
-      .select('features')
-      .eq('id', (userSub as any).plan_id)
-      .single()
-
-    if (planError || !plan) {
-      console.error('Plan Error:', planError)
-      return NextResponse.json({ error: 'Plan not found', details: planError }, { status: 403 })
-    }
-
-    const features = plan.features as any
-    console.log('AI Agent Request - Features:', features)
-    const isAiEnabled = features?.ai_agent === true
+    const isAiEnabled = await userHasFeature(supabase as any, user.id, 'ai_agent')
 
     if (!isAiEnabled) {
       return NextResponse.json({ 

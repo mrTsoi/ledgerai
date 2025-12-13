@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useState, useEffect, useCallback } from 'react'
 import { Database } from '@/types/database.types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Check, X, Loader2, Phone, Mail } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
+import { FEATURE_DEFINITIONS, isFeatureEnabled } from '@/lib/subscription/features'
 
 type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
 
@@ -21,41 +21,25 @@ export function PricingSection() {
   const [loading, setLoading] = useState(true)
   const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly')
   const [contactConfig, setContactConfig] = useState<ContactConfig>({ whatsapp: '', email: '' })
-  const supabase = useMemo(() => createClient(), [])
-
-  const fetchContactConfig = useCallback(async () => {
-    const { data } = await (supabase
-      .from('system_settings') as any)
-      .select('setting_value')
-      .eq('setting_key', 'contact_sales_config')
-      .single()
-    
-    if (data?.setting_value) {
-      setContactConfig(data.setting_value as ContactConfig)
-    }
-  }, [supabase])
 
   const fetchPlans = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('subscription_plans')
-        .select('*')
-        .eq('is_active', true)
-        .order('price_monthly', { ascending: true })
+      const res = await fetch('/api/public/pricing')
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json?.error || 'Failed to load pricing')
 
-      if (error) throw error
-      setPlans(data || [])
+      setPlans((json?.plans || []) as SubscriptionPlan[])
+      setContactConfig((json?.contact_config || { whatsapp: '', email: '' }) as ContactConfig)
     } catch (error) {
       console.error('Error fetching plans:', error)
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchPlans()
-    fetchContactConfig()
-  }, [fetchPlans, fetchContactConfig])
+  }, [fetchPlans])
 
   const formatPrice = (price: number | null) => {
     if (price === 0 || price === null) return 'Free'
@@ -87,40 +71,13 @@ export function PricingSection() {
 
     // JSON Features
     const featureFlags = (plan.features as any) || {}
-
-    features.push({
-      text: 'AI Automation',
-      included: !!featureFlags.ai_access
-    })
-    features.push({
-      text: 'AI Agent (Voice/Text)',
-      included: !!featureFlags.ai_agent
-    })
-    features.push({
-      text: 'Bank Feed Integration',
-      included: !!featureFlags.bank_integration
-    })
-    features.push({
-      text: 'Tax Automation',
-      included: !!featureFlags.tax_automation
-    })
-    features.push({
-      text: 'Custom Domain',
-      included: !!featureFlags.custom_domain
-    })
-    features.push({
-      text: 'SSO / Enterprise Security',
-      included: !!featureFlags.sso
-    })
-    features.push({
-      text: 'Concurrent Batch Processing',
-      included: !!featureFlags.concurrent_batch_processing,
-      isNew: true
-    })
-    features.push({
-      text: 'Custom features and more',
-      included: !!featureFlags.custom_features
-    })
+    for (const def of FEATURE_DEFINITIONS) {
+      features.push({
+        text: def.label,
+        included: isFeatureEnabled(featureFlags, def.key),
+        isNew: def.isNew,
+      })
+    }
 
     return features
   }
@@ -216,7 +173,7 @@ export function PricingSection() {
                         )}
                         <span className={feature.included ? 'text-gray-700' : 'text-gray-400'}>
                           {feature.text}
-                          {(feature as any).isNew && feature.included && (
+                          {feature.isNew && feature.included && (
                             <span className="ml-2 px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">New</span>
                           )}
                         </span>

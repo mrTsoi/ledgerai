@@ -1,8 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { Database } from '@/types/database.types'
+import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react'
 
 export type SubscriptionDetails = {
   plan_name: string
@@ -37,34 +35,24 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [subscription, setSubscription] = useState<SubscriptionDetails | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = useMemo(() => createClient(), [])
 
   const fetchSubscription = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        setLoading(false)
+      const res = await fetch('/api/subscription/me')
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setSubscription(null)
         return
       }
 
-      const { data, error } = await (supabase.rpc as any)('get_user_subscription_details', {
-        p_user_id: user.id
-      })
-
-      if (error) throw error
-      if (data && data.length > 0) {
-        console.log('Subscription Data:', data[0])
-        setSubscription(data[0])
-      } else {
-        setSubscription(null)
-      }
+      setSubscription((json?.subscription as SubscriptionDetails) || null)
     } catch (error) {
       console.error('Error fetching subscription:', error)
       setSubscription(null)
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchSubscription()
