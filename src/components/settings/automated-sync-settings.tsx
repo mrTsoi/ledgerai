@@ -30,7 +30,7 @@ export function AutomatedSyncSettings() {
     // Fetch initial state: enabled, webhookUrl, jobs
     // Replace with real API calls
     setEnabled(true);
-    setWebhookUrl('https://your-app.com/api/external-sources/run?tenant_id=TENANT_ID&secret=SECRET');
+    setWebhookUrl(location.origin+'/api/external-sources/run?tenant_id=TENANT_ID&secret=SECRET');
     setJobs([
       {
         id: '1',
@@ -64,7 +64,7 @@ export function AutomatedSyncSettings() {
   };
 
   return (
-    <Card className="w-full max-w-xl mx-auto md:max-w-2xl lg:max-w-3xl">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Automated Data Sync</CardTitle>
         <CardDescription>
