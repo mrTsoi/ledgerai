@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { verifyOAuthState } from '@/lib/external-sources/oauth-state'
 import { userHasFeature } from '@/lib/subscription/server'
+import { isPostgrestRelationMissing, missingRelationHint } from '@/lib/supabase/postgrest-errors'
 
 export const runtime = 'nodejs'
 
@@ -17,9 +18,10 @@ export async function GET(req: Request) {
 
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID
   const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET
-  const redirectUri = process.env.GOOGLE_OAUTH_REDIRECT_URI
+  const origin = new URL(req.url).origin
+  const redirectUri = process.env.GOOGLE_OAUTH_REDIRECT_URI || `${origin}/api/external-sources/oauth/google/callback`
 
-  if (!clientId || !clientSecret || !redirectUri) {
+  if (!clientId || !clientSecret) {
     return NextResponse.json({ error: 'Google OAuth is not configured' }, { status: 503 })
   }
 
@@ -27,7 +29,17 @@ export async function GET(req: Request) {
   try {
     parsed = verifyOAuthState(state)
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message || 'Invalid state' }, { status: 400 })
+    const message = e?.message || 'Invalid state'
+    if (typeof message === 'string' && message.toLowerCase().includes('oauth state signing')) {
+      return NextResponse.json(
+        {
+          error: message,
+          hint: 'Set EXTERNAL_OAUTH_STATE_SECRET (>=32 chars) consistently across all app instances.',
+        },
+        { status: 503 }
+      )
+    }
+    return NextResponse.json({ error: message }, { status: 400 })
   }
 
   const supabase = await createClient()
@@ -63,8 +75,16 @@ export async function GET(req: Request) {
 
   const tokenJson = (await tokenRes.json()) as any
   if (!tokenRes.ok) {
+    // Helpful diagnostics for dev environments (Google often returns redirect_uri mismatch here).
+    const details = process.env.NODE_ENV !== 'production' ? tokenJson : undefined
     return NextResponse.json(
-      { error: tokenJson?.error_description || tokenJson?.error || 'Token exchange failed' },
+      {
+        error: tokenJson?.error_description || tokenJson?.error || 'Token exchange failed',
+        details,
+        hint:
+          'Verify GOOGLE_OAUTH_CLIENT_ID/SECRET and that the exact redirect URI is allowed in Google Cloud Console. Expected redirect_uri: ' +
+          redirectUri,
+      },
       { status: 400 }
     )
   }
@@ -72,8 +92,14 @@ export async function GET(req: Request) {
   const refreshToken = tokenJson.refresh_token as string | undefined
   if (!refreshToken) {
     // This can happen if the user previously consented without prompt=consent.
+    const details = process.env.NODE_ENV !== 'production' ? tokenJson : undefined
     return NextResponse.json(
-      { error: 'No refresh_token returned. Try again with re-consent.' },
+      {
+        error: 'No refresh_token returned. Try again with re-consent.',
+        details,
+        hint:
+          'In Google Account → Security → Third-party access, remove this app and try Connect again (we request prompt=consent + access_type=offline).',
+      },
       { status: 400 }
     )
   }
@@ -92,7 +118,18 @@ export async function GET(req: Request) {
     .eq('id', parsed.source_id)
     .single()
 
-  if (sourceError) return NextResponse.json({ error: sourceError.message }, { status: 400 })
+  if (sourceError) {
+    if (isPostgrestRelationMissing(sourceError, 'external_document_sources')) {
+      return NextResponse.json(
+        {
+          error: sourceError.message,
+          ...missingRelationHint('external_document_sources'),
+        },
+        { status: 503 }
+      )
+    }
+    return NextResponse.json({ error: sourceError.message }, { status: 400 })
+  }
   if ((source as any).provider !== 'GOOGLE_DRIVE') {
     return NextResponse.json({ error: 'Source is not Google Drive' }, { status: 400 })
   }
@@ -122,5 +159,7 @@ export async function GET(req: Request) {
       ? parsed.return_to
       : null
 
-  return NextResponse.redirect(returnTo || '/dashboard/settings?tab=external-sources')
+  const origin2 = new URL(req.url).origin
+  const targetPath = returnTo || '/en/dashboard/settings?tab=external-sources'
+  return NextResponse.redirect(new URL(targetPath, origin2))
 }

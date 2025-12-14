@@ -9,6 +9,7 @@ import { oneDriveList, oneDriveDownload } from '@/lib/external-sources/onedrive'
 import { hashExternalSourcesCronKey, timingSafeEqualHex } from '@/lib/external-sources/cron-keys'
 import { minimatch } from 'minimatch'
 import { userHasFeature } from '@/lib/subscription/server'
+import { isPostgrestRelationMissing, missingRelationHint } from '@/lib/supabase/postgrest-errors'
 
 export const runtime = 'nodejs'
 
@@ -110,7 +111,18 @@ export async function POST(req: Request) {
 
   const { data: sources, error: sourcesError } = await sourcesQuery
 
-  if (sourcesError) return NextResponse.json({ error: sourcesError.message }, { status: 500 })
+  if (sourcesError) {
+    if (isPostgrestRelationMissing(sourcesError, 'external_document_sources')) {
+      return NextResponse.json(
+        {
+          error: sourcesError.message,
+          ...missingRelationHint('external_document_sources'),
+        },
+        { status: 503 }
+      )
+    }
+    return NextResponse.json({ error: sourcesError.message }, { status: 500 })
+  }
 
   const defaultLimit = hasTenantCronAuth ? tenantCronDefaults?.default_run_limit ?? 10 : 10
   const limit = Math.max(1, Math.min(50, Number(typeof body.limit === 'number' || typeof body.limit === 'string' ? body.limit : defaultLimit)))

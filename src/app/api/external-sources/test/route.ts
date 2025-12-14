@@ -7,6 +7,7 @@ import { googleDriveList } from '@/lib/external-sources/google-drive'
 import { oneDriveList } from '@/lib/external-sources/onedrive'
 import { minimatch } from 'minimatch'
 import { userHasFeature } from '@/lib/subscription/server'
+import { isPostgrestRelationMissing, missingRelationHint } from '@/lib/supabase/postgrest-errors'
 
 export const runtime = 'nodejs'
 
@@ -56,7 +57,18 @@ export async function POST(req: Request) {
     .eq('id', body.source_id)
     .single()
 
-  if (sourceError) return NextResponse.json({ error: sourceError.message }, { status: 400 })
+  if (sourceError) {
+    if (isPostgrestRelationMissing(sourceError, 'external_document_sources')) {
+      return NextResponse.json(
+        {
+          error: sourceError.message,
+          ...missingRelationHint('external_document_sources'),
+        },
+        { status: 503 }
+      )
+    }
+    return NextResponse.json({ error: sourceError.message }, { status: 400 })
+  }
 
   // authorization: ensure user is admin of that tenant
   const { data: membership } = await (supabase.from('memberships') as any)

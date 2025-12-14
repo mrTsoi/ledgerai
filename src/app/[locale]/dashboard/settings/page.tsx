@@ -11,6 +11,7 @@ import { SecuritySettings } from '@/components/settings/security-settings'
 import { DomainSettings } from '@/components/settings/domain-settings'
 import { BankFeedSettings } from '@/components/settings/bank-feed-settings'
 import { ExternalSourcesSettings } from '@/components/settings/external-sources-settings'
+import { AutomatedSyncSettings } from '@/components/settings/automated-sync-settings'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function SettingsPage() {
@@ -57,6 +58,7 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="external-sources" className="space-y-4">
+          <AutomatedSyncSettings />
           <ExternalSourcesSettings />
         </TabsContent>
         

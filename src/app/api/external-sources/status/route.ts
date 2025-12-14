@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { userHasFeature } from '@/lib/subscription/server'
+import { isPostgrestRelationMissing, missingRelationHint } from '@/lib/supabase/postgrest-errors'
 
 export const runtime = 'nodejs'
 
@@ -41,7 +42,18 @@ export async function GET(req: Request) {
     .eq('id', sourceId)
     .single()
 
-  if (sourceError) return NextResponse.json({ error: sourceError.message }, { status: 400 })
+  if (sourceError) {
+    if (isPostgrestRelationMissing(sourceError, 'external_document_sources')) {
+      return NextResponse.json(
+        {
+          error: sourceError.message,
+          ...missingRelationHint('external_document_sources'),
+        },
+        { status: 503 }
+      )
+    }
+    return NextResponse.json({ error: sourceError.message }, { status: 400 })
+  }
 
   const { data: membership } = await (supabase.from('memberships') as any)
     .select('id')

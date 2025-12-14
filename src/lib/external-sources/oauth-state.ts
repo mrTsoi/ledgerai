@@ -8,8 +8,24 @@ type Payload = {
 }
 
 function getSecret() {
-  const secret = process.env.EXTERNAL_OAUTH_STATE_SECRET
-  if (!secret) throw new Error('EXTERNAL_OAUTH_STATE_SECRET is not set')
+  // Prefer a dedicated secret for OAuth state signing.
+  // Fall back to common app-level secrets if present.
+  const secret =
+    process.env.EXTERNAL_OAUTH_STATE_SECRET ||
+    process.env.AUTH_SECRET ||
+    process.env.NEXTAUTH_SECRET
+
+  if (!secret) {
+    throw new Error(
+      'OAuth state signing is not configured. Set EXTERNAL_OAUTH_STATE_SECRET (recommended), or provide AUTH_SECRET / NEXTAUTH_SECRET.'
+    )
+  }
+
+  // Avoid trivially short secrets.
+  if (secret.length < 32) {
+    throw new Error('OAuth state signing secret is too short. Use at least 32 characters.')
+  }
+
   return secret
 }
 

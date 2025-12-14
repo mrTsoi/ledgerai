@@ -9,6 +9,11 @@ type GoogleTokenResponse = {
   refresh_token?: string
 }
 
+type GoogleDriveItem = {
+  id: string
+  name: string
+}
+
 async function refreshAccessToken(params: {
   refreshToken: string
 }) {
@@ -37,6 +42,46 @@ async function refreshAccessToken(params: {
   return json as GoogleTokenResponse
 }
 
+export async function googleDriveGetAccount(params: { refreshToken: string }) {
+  const token = await refreshAccessToken({ refreshToken: params.refreshToken })
+
+  const url = new URL('https://www.googleapis.com/drive/v3/about')
+  url.searchParams.set('fields', 'user(emailAddress,displayName)')
+
+  const res = await fetch(url.toString(), {
+    headers: { Authorization: `Bearer ${token.access_token}` },
+  })
+
+  const json = (await res.json()) as any
+  if (!res.ok) {
+    throw new Error(json?.error?.message || 'Failed to get Google Drive account')
+  }
+
+  const user = json?.user || {}
+  return {
+    email: (user.emailAddress as string | undefined) || null,
+    displayName: (user.displayName as string | undefined) || null,
+  }
+}
+
+export async function googleDriveGetItemName(params: { fileId: string; refreshToken: string }) {
+  const token = await refreshAccessToken({ refreshToken: params.refreshToken })
+
+  const url = new URL(`https://www.googleapis.com/drive/v3/files/${params.fileId}`)
+  url.searchParams.set('fields', 'name')
+
+  const res = await fetch(url.toString(), {
+    headers: { Authorization: `Bearer ${token.access_token}` },
+  })
+
+  const json = (await res.json()) as any
+  if (!res.ok) {
+    throw new Error(json?.error?.message || 'Failed to resolve Google Drive item')
+  }
+
+  return (json?.name as string | undefined) || null
+}
+
 export async function googleDriveList(params: {
   folderId: string
   refreshToken: string
@@ -49,6 +94,10 @@ export async function googleDriveList(params: {
   url.searchParams.set('q', q)
   url.searchParams.set('pageSize', '200')
   url.searchParams.set('fields', 'files(id,name,mimeType,modifiedTime,size,md5Checksum)')
+  url.searchParams.set('spaces', 'drive')
+  url.searchParams.set('supportsAllDrives', 'true')
+  url.searchParams.set('includeItemsFromAllDrives', 'true')
+  url.searchParams.set('corpora', 'allDrives')
 
   const res = await fetch(url.toString(), {
     headers: { Authorization: `Bearer ${token.access_token}` },
@@ -80,8 +129,41 @@ export async function googleDriveListFolders(params: {
 }) {
   const token = await refreshAccessToken({ refreshToken: params.refreshToken })
 
+  // Support showing Shared Drives as pseudo-folders at the top level.
+  // - parentId === 'root' => list My Drive root folders + shared drives.
+  // - parentId === 'drive:<driveId>' => list folders at the root of that Shared Drive.
+  let driveId: string | null = null
+  let parentId = params.parentId
+  if (parentId.startsWith('drive:')) {
+    driveId = parentId.slice('drive:'.length) || null
+    parentId = 'root'
+  }
+
+  async function listSharedDrives(): Promise<GoogleDriveItem[]> {
+    const url = new URL('https://www.googleapis.com/drive/v3/drives')
+    url.searchParams.set('pageSize', '100')
+    url.searchParams.set('fields', 'drives(id,name)')
+
+    const res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token.access_token}` },
+    })
+
+    const json = (await res.json()) as any
+    if (!res.ok) {
+      // If the account has no Shared Drives, Google may still return ok with empty list.
+      // If it errors (e.g., not supported), treat as none.
+      return []
+    }
+
+    const drives = (json.drives || []) as any[]
+    return drives.map((d) => ({
+      id: `drive:${d.id as string}`,
+      name: `[Shared Drive] ${d.name as string}`,
+    }))
+  }
+
   const q = [
-    `'${params.parentId}' in parents`,
+    `'${parentId}' in parents`,
     "mimeType = 'application/vnd.google-apps.folder'",
     'trashed = false',
   ].join(' and ')
@@ -90,6 +172,21 @@ export async function googleDriveListFolders(params: {
   url.searchParams.set('q', q)
   url.searchParams.set('pageSize', '200')
   url.searchParams.set('fields', 'files(id,name)')
+  url.searchParams.set('spaces', 'drive')
+  url.searchParams.set('supportsAllDrives', 'true')
+  url.searchParams.set('includeItemsFromAllDrives', 'true')
+
+  // Root browsing is different:
+  // - For My Drive root, use corpora=user (more reliable than allDrives + root).
+  // - For Shared Drive root, use corpora=drive + driveId.
+  if (driveId) {
+    url.searchParams.set('corpora', 'drive')
+    url.searchParams.set('driveId', driveId)
+  } else if (parentId === 'root') {
+    url.searchParams.set('corpora', 'user')
+  } else {
+    url.searchParams.set('corpora', 'allDrives')
+  }
 
   const res = await fetch(url.toString(), {
     headers: { Authorization: `Bearer ${token.access_token}` },
@@ -101,13 +198,18 @@ export async function googleDriveListFolders(params: {
   }
 
   const folders = (json.files || []) as any[]
+  const driveEntries = parentId === 'root' && !driveId ? await listSharedDrives() : []
+
   return {
     accessToken: token.access_token,
     expiresAt: new Date(Date.now() + token.expires_in * 1000).toISOString(),
-    folders: folders.map((f) => ({
-      id: f.id as string,
-      name: f.name as string,
-    })),
+    folders: [
+      ...driveEntries,
+      ...folders.map((f) => ({
+        id: f.id as string,
+        name: f.name as string,
+      })),
+    ],
   }
 }
 

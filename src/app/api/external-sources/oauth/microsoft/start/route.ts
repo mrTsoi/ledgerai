@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { signOAuthState } from '@/lib/external-sources/oauth-state'
 import { userHasFeature } from '@/lib/subscription/server'
+import { isPostgrestRelationMissing, missingRelationHint } from '@/lib/supabase/postgrest-errors'
 
 export const runtime = 'nodejs'
 
@@ -32,8 +33,9 @@ export async function GET(req: Request) {
   const returnTo = returnToRaw && returnToRaw.startsWith('/') && !returnToRaw.startsWith('//') ? returnToRaw : null
 
   const clientId = process.env.MICROSOFT_OAUTH_CLIENT_ID
-  const redirectUri = process.env.MICROSOFT_OAUTH_REDIRECT_URI
-  if (!clientId || !redirectUri) {
+  const origin = new URL(req.url).origin
+  const redirectUri = process.env.MICROSOFT_OAUTH_REDIRECT_URI || `${origin}/api/external-sources/oauth/microsoft/callback`
+  if (!clientId) {
     return NextResponse.json({ error: 'Microsoft OAuth is not configured' }, { status: 503 })
   }
 
@@ -51,7 +53,18 @@ export async function GET(req: Request) {
     .eq('id', sourceId)
     .single()
 
-  if (sourceError) return NextResponse.json({ error: sourceError.message }, { status: 400 })
+  if (sourceError) {
+    if (isPostgrestRelationMissing(sourceError, 'external_document_sources')) {
+      return NextResponse.json(
+        {
+          error: sourceError.message,
+          ...missingRelationHint('external_document_sources'),
+        },
+        { status: 503 }
+      )
+    }
+    return NextResponse.json({ error: sourceError.message }, { status: 400 })
+  }
   if ((source as any).provider !== 'ONEDRIVE') {
     return NextResponse.json({ error: 'Source is not OneDrive' }, { status: 400 })
   }
@@ -66,7 +79,18 @@ export async function GET(req: Request) {
 
   if (!membership) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const state = signOAuthState({ source_id: sourceId, user_id: user.id, ts: Date.now(), return_to: returnTo || undefined })
+  let state: string
+  try {
+    state = signOAuthState({ source_id: sourceId, user_id: user.id, ts: Date.now(), return_to: returnTo || undefined })
+  } catch (e: any) {
+    return NextResponse.json(
+      {
+        error: e?.message || 'OAuth state signing failed',
+        hint: 'Set EXTERNAL_OAUTH_STATE_SECRET (>=32 chars). Example: node -e "console.log(require(\"crypto\").randomBytes(32).toString(\"hex\"))"',
+      },
+      { status: 503 }
+    )
+  }
   const nonce = crypto.randomBytes(12).toString('hex')
 
   const authUrl = new URL('https://login.microsoftonline.com/common/oauth2/v2.0/authorize')
@@ -77,6 +101,11 @@ export async function GET(req: Request) {
   authUrl.searchParams.set('scope', 'offline_access Files.Read User.Read')
   authUrl.searchParams.set('state', state)
   authUrl.searchParams.set('nonce', nonce)
+
+  const mode = url.searchParams.get('mode')
+  if (mode === 'json') {
+    return NextResponse.json({ auth_url: authUrl.toString(), redirect_uri: redirectUri })
+  }
 
   return NextResponse.redirect(authUrl.toString())
 }

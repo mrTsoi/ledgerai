@@ -3,14 +3,12 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { userHasFeature } from '@/lib/subscription/server'
 import { isPostgrestRelationMissing, missingRelationHint } from '@/lib/supabase/postgrest-errors'
+import { googleDriveGetAccount, googleDriveGetItemName } from '@/lib/external-sources/google-drive'
+import { oneDriveGetAccount, oneDriveGetItemName } from '@/lib/external-sources/onedrive'
 
 export const runtime = 'nodejs'
 
-type Body = {
-  source_id: string
-}
-
-export async function POST(req: Request) {
+export async function GET(req: Request) {
   const supabase = await createClient()
   const {
     data: { user },
@@ -27,14 +25,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
   }
 
-  let body: Body
-  try {
-    body = (await req.json()) as Body
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
-  }
-
-  if (!body?.source_id) return NextResponse.json({ error: 'source_id is required' }, { status: 400 })
+  const url = new URL(req.url)
+  const sourceId = url.searchParams.get('source_id')
+  if (!sourceId) return NextResponse.json({ error: 'source_id is required' }, { status: 400 })
 
   let service: ReturnType<typeof createServiceClient>
   try {
@@ -47,8 +40,8 @@ export async function POST(req: Request) {
   }
 
   const { data: source, error: sourceError } = await (service.from('external_document_sources') as any)
-    .select('id, tenant_id')
-    .eq('id', body.source_id)
+    .select('id, tenant_id, provider, config')
+    .eq('id', sourceId)
     .single()
 
   if (sourceError) {
@@ -74,10 +67,32 @@ export async function POST(req: Request) {
 
   if (!membership) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  await (service.from('external_document_source_secrets') as any).upsert(
-    { source_id: body.source_id, secrets: {} },
-    { onConflict: 'source_id' }
-  )
+  const { data: secretsRow } = await (service.from('external_document_source_secrets') as any)
+    .select('secrets')
+    .eq('source_id', sourceId)
+    .maybeSingle()
 
-  return NextResponse.json({ ok: true })
+  const secrets = (secretsRow as any)?.secrets || {}
+  const refreshToken = secrets.refresh_token as string | undefined
+
+  const provider = String((source as any).provider || '')
+  const folderId = ((source as any).config || {})?.folder_id as string | undefined
+
+  if (!refreshToken) {
+    return NextResponse.json({ provider, connected: false, folder_id: folderId || null })
+  }
+
+  if (provider === 'GOOGLE_DRIVE') {
+    const account = await googleDriveGetAccount({ refreshToken })
+    const folderName = folderId ? await googleDriveGetItemName({ fileId: folderId, refreshToken }).catch(() => null) : null
+    return NextResponse.json({ provider, connected: true, account, folder_id: folderId || null, folder_name: folderName })
+  }
+
+  if (provider === 'ONEDRIVE') {
+    const account = await oneDriveGetAccount({ refreshToken })
+    const folderName = folderId ? await oneDriveGetItemName({ itemId: folderId, refreshToken }).catch(() => null) : null
+    return NextResponse.json({ provider, connected: true, account, folder_id: folderId || null, folder_name: folderName })
+  }
+
+  return NextResponse.json({ provider, connected: true, folder_id: folderId || null })
 }

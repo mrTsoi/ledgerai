@@ -2,8 +2,11 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { googleDriveListFolders } from '@/lib/external-sources/google-drive'
+import { googleDriveList } from '@/lib/external-sources/google-drive'
 import { oneDriveListFolders } from '@/lib/external-sources/onedrive'
+import { oneDriveList } from '@/lib/external-sources/onedrive'
 import { userHasFeature } from '@/lib/subscription/server'
+import { isPostgrestRelationMissing, missingRelationHint } from '@/lib/supabase/postgrest-errors'
 
 export const runtime = 'nodejs'
 
@@ -45,7 +48,18 @@ export async function GET(req: Request) {
     .eq('id', sourceId)
     .single()
 
-  if (sourceError) return NextResponse.json({ error: sourceError.message }, { status: 400 })
+  if (sourceError) {
+    if (isPostgrestRelationMissing(sourceError, 'external_document_sources')) {
+      return NextResponse.json(
+        {
+          error: sourceError.message,
+          ...missingRelationHint('external_document_sources'),
+        },
+        { status: 503 }
+      )
+    }
+    return NextResponse.json({ error: sourceError.message }, { status: 400 })
+  }
 
   const { data: membership } = await (supabase.from('memberships') as any)
     .select('role')
@@ -69,27 +83,70 @@ export async function GET(req: Request) {
   const provider = (source as any).provider as string
 
   if (provider === 'GOOGLE_DRIVE') {
-    const { folders } = await googleDriveListFolders({ parentId, refreshToken })
-    return NextResponse.json({ parent_id: parentId, folders })
+    try {
+      const { folders } = await googleDriveListFolders({ parentId, refreshToken })
+
+      // File preview: only works for real folder ids (not our synthetic shared-drive entries).
+      let files: Array<{ id: string; name: string; mimeType?: string; size?: number; modifiedTime?: string }> = []
+      if (!parentId.startsWith('drive:')) {
+        const listed = await googleDriveList({ folderId: parentId, refreshToken })
+        files = (listed.files || [])
+          .filter((f) => f.mimeType !== 'application/vnd.google-apps.folder')
+          .slice(0, 50)
+          .map((f) => ({
+            id: f.id,
+            name: f.name,
+            mimeType: f.mimeType,
+            size: f.size,
+            modifiedTime: f.modifiedTime,
+          }))
+      }
+
+      return NextResponse.json({ parent_id: parentId, folders, files })
+    } catch (e: any) {
+      return NextResponse.json(
+        {
+          error: e?.message || 'Failed to list Google Drive folders',
+        },
+        { status: 400 }
+      )
+    }
   }
 
   if (provider === 'ONEDRIVE') {
-    const { folders, refreshToken: newRefreshToken } = await oneDriveListFolders({ parentId, refreshToken })
+    try {
+      const { folders, refreshToken: newRefreshToken } = await oneDriveListFolders({ parentId, refreshToken })
 
-    if (newRefreshToken && newRefreshToken !== refreshToken) {
-      await (service.from('external_document_source_secrets') as any).upsert(
-        {
-          source_id: sourceId,
-          secrets: {
-            ...secrets,
-            refresh_token: newRefreshToken,
+      if (newRefreshToken && newRefreshToken !== refreshToken) {
+        await (service.from('external_document_source_secrets') as any).upsert(
+          {
+            source_id: sourceId,
+            secrets: {
+              ...secrets,
+              refresh_token: newRefreshToken,
+            },
           },
+          { onConflict: 'source_id' }
+        )
+      }
+
+      const listed = await oneDriveList({ folderId: parentId, refreshToken: newRefreshToken || refreshToken })
+      const files = (listed.files || []).slice(0, 50).map((f) => ({
+        id: f.id,
+        name: f.name,
+        size: f.size,
+        modifiedTime: f.modifiedTime,
+      }))
+
+      return NextResponse.json({ parent_id: parentId, folders, files })
+    } catch (e: any) {
+      return NextResponse.json(
+        {
+          error: e?.message || 'Failed to list OneDrive folders',
         },
-        { onConflict: 'source_id' }
+        { status: 400 }
       )
     }
-
-    return NextResponse.json({ parent_id: parentId, folders })
   }
 
   return NextResponse.json({ error: 'Folder picker only supported for cloud providers' }, { status: 400 })

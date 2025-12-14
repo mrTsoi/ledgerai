@@ -61,6 +61,7 @@ export async function POST(req: Request) {
         { status: 503 }
       )
     }
+
     return NextResponse.json({ error: sourceError.message }, { status: 400 })
   }
 
@@ -74,10 +75,22 @@ export async function POST(req: Request) {
 
   if (!membership) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  await (service.from('external_document_source_secrets') as any).upsert(
-    { source_id: body.source_id, secrets: {} },
-    { onConflict: 'source_id' }
-  )
+  const { error: deleteError } = await (service.from('external_document_sources') as any)
+    .delete()
+    .eq('id', body.source_id)
+
+  if (deleteError) {
+    if (isPostgrestRelationMissing(deleteError, 'external_document_sources')) {
+      return NextResponse.json(
+        {
+          error: deleteError.message,
+          ...missingRelationHint('external_document_sources'),
+        },
+        { status: 503 }
+      )
+    }
+    return NextResponse.json({ error: deleteError.message }, { status: 500 })
+  }
 
   return NextResponse.json({ ok: true })
 }

@@ -24,7 +24,7 @@ async function refreshAccessToken(params: { refreshToken: string }) {
       client_secret: clientSecret,
       grant_type: 'refresh_token',
       refresh_token: params.refreshToken,
-      scope: 'offline_access Files.Read',
+      scope: 'offline_access Files.Read User.Read',
     }),
   })
 
@@ -34,6 +34,45 @@ async function refreshAccessToken(params: { refreshToken: string }) {
   }
 
   return json as MicrosoftTokenResponse
+}
+
+export async function oneDriveGetAccount(params: { refreshToken: string }) {
+  const token = await refreshAccessToken({ refreshToken: params.refreshToken })
+
+  const url = new URL('https://graph.microsoft.com/v1.0/me')
+  url.searchParams.set('$select', 'displayName,mail,userPrincipalName')
+
+  const res = await fetch(url.toString(), {
+    headers: { Authorization: `Bearer ${token.access_token}` },
+  })
+
+  const json = (await res.json()) as any
+  if (!res.ok) {
+    throw new Error(json?.error?.message || 'Failed to get OneDrive account')
+  }
+
+  return {
+    email: (json?.mail as string | undefined) || (json?.userPrincipalName as string | undefined) || null,
+    displayName: (json?.displayName as string | undefined) || null,
+  }
+}
+
+export async function oneDriveGetItemName(params: { itemId: string; refreshToken: string }) {
+  const token = await refreshAccessToken({ refreshToken: params.refreshToken })
+
+  const url = new URL(`https://graph.microsoft.com/v1.0/me/drive/items/${params.itemId}`)
+  url.searchParams.set('$select', 'name')
+
+  const res = await fetch(url.toString(), {
+    headers: { Authorization: `Bearer ${token.access_token}` },
+  })
+
+  const json = (await res.json()) as any
+  if (!res.ok) {
+    throw new Error(json?.error?.message || 'Failed to resolve OneDrive item')
+  }
+
+  return (json?.name as string | undefined) || null
 }
 
 export async function oneDriveList(params: { folderId: string; refreshToken: string }) {
