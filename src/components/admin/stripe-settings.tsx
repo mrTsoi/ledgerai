@@ -24,14 +24,23 @@ export function StripeSettings() {
   const loadSettings = useCallback(async () => {
     try {
       setLoading(true)
-      const { data, error } = await (supabase
-        .from('system_settings') as any)
+      const { data, error } = await supabase
+        .from('system_settings')
         .select('setting_value')
         .eq('setting_key', 'stripe_config')
         .single()
 
       if (data) {
-        setConfig((data as any).setting_value as any)
+        const raw = (data as unknown as { setting_value: unknown }).setting_value
+        if (typeof raw === 'string') {
+          try {
+            setConfig(JSON.parse(raw) as typeof config)
+          } catch {
+            setConfig(DEFAULT_CONFIG)
+          }
+        } else if (raw && typeof raw === 'object') {
+          setConfig(raw as typeof config)
+        }
       }
     } catch (error) {
       console.error('Error loading Stripe settings:', error)

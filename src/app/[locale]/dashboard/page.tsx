@@ -45,15 +45,29 @@ export default function DashboardPage() {
     }, [subscription, subLoading])
 
     // Stripe Checkout Handler
+    const [pendingToken, setPendingToken] = useState<string | null>(null)
+
     const handleCheckout = async () => {
       setCheckoutLoading(true)
       setCheckoutError(null)
       try {
+        if (pendingToken) {
+          const res = await fetch('/api/subscriptions/pending/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: pendingToken, returnUrl: window.location.origin + '/dashboard' }),
+          })
+          if (!res.ok) throw new Error(await res.text())
+          const { url } = await res.json()
+          window.location.href = url
+          return
+        }
+
         const res = await fetch('/api/stripe/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            plan_name: subscription?.plan_name || 'free',
+              planId: subscription?.plan_id,
             interval: subscription?.current_period_end && subscription?.current_period_start ?
               (new Date(subscription.current_period_end).getFullYear() - new Date(subscription.current_period_start).getFullYear() >= 1 ? 'year' : 'month') : 'month',
             returnUrl: window.location.origin + '/dashboard',
@@ -70,6 +84,26 @@ export default function DashboardPage() {
     }
   const supabase = useMemo(() => createClient(), [])
   const tenantId = currentTenant?.id
+  // Check for pending subscription after login
+  useEffect(() => {
+    const checkPending = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        const email = user?.email
+        if (!email) return
+        const res = await fetch(`/api/subscriptions/pending/lookup?email=${encodeURIComponent(email)}`)
+        if (!res.ok) return
+        const json = await res.json()
+        if (json && json.pending) {
+          setPendingToken(json.pending.token || null)
+          setShowPaymentModal(true)
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    checkPending()
+  }, [supabase])
   const [stats, setStats] = useState<DashboardStats>({
     documentCount: 0,
     pendingTransactions: 0,
@@ -95,16 +129,17 @@ export default function DashboardPage() {
       ])
 
       // 2. Fetch Revenue
-      const { data: plDataRaw } = await supabase.rpc('get_profit_loss', {
+          const { rpc } = await import('@/lib/supabase/typed')
+          const { data: plDataRaw } = await rpc('get_profit_loss', {
         p_tenant_id: tenantId,
         p_start_date: startDate,
         p_end_date: endDate
-      } as any)
+      })
       
-      const plData = plDataRaw as any[] | null
+      const plData = plDataRaw as Array<{ account_type?: string; amount?: number }> | null
 
       const revenue = plData 
-        ? plData.filter((row: any) => row.account_type === 'REVENUE').reduce((sum: number, row: any) => sum + row.amount, 0)
+        ? plData.filter((row) => row.account_type === 'REVENUE').reduce((sum: number, row) => sum + (row.amount || 0), 0)
         : 0
 
       setStats({
@@ -129,7 +164,7 @@ export default function DashboardPage() {
       ])
 
       const activities: ActivityItem[] = [
-        ...(recentDocs.data as any[] || []).map(d => ({
+        ...((recentDocs.data as { id: string; file_name: string; created_at: string; status: string }[] ) || []).map(d => ({
           id: d.id,
           type: 'DOCUMENT' as const,
           title: d.file_name,
@@ -137,7 +172,7 @@ export default function DashboardPage() {
           status: d.status,
           date: d.created_at
         })),
-        ...(recentTx.data as any[] || []).map(t => ({
+        ...((recentTx.data as { id: string; description?: string; created_at: string; status: string; reference_number?: string }[] ) || []).map(t => ({
           id: t.id,
           type: 'TRANSACTION' as const,
           title: t.description || 'Untitled Transaction',

@@ -48,7 +48,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
     }
 
-    const { data, error } = await (supabase as any).rpc('get_tax_estimate', {
+    const { rpc } = await import('@/lib/supabase/typed')
+    const { data, error } = await rpc('get_tax_estimate', {
       p_tenant_id: body.tenantId,
       p_start_date: body.startDate,
       p_end_date: body.endDate

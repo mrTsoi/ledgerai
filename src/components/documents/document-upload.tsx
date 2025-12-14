@@ -45,11 +45,11 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
   const [files, setFiles] = useState<UploadFile[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [selectedBankAccountId, setSelectedBankAccountId] = useState<string>('none')
-  const [bankAccounts, setBankAccounts] = useState<any[]>([])
+  const [bankAccounts, setBankAccounts] = useState<import('@/types/database.types').Database['public']['Tables']['bank_accounts']['Row'][]>([])
   const { currentTenant } = useTenant()
   const { batchSize } = useBatchConfig()
   const router = useRouter()
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo(() => createClient() as any, [])
   const tenantId = currentTenant?.id
 
   const fetchBankAccounts = useCallback(async () => {
@@ -131,8 +131,8 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
       const documentType = isBankStatement ? 'bank_statement' : null
 
       // Create document record
-      const { error: dbError } = await (supabase
-        .from('documents') as any)
+      const { error: dbError } = await supabase
+        .from('documents')
         .insert({
           id: documentId,
           tenant_id: currentTenant.id,
@@ -153,8 +153,8 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
 
       // If bank account selected, create bank_statement record immediately
       if (isBankStatement) {
-        await (supabase
-          .from('bank_statements') as any)
+        await supabase
+          .from('bank_statements')
           .insert({
             tenant_id: currentTenant.id,
             bank_account_id: selectedBankAccountId,

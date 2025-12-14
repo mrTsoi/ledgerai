@@ -46,9 +46,12 @@
     "tabs": {
       "overview": "System Overview",
       "tenants": "Tenant Management",
+      "pending": "Pending Subscriptions",
       "audit": "Audit Logs",
       "languages": "Languages"
     }
+    ,
+    "unauthorized": "You are not authorized to view this admin area."
   },
   "auth": {
     "login": "Log In",

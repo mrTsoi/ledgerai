@@ -60,15 +60,15 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
 
   const { currentTenant } = useTenant()
   const { batchSize } = useBatchConfig()
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo(() => createClient() as any, [])
 
   const fetchDocuments = useCallback(async () => {
     if (!currentTenant) return
 
     try {
       setLoading(true)
-      let query = (supabase
-        .from('documents') as any)
+      let query = supabase
+        .from('documents')
         .select('*, document_data(confidence_score, extracted_data)')
         .eq('tenant_id', currentTenant.id)
         .order('created_at', { ascending: false })
@@ -115,7 +115,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
     try {
       const { data, error } = await supabase.storage
         .from('documents')
-        .download((doc as any).file_path)
+        .download(doc.file_path)
 
       if (error) throw error
 
@@ -123,7 +123,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
       const url = URL.createObjectURL(data)
       const a = document.createElement('a')
       a.href = url
-      a.download = (doc as any).file_name
+      a.download = doc.file_name
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -135,22 +135,22 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
   }
 
   const checkAssociations = async (docId: string) => {
-    const { count: txCount } = await (supabase
-      .from('transactions') as any)
+    const { count: txCount } = await supabase
+      .from('transactions')
       .select('*', { count: 'exact', head: true })
       .eq('document_id', docId)
 
-    const { data: statements } = await (supabase
-      .from('bank_statements') as any)
+    const { data: statements } = await supabase
+      .from('bank_statements')
       .select('id')
       .eq('document_id', docId)
 
-    const statementIds = statements?.map((s: any) => s.id) || []
+    const statementIds = (statements as { id: string }[] | null)?.map(s => s.id) || []
     let bankTxCount = 0
     
     if (statementIds.length > 0) {
-      const { count } = await (supabase
-        .from('bank_transactions') as any)
+      const { count } = await supabase
+        .from('bank_transactions')
         .select('*', { count: 'exact', head: true })
         .in('bank_statement_id', statementIds)
       bankTxCount = count || 0
@@ -164,22 +164,22 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
   }
 
   const checkBulkAssociations = async (docIds: string[]) => {
-    const { count: txCount } = await (supabase
-      .from('transactions') as any)
+    const { count: txCount } = await supabase
+      .from('transactions')
       .select('*', { count: 'exact', head: true })
       .in('document_id', docIds)
 
-    const { data: statements } = await (supabase
-      .from('bank_statements') as any)
+    const { data: statements } = await supabase
+      .from('bank_statements')
       .select('id')
       .in('document_id', docIds)
 
-    const statementIds = statements?.map((s: any) => s.id) || []
+    const statementIds = (statements as { id: string }[] | null)?.map(s => s.id) || []
     let bankTxCount = 0
     
     if (statementIds.length > 0) {
-      const { count } = await (supabase
-        .from('bank_transactions') as any)
+      const { count } = await supabase
+        .from('bank_transactions')
         .select('*', { count: 'exact', head: true })
         .in('bank_statement_id', statementIds)
       bankTxCount = count || 0
@@ -211,8 +211,8 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
         try {
           // 1. Delete Transactions
           if (associations.transactions > 0) {
-            const { error: txError } = await (supabase
-              .from('transactions') as any)
+            const { error: txError } = await supabase
+              .from('transactions')
               .delete()
               .eq('document_id', doc.id)
             if (txError) throw txError
@@ -220,8 +220,8 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
 
           // 2. Delete Bank Statements (Cascades to Bank Transactions)
           if (associations.bankStatements > 0) {
-            const { error: bsError } = await (supabase
-              .from('bank_statements') as any)
+            const { error: bsError } = await supabase
+              .from('bank_statements')
               .delete()
               .eq('document_id', doc.id)
             if (bsError) throw bsError
@@ -230,13 +230,13 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
           // 3. Delete from storage
           const { error: storageError } = await supabase.storage
             .from('documents')
-            .remove([(doc as any).file_path])
+            .remove([doc.file_path])
 
           if (storageError) throw storageError
 
           // 4. Delete from database
-          const { error: dbError } = await (supabase
-            .from('documents') as any)
+          const { error: dbError } = await supabase
+            .from('documents')
             .delete()
             .eq('id', doc.id)
 
@@ -260,7 +260,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
     try {
       const { data, error } = await supabase.storage
         .from('documents')
-        .download((doc as any).file_path)
+        .download(doc.file_path)
 
       if (error) throw error
 
@@ -287,7 +287,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
     }
     // Handle case where Supabase might return a single object instead of array
     if (doc.document_data && !Array.isArray(doc.document_data)) {
-      return doc.document_data as any
+      return doc.document_data as Document['document_data']
     }
     return null
   }
@@ -308,14 +308,14 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
       })
       
       if (!response.ok) {
-        const data = await response.json().catch(() => ({} as any))
-        const msg = data?.error || data?.message || 'Failed to start processing'
+        const data = await response.json().catch(() => ({} as unknown)) as Record<string, unknown>
+        const msg = (data['error'] as string) || (data['message'] as string) || 'Failed to start processing'
         throw new Error(msg)
       }
       
       // Fetch the updated document to get the new AI data
-      const { data: updatedDoc, error: fetchError } = await (supabase
-        .from('documents') as any)
+      const { data: updatedDoc, error: fetchError } = await supabase
+        .from('documents')
         .select('*, document_data(confidence_score, extracted_data)')
         .eq('id', doc.id)
         .single()
@@ -385,8 +385,8 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
           
           // 1. Delete Transactions
           if (associations.transactions > 0) {
-            const { error: txError } = await (supabase
-              .from('transactions') as any)
+            const { error: txError } = await supabase
+              .from('transactions')
               .delete()
               .in('document_id', ids)
             if (txError) throw txError
@@ -394,22 +394,22 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
 
           // 2. Delete Bank Statements (Cascades to Bank Transactions)
           if (associations.bankStatements > 0) {
-            const { error: bsError } = await (supabase
-              .from('bank_statements') as any)
+            const { error: bsError } = await supabase
+              .from('bank_statements')
               .delete()
               .in('document_id', ids)
             if (bsError) throw bsError
           }
 
           // 3. Delete from storage
-          const paths = docsToDelete.map(d => (d as any).file_path)
+          const paths = docsToDelete.map(d => d.file_path)
           if (paths.length > 0) {
             await supabase.storage.from('documents').remove(paths)
           }
 
           // 4. Delete from DB
-          const { error } = await (supabase
-            .from('documents') as any)
+          const { error } = await supabase
+            .from('documents')
             .delete()
             .in('id', ids)
 
@@ -463,8 +463,8 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
 
             if (response.ok) {
               // Fetch updated doc
-              const { data: updatedDoc } = await (supabase
-                .from('documents') as any)
+              const { data: updatedDoc } = await supabase
+                .from('documents')
                 .select('*, document_data(confidence_score, extracted_data)')
                 .eq('id', id)
                 .single()

@@ -702,6 +702,47 @@ export interface Database {
           updated_at?: string
         }
       }
+      pending_subscriptions: {
+        Row: {
+          id: string
+          tenant_id: string | null
+          email: string
+          plan_id: string | null
+          interval: 'month' | 'year'
+          stripe_price_id: string | null
+          token: string
+          expires_at: string
+          consumed_at: string | null
+          consumed_by_user_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id?: string | null
+          email: string
+          plan_id?: string | null
+          interval?: 'month' | 'year'
+          stripe_price_id?: string | null
+          token?: string
+          expires_at?: string
+          consumed_at?: string | null
+          consumed_by_user_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string | null
+          email?: string
+          plan_id?: string | null
+          interval?: 'month' | 'year'
+          stripe_price_id?: string | null
+          token?: string
+          expires_at?: string
+          consumed_at?: string | null
+          consumed_by_user_id?: string | null
+          created_at?: string
+        }
+      }
       promo_codes: {
         Row: {
           id: string
@@ -779,6 +820,73 @@ export interface Database {
           current_period_end?: string | null
           created_at?: string
           updated_at?: string
+        }
+      }
+      billing_invoices: {
+        Row: {
+          id: string
+          user_id: string
+          stripe_invoice_id: string
+          amount_paid: number
+          currency: string
+          status: string | null
+          invoice_pdf: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          stripe_invoice_id: string
+          amount_paid: number
+          currency?: string | null
+          status?: string | null
+          invoice_pdf?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          stripe_invoice_id?: string
+          amount_paid?: number
+          currency?: string | null
+          status?: string | null
+          invoice_pdf?: string | null
+          created_at?: string
+        }
+      }
+      ai_usage_logs: {
+        Row: {
+          id: string
+          tenant_id: string
+          ai_provider_id: string | null
+          model: string | null
+          tokens_input: number | null
+          tokens_output: number | null
+          status: string | null
+          error_message: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tenant_id: string
+          ai_provider_id?: string | null
+          model?: string | null
+          tokens_input?: number | null
+          tokens_output?: number | null
+          status?: string | null
+          error_message?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string
+          ai_provider_id?: string | null
+          model?: string | null
+          tokens_input?: number | null
+          tokens_output?: number | null
+          status?: string | null
+          error_message?: string | null
+          created_at?: string
         }
       }
     }

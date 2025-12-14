@@ -9,6 +9,8 @@ import { TranslationManagement } from '@/components/admin/translation-management
 import { AIProviderManagement } from '@/components/admin/ai-provider-management'
 import { PlatformCustomizer } from '@/components/admin/platform-customizer'
 import { ProcessingSettings } from '@/components/admin/processing-settings'
+import { PendingSubscriptionsAdmin } from '@/components/admin/pending-subscriptions'
+          <TabsTrigger value="pending">Pending Subscriptions</TabsTrigger>
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
@@ -66,6 +68,9 @@ export default function AdminPage() {
 
         <TabsContent value="subscriptions">
           <SubscriptionManagement />
+        </TabsContent>
+        <TabsContent value="pending">
+          <PendingSubscriptionsAdmin />
         </TabsContent>
 
         <TabsContent value="audit">

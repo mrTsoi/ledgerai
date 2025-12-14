@@ -7,15 +7,14 @@ export async function getUserSubscriptionFeatures(
   supabase: SupabaseClient<Database>,
   userId: string
 ): Promise<Record<string, any>> {
-  const { data, error } = await (supabase.rpc as any)('get_user_subscription_details', {
-    p_user_id: userId,
-  })
+  const { rpc } = await import('@/lib/supabase/typed')
+  const rpcRes = await rpc('get_user_subscription_details', { p_user_id: userId })
 
-  if (error) {
-    throw new Error(error.message || 'Failed to load subscription details')
+  if (rpcRes.error) {
+    throw new Error(rpcRes.error.message || 'Failed to load subscription details')
   }
 
-  const first = (data as any[])?.[0]
+  const first = (rpcRes.data as any[])?.[0]
   return (first?.features as Record<string, any>) || {}
 }
 

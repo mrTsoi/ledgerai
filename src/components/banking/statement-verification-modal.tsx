@@ -33,7 +33,7 @@ export function StatementVerificationModal({ isOpen, onClose, accountId }: Props
   const [loading, setLoading] = useState(true)
   const [viewDocumentId, setViewDocumentId] = useState<string | null>(null)
   
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo(() => createClient() as any, [])
 
   const fetchData = useCallback(async () => {
     try {
@@ -70,7 +70,7 @@ export function StatementVerificationModal({ isOpen, onClose, accountId }: Props
 
       if (error) throw error
 
-      const verified = stmts.map((stmt: any) => {
+      const verified = (stmts as any[]).map((stmt: any) => {
         const docData = stmt.document?.document_data?.[0] // Assuming one data record per doc
         
         // For bank statements, items might be in extracted_data.bank_transactions instead of line_items
@@ -82,14 +82,14 @@ export function StatementVerificationModal({ isOpen, onClose, accountId }: Props
         const extractedCount = Array.isArray(extractedItems) ? extractedItems.length : null
         
         // Calculate totals
-        const feedTotal = stmt.transactions?.reduce((sum: number, t: any) => sum + t.amount, 0) || 0
+        const feedTotal = (stmt.transactions || []).reduce((sum: number, t: any) => sum + (t?.amount || 0), 0)
         
         // Extracted total might be in total_amount or sum of line items
         let extractedTotal = docData?.total_amount
         if (!extractedTotal && Array.isArray(extractedItems)) {
            // Try to sum line items if total_amount is missing
            // This depends on line item structure
-           extractedTotal = extractedItems.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0)
+           extractedTotal = (Array.isArray(extractedItems) ? extractedItems : []).reduce((sum: number, item: any) => sum + (Number(item?.amount) || 0), 0)
         }
 
         return {

@@ -49,7 +49,8 @@ export async function POST(req: Request) {
   }
 
   // Load memberships to determine permissions
-  const { data: membershipRows, error: membershipError } = await (supabase.from('memberships') as any)
+  const { data: membershipRows, error: membershipError } = await supabase
+    .from('memberships')
     .select('tenant_id, role, is_active')
     .eq('user_id', user.id)
     .eq('is_active', true)
@@ -59,7 +60,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: membershipError.message }, { status: 400 })
   }
 
-  const memberships = (membershipRows || []) as any[]
+  const memberships = (membershipRows || []) as { tenant_id: string; role: string; is_active: boolean }[]
   const isSuperAdmin = memberships.some((m) => m.role === 'SUPER_ADMIN')
 
   // Tenants the user explicitly manages in a tenant-context sense.
@@ -94,11 +95,11 @@ export async function POST(req: Request) {
   } else if (normalizedScope === 'all_platform') {
     if (!isSuperAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-    const { data: tenants, error: tenantsError } = await (supabase.from('tenants') as any).select('id')
+    const { data: tenants, error: tenantsError } = await supabase.from('tenants').select('id')
     if (tenantsError) {
       return NextResponse.json({ error: tenantsError.message }, { status: 400 })
     }
-    targetTenantIds = uniqueStrings(((tenants || []) as any[]).map((t) => t.id))
+    targetTenantIds = uniqueStrings(((tenants || []) as { id: string }[]).map((t) => t.id))
   } else {
     return NextResponse.json({ error: 'Invalid scope' }, { status: 400 })
   }

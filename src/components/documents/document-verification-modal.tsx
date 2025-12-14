@@ -66,7 +66,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
   const [lastZoomLevel, setLastZoomLevel] = useState(100)
 
   const { currentTenant } = useTenant()
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo(() => createClient() as any, [])
 
   useEffect(() => {
     return () => {
@@ -79,8 +79,8 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
       setLoading(true)
       
       // Fetch document
-      const { data: doc, error: docError } = await (supabase
-        .from('documents') as any)
+      const { data: doc, error: docError } = await supabase
+        .from('documents')
         .select('*')
         .eq('id', documentId)
         .single()
@@ -89,8 +89,8 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
       setDocument(doc)
 
       // Fetch document data separately to ensure freshness
-      const { data: dData, error: dataError } = await (supabase
-        .from('document_data') as any)
+      const { data: dData, error: dataError } = await supabase
+        .from('document_data')
         .select('*')
         .eq('document_id', documentId)
         .maybeSingle()
@@ -100,7 +100,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
       // Load preview
       const { data: blob, error: storageError } = await supabase.storage
         .from('documents')
-        .download((doc as any).file_path)
+        .download(doc!.file_path)
 
       if (!storageError && blob) {
         setPreviewUrl(URL.createObjectURL(blob))
@@ -132,7 +132,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
       if (dData) {
         setDocData(dData)
         
-        const extracted = (dData.extracted_data as any) || {}
+        const extracted = (dData.extracted_data as unknown as Record<string, any>) || {}
         const rawDate = dData.document_date ?? extracted.document_date
 
         setFormData({
@@ -141,7 +141,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
           total_amount: dData.total_amount?.toString() ?? extracted.total_amount?.toString() ?? '',
           currency: dData.currency ?? extracted.currency ?? 'USD',
           invoice_number: extracted.invoice_number ?? '',
-          document_type: doc.document_type ?? extracted.document_type ?? 'invoice',
+          document_type: doc!.document_type ?? extracted.document_type ?? 'invoice',
           transaction_type: extracted.transaction_type ?? 'expense',
           // Bank Statement Fields
           statement_period_start: extracted.statement_period_start || '',
@@ -154,12 +154,15 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
 
         // Bank transactions
         if (extracted.bank_transactions && Array.isArray(extracted.bank_transactions)) {
-          setBankTransactions(extracted.bank_transactions.map((t: any) => ({
-            date: t.date || '',
-            description: t.description || '',
-            amount: (t.amount ?? '').toString(),
-            type: t.type === 'CREDIT' ? 'CREDIT' : 'DEBIT'
-          })))
+          setBankTransactions(extracted.bank_transactions.map((t: unknown) => {
+            const tx = t as Record<string, any>
+            return {
+              date: tx.date || '',
+              description: tx.description || '',
+              amount: (tx.amount ?? '').toString(),
+              type: tx.type === 'CREDIT' ? 'CREDIT' : 'DEBIT'
+            }
+          }))
         } else {
           setBankTransactions([])
         }
@@ -257,7 +260,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
         total_amount: parseFloat(formData.total_amount) || 0,
         currency: formData.currency,
         extracted_data: {
-          ...((docData?.extracted_data as any) || {}),
+          ...((docData?.extracted_data as unknown as Record<string, any>) || {}),
           vendor_name: formData.vendor_name,
           document_date: formData.document_date,
           total_amount: parseFloat(formData.total_amount) || 0,
@@ -280,8 +283,8 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
       }
 
       // Use upsert to handle both insert and update scenarios (and race conditions)
-      const { error: dataError } = await (supabase
-        .from('document_data') as any)
+      const { error: dataError } = await supabase
+        .from('document_data')
         .upsert({
           document_id: document.id,
           ...updateData,
@@ -289,7 +292,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
           confidence_score: docData?.confidence_score ?? 1.0,
           line_items: docData?.line_items ?? [],
           metadata: {
-            ...((docData?.metadata as any) || {}),
+            ...((docData?.metadata as unknown as Record<string, any>) || {}),
             verified_by_user: true
           }
         }, { onConflict: 'document_id' })
@@ -297,24 +300,24 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
       if (dataError) throw dataError
 
       // Update document type
-      await (supabase
-        .from('documents') as any)
+      await supabase
+        .from('documents')
         .update({ document_type: formData.document_type })
         .eq('id', document.id)
 
       // Handle Bank Statement Updates
       if (formData.document_type === 'bank_statement') {
         // 1. Find existing statement
-        const { data: existingStatement } = await (supabase
-          .from('bank_statements') as any)
+        const { data: existingStatement } = await supabase
+          .from('bank_statements')
           .select('id')
           .eq('document_id', document.id)
           .maybeSingle()
         
         if (existingStatement) {
           // Update statement details
-          await (supabase
-            .from('bank_statements') as any)
+          await supabase
+            .from('bank_statements')
             .update({
               start_date: formData.statement_period_start || null,
               end_date: formData.statement_period_end || null,
@@ -326,8 +329,8 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
 
           // Update transactions (Delete all and re-insert is safest for sync)
           // Ideally we would diff, but for now this ensures consistency with the verified data
-          await (supabase
-            .from('bank_transactions') as any)
+          await supabase
+            .from('bank_transactions')
             .delete()
             .eq('bank_statement_id', existingStatement.id)
             .eq('status', 'PENDING') // Only delete pending ones to avoid messing up matched ones? 
@@ -338,8 +341,9 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
             // Let's just delete all for now as this is "Verification" stage.
           
           if (bankTransactions.length > 0) {
+            if (!currentTenant?.id) throw new Error('No tenant selected')
             const txsToInsert = bankTransactions.map(tx => ({
-              tenant_id: currentTenant?.id,
+              tenant_id: currentTenant.id,
               bank_statement_id: existingStatement.id,
               transaction_date: tx.date,
               description: tx.description,
@@ -349,13 +353,13 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
               confidence_score: 1.0 // User verified
             }))
             
-            await (supabase.from('bank_transactions') as any).insert(txsToInsert as any)
+            await supabase.from('bank_transactions').insert(txsToInsert)
           }
         }
       } else {
         // Handle Invoice/Receipt Updates (Existing Logic)
-        const { data: transaction } = await (supabase
-          .from('transactions') as any)
+        const { data: transaction } = await supabase
+          .from('transactions')
           .select('id, status')
           .eq('document_id', document.id)
           .single()
@@ -363,7 +367,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
         if (transaction && transaction.status === 'DRAFT') {
           // ... existing logic ...
           // 1. Determine Currency & Rate
-          const tenantCurrency = (currentTenant as any)?.currency || 'USD'
+          const tenantCurrency = 'USD'
           const docCurrency = formData.currency || tenantCurrency
           let exchangeRate = 1.0
           
@@ -376,8 +380,8 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
           }
 
           // 2. Update transaction details
-          await (supabase
-            .from('transactions') as any)
+          await supabase
+            .from('transactions')
             .update({
               transaction_date: formData.document_date || new Date().toISOString().split('T')[0],
               reference_number: formData.invoice_number || null,
@@ -391,8 +395,8 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
           // In a real app, this is complex because we don't know which line item corresponds to what.
           // For now, we'll fetch line items and update the amounts if there are exactly 2 (simple double entry)
           
-          const { data: lineItems } = await (supabase
-            .from('line_items') as any)
+          const { data: lineItems } = await supabase
+            .from('line_items')
             .select('*')
             .eq('transaction_id', transaction.id)
 
@@ -424,8 +428,8 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
             })
 
             for (const item of updates) {
-              await (supabase
-                .from('line_items') as any)
+              await supabase
+                .from('line_items')
                 .update({ 
                     debit: item.debit, 
                     credit: item.credit,
