@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -17,6 +19,14 @@ interface ScheduledJob {
   status: 'success' | 'failure' | 'pending';
 }
 
+const FREQUENCIES = [
+  { label: 'Every 15 minutes', value: '*/15 * * * *' },
+  { label: 'Hourly', value: '0 * * * *' },
+  { label: 'Daily', value: '0 0 * * *' },
+  { label: 'Weekly', value: '0 0 * * 0' },
+  { label: 'Custom (cron)', value: 'custom' },
+];
+
 export function AutomatedSyncSettings() {
     const [helpOpen, setHelpOpen] = useState(false);
   const [enabled, setEnabled] = useState(true);
@@ -25,6 +35,10 @@ export function AutomatedSyncSettings() {
   const [rotating, setRotating] = useState(false);
   const [running, setRunning] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [editingJob, setEditingJob] = useState<ScheduledJob | null>(null);
+  const [editFrequency, setEditFrequency] = useState('');
+  const [editCustom, setEditCustom] = useState('');
+  const [editError, setEditError] = useState('');
 
   useEffect(() => {
     // Fetch initial state: enabled, webhookUrl, jobs
@@ -63,6 +77,47 @@ export function AutomatedSyncSettings() {
     }, 1000);
   };
 
+  const handleEditJob = (job: ScheduledJob) => {
+    setEditingJob(job);
+    setEditFrequency(FREQUENCIES.find(f => f.value === job.frequency) ? job.frequency : 'custom');
+    setEditCustom(FREQUENCIES.find(f => f.value === job.frequency) ? '' : job.frequency);
+    setEditError('');
+  };
+
+  const handleSaveEdit = () => {
+    let freq = editFrequency === 'custom' ? editCustom.trim() : editFrequency;
+    if (!freq) {
+      setEditError('Frequency is required.');
+      return;
+    }
+    // TODO: Add cron validation here if needed
+    setJobs(jobs => jobs.map(j => j.id === editingJob?.id ? { ...j, frequency: freq } : j));
+    setEditingJob(null);
+    setEditFrequency('');
+    setEditCustom('');
+    setEditError('');
+    toast.success('Schedule updated.');
+  };
+
+  const handleDeleteJob = (id: string) => {
+    setJobs(jobs => jobs.filter(j => j.id !== id));
+    toast.success('Schedule deleted.');
+  };
+
+  const handleAddJob = () => {
+    setEditingJob({
+      id: 'new-' + Date.now(),
+      source: '',
+      frequency: '0 * * * *',
+      lastRun: '-',
+      nextRun: '-',
+      status: 'pending',
+    });
+    setEditFrequency('0 * * * *');
+    setEditCustom('');
+    setEditError('');
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -98,7 +153,10 @@ export function AutomatedSyncSettings() {
           </Button>
         </div>
         <div className="space-y-2">
-          <div className="font-medium text-sm">Scheduled Jobs</div>
+          <div className="flex items-center justify-between">
+            <div className="font-medium text-sm">Scheduled Jobs</div>
+            <Button size="sm" variant="outline" onClick={handleAddJob}>Add Schedule</Button>
+          </div>
           <div className="overflow-x-auto">
             <table className="min-w-full text-xs border rounded-md">
               <thead>
@@ -108,13 +166,14 @@ export function AutomatedSyncSettings() {
                   <th className="p-2 text-left">Last Run</th>
                   <th className="p-2 text-left">Next Run</th>
                   <th className="p-2 text-left">Status</th>
+                  <th className="p-2 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {jobs.map(job => (
                   <tr key={job.id} className="border-t">
-                    <td className="p-2">{job.source}</td>
-                    <td className="p-2">{job.frequency}</td>
+                    <td className="p-2">{job.source || <span className="italic text-muted-foreground">(not set)</span>}</td>
+                    <td className="p-2">{FREQUENCIES.find(f => f.value === job.frequency)?.label || job.frequency}</td>
                     <td className="p-2">{job.lastRun}</td>
                     <td className="p-2">{job.nextRun}</td>
                     <td className="p-2">
@@ -128,12 +187,62 @@ export function AutomatedSyncSettings() {
                         {job.status}
                       </span>
                     </td>
+                    <td className="p-2 flex gap-1">
+                      <Button size="xs" variant="outline" onClick={() => handleEditJob(job)}>Edit</Button>
+                      <Button size="xs" variant="destructive" onClick={() => handleDeleteJob(job.id)}>Delete</Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
+
+        {/* Edit/Add Schedule Modal */}
+        <Dialog open={!!editingJob} onOpenChange={open => { if (!open) setEditingJob(null); }}>
+          <DialogContent className="max-w-md w-full">
+            <DialogHeader>
+              <DialogTitle>{editingJob?.id?.startsWith('new-') ? 'Add Schedule' : 'Edit Schedule'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium mb-1">Source</label>
+                <Input
+                  value={editingJob?.source || ''}
+                  onChange={e => setEditingJob(j => j ? { ...j, source: e.target.value } : j)}
+                  placeholder="e.g. Google Drive"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1">Frequency</label>
+                <Select value={editFrequency} onValueChange={v => setEditFrequency(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select frequency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FREQUENCIES.map(f => (
+                      <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {editFrequency === 'custom' && (
+                  <Input
+                    className="mt-2"
+                    value={editCustom}
+                    onChange={e => setEditCustom(e.target.value)}
+                    placeholder="Custom cron expression"
+                  />
+                )}
+              </div>
+              {editError && <div className="text-xs text-red-600">{editError}</div>}
+              <div className="flex gap-2 justify-end">
+                <Button size="sm" variant="outline" onClick={() => setEditingJob(null)}>Cancel</Button>
+                <Button size="sm" onClick={handleSaveEdit}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
         <div className="text-xs text-muted-foreground">
           <button
             type="button"
