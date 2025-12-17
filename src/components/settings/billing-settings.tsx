@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Loader2, Check, X, AlertCircle, Download, FileInput, Phone, Mail } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { useSubscription } from '@/hooks/use-subscription'
 import { importInvoiceToTransactions } from '@/app/actions/billing-actions'
 import { toast } from "sonner"
@@ -215,8 +216,13 @@ export function BillingSettings() {
           {subscription ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                <h3 className="font-semibold text-blue-900">{subscription.plan_name}</h3>
-                <p className="text-sm text-blue-700 mb-2">{subscription.status === 'active' ? 'Active' : 'Inactive'}</p>
+                <div className="flex items-center gap-3">
+                  <h3 className="font-semibold text-blue-900">{subscription.plan_name}</h3>
+                  <Badge variant={subscription.status === 'active' ? 'default' : subscription.status === 'pending' ? 'secondary' : 'destructive'} className="text-sm">
+                    {subscription.status?.toString().toUpperCase()}
+                  </Badge>
+                </div>
+                <p className="text-sm text-blue-700 mb-2">{subscription.status === 'active' ? 'Active' : subscription.status === 'pending' ? 'Pending Confirmation' : 'Inactive'}</p>
                 <p className="text-2xl font-bold text-blue-800">${subscription.price_monthly}/mo</p>
                 
                 {subscription.current_period_start && subscription.current_period_end && (
@@ -233,6 +239,44 @@ export function BillingSettings() {
                     <p>Switching to <strong>{subscription.next_plan_name}</strong> on {new Date(subscription.next_plan_start_date).toLocaleDateString()}</p>
                   </div>
                 )}
+
+                {/* Actions: Complete Purchase if pending, Download latest invoice when available */}
+                <div className="mt-4 flex gap-2">
+                  {subscription.status === 'pending' && subscription.plan_id && (
+                    <Button
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          setUpgrading(subscription.plan_id as string)
+                          const response = await fetch('/api/stripe/checkout', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ planId: subscription.plan_id, interval: currentInterval, returnUrl: window.location.href })
+                          })
+                          if (!response.ok) throw new Error('Failed to start checkout')
+                          const { url } = await response.json()
+                          if (url) window.location.href = url
+                        } catch (e) {
+                          console.error('Complete purchase failed', e)
+                        } finally {
+                          setUpgrading(null)
+                        }
+                      }}
+                      disabled={upgrading !== null}
+                    >
+                      {upgrading === subscription.plan_id ? <Loader2 className="animate-spin" /> : 'Complete Purchase'}
+                    </Button>
+                  )}
+
+                  {invoices.length > 0 && (
+                    <a href={invoices[0].invoice_pdf || '#'} target="_blank" rel="noreferrer" className="inline-block">
+                      <Button size="sm" variant="outline" title="Download latest invoice">
+                        <Download className="w-4 h-4 mr-2" />
+                        <span className="hidden sm:inline">Download Invoice</span>
+                      </Button>
+                    </a>
+                  )}
+                </div>
               </div>
               
               <div className="space-y-4 col-span-2">
