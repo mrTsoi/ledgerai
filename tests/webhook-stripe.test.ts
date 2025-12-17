@@ -29,7 +29,20 @@ vi.mock('@/lib/stripe', () => ({
       }))
     }
   })),
-  getStripeConfig: vi.fn(() => ({ webhook_secret: 'whsec' }))
+  getStripeConfig: vi.fn(() => ({ webhook_secret: 'whsec' })),
+  retrieveSubscription: vi.fn(async (_id: string) => ({
+    current_period_start: 1700000000,
+    current_period_end: 1702592000,
+  })),
+  retrieveInvoice: vi.fn(async (_id: string) => ({
+    id: 'invid',
+    status: 'paid',
+    amount_paid: 1000,
+    currency: 'usd',
+    invoice_pdf: 'url',
+    created: 1700000000,
+    lines: { data: [{ description: 'desc', period: { start: 1700000000, end: 1702592000 } }] },
+  })),
 }))
 
 vi.mock('@/lib/supabase/service', () => ({

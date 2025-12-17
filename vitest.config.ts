@@ -11,6 +11,17 @@ export default defineConfig({
   },
   test: {
     setupFiles: ['./tests/setup.ts'],
-    environment: 'jsdom'
+    environment: 'jsdom',
+    exclude: [
+      ...(
+        // Vitest defaults
+        // See: https://vitest.dev/config/#exclude
+        ['**/node_modules/**', '**/dist/**', '**/cypress/**', '**/.{idea,git,cache,output,temp}/**']
+      ),
+      // Playwright E2E tests live here; they should be run via `npx playwright test`
+      'tests/e2e/**',
+      // Prevent accidental collection of Playwright-style specs anywhere
+      '**/*.spec.*'
+    ]
   }
 })
