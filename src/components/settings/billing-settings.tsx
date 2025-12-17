@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { useSubscription } from '@/hooks/use-subscription'
 import { importInvoiceToTransactions } from '@/app/actions/billing-actions'
 import { toast } from "sonner"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { FEATURE_DEFINITIONS, isFeatureEnabled } from '@/lib/subscription/features'
 
 type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
@@ -31,7 +31,38 @@ export function BillingSettings() {
   const [billingCycle, setBillingCycle] = useState<'month' | 'year'>('month')
   const [invoices, setInvoices] = useState<any[]>([])
   const [contactConfig, setContactConfig] = useState<ContactConfig>({ whatsapp: '', email: '' })
+  const [purchaseModalOpen, setPurchaseModalOpen] = useState(false)
+  const [purchaseModal, setPurchaseModal] = useState<null | {
+    kind: 'success' | 'updated' | 'scheduled' | 'canceled'
+    previousPlanName?: string | null
+    previousCycle?: 'month' | 'year' | null
+    newPlanName?: string | null
+    newCycle?: 'month' | 'year' | null
+    effectiveDate?: string | null
+    nextBillingDate?: string | null
+  }>(null)
+  const [inlineChangeBanner, setInlineChangeBanner] = useState<null | {
+    previousPlanName?: string | null
+    previousCycle?: 'month' | 'year' | null
+    newPlanName?: string | null
+    newCycle?: 'month' | 'year' | null
+    effectiveDate?: string | null
+    isScheduled: boolean
+  }>(null)
   const supabase = useMemo(() => createClient(), [])
+
+  const inferInterval = (sub: any): 'month' | 'year' => {
+    if (sub?.current_period_start && sub?.current_period_end) {
+      const dur = new Date(sub.current_period_end).getTime() - new Date(sub.current_period_start).getTime()
+      return dur > 40 * 24 * 60 * 60 * 1000 ? 'year' : 'month'
+    }
+    return 'month'
+  }
+
+  const formatCycle = (cycle: 'month' | 'year' | null | undefined) => {
+    if (!cycle) return ''
+    return cycle === 'year' ? 'Yearly' : 'Monthly'
+  }
 
   const formatStorage = (bytes: number) => {
     if (bytes === -1) return 'Unlimited'
@@ -165,6 +196,102 @@ export function BillingSettings() {
     fetchContactConfig()
   }, [fetchPlans, fetchInvoices, fetchContactConfig])
 
+  useEffect(() => {
+    // Post-checkout UX: show a clear confirmation and refresh subscription + invoices.
+    // We keep tab/other params intact, and remove only the checkout-related ones.
+    const params = new URLSearchParams(window.location.search)
+    const success = params.get('success') === 'true'
+    const canceled = params.get('canceled') === 'true'
+    const updated = params.get('updated') === 'true'
+    const scheduled = params.get('change') === 'scheduled' || params.get('downgrade') === 'scheduled'
+
+    if (!success && !canceled && !updated && !scheduled) return
+
+    const previousPlanName = subscription?.plan_name || null
+    const previousCycle = subscription ? inferInterval(subscription) : null
+
+    ;(async () => {
+      try {
+        const nextSub = await refreshSubscription()
+        await fetchInvoices()
+
+        const currentCycle = nextSub ? inferInterval(nextSub) : null
+        const nextBillingDate = nextSub?.current_period_end || null
+
+        if (canceled) {
+          setPurchaseModal({
+            kind: 'canceled',
+            previousPlanName,
+            previousCycle,
+            newPlanName: previousPlanName,
+            newCycle: previousCycle,
+          })
+          setPurchaseModalOpen(true)
+          setInlineChangeBanner(null)
+          return
+        }
+
+        if (scheduled) {
+          const nextPlanName = nextSub?.next_plan_name || nextSub?.plan_name || null
+          const nextCycle = (nextSub?.next_billing_interval as any) || currentCycle
+          const effectiveDate = nextSub?.next_plan_start_date || nextSub?.current_period_end || null
+
+          setPurchaseModal({
+            kind: 'scheduled',
+            previousPlanName,
+            previousCycle,
+            newPlanName: nextPlanName,
+            newCycle: nextCycle,
+            effectiveDate,
+            nextBillingDate,
+          })
+          setPurchaseModalOpen(true)
+          setInlineChangeBanner({
+            previousPlanName,
+            previousCycle,
+            newPlanName: nextPlanName,
+            newCycle: nextCycle,
+            effectiveDate,
+            isScheduled: true,
+          })
+          return
+        }
+
+        // Immediate purchase/update
+        const newPlanName = nextSub?.plan_name || null
+        const newCycle = currentCycle
+        setPurchaseModal({
+          kind: updated ? 'updated' : 'success',
+          previousPlanName,
+          previousCycle,
+          newPlanName,
+          newCycle,
+          effectiveDate: null,
+          nextBillingDate,
+        })
+        setPurchaseModalOpen(true)
+        setInlineChangeBanner({
+          previousPlanName,
+          previousCycle,
+          newPlanName,
+          newCycle,
+          effectiveDate: null,
+          isScheduled: false,
+        })
+      } finally {
+        const url = new URL(window.location.href)
+        url.searchParams.delete('success')
+        url.searchParams.delete('canceled')
+        url.searchParams.delete('updated')
+        url.searchParams.delete('change')
+        url.searchParams.delete('downgrade')
+
+        const qs = url.searchParams.toString()
+        window.history.replaceState({}, '', `${url.pathname}${qs ? `?${qs}` : ''}${url.hash}`)
+      }
+    })()
+  }, [fetchInvoices, refreshSubscription, subscription])
+
   const handleUpgrade = async (planId: string) => {
     try {
       setUpgrading(planId)
@@ -206,6 +333,75 @@ export function BillingSettings() {
 
   return (
     <div className="space-y-8">
+      <Dialog open={purchaseModalOpen} onOpenChange={setPurchaseModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {purchaseModal?.kind === 'scheduled'
+                ? 'Change scheduled'
+                : purchaseModal?.kind === 'updated'
+                  ? 'Subscription updated'
+                  : purchaseModal?.kind === 'canceled'
+                    ? 'Checkout canceled'
+                    : 'Purchase confirmed'}
+            </DialogTitle>
+            <DialogDescription>
+              {purchaseModal?.kind === 'scheduled'
+                ? 'Your changes will take effect at the end of your current billing period.'
+                : purchaseModal?.kind === 'canceled'
+                  ? 'No charges were made.'
+                  : 'Your subscription has been updated successfully.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 text-sm">
+            {(purchaseModal?.previousPlanName || purchaseModal?.newPlanName) && (
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Plan</span>
+                <span className="text-right font-medium">
+                  {(purchaseModal?.previousPlanName || '—')}
+                  {'  →  '}
+                  {(purchaseModal?.newPlanName || '—')}
+                </span>
+              </div>
+            )}
+
+            {(purchaseModal?.previousCycle || purchaseModal?.newCycle) && (
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Billing cycle</span>
+                <span className="text-right font-medium">
+                  {formatCycle(purchaseModal?.previousCycle || null) || '—'}
+                  {'  →  '}
+                  {formatCycle(purchaseModal?.newCycle || null) || '—'}
+                </span>
+              </div>
+            )}
+
+            {purchaseModal?.kind === 'scheduled' && (
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Effective</span>
+                <span className="text-right font-medium">
+                  {purchaseModal?.effectiveDate ? new Date(purchaseModal.effectiveDate).toLocaleDateString() : 'End of current period'}
+                </span>
+              </div>
+            )}
+
+            {purchaseModal?.nextBillingDate && (
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Next billing date</span>
+                <span className="text-right font-medium">
+                  {new Date(purchaseModal.nextBillingDate).toLocaleDateString()}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button onClick={() => setPurchaseModalOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Current Usage */}
       <Card>
         <CardHeader>
@@ -233,11 +429,51 @@ export function BillingSettings() {
                   </div>
                 )}
 
-                {subscription.next_plan_name && subscription.next_plan_start_date && (
-                  <div className="mt-4 pt-4 border-t border-blue-200 text-xs text-amber-700 bg-amber-50 p-2 rounded">
-                    <p className="font-semibold mb-1">Scheduled Change</p>
-                    <p>Switching to <strong>{subscription.next_plan_name}</strong> on {new Date(subscription.next_plan_start_date).toLocaleDateString()}</p>
+                {inlineChangeBanner && (
+                  <div className="mt-4 pt-4 border-t border-blue-200 text-xs text-amber-800 bg-amber-50 p-2 rounded">
+                    <p className="font-semibold mb-1">
+                      {inlineChangeBanner.isScheduled ? 'Change scheduled (effective at period end)' : 'Recent change'}
+                    </p>
+                    <p>
+                      Plan: <strong>{inlineChangeBanner.previousPlanName || '—'}</strong> → <strong>{inlineChangeBanner.newPlanName || '—'}</strong>
+                    </p>
+                    <p>
+                      Billing cycle: <strong>{formatCycle(inlineChangeBanner.previousCycle || null) || '—'}</strong> → <strong>{formatCycle(inlineChangeBanner.newCycle || null) || '—'}</strong>
+                    </p>
+                    {inlineChangeBanner.isScheduled && (
+                      <p>
+                        After your current billing period ends (on {inlineChangeBanner.effectiveDate ? new Date(inlineChangeBanner.effectiveDate).toLocaleDateString() : new Date(subscription.current_period_end).toLocaleDateString()}), your changes will take effect.
+                      </p>
+                    )}
                   </div>
+                )}
+
+                {(subscription.next_plan_start_date || (subscription as any)?.next_billing_interval) && (
+                  (() => {
+                    const nextInterval = subscription.next_billing_interval || null
+                    const nextBillingLabel = nextInterval === 'year' ? 'Yearly' : nextInterval === 'month' ? 'Monthly' : null
+                    const planChange = Boolean(subscription.next_plan_name && subscription.next_plan_name !== subscription.plan_name)
+                    const cycleChange = Boolean(nextInterval && nextInterval !== currentInterval)
+                    const effectiveDate = subscription.next_plan_start_date || subscription.current_period_end
+                    const effectiveDateLabel = effectiveDate ? new Date(effectiveDate).toLocaleDateString() : null
+
+                    const parts: string[] = []
+                    if (planChange && subscription.next_plan_name) parts.push(`switch to ${subscription.next_plan_name}`)
+                    if (cycleChange && nextBillingLabel) parts.push(`switch billing cycle to ${nextBillingLabel}`)
+
+                    const afterText = effectiveDateLabel
+                      ? `After your current billing period ends (on ${effectiveDateLabel}), `
+                      : 'After your current billing period ends, '
+
+                    const willText = parts.length > 0 ? `your subscription will ${parts.join(' and ')}.` : 'your change will take effect.'
+
+                    return (
+                      <div className="mt-4 pt-4 border-t border-blue-200 text-xs text-amber-800 bg-amber-50 p-2 rounded">
+                        <p className="font-semibold mb-1">Change scheduled (effective at period end)</p>
+                        <p>{afterText}{willText}</p>
+                      </div>
+                    )
+                  })()
                 )}
 
                 {/* Actions: Complete Purchase if pending, Download latest invoice when available */}

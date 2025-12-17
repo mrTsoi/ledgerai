@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,7 +17,29 @@ export default function LoginForm() {
   const [showMfaInput, setShowMfaInput] = useState(false)
   const [mfaCode, setMfaCode] = useState('')
   const router = useRouter()
+  const pathname = usePathname()
   const supabase = createClient()
+
+  const locale = (pathname?.split('/')?.[1] || 'en') as string
+
+  const handleGoogleLogin = async () => {
+    setError(null)
+    setLoading(true)
+    try {
+      const redirectTo = `${window.location.origin}/${locale}/auth/callback?next=${encodeURIComponent(`/${locale}/dashboard`)}`
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+        },
+      })
+      if (error) throw error
+      // Redirect handled by Supabase
+    } catch (err: any) {
+      setError(err?.message || 'Failed to start Google login')
+      setLoading(false)
+    }
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -119,6 +141,16 @@ export default function LoginForm() {
               </div>
             ) : (
               <>
+                <Button type="button" variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={loading}>
+                  Continue with Google
+                </Button>
+
+                <div className="flex items-center gap-3">
+                  <div className="h-px flex-1 bg-border" />
+                  <span className="text-xs text-muted-foreground">or</span>
+                  <div className="h-px flex-1 bg-border" />
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input

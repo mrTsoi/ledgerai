@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,7 +23,35 @@ export default function SignupForm() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
   const supabase = createClient()
+
+  const locale = (pathname?.split('/')?.[1] || 'en') as string
+
+  const handleGoogleSignup = async () => {
+    setError(null)
+    if (!planId) {
+      setError('Please select a subscription plan.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const next = `/${locale}/dashboard`
+      const redirectTo = `${window.location.origin}/${locale}/auth/callback?next=${encodeURIComponent(next)}&plan_id=${encodeURIComponent(planId)}&interval=${encodeURIComponent(interval)}`
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+        },
+      })
+      if (error) throw error
+      // Redirect handled by Supabase
+    } catch (err: any) {
+      setError(err?.message || 'Failed to start Google signup')
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     // Fetch plans from Supabase
@@ -122,6 +150,16 @@ export default function SignupForm() {
                 required
                 disabled={loading}
               />
+            </div>
+
+            <Button type="button" variant="outline" className="w-full" onClick={handleGoogleSignup} disabled={loading || success}>
+              Continue with Google
+            </Button>
+
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs text-muted-foreground">or</span>
+              <div className="h-px flex-1 bg-border" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="plan">Subscription Plan</Label>

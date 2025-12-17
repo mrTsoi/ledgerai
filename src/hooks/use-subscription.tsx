@@ -17,6 +17,7 @@ export type SubscriptionDetails = {
   current_period_end: string
   next_plan_name?: string
   next_plan_start_date?: string
+  next_billing_interval?: 'month' | 'year' | null
   features?: {
     ai_agent?: boolean
     bank_integration?: boolean
@@ -28,7 +29,7 @@ export type SubscriptionDetails = {
 type SubscriptionContextType = {
   subscription: SubscriptionDetails | null
   loading: boolean
-  refreshSubscription: () => Promise<void>
+  refreshSubscription: () => Promise<SubscriptionDetails | null>
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined)
@@ -43,13 +44,16 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
         setSubscription(null)
-        return
+        return null
       }
 
-      setSubscription((json?.subscription as SubscriptionDetails) || null)
+      const next = (json?.subscription as SubscriptionDetails) || null
+      setSubscription(next)
+      return next
     } catch (error) {
       console.error('Error fetching subscription:', error)
       setSubscription(null)
+      return null
     } finally {
       setLoading(false)
     }

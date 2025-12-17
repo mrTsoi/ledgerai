@@ -311,6 +311,37 @@ export async function POST(req: Request) {
         // If the update was a phase transition (schedule completed), we might want to clear next_plan_id
         // We can check if cancel_at_period_end is false, meaning no pending cancellation.
         
+        // If Stripe says the subscription is deleted, and we had a queued next_plan_id
+        // (e.g., downgrade to Free), apply it now so the app immediately reflects the Free plan.
+        if (event.type === 'customer.subscription.deleted') {
+          const svc = createService()
+          const { data: existingRow } = await svc
+            .from('user_subscriptions')
+            .select('user_id, next_plan_id')
+            .eq('stripe_subscription_id', subscription.id)
+            .maybeSingle()
+
+          const nextPlanId = (existingRow as any)?.next_plan_id as string | null | undefined
+
+          if (nextPlanId) {
+            const nowIso = new Date().toISOString()
+            await svc
+              .from('user_subscriptions')
+              .update({
+                plan_id: nextPlanId,
+                status: 'active',
+                stripe_subscription_id: null,
+                current_period_start: nowIso,
+                current_period_end: null,
+                next_plan_id: null,
+                next_plan_start_date: null,
+                next_billing_interval: null,
+              })
+              .eq('stripe_subscription_id', subscription.id)
+            break
+          }
+        }
+
         const cps2 = getNumberField(subscription, 'current_period_start')
         const cpe2 = getNumberField(subscription, 'current_period_end')
         const updateData: Database['public']['Tables']['user_subscriptions']['Update'] = {
@@ -319,11 +350,6 @@ export async function POST(req: Request) {
           current_period_end: cpe2 ? new Date(cpe2 * 1000).toISOString() : null
         }
 
-        // If the subscription is active and not canceling, we might assume the transition happened
-        // Ideally we check the plan ID.
-        // Let's fetch the current plan from DB to compare? No, too expensive.
-        // Let's just update the core fields.
-        
         await createService()
           .from('user_subscriptions')
           .update(updateData)
