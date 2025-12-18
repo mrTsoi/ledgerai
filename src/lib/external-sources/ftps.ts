@@ -4,6 +4,7 @@ import path from 'path'
 import tls from 'tls'
 import { guessMimeType } from './mime'
 import type { ExternalFetchedFile, ExternalSourceConfig, ExternalSourceSecrets } from './types'
+import { Writable } from 'stream'
 
 type FtpsListItem = {
   name: string
@@ -60,17 +61,14 @@ export async function fetchFromFtps(config: ExternalSourceConfig, secrets: Exter
       download: async (remoteFilePath: string): Promise<ExternalFetchedFile> => {
         // basic-ftp can download to a Writable; easiest is to collect into a buffer.
         const chunks: Buffer[] = []
-        await client.downloadTo(
-          {
-            writable: true,
-            write: (chunk: Buffer, _enc: any, cb: any) => {
-              chunks.push(Buffer.from(chunk))
-              cb()
-            },
-            end: (cb: any) => cb(),
-          } as any,
-          remoteFilePath
-        )
+        const writable = new Writable({
+          write(chunk: Buffer | string, _encoding, callback) {
+            chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)))
+            callback()
+          },
+        })
+
+        await client.downloadTo(writable, remoteFilePath)
 
         const buf = Buffer.concat(chunks)
         const filename = path.posix.basename(remoteFilePath)

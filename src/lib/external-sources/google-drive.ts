@@ -34,12 +34,13 @@ async function refreshAccessToken(params: {
     }),
   })
 
-  const json = (await res.json()) as any
+  const json = await res.json() as unknown
   if (!res.ok) {
-    throw new Error(json?.error_description || json?.error || 'Failed to refresh Google token')
+    const errMsg = (json as Record<string, unknown>)['error_description'] ?? (json as Record<string, unknown>)['error'] ?? 'Failed to refresh Google token'
+    throw new Error(String(errMsg))
   }
 
-  return json as GoogleTokenResponse
+  return json as unknown as GoogleTokenResponse
 }
 
 export async function googleDriveGetAccount(params: { refreshToken: string }) {
@@ -52,15 +53,16 @@ export async function googleDriveGetAccount(params: { refreshToken: string }) {
     headers: { Authorization: `Bearer ${token.access_token}` },
   })
 
-  const json = (await res.json()) as any
+  const json = await res.json() as unknown
   if (!res.ok) {
-    throw new Error(json?.error?.message || 'Failed to get Google Drive account')
+    const err = (json as Record<string, unknown>)['error'] as Record<string, unknown> | undefined
+    throw new Error(String((err && err['message']) || 'Failed to get Google Drive account'))
   }
 
-  const user = json?.user || {}
+  const user = (json as Record<string, unknown>)['user'] as Record<string, unknown> | undefined
   return {
-    email: (user.emailAddress as string | undefined) || null,
-    displayName: (user.displayName as string | undefined) || null,
+    email: (user && (user['emailAddress'] as string)) || null,
+    displayName: (user && (user['displayName'] as string)) || null,
   }
 }
 
@@ -74,12 +76,13 @@ export async function googleDriveGetItemName(params: { fileId: string; refreshTo
     headers: { Authorization: `Bearer ${token.access_token}` },
   })
 
-  const json = (await res.json()) as any
+  const json = await res.json() as unknown
   if (!res.ok) {
-    throw new Error(json?.error?.message || 'Failed to resolve Google Drive item')
+    const err = (json as Record<string, unknown>)['error'] as Record<string, unknown> | undefined
+    throw new Error(String((err && err['message']) || 'Failed to resolve Google Drive item'))
   }
 
-  return (json?.name as string | undefined) || null
+  return (json as Record<string, unknown>)['name'] as string | undefined || null
 }
 
 export async function googleDriveList(params: {
@@ -103,23 +106,27 @@ export async function googleDriveList(params: {
     headers: { Authorization: `Bearer ${token.access_token}` },
   })
 
-  const json = (await res.json()) as any
+  const json = await res.json() as unknown
   if (!res.ok) {
-    throw new Error(json?.error?.message || 'Failed to list Google Drive files')
+    const err = (json as Record<string, unknown>)['error'] as Record<string, unknown> | undefined
+    throw new Error(String((err && err['message']) || 'Failed to list Google Drive files'))
   }
 
-  const files = (json.files || []) as any[]
+  const filesArr = ((json as Record<string, unknown>)['files'] as unknown[]) || []
   return {
     accessToken: token.access_token,
     expiresAt: new Date(Date.now() + token.expires_in * 1000).toISOString(),
-    files: files.map((f) => ({
-      id: f.id as string,
-      name: f.name as string,
-      mimeType: f.mimeType as string,
-      modifiedTime: f.modifiedTime as string | undefined,
-      size: f.size ? Number(f.size) : undefined,
-      md5Checksum: f.md5Checksum as string | undefined,
-    })),
+    files: filesArr.map((f) => {
+      const fr = f as Record<string, unknown>
+      return {
+        id: String(fr['id'] ?? ''),
+        name: String(fr['name'] ?? ''),
+        mimeType: String(fr['mimeType'] ?? ''),
+        modifiedTime: fr['modifiedTime'] ? String(fr['modifiedTime']) : undefined,
+        size: fr['size'] ? Number(fr['size']) : undefined,
+        md5Checksum: fr['md5Checksum'] ? String(fr['md5Checksum']) : undefined,
+      }
+    }),
   }
 }
 
@@ -148,18 +155,21 @@ export async function googleDriveListFolders(params: {
       headers: { Authorization: `Bearer ${token.access_token}` },
     })
 
-    const json = (await res.json()) as any
+    const json = await res.json() as unknown
     if (!res.ok) {
       // If the account has no Shared Drives, Google may still return ok with empty list.
       // If it errors (e.g., not supported), treat as none.
       return []
     }
 
-    const drives = (json.drives || []) as any[]
-    return drives.map((d) => ({
-      id: `drive:${d.id as string}`,
-      name: `[Shared Drive] ${d.name as string}`,
-    }))
+    const drivesArr = ((json as Record<string, unknown>)['drives'] as unknown[]) || []
+    return drivesArr.map((d) => {
+      const dr = d as Record<string, unknown>
+      return {
+        id: `drive:${String(dr['id'] ?? '')}`,
+        name: `[Shared Drive] ${String(dr['name'] ?? '')}`,
+      }
+    })
   }
 
   const q = [
@@ -192,12 +202,12 @@ export async function googleDriveListFolders(params: {
     headers: { Authorization: `Bearer ${token.access_token}` },
   })
 
-  const json = (await res.json()) as any
+  const json = await res.json() as unknown
   if (!res.ok) {
-    throw new Error(json?.error?.message || 'Failed to list Google Drive folders')
+    throw new Error('Failed to list Google Drive folders')
   }
 
-  const folders = (json.files || []) as any[]
+  const foldersArr = ((json as Record<string, unknown>)['files'] as unknown[]) || []
   const driveEntries = parentId === 'root' && !driveId ? await listSharedDrives() : []
 
   return {
@@ -205,10 +215,13 @@ export async function googleDriveListFolders(params: {
     expiresAt: new Date(Date.now() + token.expires_in * 1000).toISOString(),
     folders: [
       ...driveEntries,
-      ...folders.map((f) => ({
-        id: f.id as string,
-        name: f.name as string,
-      })),
+      ...foldersArr.map((f) => {
+        const fr = f as Record<string, unknown>
+        return {
+          id: String(fr['id'] ?? ''),
+          name: String(fr['name'] ?? ''),
+        }
+      }),
     ],
   }
 }

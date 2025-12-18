@@ -14,7 +14,7 @@ export async function GET(req: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const ok = await userHasFeature(supabase as any, user.id, 'ai_access')
+    const ok = await userHasFeature(supabase, user.id, 'ai_access')
     if (!ok) {
       return NextResponse.json({ error: 'AI automation is not available on your plan' }, { status: 403 })
     }
@@ -26,7 +26,8 @@ export async function GET(req: Request) {
   const tenantId = url.searchParams.get('tenant_id')
   if (!tenantId) return NextResponse.json({ error: 'tenant_id is required' }, { status: 400 })
 
-  const { data: membership } = await (supabase.from('memberships') as any)
+  const { data: membership } = await supabase
+    .from('memberships')
     .select('role')
     .eq('tenant_id', tenantId)
     .eq('user_id', user.id)
@@ -45,7 +46,8 @@ export async function GET(req: Request) {
       { status: 503 }
     )
   }
-  const { data } = await (service.from('external_sources_cron_secrets') as any)
+  const { data } = await service
+    .from('external_sources_cron_secrets')
     .select('enabled, default_run_limit, key_prefix, updated_at')
     .eq('tenant_id', tenantId)
     .maybeSingle()
@@ -56,10 +58,10 @@ export async function GET(req: Request) {
 
   return NextResponse.json({
     configured: true,
-    enabled: !!(data as any).enabled,
-    default_run_limit: Number((data as any).default_run_limit || 10),
-    key_prefix: (data as any).key_prefix as string,
-    updated_at: (data as any).updated_at as string,
+    enabled: !!(data as { enabled?: boolean } | null)?.enabled,
+    default_run_limit: Number(((data as { default_run_limit?: number } | null)?.default_run_limit) || 10),
+    key_prefix: (data as { key_prefix?: string } | null)?.key_prefix as string,
+    updated_at: (data as { updated_at?: string } | null)?.updated_at as string,
   })
 }
 
@@ -72,7 +74,7 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const ok = await userHasFeature(supabase as any, user.id, 'ai_access')
+    const ok = await userHasFeature(supabase, user.id, 'ai_access')
     if (!ok) {
       return NextResponse.json({ error: 'AI automation is not available on your plan' }, { status: 403 })
     }
@@ -90,7 +92,8 @@ export async function POST(req: Request) {
   const tenantId = body?.tenant_id as string | undefined
   if (!tenantId) return NextResponse.json({ error: 'tenant_id is required' }, { status: 400 })
 
-  const { data: membership } = await (supabase.from('memberships') as any)
+  const { data: membership } = await supabase
+    .from('memberships')
     .select('role')
     .eq('tenant_id', tenantId)
     .eq('user_id', user.id)
@@ -118,7 +121,8 @@ export async function POST(req: Request) {
   }
 
   // Only allow updating config if already configured (key exists)
-  const { data: existing } = await (service.from('external_sources_cron_secrets') as any)
+  const { data: existing } = await service
+    .from('external_sources_cron_secrets')
     .select('tenant_id, enabled, default_run_limit, key_prefix')
     .eq('tenant_id', tenantId)
     .maybeSingle()
@@ -135,9 +139,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true })
   }
 
-  const { error } = await (service.from('external_sources_cron_secrets') as any)
-    .update(patch)
-    .eq('tenant_id', tenantId)
+  const { error } = await service.from('external_sources_cron_secrets').update(patch).eq('tenant_id', tenantId)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 

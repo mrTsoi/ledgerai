@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      const ok = await userHasFeature(supabase as any, user.id, 'ai_access')
+      const ok = await userHasFeature(supabase, user.id, 'ai_access')
       if (!ok) {
         return NextResponse.json({ error: 'AI automation is not available on your plan' }, { status: 403 })
       }
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       .from('memberships')
       .select('*')
       .eq('user_id', user.id)
-      .eq('tenant_id', (document as any).tenant_id)
+      .eq('tenant_id', document.tenant_id)
       .eq('is_active', true)
       .single()
 

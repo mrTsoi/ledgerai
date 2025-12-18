@@ -20,7 +20,8 @@ export async function GET(req: Request) {
   const tenantId = url.searchParams.get('tenant_id')
   if (!tenantId) return badRequest('tenant_id is required')
 
-  const { data, error } = await (supabase.from('exchange_rates') as any)
+  const { data, error } = await supabase
+    .from('exchange_rates')
     .select('*')
     .eq('tenant_id', tenantId)
     .order('currency')
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
 
   let body: { tenant_id?: string; currency?: string; rate?: number }
   try {
-    body = (await req.json()) as any
+    body = (await req.json()) as unknown as { tenant_id?: string; currency?: string; rate?: number }
   } catch {
     return badRequest('Invalid JSON body')
   }
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
   if (!body?.currency) return badRequest('currency is required')
   if (typeof body?.rate !== 'number' || !Number.isFinite(body.rate)) return badRequest('rate is required')
 
-  const { error } = await (supabase.from('exchange_rates') as any).insert({
+  const { error } = await supabase.from('exchange_rates').insert({
     tenant_id: body.tenant_id,
     currency: String(body.currency).toUpperCase(),
     rate: body.rate,
@@ -71,7 +72,7 @@ export async function PUT(req: Request) {
 
   let body: { id?: string; rate?: number }
   try {
-    body = (await req.json()) as any
+    body = (await req.json()) as unknown as { id?: string; rate?: number }
   } catch {
     return badRequest('Invalid JSON body')
   }
@@ -79,7 +80,8 @@ export async function PUT(req: Request) {
   if (!body?.id) return badRequest('id is required')
   if (typeof body?.rate !== 'number' || !Number.isFinite(body.rate)) return badRequest('rate is required')
 
-  const { error } = await (supabase.from('exchange_rates') as any)
+  const { error } = await supabase
+    .from('exchange_rates')
     .update({ rate: body.rate, is_manual: true })
     .eq('id', body.id)
 
@@ -100,7 +102,7 @@ export async function DELETE(req: Request) {
   const id = url.searchParams.get('id')
   if (!id) return badRequest('id is required')
 
-  const { error } = await (supabase.from('exchange_rates') as any).delete().eq('id', id)
+  const { error } = await supabase.from('exchange_rates').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
   return NextResponse.json({ ok: true })

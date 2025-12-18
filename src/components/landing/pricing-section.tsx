@@ -70,7 +70,7 @@ export function PricingSection() {
     })
 
     // JSON Features
-    const featureFlags = (plan.features as any) || {}
+    const featureFlags = (plan.features || {}) as Record<string, unknown>
     for (const def of FEATURE_DEFINITIONS) {
       features.push({
         text: def.label,

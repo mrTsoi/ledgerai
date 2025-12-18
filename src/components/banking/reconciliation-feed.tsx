@@ -151,8 +151,8 @@ export function ReconciliationFeed({ accountId }: Props) {
 
     try {
       // 1. Update bank_transaction status
-      const { error: btError } = await (supabase
-        .from('bank_transactions') as any)
+      const { error: btError } = await supabase
+        .from('bank_transactions')
         .update({
           status: 'PENDING',
           matched_transaction_id: null
@@ -244,16 +244,16 @@ export function ReconciliationFeed({ accountId }: Props) {
             const bestMatch = result.matches?.[0]
             if (bestMatch && bestMatch.confidence_score >= 0.9) {
                // Auto match!
-               await (supabase
-                .from('bank_transactions') as any)
+               await supabase
+                .from('bank_transactions')
                 .update({
                   status: 'MATCHED',
                   matched_transaction_id: bestMatch.transaction.id,
                   confidence_score: bestMatch.confidence_score
                 })
                 .eq('id', tx.id)
-                
-               await (supabase.from('bank_transaction_matches') as any).insert({
+               
+               await supabase.from('bank_transaction_matches').insert({
                   bank_transaction_id: tx.id,
                   transaction_id: bestMatch.transaction.id,
                   match_type: 'EXACT' // AI Exact
@@ -337,9 +337,9 @@ export function ReconciliationFeed({ accountId }: Props) {
       const ids = Array.from(selectedIds)
       const chunks = chunkArray(ids, batchSize)
 
-      for (const chunk of chunks) {
-        const { error } = await (supabase
-          .from('bank_transactions') as any)
+        for (const chunk of chunks) {
+        const { error } = await supabase
+          .from('bank_transactions')
           .update({ status: 'EXCLUDED' })
           .in('id', chunk)
 

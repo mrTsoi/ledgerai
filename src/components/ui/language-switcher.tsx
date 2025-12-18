@@ -43,7 +43,7 @@ export function LanguageSwitcher() {
 
   const handleChange = (nextLocale: string) => {
     startTransition(() => {
-      router.replace(pathname, { locale: nextLocale as any });
+      router.replace(pathname, { locale: nextLocale as 'en' | 'zh-CN' | 'zh-TW' | undefined });
     });
   };
 

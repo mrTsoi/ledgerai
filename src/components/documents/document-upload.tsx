@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useTenant } from '@/hooks/use-tenant'
 import { useBatchConfig, chunkArray } from '@/hooks/use-batch-config'
 import { createClient } from '@/lib/supabase/client'
+import type { Database } from '@/types/database.types'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Upload, X, FileText, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
@@ -45,7 +47,7 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
   const [files, setFiles] = useState<UploadFile[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [selectedBankAccountId, setSelectedBankAccountId] = useState<string>('none')
-  const [bankAccounts, setBankAccounts] = useState<any[]>([])
+  const [bankAccounts, setBankAccounts] = useState<Partial<import('@/types/database.types').Database['public']['Tables']['bank_accounts']['Row']>[]>([])
   const { currentTenant } = useTenant()
   const { batchSize } = useBatchConfig()
   const router = useRouter()

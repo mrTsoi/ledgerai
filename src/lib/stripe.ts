@@ -14,7 +14,9 @@ export async function getStripeConfig() {
     throw new Error('Stripe configuration not found')
   }
 
-  return (data as any).setting_value as {
+  const settingValue = (data as unknown as { setting_value: unknown }).setting_value
+
+  return settingValue as unknown as {
     mode: 'test' | 'live'
     publishable_key: string
     secret_key: string
@@ -30,7 +32,7 @@ export async function getStripe() {
   }
 
   return new Stripe(config.secret_key, {
-    apiVersion: '2025-11-17.clover' as any, // Use latest or compatible version
+    apiVersion: '2025-11-17.clover',
     typescript: true,
   })
 }

@@ -143,7 +143,7 @@ export function ChartOfAccounts() {
 
   const accountTypes = ['ASSET', 'LIABILITY', 'EQUITY', 'REVENUE', 'EXPENSE']
 
-  const getTypeColor = (type: string) => {
+  const getTypeColor = (type?: string) => {
     const colors: Record<string, string> = {
       ASSET: 'bg-blue-100 text-blue-800',
       LIABILITY: 'bg-red-100 text-red-800',
@@ -151,7 +151,7 @@ export function ChartOfAccounts() {
       REVENUE: 'bg-green-100 text-green-800',
       EXPENSE: 'bg-orange-100 text-orange-800'
     }
-    return colors[type] || 'bg-gray-100 text-gray-800'
+    return colors[type || ''] || 'bg-gray-100 text-gray-800'
   }
 
   if (loading) {

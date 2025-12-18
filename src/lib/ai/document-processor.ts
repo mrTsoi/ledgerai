@@ -3,6 +3,15 @@ import { Database } from '@/types/database.types'
 import { DocumentProcessorServiceClient } from '@google-cloud/documentai'
 import OpenAI from 'openai'
 import crypto from 'crypto'
+import {
+  findDocumentsByTenantAndHash,
+  findTransactionByDocumentId,
+  updateDocumentById,
+  insertAIUsageLog,
+  getTenantById,
+  findBankAccountByTenantAndAccountNumber,
+  upsertDocumentData
+} from '../supabase/typed'
 
 type Document = Database['public']['Tables']['documents']['Row']
 type DocumentData = Database['public']['Tables']['document_data']['Insert']
@@ -42,6 +51,17 @@ interface ExtractedData {
   is_belongs_to_tenant?: boolean
 }
 
+function getNumberFrom(obj: Record<string, unknown> | undefined, key: string): number {
+  if (!obj) return 0
+  const v = obj[key]
+  if (typeof v === 'number') return v
+  if (typeof v === 'string') {
+    const n = Number(v)
+    return Number.isNaN(n) ? 0 : n
+  }
+  return 0
+}
+
 /**
  * AI Document Processing Service
  * 
@@ -63,8 +83,8 @@ export class AIProcessingService {
       const supabase = await createClient()
 
       // 1. Get document details
-      const { data: document, error: docError } = await (supabase
-        .from('documents') as any)
+      const { data: document, error: docError } = await supabase
+        .from('documents')
         .select('*, tenants(name, currency)')
         .eq('id', documentId)
         .single()
@@ -74,20 +94,18 @@ export class AIProcessingService {
         return { success: false, error: 'Document not found', statusCode: 404 }
       }
 
-      const tenantName = (document as any).tenants?.name || 'the company'
-      const tenantCurrency = (document as any).tenants?.currency || 'USD'
+      const docRow = document as unknown as Document & { tenants?: { name?: string; currency?: string } }
+      const tenantName = docRow.tenants?.name || 'the company'
+      const tenantCurrency = docRow.tenants?.currency || 'USD'
 
       // 2. Update status to PROCESSING
-      await (supabase
-        .from('documents') as any)
-        .update({ status: 'PROCESSING' })
-        .eq('id', documentId)
+      await updateDocumentById(documentId, { status: 'PROCESSING' })
 
       // --- DUPLICATE DETECTION START ---
       // Download file to calculate hash
       const { data: fileData, error: downloadError } = await supabase.storage
         .from('documents')
-        .download((document as any).file_path)
+        .download(docRow.file_path)
 
       if (downloadError || !fileData) throw new Error('Failed to download file from storage')
 
@@ -96,13 +114,9 @@ export class AIProcessingService {
       const hash = crypto.createHash('sha256').update(buffer).digest('hex')
 
       // Check for duplicates
-      const { data: duplicates } = await (supabase
-        .from('documents') as any)
-        .select('id')
-        .eq('tenant_id', (document as any).tenant_id)
-        .eq('content_hash', hash)
-        .neq('id', documentId) // Exclude self
-      
+      const dupResp = await findDocumentsByTenantAndHash(docRow.tenant_id, hash, documentId)
+
+      const duplicates = Array.isArray(dupResp.data) ? (dupResp.data as Array<{ id: string }>) : []
       const isDuplicate = duplicates && duplicates.length > 0
       const validationFlags: string[] = []
       let validationStatus = 'PENDING'
@@ -116,12 +130,9 @@ export class AIProcessingService {
         // Find if there is an existing transaction for the original document
         // We use the first duplicate found as the "original"
         const originalDocId = duplicates[0].id
-        const { data: existingTx } = await (supabase
-          .from('transactions') as any)
-          .select('id')
-          .eq('document_id', originalDocId)
-          .maybeSingle()
-          
+        const txResp = await findTransactionByDocumentId(originalDocId)
+
+        const existingTx = txResp.data as { id: string } | null
         if (existingTx) {
           existingTransactionId = existingTx.id
           console.log(`Found existing transaction ${existingTransactionId} to update`)
@@ -129,38 +140,35 @@ export class AIProcessingService {
       }
 
       // Update document with hash
-      await (supabase
-        .from('documents') as any)
-        .update({ 
-          content_hash: hash,
-          validation_status: validationStatus,
-          validation_flags: validationFlags
-        })
-        .eq('id', documentId)
+      await updateDocumentById(documentId, {
+        content_hash: hash,
+        validation_status: validationStatus,
+        validation_flags: validationFlags
+      })
       
       // --- DUPLICATE DETECTION END ---
 
       // 3. Get Tenant AI Configuration
-      const aiConfig = await this.getTenantAIConfig((document as any).tenant_id)
+      const aiConfig = await this.getTenantAIConfig(docRow.tenant_id)
       
       // --- RATE LIMIT CHECK START ---
-      if (aiConfig && aiConfig.ai_providers) {
-          const providerConfig = aiConfig.ai_providers.config as any
-          const limitMin = providerConfig?.per_minute_limit_default || 0
-          const limitHour = providerConfig?.per_hour_limit_default || 0
-          const limitDay = providerConfig?.per_day_limit_default || 0
+        if (aiConfig && aiConfig.ai_providers) {
+          const providerConfigObj = (aiConfig.ai_providers?.config ?? {}) as Record<string, unknown>
+          const limitMin = getNumberFrom(providerConfigObj, 'per_minute_limit_default')
+          const limitHour = getNumberFrom(providerConfigObj, 'per_hour_limit_default')
+          const limitDay = getNumberFrom(providerConfigObj, 'per_day_limit_default')
           
           if (limitMin > 0 || limitHour > 0 || limitDay > 0) {
               try {
                   // We use a try-catch here because the RPC function might not exist if migration wasn't run
-                  const { data: isAllowed, error: limitError } = await (supabase.rpc as any)('check_ai_rate_limit', {
-                      p_tenant_id: (document as any).tenant_id,
+                    const { data: isAllowed, error: limitError } = await (supabase as any).rpc('check_ai_rate_limit', {
+                      p_tenant_id: docRow.tenant_id,
                       p_provider_id: aiConfig.ai_providers.id,
                       p_limit_min: limitMin,
                       p_limit_hour: limitHour,
                       p_limit_day: limitDay
-                  })
-                  
+                    })
+
                   if (limitError) {
                       // If RPC fails (e.g. not found), we log warning but allow processing (fail open)
                       // unless it's a permission error, but for now we prioritize availability
@@ -201,13 +209,13 @@ export class AIProcessingService {
       // --- LOG USAGE START ---
       try {
           if (aiConfig?.ai_providers?.id) {
-            await (supabase.from('ai_usage_logs') as any).insert({
-                tenant_id: (document as any).tenant_id,
-                ai_provider_id: aiConfig.ai_providers.id,
-                model: aiConfig.model_name || (aiConfig.ai_providers.config as any)?.models?.[0] || 'unknown',
-                status: 'success',
-                tokens_input: 0, // Placeholder
-                tokens_output: 0
+            await insertAIUsageLog({
+              tenant_id: docRow.tenant_id,
+              ai_provider_id: aiConfig.ai_providers.id,
+              model: aiConfig.model_name || (((aiConfig.ai_providers?.config ?? {}) as Record<string, any>).models?.[0] as string) || 'unknown',
+              status: 'success',
+              tokens_input: 0,
+              tokens_output: 0
             })
           }
       } catch (e) {
@@ -217,14 +225,10 @@ export class AIProcessingService {
 
       // --- TENANT VALIDATION START ---
       // Check if tenant name appears in either vendor or customer fields
-      const { data: tenant } = await (supabase
-        .from('tenants') as any)
-        .select('name')
-        .eq('id', (document as any).tenant_id)
-        .single()
+      const { data: tenant } = await getTenantById(docRow.tenant_id)
       
       if (tenant) {
-        const tenantName = tenant.name.toLowerCase()
+        const tenantName = String((tenant as { name?: string } | null)?.name || '').toLowerCase()
         const vendorName = extractedData.vendor_name?.toLowerCase() || ''
         const customerName = extractedData.customer_name?.toLowerCase() || ''
         
@@ -243,16 +247,10 @@ export class AIProcessingService {
                   isTenantMatch = true
               } else if (extractedData.account_number) {
                   // If we have an account number, check if it matches any of our bank accounts
-                  const { data: existingAccount } = await (supabase
-                      .from('bank_accounts') as any)
-                      .select('id')
-                      .eq('tenant_id', (document as any).tenant_id)
-                      .ilike('account_number', `%${extractedData.account_number}%`)
-                      .maybeSingle()
-                  
-                  if (existingAccount) {
+                    const { data: existingAccount } = await findBankAccountByTenantAndAccountNumber(docRow.tenant_id, extractedData.account_number)
+                    if (existingAccount) {
                       isTenantMatch = true
-                  }
+                    }
               }
               
               // Fallback: Check if AI put the name in customer_name or vendor_name by mistake
@@ -288,13 +286,13 @@ export class AIProcessingService {
               console.log(`Potential wrong tenant detected. Tenant: ${tenantName}`)
               
               // Update flags
-              await (supabase
-              .from('documents') as any)
-              .update({ 
-                validation_status: validationStatus,
-                validation_flags: validationFlags
-              })
-              .eq('id', documentId)
+              await supabase
+                .from('documents')
+                .update({
+                  validation_status: validationStatus,
+                  validation_flags: validationFlags
+                })
+                .eq('id', documentId)
             }
         }
       }
@@ -303,25 +301,23 @@ export class AIProcessingService {
       // 5. Save extracted data
       const documentData: DocumentData = {
         document_id: documentId,
-        extracted_data: extractedData as any,
+        extracted_data: extractedData as unknown as DocumentData['extracted_data'],
         confidence_score: extractedData.confidence_score || 0.85,
         vendor_name: extractedData.vendor_name || null,
         document_date: extractedData.document_date || extractedData.statement_period_end || null,
         total_amount: extractedData.total_amount || extractedData.closing_balance || null,
         currency: extractedData.currency || tenantCurrency,
-        line_items: (extractedData.line_items || []) as any,
+        line_items: (extractedData.line_items || []) as unknown as DocumentData['line_items'],
         metadata: {
           processed_by: aiConfig?.ai_providers?.name || 'mock-ai-service',
           processing_time: Date.now(),
           transaction_type: extractedData.transaction_type
-        } as any
+        } as unknown as DocumentData['metadata']
       }
 
       // Save extracted data to DB
       // We use upsert to handle re-processing of the same document
-      const { error: dataError } = await (supabase
-        .from('document_data') as any)
-        .upsert(documentData, { onConflict: 'document_id' })
+      const { error: dataError } = await upsertDocumentData(documentData)
       
       if (dataError) {
           console.error('Error saving document data:', dataError)
@@ -338,14 +334,11 @@ export class AIProcessingService {
       // 7. Update document status to PROCESSED (or keep as NEEDS_REVIEW if flagged)
       // If validation failed, we might want to keep it as PROCESSED but with validation_status = NEEDS_REVIEW
       // The UI should show "Processed (Needs Review)"
-      await (supabase
-        .from('documents') as any)
-        .update({ 
-          status: 'PROCESSED',
-          processed_at: new Date().toISOString(),
-          document_type: extractedData.document_type || this.inferDocumentType(extractedData)
-        })
-        .eq('id', documentId)
+      await updateDocumentById(documentId, {
+        status: 'PROCESSED',
+        processed_at: new Date().toISOString(),
+        document_type: extractedData.document_type || this.inferDocumentType(extractedData)
+      })
 
       return { 
         success: true, 
@@ -367,14 +360,10 @@ export class AIProcessingService {
       }
 
       // Update status to FAILED
-      const supabase = await createClient()
-      await (supabase
-        .from('documents') as any)
-        .update({ 
-          status: 'FAILED',
-          error_message: errorMessage
-        })
-        .eq('id', documentId)
+      await updateDocumentById(documentId, {
+        status: 'FAILED',
+        error_message: errorMessage
+      })
 
       return { success: false, error: errorMessage, statusCode }
     }
@@ -1132,7 +1121,7 @@ export class AIProcessingService {
             created_by: user?.id || null,
             currency: txCurrency,
             exchange_rate: 1.0
-          } as any)
+          } as unknown as Database['public']['Tables']['transactions']['Insert'])
           .select()
           .single()
 
@@ -1277,8 +1266,8 @@ export class AIProcessingService {
     const supabase = await createClient()
 
     // 1. Try tenant-specific configuration first
-    const { data: tenantConfig } = await (supabase
-      .from('tenant_ai_configurations') as any)
+    const { data: tenantConfig } = await supabase
+      .from('tenant_ai_configurations')
       .select(`
         *,
         ai_providers (*)
@@ -1294,8 +1283,8 @@ export class AIProcessingService {
     // 2. Fallback to a platform-level default provider
     // Currently we treat the first active provider as the default.
     // Later, we can add an explicit is_default flag in ai_providers.
-    const { data: defaultProvider } = await (supabase
-      .from('ai_providers') as any)
+    const { data: defaultProvider } = await supabase
+      .from('ai_providers')
       .select('*')
       .eq('is_active', true)
       .order('created_at', { ascending: true })
@@ -1315,7 +1304,7 @@ export class AIProcessingService {
       custom_config: defaultProvider.config || {},
       is_active: true,
       ai_providers: defaultProvider,
-    } as any
+    }
   }
 }
 

@@ -207,8 +207,8 @@ export function PlatformCustomizer() {
   const loadSettings = useCallback(async () => {
     try {
       setLoading(true)
-      const { data, error } = await (supabase
-        .from('system_settings') as any)
+      const { data, error } = await supabase
+        .from('system_settings')
         .select('setting_value')
         .eq('setting_key', 'platform_appearance')
         .single()
@@ -216,18 +216,21 @@ export function PlatformCustomizer() {
       if (error && error.code !== 'PGRST116') throw error
 
       if (data) {
-        const loadedConfig = data.setting_value as PlatformConfig
+        const raw = (data as unknown as { setting_value: unknown }).setting_value
+        const loadedConfig = typeof raw === 'string' ? (() => {
+          try { return JSON.parse(raw) as PlatformConfig } catch { return undefined }
+        })() : (raw as PlatformConfig | undefined)
         // Deep merge with default config to ensure new fields are present
         setConfig({
           ...DEFAULT_CONFIG,
-          ...loadedConfig,
+          ...(loadedConfig || {}),
           chatbot: {
             ...DEFAULT_CONFIG.chatbot,
-            ...(loadedConfig.chatbot || {})
+            ...((loadedConfig && loadedConfig.chatbot) || {})
           },
           landing_page: {
             ...DEFAULT_CONFIG.landing_page,
-            ...(loadedConfig.landing_page || {})
+            ...((loadedConfig && loadedConfig.landing_page) || {})
           }
         })
       }

@@ -190,7 +190,8 @@ export function ExternalSourcesSettings() {
     if (!tenantId || !canManage) return
 
     try {
-      const { data, error } = await (supabase.from('bank_accounts') as any)
+      const { data, error } = await supabase
+        .from('bank_accounts')
         .select('id, account_name, bank_name')
         .eq('tenant_id', tenantId)
         .eq('is_active', true)
@@ -263,7 +264,7 @@ export function ExternalSourcesSettings() {
         })
       )
 
-      setCloudInfoById(Object.fromEntries(entries.filter((e) => e[1] !== null)) as any)
+      setCloudInfoById(Object.fromEntries(entries.filter((e) => e[1] !== null)) as typeof cloudInfoById)
     } catch {
       // ignore
     }
@@ -636,9 +637,9 @@ export function ExternalSourcesSettings() {
   }
 
   const wizardBack = () => {
-    const prev = wizardStep === 1 ? 1 : ((wizardStep - 1) as any)
-    setWizardStep(prev)
-    persistWizard({ open: true, step: prev })
+    const prev = wizardStep === 1 ? 1 : wizardStep - 1
+    setWizardStep(prev as 1 | 2 | 3 | 4)
+    persistWizard({ open: true, step: prev as 1 | 2 | 3 | 4 })
   }
 
   const wizardFinish = async () => {
@@ -972,7 +973,7 @@ export function ExternalSourcesSettings() {
                         <div className="grid gap-3 md:grid-cols-2">
                           <div className="space-y-2">
                             <Label>Document Type</Label>
-                            <Select value={documentType} onValueChange={(v) => setDocumentType(v as any)}>
+                            <Select value={documentType} onValueChange={(v) => setDocumentType(v as 'invoice' | 'receipt' | 'bank_statement' | 'other' | 'none') }>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select type" />
                               </SelectTrigger>

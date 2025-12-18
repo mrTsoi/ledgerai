@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { Database } from '@/types/database.types'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,25 +15,36 @@ import { toast } from "sonner"
 export function StripeSettings() {
   const [loading, setLoading] = useState(false)
   const [showSecret, setShowSecret] = useState(false)
-  const [config, setConfig] = useState({
-    mode: 'test', // 'test' or 'live'
+  const DEFAULT_CONFIG = {
+    mode: 'test',
     publishable_key: '',
     secret_key: '',
     webhook_secret: ''
-  })
-  const supabase = useMemo(() => createClient(), [])
+  }
+
+  const [config, setConfig] = useState(() => DEFAULT_CONFIG)
+  const supabase = useMemo((): SupabaseClient<Database> => createClient() as SupabaseClient<Database>, [])
 
   const loadSettings = useCallback(async () => {
     try {
       setLoading(true)
-      const { data, error } = await (supabase
-        .from('system_settings') as any)
+      const { data, error } = await supabase
+        .from('system_settings')
         .select('setting_value')
         .eq('setting_key', 'stripe_config')
         .single()
 
       if (data) {
-        setConfig((data as any).setting_value as any)
+        const raw = (data as unknown as { setting_value: unknown }).setting_value
+        if (typeof raw === 'string') {
+          try {
+            setConfig(JSON.parse(raw) as typeof config)
+          } catch {
+            setConfig(DEFAULT_CONFIG)
+          }
+        } else if (raw && typeof raw === 'object') {
+          setConfig(raw as typeof config)
+        }
       }
     } catch (error) {
       console.error('Error loading Stripe settings:', error)
