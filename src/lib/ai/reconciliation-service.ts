@@ -119,17 +119,18 @@ export class AIReconciliationService {
       }
 
       // Amount check
-      if ((candidate as any).amount !== undefined) {
-          const amountDiff = Math.abs(bankTransaction.amount - (candidate as any).amount)
-          if (amountDiff < 0.05) {
-              score += 0.4
-              reasons.push('Exact amount match')
-          } else if (amountDiff < 1.0) {
-              score += 0.2
-              reasons.push('Close amount match')
-          }
+      const candidateAmount = (candidate as unknown as Record<string, unknown>)['amount']
+      if (typeof candidateAmount === 'number') {
+        const amountDiff = Math.abs(bankTransaction.amount - candidateAmount)
+        if (amountDiff < 0.05) {
+          score += 0.4
+          reasons.push('Exact amount match')
+        } else if (amountDiff < 1.0) {
+          score += 0.2
+          reasons.push('Close amount match')
+        }
       } else {
-          score += 0.2 // Fallback if amount unknown but passed in list
+        score += 0.2 // Fallback if amount unknown but passed in list
       }
 
       return {

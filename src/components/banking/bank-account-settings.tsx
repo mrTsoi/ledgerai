@@ -44,10 +44,10 @@ export function BankAccountSettings({ accountId }: Props) {
       if (error) throw error
       setAccount(data)
       setFormData({
-        account_name: (data as any).account_name,
-        account_number: (data as any).account_number || '',
-        bank_name: (data as any).bank_name || '',
-        currency: (data as any).currency || 'USD'
+        account_name: data?.account_name || '',
+        account_number: data?.account_number || '',
+        bank_name: data?.bank_name || '',
+        currency: data?.currency || 'USD'
       })
     } catch (error) {
       console.error('Error fetching account:', error)
@@ -63,8 +63,8 @@ export function BankAccountSettings({ accountId }: Props) {
   const handleSave = async () => {
     try {
       setSaving(true)
-      const { error } = await (supabase
-        .from('bank_accounts') as any)
+      const { error } = await supabase
+        .from('bank_accounts')
         .update({
           account_name: formData.account_name,
           account_number: formData.account_number,
@@ -87,10 +87,7 @@ export function BankAccountSettings({ accountId }: Props) {
     if (!confirm('Are you sure you want to delete this bank account? This action cannot be undone.')) return
 
     try {
-      const { error } = await (supabase
-        .from('bank_accounts') as any)
-        .delete()
-        .eq('id', accountId)
+      const { error } = await supabase.from('bank_accounts').delete().eq('id', accountId)
 
       if (error) throw error
       router.push('/dashboard/banking')

@@ -49,7 +49,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const ok = await userHasFeature(supabase as any, user.id, 'custom_domain')
+    const ok = await userHasFeature(supabase, user.id, 'custom_domain')
     if (!ok) {
       return NextResponse.json({ error: 'Custom domains are not available on your plan' }, { status: 403 })
     }
@@ -69,7 +69,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Domain is required' }, { status: 400 })
   }
 
-  const { data: row, error } = await (supabase.from('tenant_domains') as any)
+  const { data: row, error } = await supabase
+    .from('tenant_domains')
     .select('id, tenant_id, domain, verification_token, verified_at')
     .eq('domain', domain)
     .maybeSingle()
@@ -82,9 +83,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Domain not found' }, { status: 404 })
   }
 
-  const { data: membership, error: membershipError } = await (supabase.from('memberships') as any)
+  const tenantId = (row as { tenant_id?: string } | null)?.tenant_id
+  const { data: membership, error: membershipError } = await supabase
+    .from('memberships')
     .select('role')
-    .eq('tenant_id', (row as any).tenant_id)
+    .eq('tenant_id', tenantId)
     .eq('user_id', user.id)
     .maybeSingle()
 
@@ -113,7 +116,8 @@ export async function POST(req: Request) {
     })
   }
 
-  const { error: updateError } = await (supabase.from('tenant_domains') as any)
+  const { error: updateError } = await supabase
+    .from('tenant_domains')
     .update({ verified_at: new Date().toISOString() })
     .eq('id', row.id)
 

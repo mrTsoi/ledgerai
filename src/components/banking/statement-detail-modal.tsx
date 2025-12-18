@@ -84,11 +84,11 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
       }
 
       let txs: any[] = []
-      if (statement) {
+        if (statement) {
         const { data: dbTxs, error: txError } = await supabase
           .from('bank_transactions')
           .select('*')
-          .eq('bank_statement_id', (statement as any).id)
+          .eq('bank_statement_id', statement.id)
           .order('transaction_date', { ascending: false })
 
         if (txError) {
@@ -106,8 +106,9 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
             .eq('document_id', documentId)
             .maybeSingle()
          
-         if (!docDataError && (docData as any)?.extracted_data?.bank_transactions) {
-             setTransactions((docData as any).extracted_data.bank_transactions.map((t: any, i: number) => ({
+         if (!docDataError && (docData as { extracted_data?: any } | null)?.extracted_data?.bank_transactions) {
+           const extracted = (docData as { extracted_data?: any }).extracted_data
+           setTransactions(extracted.bank_transactions.map((t: any, i: number) => ({
                  id: `temp-${i}`,
                  transaction_date: t.date,
                  description: t.description,
@@ -121,10 +122,10 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
       }
 
       // 3. Load Preview
-      if ((doc as any)?.file_path) {
+      if (doc?.file_path) {
         const { data: blob, error: storageError } = await supabase.storage
           .from('documents')
-          .download((doc as any).file_path)
+          .download(doc.file_path as string)
 
         if (storageError) {
           console.error('Error downloading preview:', storageError)
@@ -155,8 +156,8 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
       const newTxs = transactions.filter(t => t.id?.toString().startsWith('temp-'))
 
       for (const tx of updates) {
-        const { error } = await (supabase
-          .from('bank_transactions') as any)
+        const { error } = await supabase
+          .from('bank_transactions')
           .update({
             transaction_date: tx.transaction_date,
             description: tx.description,
@@ -184,11 +185,11 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
             .maybeSingle()
             
           if (statement) {
-              statementId = (statement as any).id
+              statementId = statement.id
               
               const toInsert = newTxs.map(tx => ({
                   bank_statement_id: statementId,
-                  tenant_id: (statement as any).tenant_id,
+                  tenant_id: statement.tenant_id,
                   transaction_date: tx.transaction_date,
                   description: tx.description,
                   amount: tx.amount,
@@ -197,10 +198,8 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
                   raw_data: { source: 'manual_entry' }
               }))
               
-              const { error: insertError } = await (supabase
-                .from('bank_transactions') as any)
-                .insert(toInsert)
-                
+              const { error: insertError } = await supabase.from('bank_transactions').insert(toInsert)
+              
               if (insertError) throw insertError
           } else {
               console.warn('No statement found for document, cannot insert new transactions yet')
@@ -216,25 +215,25 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
         .eq('document_id', documentId)
         .single()
 
-      if (currentData) {
+        if (currentData) {
           const updatedExtracted = {
-              ...(currentData as any).extracted_data,
-              bank_transactions: transactions.map(t => ({
-                  date: t.transaction_date,
-                  description: t.description,
-                  amount: t.amount,
-                  type: t.transaction_type
-              }))
+            ...((currentData as { extracted_data?: any }).extracted_data || {}),
+            bank_transactions: transactions.map(t => ({
+              date: t.transaction_date,
+              description: t.description,
+              amount: t.amount,
+              type: t.transaction_type
+            }))
           }
 
-          await (supabase
-            .from('document_data') as any)
-            .update({
-                extracted_data: updatedExtracted,
-                metadata: { verified_by_user: true }
-            })
-            .eq('document_id', documentId)
-      }
+          await supabase
+          .from('document_data')
+          .update({
+            extracted_data: updatedExtracted,
+            metadata: { verified_by_user: true }
+          })
+          .eq('document_id', documentId)
+        }
 
       toast.success('Changes saved successfully')
       if (onSaved) onSaved()
@@ -269,11 +268,11 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
       const tx = transactions.find(t => t.id === id)
       if (!tx) return
 
-      if (tx.id && !tx.id.toString().startsWith('temp-')) {
+        if (tx.id && !tx.id.toString().startsWith('temp-')) {
           if (!confirm('Delete this transaction permanently?')) return
           
           try {
-              await (supabase.from('bank_transactions') as any).delete().eq('id', tx.id)
+          await supabase.from('bank_transactions').delete().eq('id', tx.id)
           } catch (e) {
               console.error(e)
               toast.error('Failed to delete')

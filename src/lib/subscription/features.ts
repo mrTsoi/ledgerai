@@ -27,7 +27,8 @@ export const FEATURE_DEFINITIONS: FeatureDefinition[] = [
 
 export function isFeatureEnabled(features: unknown, featureKey: FeatureKey): boolean {
   if (!features || typeof features !== 'object') return false
-  return (features as any)?.[featureKey] === true
+  const obj = features as Record<string, unknown>
+  return obj[featureKey] === true
 }
 
 export function getFeatureLabel(featureKey: FeatureKey): string {

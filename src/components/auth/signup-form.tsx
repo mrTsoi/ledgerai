@@ -65,6 +65,22 @@ export default function SignupForm() {
       }
 
       setSuccess(true)
+      // Persist pending subscription so we can resume checkout after email confirmation/login
+      try {
+        await fetch('/api/subscriptions/pending/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            tenant_id: null,
+            plan_id: planId,
+            interval,
+          }),
+        })
+      } catch (e) {
+        // Non-fatal: allow signup to proceed even if persisting pending fails
+        console.error('failed to persist pending subscription', e)
+      }
       // Show confirmation message and prompt user to check email
     } catch (err) {
       setError('An unexpected error occurred')

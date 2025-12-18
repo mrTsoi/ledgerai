@@ -45,7 +45,7 @@ export function TeamList() {
       const res = await fetch(`/api/team/members?tenant_id=${encodeURIComponent(tenantId)}`)
       const json = await res.json()
       if (!res.ok) throw new Error(json?.error || 'Failed to load team members')
-      setMembers((json?.members || []) as any)
+      setMembers((json?.members || []) as Membership[])
     } catch (error) {
       console.error('Error fetching members:', error)
     } finally {
@@ -196,7 +196,7 @@ export function TeamList() {
                   <TableCell>{member.profiles?.email}</TableCell>
                   <TableCell>
                     <Select 
-                      defaultValue={member.role} 
+                      defaultValue={member.role ?? undefined} 
                       onValueChange={(v) => handleRoleChange(member.id, v)}
                     >
                       <SelectTrigger className="w-32 h-8">
@@ -211,7 +211,7 @@ export function TeamList() {
                     </Select>
                   </TableCell>
                   <TableCell>
-                    {new Date(member.created_at).toLocaleDateString()}
+                    {member.created_at ? new Date(member.created_at).toLocaleDateString() : ''}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button 

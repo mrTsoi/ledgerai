@@ -1,5 +1,6 @@
 import {getRequestConfig} from 'next-intl/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient as createServerSupabaseClient } from '@/lib/supabase/server';
+import type { Database } from '@/types/database.types';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -32,7 +33,7 @@ export default getRequestConfig(async ({requestLocale}) => {
   // 2. Load DB messages
   if (supabaseUrl && supabaseKey) {
     try {
-      const supabase = createClient(supabaseUrl, supabaseKey);
+      const supabase = await createServerSupabaseClient()
       const { data: dbTranslations } = await supabase
         .from('app_translations')
         .select('namespace, key, value')

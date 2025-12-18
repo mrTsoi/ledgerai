@@ -177,10 +177,8 @@ export async function POST(req: Request) {
           })
 
         if (rows.length > 0) {
-          const { data: insertedCount, error: rpcError } = await (service as any).rpc(
-            'insert_bank_feed_transactions',
-            { p_rows: rows }
-          )
+          const { rpc } = await import('@/lib/supabase/typed')
+          const { data: insertedCount, error: rpcError } = await rpc('insert_bank_feed_transactions', { p_rows: rows })
 
           if (rpcError) throw rpcError
           totalInserted += Number(insertedCount || 0)

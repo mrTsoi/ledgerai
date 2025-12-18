@@ -17,7 +17,7 @@ export async function GET(req: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const ok = await userHasFeature(supabase as any, user.id, 'ai_access')
+    const ok = await userHasFeature(supabase, user.id, 'ai_access')
     if (!ok) {
       return NextResponse.json({ error: 'AI automation is not available on your plan' }, { status: 403 })
     }
@@ -39,7 +39,8 @@ export async function GET(req: Request) {
     )
   }
 
-  const { data: source, error: sourceError } = await (service.from('external_document_sources') as any)
+  const { data: source, error: sourceError } = await service
+    .from('external_document_sources')
     .select('id, tenant_id, provider, config')
     .eq('id', sourceId)
     .single()
@@ -57,9 +58,11 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: sourceError.message }, { status: 400 })
   }
 
-  const { data: membership } = await (supabase.from('memberships') as any)
+  const sourceTenantId = (source as { tenant_id?: string } | null)?.tenant_id
+  const { data: membership } = await supabase
+    .from('memberships')
     .select('role')
-    .eq('tenant_id', (source as any).tenant_id)
+    .eq('tenant_id', sourceTenantId)
     .eq('user_id', user.id)
     .eq('is_active', true)
     .in('role', ['COMPANY_ADMIN', 'SUPER_ADMIN'])
@@ -67,16 +70,17 @@ export async function GET(req: Request) {
 
   if (!membership) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { data: secretsRow } = await (service.from('external_document_source_secrets') as any)
+  const { data: secretsRow } = await service
+    .from('external_document_source_secrets')
     .select('secrets')
     .eq('source_id', sourceId)
     .maybeSingle()
 
-  const secrets = (secretsRow as any)?.secrets || {}
+  const secrets = (secretsRow as { secrets?: any } | null)?.secrets || {}
   const refreshToken = secrets.refresh_token as string | undefined
 
-  const provider = String((source as any).provider || '')
-  const folderId = ((source as any).config || {})?.folder_id as string | undefined
+  const provider = String((source as { provider?: string } | null)?.provider || '')
+  const folderId = ((source as { config?: any } | null)?.config || {})?.folder_id as string | undefined
 
   if (!refreshToken) {
     return NextResponse.json({ provider, connected: false, folder_id: folderId || null })

@@ -30,7 +30,7 @@ export function TenantSettings() {
         name: currentTenant.name,
         slug: currentTenant.slug,
         locale: currentTenant.locale || 'en-US',
-        currency: (currentTenant as any).currency || 'USD'
+        currency: currentTenant.currency || 'USD'
       })
     }
   }, [currentTenant])

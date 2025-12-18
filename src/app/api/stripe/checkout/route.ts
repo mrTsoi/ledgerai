@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type Stripe from 'stripe'
 import { createClient } from '@/lib/supabase/server'
 import { getStripe } from '@/lib/stripe'
 
@@ -24,6 +25,9 @@ export async function POST(req: NextRequest) {
       return new NextResponse('Plan not found', { status: 404 })
     }
 
+    // Narrow plan into a local shape used below
+    const planRow = plan as { price_yearly?: number; price_monthly?: number; name?: string; id?: string; description?: string }
+
     const stripe = await getStripe()
 
     // Get or create customer
@@ -33,9 +37,8 @@ export async function POST(req: NextRequest) {
       .eq('user_id', user.id)
       .single()
 
-    let customerId = (subscription as any)?.stripe_customer_id
-    // Removed duplicate declaration of existingSubscriptionId here
-    const currentPlanId = (subscription as any)?.plan_id
+    let customerId = subscription?.stripe_customer_id
+    const currentPlanId = subscription?.plan_id
 
     if (!customerId) {
       const customer = await stripe.customers.create({
@@ -76,11 +79,8 @@ export async function POST(req: NextRequest) {
           existingSubscriptionId = existingSub.id
           
           // Sync DB if needed
-          if ((subscription as any)?.stripe_subscription_id !== existingSubscriptionId) {
-             await (supabase
-              .from('user_subscriptions') as any)
-              .update({ stripe_subscription_id: existingSubscriptionId })
-              .eq('user_id', user.id)
+           if (subscription?.stripe_subscription_id !== existingSubscriptionId) {
+             await supabase.from('user_subscriptions').update({ stripe_subscription_id: existingSubscriptionId }).eq('user_id', user.id)
           }
         } else {
           // No active subscriptions in Stripe, even if DB thought so.
@@ -102,8 +102,8 @@ export async function POST(req: NextRequest) {
           
           // Calculate new price amount
           const priceAmount = interval === 'year'
-            ? ((plan as any).price_yearly || (plan as any).price_monthly * 12)
-            : (plan as any).price_monthly
+            ? (planRow.price_yearly ?? ((planRow.price_monthly ?? 0) * 12))
+            : (planRow.price_monthly ?? 0)
           const newPriceAmount = Math.round(priceAmount * 100)          // We need to find or create the price ID in Stripe for this plan
           // For simplicity in this demo, we'll create a new price on the fly or search for it
           // In production, you should map your DB plan IDs to Stripe Price IDs
@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
           // Let's try to find a Price for this plan.
           // We'll search products by name.
           const products = await stripe.products.search({
-            query: `name:'${(plan as any).name}'`,
+            query: `name:'${planRow.name}'`,
           })
           
           let priceId
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
           if (products.data.length > 0) {
             const productId = products.data[0].id
             // Find price
-            const prices = await stripe.prices.list({ product: productId, lookup_keys: [`${(plan as any).id}_${interval}`] })
+            const prices = await stripe.prices.list({ product: productId, lookup_keys: [`${planRow.id}_${interval}`] })
             if (prices.data.length > 0) {
               priceId = prices.data[0].id
             } else {
@@ -140,19 +140,19 @@ export async function POST(req: NextRequest) {
                 unit_amount: newPriceAmount,
                 currency: 'usd',
                 recurring: { interval: interval as 'month' | 'year' },
-                lookup_key: `${(plan as any).id}_${interval}`
+                lookup_key: `${planRow.id}_${interval}`
               })
               priceId = price.id
             }
           } else {
             // Create product and price
-            const product = await stripe.products.create({ name: (plan as any).name })
+            const product = await stripe.products.create({ name: planRow.name || 'Plan' })
             const price = await stripe.prices.create({
               product: product.id,
               unit_amount: newPriceAmount,
               currency: 'usd',
               recurring: { interval: interval as 'month' | 'year' },
-              lookup_key: `${(plan as any).id}_${interval}`
+                lookup_key: `${planRow.id}_${interval}`
             })
             priceId = price.id
           }
@@ -167,7 +167,7 @@ export async function POST(req: NextRequest) {
           // If we recovered the sub from Stripe, currentPlanId might be null/old.
           // Trust the price comparison logic primarily.
 
-          if (currentPlanId === (plan as any).id) {
+          if (currentPlanId === planRow.id) {
             // Same plan, check interval change
             if (currentInterval === 'year' && interval === 'month') {
               // Year -> Month is a downgrade (scheduled)
@@ -219,13 +219,10 @@ export async function POST(req: NextRequest) {
             })
 
             // Update local DB to reflect scheduled change
-            await (supabase
-              .from('user_subscriptions') as any)
-              .update({
-                next_plan_id: (plan as any).id,
+            await supabase.from('user_subscriptions').update({
+                next_plan_id: planRow.id,
                 next_plan_start_date: new Date(existingSub.current_period_end * 1000).toISOString()
-              })
-              .eq('user_id', user.id)
+              }).eq('user_id', user.id)
             
             return NextResponse.json({ url: `${baseUrl}?success=true&tab=billing&downgrade=scheduled` })
           } else {
@@ -263,13 +260,10 @@ export async function POST(req: NextRequest) {
             })
 
             // Update local DB immediately for better UX (webhook will confirm later)
-            await (supabase
-              .from('user_subscriptions') as any)
-              .update({
-                plan_id: (plan as any).id,
+            await supabase.from('user_subscriptions').update({
+                plan_id: planRow.id,
                 // Don't update status/dates yet, let webhook handle it or wait for refresh
-              })
-              .eq('user_id', user.id)
+              }).eq('user_id', user.id)
 
             return NextResponse.json({ url: `${baseUrl}?success=true&tab=billing&updated=true` })
           }
@@ -288,10 +282,13 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: (plan as any).name,
-              description: (plan as any).description || undefined,
+              name: planRow.name,
+              description: planRow.description || undefined,
             },
-            unit_amount: Math.round((interval === 'year' ? ((plan as any).price_yearly || (plan as any).price_monthly * 12) : (plan as any).price_monthly) * 100),
+            unit_amount: Math.round(((interval === 'year'
+              ? (planRow.price_yearly ?? ((planRow.price_monthly ?? 0) * 12))
+              : (planRow.price_monthly ?? 0))
+            ) * 100),
             recurring: {
               interval: interval as 'month' | 'year',
             },
@@ -304,10 +301,10 @@ export async function POST(req: NextRequest) {
       cancel_url: `${baseUrl}?canceled=true&tab=billing`,
       metadata: {
         userId: user.id,
-        planId: (plan as any).id,
+        planId: planRow.id,
       },
       allow_promotion_codes: true,
-    })
+    } as Stripe.Checkout.SessionCreateParams)
 
     return NextResponse.json({ url: session.url })
   } catch (error: any) {

@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useState, ReactNode 
 
 export type SubscriptionDetails = {
   plan_name: string
+  plan_id?: string
   max_tenants: number
   current_tenants: number
   max_documents: number

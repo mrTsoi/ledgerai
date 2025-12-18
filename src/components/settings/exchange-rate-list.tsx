@@ -40,7 +40,7 @@ export function ExchangeRateList() {
   })
 
   const canEdit = userRole === 'COMPANY_ADMIN' || userRole === 'SUPER_ADMIN' || userRole === 'ACCOUNTANT'
-  const baseCurrency = (currentTenant as any)?.currency || 'USD'
+  const baseCurrency = currentTenant?.currency || 'USD'
 
   const fetchRates = useCallback(async () => {
     if (!tenantId) return

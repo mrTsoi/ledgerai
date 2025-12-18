@@ -46,9 +46,12 @@
     "tabs": {
       "overview": "系统概览",
       "tenants": "租户管理",
+      "pending": "待处理订阅",
       "audit": "审计日志",
       "languages": "语言管理"
     }
+    ,
+    "unauthorized": "您无权查看此管理区域。"
   },
   "auth": {
     "login": "登录",

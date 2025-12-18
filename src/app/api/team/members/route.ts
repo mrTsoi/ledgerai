@@ -20,9 +20,7 @@ export async function GET(req: Request) {
   const tenantId = url.searchParams.get('tenant_id')
   if (!tenantId) return badRequest('tenant_id is required')
 
-  const { data, error } = await (supabase.from('memberships') as any)
-    .select('*, profiles (*)')
-    .eq('tenant_id', tenantId)
+  const { data, error } = await supabase.from('memberships').select('*, profiles (*)').eq('tenant_id', tenantId)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
   return NextResponse.json({ members: data || [] })
@@ -40,7 +38,7 @@ export async function POST(req: Request) {
 
   let body: { tenant_id?: string; email?: string; role?: string }
   try {
-    body = (await req.json()) as any
+    body = (await req.json()) as unknown as { tenant_id?: string; email?: string; role?: string }
   } catch {
     return badRequest('Invalid JSON body')
   }
@@ -52,7 +50,8 @@ export async function POST(req: Request) {
   if (!tenantId) return badRequest('tenant_id is required')
   if (!email) return badRequest('email is required')
 
-  const { data: profile, error: profileError } = await (supabase.from('profiles') as any)
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
     .select('id, email')
     .ilike('email', email)
     .maybeSingle()
@@ -65,7 +64,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'User not found. Ask them to sign up first.' }, { status: 400 })
   }
 
-  const { error } = await (supabase.from('memberships') as any).upsert(
+  const { error } = await supabase.from('memberships').upsert(
     {
       tenant_id: tenantId,
       user_id: profile.id,
@@ -90,7 +89,7 @@ export async function PUT(req: Request) {
 
   let body: { id?: string; role?: string; is_active?: boolean }
   try {
-    body = (await req.json()) as any
+    body = (await req.json()) as unknown as { id?: string; role?: string; is_active?: boolean }
   } catch {
     return badRequest('Invalid JSON body')
   }
@@ -101,7 +100,7 @@ export async function PUT(req: Request) {
   if (typeof body?.role === 'string') payload.role = body.role
   if (typeof body?.is_active === 'boolean') payload.is_active = body.is_active
 
-  const { error } = await (supabase.from('memberships') as any).update(payload).eq('id', body.id)
+  const { error } = await supabase.from('memberships').update(payload).eq('id', body.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
   return NextResponse.json({ ok: true })
@@ -120,7 +119,7 @@ export async function DELETE(req: Request) {
   const id = url.searchParams.get('id')
   if (!id) return badRequest('id is required')
 
-  const { error } = await (supabase.from('memberships') as any).delete().eq('id', id)
+  const { error } = await supabase.from('memberships').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
   return NextResponse.json({ ok: true })

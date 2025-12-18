@@ -47,9 +47,10 @@ export default function BankAccountPage() {
         .eq('status', 'PENDING')
         .eq('bank_statements.bank_account_id', accountId as string)
 
+      const latest = latestStatement as unknown as { closing_balance?: number; end_date?: string } | null
       setStats({
-        currentBalance: (latestStatement as any)?.closing_balance || 0,
-        lastStatementDate: (latestStatement as any)?.end_date || null,
+        currentBalance: latest?.closing_balance ?? 0,
+        lastStatementDate: latest?.end_date ?? null,
         unreconciledCount: pendingCount || 0
       })
     } catch (error) {

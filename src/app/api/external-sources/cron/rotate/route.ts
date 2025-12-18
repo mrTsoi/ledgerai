@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const ok = await userHasFeature(supabase as any, user.id, 'ai_access')
+    const ok = await userHasFeature(supabase, user.id, 'ai_access')
     if (!ok) {
       return NextResponse.json({ error: 'AI automation is not available on your plan' }, { status: 403 })
     }
@@ -36,7 +36,8 @@ export async function POST(req: Request) {
 
   if (!body?.tenant_id) return NextResponse.json({ error: 'tenant_id is required' }, { status: 400 })
 
-  const { data: membership } = await (supabase.from('memberships') as any)
+  const { data: membership } = await supabase
+    .from('memberships')
     .select('role')
     .eq('tenant_id', body.tenant_id)
     .eq('user_id', user.id)
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
       { status: 503 }
     )
   }
-  const { error } = await (service.from('external_sources_cron_secrets') as any).upsert(
+  const { error } = await service.from('external_sources_cron_secrets').upsert(
     {
       tenant_id: body.tenant_id,
       key_prefix: prefix,

@@ -12,7 +12,7 @@ export async function GET() {
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data, error } = await (supabase.rpc as any)('get_user_subscription_details', {
+  const { data, error } = await supabase.rpc('get_user_subscription_details', {
     p_user_id: user.id,
   })
 

@@ -28,7 +28,7 @@ export async function importFetchedFile(params: {
     .upload(filePath, fetched.bytes, {
       contentType: fetched.mimeType,
       upsert: false,
-    } as any)
+    })
 
   if (storageError) {
     throw new Error(storageError.message)
@@ -36,7 +36,8 @@ export async function importFetchedFile(params: {
 
   const documentType = config.document_type ?? null
 
-  const { error: docError } = await (supabase.from('documents') as any).insert({
+  const svc = supabase
+  const { error: docError } = await svc.from('documents').insert({
     id: documentId,
     tenant_id: tenantId,
     file_path: filePath,
@@ -55,7 +56,7 @@ export async function importFetchedFile(params: {
   }
 
   if (documentType === 'bank_statement' && config.bank_account_id) {
-    await (supabase.from('bank_statements') as any).insert({
+    await svc.from('bank_statements').insert({
       tenant_id: tenantId,
       bank_account_id: config.bank_account_id,
       document_id: documentId,

@@ -25,7 +25,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { data: membership, error: membershipError } = await (supabase.from('memberships') as any)
+    const { data: membership, error: membershipError } = await supabase
+      .from('memberships')
       .select('role')
       .eq('tenant_id', body.tenantId)
       .eq('user_id', user.id)
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      const ok = await userHasFeature(supabase as any, user.id, 'tax_automation')
+      const ok = await userHasFeature(supabase, user.id, 'tax_automation')
       if (!ok) {
         return NextResponse.json({ error: 'Tax automation is not available on your plan' }, { status: 403 })
       }
@@ -48,7 +49,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
     }
 
-    const { data, error } = await (supabase as any).rpc('get_tax_estimate', {
+    const { rpc } = await import('@/lib/supabase/typed')
+    const { data, error } = await rpc('get_tax_estimate', {
       p_tenant_id: body.tenantId,
       p_start_date: body.startDate,
       p_end_date: body.endDate

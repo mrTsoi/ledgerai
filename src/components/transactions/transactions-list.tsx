@@ -66,8 +66,8 @@ export function TransactionsList({ status }: Props) {
 
     try {
       setLoading(true)
-      let query = (supabase
-        .from('transactions') as any)
+      let query = supabase
+        .from('transactions')
         .select(`
           *,
           documents (
@@ -179,8 +179,8 @@ export function TransactionsList({ status }: Props) {
       description: 'Are you sure you want to void this transaction?',
       action: async () => {
         try {
-          const { error } = await (supabase
-            .from('transactions') as any)
+          const { error } = await supabase
+            .from('transactions')
             .update({ status: 'VOID' })
             .eq('id', id)
 
@@ -205,10 +205,10 @@ export function TransactionsList({ status }: Props) {
       description: 'Are you sure you want to delete this transaction?',
       action: async () => {
         try {
-          const { error } = await (supabase
-            .from('transactions') as any)
-            .delete()
-            .eq('id', id)
+            const { error } = await supabase
+              .from('transactions')
+              .delete()
+              .eq('id', id)
 
           if (error) throw error
           
@@ -251,12 +251,12 @@ export function TransactionsList({ status }: Props) {
       if (tx.status !== 'DRAFT') return
 
       // Check confidence score
-      const doc = (tx as any).documents
+      const doc = Array.isArray(tx.documents) ? tx.documents[0] : tx.documents
       const docData = doc?.document_data
       const confidence = Array.isArray(docData) && docData.length > 0 ? docData[0].confidence_score : null
       
-      // Check validation flags
-      const hasValidationIssues = doc?.validation_flags?.some((flag: string) => 
+      // Check validation flags (read from nested document_data)
+      const hasValidationIssues = doc?.document_data?.validation_flags?.some((flag: string) => 
         ['DUPLICATE_DOCUMENT', 'WRONG_TENANT'].includes(flag)
       )
 
@@ -301,8 +301,8 @@ export function TransactionsList({ status }: Props) {
           let processedCount = 0
 
           for (const chunk of chunks) {
-            const { error } = await (supabase
-              .from('transactions') as any)
+            const { error } = await supabase
+              .from('transactions')
               .update({ status: 'POSTED', posted_at: new Date().toISOString() })
               .in('id', chunk)
 
@@ -335,8 +335,8 @@ export function TransactionsList({ status }: Props) {
           const chunks = chunkArray(ids, batchSize)
 
           for (const chunk of chunks) {
-            const { error } = await (supabase
-              .from('transactions') as any)
+            const { error } = await supabase
+              .from('transactions')
               .update({ status: 'VOID' })
               .in('id', chunk)
 
@@ -376,8 +376,8 @@ export function TransactionsList({ status }: Props) {
           const chunks = chunkArray(draftsToDelete.map(t => t.id), batchSize)
 
           for (const chunk of chunks) {
-            const { error } = await (supabase
-              .from('transactions') as any)
+            const { error } = await supabase
+              .from('transactions')
               .delete()
               .in('id', chunk)
 
@@ -509,8 +509,8 @@ export function TransactionsList({ status }: Props) {
           if (txIdsToDelete.length > 0) {
             const deleteChunks = chunkArray(txIdsToDelete, batchSize)
             for (const chunk of deleteChunks) {
-              const { error } = await (supabase
-                .from('transactions') as any)
+              const { error } = await supabase
+                .from('transactions')
                 .delete()
                 .in('id', chunk)
               if (error) throw error
@@ -521,8 +521,8 @@ export function TransactionsList({ status }: Props) {
           if (txIdsToVoid.length > 0) {
             const voidChunks = chunkArray(txIdsToVoid, batchSize)
             for (const chunk of voidChunks) {
-              const { error } = await (supabase
-                .from('transactions') as any)
+              const { error } = await supabase
+                .from('transactions')
                 .update({ status: 'VOID' })
                 .in('id', chunk)
               if (error) throw error
@@ -588,10 +588,10 @@ export function TransactionsList({ status }: Props) {
     let amount = 0
     // Prioritize the structured currency column as it's the canonical source
     let currency = docData?.currency || 
-                   (docData?.extracted_data as any)?.currency || 
-                   tx.currency || 
-                   (currentTenant as any)?.currency || 
-                   'USD'
+             (docData?.extracted_data as { currency?: string } | null)?.currency || 
+             tx.currency || 
+             currentTenant?.currency || 
+             'USD'
     
     // Try explicit column first
     if (docData?.total_amount != null) {
@@ -730,12 +730,12 @@ export function TransactionsList({ status }: Props) {
                 const docIssues: AuditIssue[] = []
                 
                 // Check document validation status
-                const doc = (tx as any).documents
+                const doc = Array.isArray(tx.documents) ? tx.documents[0] : tx.documents
                 const docData = doc?.document_data
                 const confidence = Array.isArray(docData) && docData.length > 0 ? docData[0].confidence_score : null
 
-                if (doc && doc.validation_flags && Array.isArray(doc.validation_flags)) {
-                  doc.validation_flags.forEach((flag: string) => {
+                if (doc && doc.document_data && doc.document_data.validation_flags && Array.isArray(doc.document_data.validation_flags)) {
+                  doc.document_data.validation_flags.forEach((flag: string) => {
                     if (flag === 'DUPLICATE_DOCUMENT') {
                       docIssues.push({
                         transactionId: tx.id,
@@ -829,14 +829,14 @@ export function TransactionsList({ status }: Props) {
                           </Tooltip>
                         </TooltipProvider>
                       ) : (
-                        getStatusIcon(tx.status)
+                        getStatusIcon(tx.status ?? '')
                       )}
                       
                       {/* Description & Meta */}
                       <div className="flex-[2]">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="font-medium">{tx.description || 'No description'}</p>
-                          {getStatusBadge(tx.status)}
+                          {getStatusBadge(tx.status ?? '')}
                           {confidence !== null && (
                             <Badge variant="outline" className={`
                               ${confidence >= 0.8 ? 'text-green-600 border-green-200 bg-green-50' : 

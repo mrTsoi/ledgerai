@@ -47,6 +47,30 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
   const [tenantCurrency, setTenantCurrency] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [rateFetchFailed, setRateFetchFailed] = useState(false)
+  const [rateRetrying, setRateRetrying] = useState(false)
+
+  const retryFetchRate = async () => {
+    if (!transaction || !currentTenant) return
+    setRateRetrying(true)
+    try {
+      const { rate: fetched, ok } = await getExchangeRate(transaction.currency || tenantCurrency, tenantCurrency, currentTenant.id)
+      if (ok) {
+        setTransaction({ ...transaction, exchange_rate: fetched })
+        setRateFetchFailed(false)
+        toast.success('Exchange rate auto-fetch succeeded')
+      } else {
+        setRateFetchFailed(true)
+        toast.error('Auto-fetch failed — please enter rate manually')
+      }
+    } catch (e) {
+      console.error('Retry fetch failed', e)
+      setRateFetchFailed(true)
+      toast.error('Auto-fetch failed — please enter rate manually')
+    } finally {
+      setRateRetrying(false)
+    }
+  }
   
   // Preview State
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -152,53 +176,54 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
 
   const fetchTransaction = useCallback(async () => {
     try {
-      // 1. Fetch Transaction
-      const { data: txData, error: txError } = await (supabase
-        .from('transactions') as any)
-        .select('*')
+      // 1. Fetch Transaction with related line_items and document_data to avoid multiple round-trips
+      const { data: txData, error: txError } = await supabase
+        .from('transactions')
+        .select(`
+          *,
+          documents (
+            file_path,
+            file_type,
+            document_data (
+              currency,
+              confidence_score,
+              total_amount,
+              extracted_data
+            )
+          ),
+          line_items (*)
+        `)
         .eq('id', transactionId)
         .single()
 
       if (txError) throw txError
 
-      // 2. Fetch Line Items
-      const { data: lineData, error: lineError } = await (supabase
-        .from('line_items') as any)
-        .select('*')
-        .eq('transaction_id', transactionId)
+      const tx = txData as TransactionWithLineItems
+      const lineData = tx?.line_items || []
 
-      if (lineError) throw lineError
-
-      // 2.5 Fetch Document Data (Fallback for currency)
+      // Extract currency from related document_data if available
       let extractedCurrency = null
-      if ((txData as any).document_id) {
-        const { data: docData } = await (supabase
-          .from('document_data') as any)
-          .select('currency')
-          .eq('document_id', (txData as any).document_id)
-          .maybeSingle()
-        if (docData?.currency) extractedCurrency = docData.currency
-      }
+      const docRel = tx?.documents
+      const doc = Array.isArray(docRel) ? docRel[0] : docRel
+      const rawDocData = doc?.document_data
+      const docData = Array.isArray(rawDocData) ? rawDocData[0] : rawDocData
+      if (docData?.currency) extractedCurrency = docData.currency
+      else if (docData?.extracted_data && (docData.extracted_data as { currency?: string }).currency) extractedCurrency = (docData.extracted_data as { currency?: string }).currency
 
-      // 3. Fetch Tenant Currency (to ensure we have it for logic)
+      // 3. Ensure we have tenant currency before auto-fetching rates
       let currentTenantCurrency = tenantCurrency
-      
-      // If we don't have it in state, try to get it from context or fetch
       if (!currentTenantCurrency && currentTenant) {
-         if ((currentTenant as any).currency) {
-            currentTenantCurrency = (currentTenant as any).currency
-         } else {
-             const { data: tenantData } = await (supabase
-               .from('tenants') as any)
-               .select('currency')
-               .eq('id', currentTenant.id)
-               .single()
-             if (tenantData?.currency) {
-                currentTenantCurrency = tenantData.currency
-             }
-         }
-         // Update state for future use
-         if (currentTenantCurrency) setTenantCurrency(currentTenantCurrency)
+        if (currentTenant?.currency) {
+          currentTenantCurrency = currentTenant.currency
+        } else {
+          const { data: tenantData } = await supabase
+            .from('tenants')
+            .select('currency')
+            .eq('id', currentTenant.id)
+            .single()
+          if (tenantData?.currency) currentTenantCurrency = tenantData.currency
+        }
+        if (currentTenantCurrency) setTenantCurrency(currentTenantCurrency)
       }
       
       // Fallback to USD only if we really couldn't find anything
@@ -208,8 +233,9 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
       // If transaction is foreign but line items lack foreign amounts, 
       // assume the stored 'debit'/'credit' are actually the foreign face values.
       
-      // Use extracted currency if transaction currency is not set
-      const effectiveCurrency = txData.currency || extractedCurrency || currentTenantCurrency
+      // Determine effective currency: prefer document data (structured then extracted), then transaction, then tenant
+      const txCurrency = txData?.currency
+      const effectiveCurrency = docData?.currency || (docData?.extracted_data as { currency?: string } | null)?.currency || txCurrency || currentTenantCurrency
       
       const isForeign = effectiveCurrency && effectiveCurrency !== currentTenantCurrency
       let rate = txData.exchange_rate || 1.0
@@ -217,12 +243,16 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
       // Auto-fetch rate if it looks like a default (1.0) for a foreign transaction
       if (isForeign && rate === 1.0 && currentTenant) {
         try {
-           const fetchedRate = await getExchangeRate(effectiveCurrency, currentTenantCurrency, currentTenant.id)
-           if (fetchedRate && fetchedRate !== 1.0) {
+           const { rate: fetchedRate, ok } = await getExchangeRate(effectiveCurrency, currentTenantCurrency, currentTenant.id)
+           if (ok && fetchedRate !== 1.0) {
              rate = fetchedRate
+             setRateFetchFailed(false)
+           } else if (!ok) {
+             setRateFetchFailed(true)
            }
         } catch (e) {
            console.error('Auto-fetch rate failed', e)
+           setRateFetchFailed(true)
         }
       }
 
@@ -255,21 +285,21 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
       })
 
       // Fetch document preview if exists
-      if ((txData as any).document_id) {
-        const { data: doc, error: docError } = await (supabase
-          .from('documents') as any)
+      if (txData?.document_id) {
+        const { data: doc, error: docError } = await supabase
+          .from('documents')
           .select('file_path, file_type')
-          .eq('id', (txData as any).document_id)
+          .eq('id', txData.document_id)
           .single()
-        
+
         if (doc && !docError) {
            const { data: blob } = await supabase.storage
             .from('documents')
-            .download((doc as any).file_path)
+            .download(doc.file_path as string)
            
            if (blob) {
              setPreviewUrl(URL.createObjectURL(blob))
-             setFileType((doc as any).file_type)
+             setFileType(doc.file_type)
            }
         }
       }
@@ -304,11 +334,11 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
       fetchTransaction()
       fetchAccounts()
       // Fetch tenant currency
-      if ((currentTenant as any).currency) {
-        setTenantCurrency((currentTenant as any).currency)
+        if (currentTenant?.currency) {
+        setTenantCurrency(currentTenant.currency)
       } else {
         // Fallback fetch if not in context yet
-        (supabase.from('tenants') as any).select('currency').eq('id', currentTenant.id).single()
+        supabase.from('tenants').select('currency').eq('id', currentTenant.id).single()
           .then(({ data }: any) => {
             if (data?.currency) setTenantCurrency(data.currency)
           })
@@ -334,10 +364,15 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
     let newRate = 1.0
     if (newCurrency !== tenantCurrency) {
       try {
-        newRate = await getExchangeRate(newCurrency, tenantCurrency, currentTenant?.id)
+        const { rate: fetched, ok } = await getExchangeRate(newCurrency, tenantCurrency, currentTenant?.id)
+        newRate = fetched
+        setRateFetchFailed(!ok)
       } catch (error) {
         console.error('Error fetching rate:', error)
+        setRateFetchFailed(true)
       }
+    } else {
+      setRateFetchFailed(false)
     }
 
     // 3. Calculate new line items
@@ -486,33 +521,27 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
     
     try {
       setSaving(true)
-      
-      // Create a new line item in DB
-      const { data: newLine, error } = await (supabase
-        .from('line_items') as any)
-        .insert({
-          transaction_id: transaction.id,
-          account_id: accounts[0]?.id, // Default to first account or null
-          debit: 0,
-          credit: 0,
-          description: 'New line item'
-        })
-        .select()
-        .single()
-        
-      if (error) throw error
-      
-      // Update local state
+      // Create a new line item locally (don't insert to DB yet) to avoid DB check constraint
+      const clientId = `new-${Date.now()}`
+      const newLine: any = {
+        id: clientId,
+        __clientId: clientId,
+        transaction_id: transaction.id,
+        account_id: accounts[0]?.id || null,
+        debit: 0,
+        credit: 0,
+        description: 'New line item'
+      }
+
       setTransaction({
         ...transaction,
         line_items: [...transaction.line_items, newLine]
       })
-      
+
       // Disable auto-balance if we have more than 2 lines now
       if (transaction.line_items.length + 1 > 2) {
         setAutoBalance(false)
       }
-      
     } catch (error: any) {
       console.error('Error adding line item:', error)
       toast.error('Failed to add line item: ' + error.message)
@@ -528,8 +557,8 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
       setSaving(true)
 
       // Update transaction
-      const { error: txError } = await (supabase
-        .from('transactions') as any)
+      const { error: txError } = await supabase
+        .from('transactions')
         .update({
           transaction_date: transaction.transaction_date,
           description: transaction.description,
@@ -543,9 +572,31 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
       if (txError) throw txError
 
       // Update line items
-      for (const line of transaction.line_items) {
-        const { error: lineError } = await (supabase
-          .from('line_items') as any)
+      // Separate new lines (created locally) from existing DB lines
+      const newLines = transaction.line_items.filter(l => typeof l.id === 'string' && l.id.startsWith('new-'))
+      const existingLines = transaction.line_items.filter(l => !(typeof l.id === 'string' && l.id.startsWith('new-')))
+
+      // Insert new lines to DB one-by-one and replace in state
+      for (const nl of newLines) {
+        const payload: any = {
+          transaction_id: nl.transaction_id,
+          account_id: nl.account_id,
+          debit: nl.debit || 0,
+          credit: nl.credit || 0,
+          description: nl.description || null
+        }
+        const { data: inserted, error: insertErr } = await supabase.from('line_items').insert(payload).select().single()
+
+        if (insertErr) throw insertErr
+
+        // Replace the temp line in transaction.line_items with the inserted row
+        transaction.line_items = transaction.line_items.map(li => (li.id === nl.id ? inserted : li))
+      }
+
+      // Update existing lines
+      for (const line of existingLines) {
+        const { error: lineError } = await supabase
+          .from('line_items')
           .update({
             account_id: line.account_id,
             debit: line.debit,
@@ -590,8 +641,8 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
 
       const { data: { user } } = await supabase.auth.getUser()
 
-      const { error } = await (supabase
-        .from('transactions') as any)
+      const { error } = await supabase
+        .from('transactions')
         .update({
           status: 'POSTED',
           posted_by: user?.id || null,
@@ -769,6 +820,14 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
             {transaction.currency && transaction.currency !== tenantCurrency && (
               <div>
                 <Label htmlFor="exchange_rate">Exchange Rate (1 {transaction.currency} = ? {tenantCurrency})</Label>
+                {rateFetchFailed && (
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="text-sm text-red-600">Auto-fetch failed — please enter the exchange rate manually.</div>
+                    <Button size="sm" variant="outline" onClick={retryFetchRate} disabled={rateRetrying}>
+                      {rateRetrying ? 'Retrying...' : 'Retry'}
+                    </Button>
+                  </div>
+                )}
                 <Input
                   id="exchange_rate"
                   type="number"
@@ -780,6 +839,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
                   }}
                   onFocus={(e) => e.target.select()}
                   disabled={transaction.status === 'POSTED'}
+                  className={rateFetchFailed ? 'border-red-500' : ''}
                 />
               </div>
             )}
@@ -836,7 +896,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
                     <div className="col-span-12 md:col-span-4">
                       <Label className="text-xs text-gray-500">Account</Label>
                       <select
-                        value={line.account_id}
+                        value={line.account_id ?? undefined}
                         onChange={(e) => updateLineItem(index, 'account_id', e.target.value)}
                         disabled={transaction.status === 'POSTED'}
                         className="w-full px-2 py-1.5 text-sm border rounded bg-white"
