@@ -1,0 +1,18 @@
+services:
+  stripe-mock:
+    image: stripe/stripe-mock:latest
+    container_name: stripe-mock-e2e
+    ports:
+      - "${STRIPE_MOCK_PORT:-12111}:12111"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:12111/"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - e2e-network
+
+networks:
+  e2e-network:
+    driver: bridge
