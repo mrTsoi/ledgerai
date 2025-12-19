@@ -498,14 +498,35 @@ WHERE user_id = '<your-user-id>';
 
 \`\`\`bash
 # Development
-npm run dev          # Start development server
+npm run dev             # Start development server
+npm run wait-for-dev    # Wait for dev server to be ready on localhost:3000
 
 # Production
-npm run build        # Build for production
-npm run start        # Start production server
+npm run build           # Build for production
+npm run start           # Start production server
 
 # Linting
-npm run lint         # Run ESLint
+npm run lint            # Run ESLint
+
+# Utilities
+npm run i18n:sync       # Sync translation files
+npm run wait-for-server # Wait for a server (use with arguments: npm run wait-for-server -- http://localhost:PORT)
+\`\`\`
+
+### Using wait-on for Testing
+
+The project includes \`wait-on\` for waiting on resources to become available before running tests or other commands:
+
+\`\`\`bash
+# Wait for development server before running tests
+npm run dev &          # Start dev server in background
+npm run wait-for-dev   # Wait until it's ready
+# Run your tests here
+
+# Or use wait-on directly
+npx wait-on http://localhost:3000        # Wait for server on port 3000
+npx wait-on http://localhost:12111 -t 30000  # Wait with 30s timeout
+npx wait-on tcp:3000                     # Wait for TCP port
 \`\`\`
 
 ## 🔒 Security Best Practices

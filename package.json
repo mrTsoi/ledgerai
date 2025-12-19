@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "i18n:sync": "node scripts/sync-translations.js"
+    "i18n:sync": "node scripts/sync-translations.js",
+    "wait-for-dev": "wait-on http://localhost:3000",
+    "wait-for-server": "wait-on"
   },
   "dependencies": {
     "@google-cloud/documentai": "^9.5.0",
@@ -67,6 +69,7 @@
     "postcss": "^8",
     "supabase": "^1.142.2",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^8.0.1"
   }
 }
