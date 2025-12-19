@@ -91,6 +91,13 @@ if ($null -eq $DockerComposeCmd) {
 
 Write-Info "Using: $DockerComposeCmdType"
 
+# Format the docker compose command for display
+if ($DockerComposeCmd -is [array]) {
+    $DockerComposeCmdDisplay = $DockerComposeCmd -join ' '
+} else {
+    $DockerComposeCmdDisplay = $DockerComposeCmd
+}
+
 # Normalize path separators for cross-platform compatibility
 # Docker Compose on Linux expects forward slashes
 $ComposeFilePath = $ComposeFile -replace '\\', '/'
@@ -206,7 +213,7 @@ try {
         # Keep services running for interactive use
         Write-Info "Mock services are running. Press Ctrl+C to stop them."
         Write-Info "Or run the following to stop manually:"
-        Write-Info "  docker compose -f $ComposeFilePath down -v"
+        Write-Info "  $DockerComposeCmdDisplay -f $ComposeFilePath down -v"
         Write-Info ""
         
         try {
@@ -221,7 +228,7 @@ try {
         # CI/CD mode - exit successfully after starting services
         Write-Info "Services started successfully (CI mode - exiting now)"
         Write-Info "To stop services, run:"
-        Write-Info "  docker compose -f $ComposeFilePath down -v"
+        Write-Info "  $DockerComposeCmdDisplay -f $ComposeFilePath down -v"
         exit 0
     }
     
