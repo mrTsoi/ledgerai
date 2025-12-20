@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { validateUploadBytes } from '@/lib/uploads/validate-upload'
 
 export async function importInvoiceToTransactions(invoiceId: string) {
   const supabase = await createClient()
@@ -64,6 +65,14 @@ export async function importInvoiceToTransactions(invoiceId: string) {
       
       if (pdfResponse.ok) {
         const pdfBuffer = await pdfResponse.arrayBuffer()
+        const validation = validateUploadBytes({
+          filename: 'invoice.pdf',
+          contentType: 'application/pdf',
+          bytes: Buffer.from(pdfBuffer),
+        })
+        if (!validation.ok) {
+          throw new Error(`Invoice PDF rejected: ${validation.error}`)
+        }
         const fileName = `invoice_${(invoice as any).stripe_invoice_id}.pdf`
         const filePath = `${tenantId}/${new Date().getFullYear()}/${fileName}`
 
@@ -71,7 +80,7 @@ export async function importInvoiceToTransactions(invoiceId: string) {
         const { error: uploadError } = await supabase.storage
           .from('documents')
           .upload(filePath, pdfBuffer, {
-            contentType: 'application/pdf',
+            contentType: validation.canonicalMime,
             upsert: true
           })
 
@@ -83,8 +92,8 @@ export async function importInvoiceToTransactions(invoiceId: string) {
               tenant_id: tenantId,
               file_path: filePath,
               file_name: fileName,
-              file_size: pdfBuffer.byteLength,
-              file_type: 'application/pdf',
+              file_size: validation.size,
+              file_type: validation.canonicalMime,
               status: 'PROCESSED',
               document_type: 'INVOICE',
               uploaded_by: user.id

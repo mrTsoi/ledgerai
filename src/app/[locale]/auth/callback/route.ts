@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { insertPendingSubscription } from '@/lib/supabase/typed'
 
 export const runtime = 'nodejs'
@@ -65,26 +66,67 @@ export async function GET(
     // Auto-subscribe to Free plan if no subscription exists (e.g. Google Login without plan selection)
     if (user && !planId) {
       try {
-        const { data: subscriptions } = await supabase
-          .from('user_subscriptions')
-          .select('id')
-          .eq('user_id', user.id)
+        let service: ReturnType<typeof createServiceClient>
+        try {
+          service = createServiceClient()
+        } catch {
+          service = null as any
+        }
 
-        if (!subscriptions || subscriptions.length === 0) {
-          const { data: plans } = await supabase
-            .from('subscription_plans')
+        if (service) {
+          // Ensure profile exists (user_subscriptions.user_id references profiles.id)
+          const { data: existingProfile } = await service
+            .from('profiles')
             .select('id')
-            .ilike('name', '%Free%')
-            .limit(1)
+            .eq('id', user.id)
+            .maybeSingle()
 
-          if (plans && plans.length > 0) {
-            await supabase.from('user_subscriptions').insert({
-              user_id: user.id,
-              plan_id: plans[0].id,
-              status: 'active',
-              current_period_start: new Date().toISOString(),
-              current_period_end: new Date(new Date().setFullYear(new Date().getFullYear() + 100)).toISOString(),
+          if (!existingProfile?.id) {
+            const fullName =
+              (user.user_metadata as any)?.full_name ||
+              (user.user_metadata as any)?.name ||
+              (user.user_metadata as any)?.display_name ||
+              null
+
+            await (service.from('profiles') as any).insert({
+              id: user.id,
+              email: user.email || null,
+              full_name: fullName,
             })
+          }
+
+          const { data: existingSub } = await service
+            .from('user_subscriptions')
+            .select('user_id, stripe_subscription_id')
+            .eq('user_id', user.id)
+            .maybeSingle()
+
+          // Do not overwrite a Stripe-managed subscription.
+          if (!existingSub?.stripe_subscription_id) {
+            const { data: planRows } = await service
+              .from('subscription_plans')
+              .select('id, name, price_monthly')
+              .eq('is_active', true)
+              .order('price_monthly', { ascending: true })
+              .limit(10)
+
+            const free = (planRows || []).find((p: any) => (p?.price_monthly ?? 0) === 0 && (p?.name || '').toLowerCase() === 'free')
+              || (planRows || []).find((p: any) => (p?.price_monthly ?? 0) === 0)
+
+            if (free?.id) {
+              const now = new Date().toISOString()
+              await (service.from('user_subscriptions') as any).upsert(
+                {
+                  user_id: user.id,
+                  plan_id: free.id,
+                  status: 'active',
+                  current_period_start: now,
+                  current_period_end: null,
+                  stripe_subscription_id: null,
+                },
+                { onConflict: 'user_id' }
+              )
+            }
           }
         }
       } catch (e) {

@@ -40,7 +40,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.00c8b2212933",
     namespace: 'literals',
     "file": "src/components/tenant/create-tenant-modal.tsx",
-    "line": 72,
+    "line": 78,
     kind: 'lt-call'
   },
   {
@@ -96,7 +96,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.01e8f2cb2453",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 593,
+    "line": 568,
     kind: 'lt-call'
   },
   {
@@ -119,8 +119,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "month",
     "key": "literal.021710fa7866",
     namespace: 'literals',
-    "file": "src/components/settings/billing-settings.tsx",
-    "line": 758,
+    "file": "src/components/subscription/available-plans.tsx",
+    "line": 196,
     kind: 'lt-call'
   },
   {
@@ -240,7 +240,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.057587d29023",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 370,
+    "line": 340,
     kind: 'ltvars-call'
   },
   {
@@ -264,7 +264,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0642b79ea12e",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 517,
+    "line": 492,
     kind: 'lt-call'
   },
   {
@@ -384,7 +384,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.09875eba5779",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 183,
+    "line": 153,
     kind: 'lt-call'
   },
   {
@@ -656,7 +656,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0e3ca03fa715",
     namespace: 'literals',
     "file": "src/components/dashboard/onboarding-view.tsx",
-    "line": 201,
+    "line": 332,
     kind: 'lt-call'
   },
   {
@@ -688,7 +688,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0eff330840f9",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 230,
+    "line": 200,
     kind: 'ltvars-call'
   },
   {
@@ -880,7 +880,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.154ee1415e99",
     namespace: 'literals',
     "file": "src/components/dashboard/onboarding-view.tsx",
-    "line": 175,
+    "line": 295,
     kind: 'lt-call'
   },
   {
@@ -1000,7 +1000,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.17b1664723bf",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 416,
+    "line": 391,
     kind: 'lt-call'
   },
   {
@@ -1048,7 +1048,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1921b5feebcd",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 177,
+    "line": 142,
     kind: 'lt-call'
   },
   {
@@ -1192,7 +1192,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1c7c77b27543",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 443,
+    "line": 418,
     kind: 'lt-call'
   },
   {
@@ -1296,7 +1296,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1e9b5cbe7b9f",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 348,
+    "line": 323,
     kind: 'lt-call'
   },
   {
@@ -1320,7 +1320,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1f5a1abf2f08",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 231,
+    "line": 201,
     kind: 'lt-call'
   },
   {
@@ -1360,7 +1360,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.204054def5d7",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 360,
+    "line": 335,
     kind: 'lt-call'
   },
   {
@@ -1424,7 +1424,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.211768b22222",
     namespace: 'literals',
     "file": "src/components/dashboard/onboarding-view.tsx",
-    "line": 44,
+    "line": 154,
     kind: 'lt-call'
   },
   {
@@ -1480,7 +1480,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.221d346c9beb",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 460,
+    "line": 435,
     kind: 'lt-call'
   },
   {
@@ -1544,7 +1544,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.23045b613cff",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 415,
+    "line": 390,
     kind: 'lt-call'
   },
   {
@@ -1600,7 +1600,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.240ffbf141a3",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 391,
+    "line": 366,
     kind: 'lt-call'
   },
   {
@@ -1728,7 +1728,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2679d420173f",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 352,
+    "line": 327,
     kind: 'lt-call'
   },
   {
@@ -1760,7 +1760,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.272bc02ec508",
     namespace: 'literals',
     "file": "src/components/banking/bank-statement-upload.tsx",
-    "line": 122,
+    "line": 101,
     kind: 'lt-call'
   },
   {
@@ -1776,7 +1776,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2783c4577c78",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 217,
+    "line": 187,
     kind: 'lt-call'
   },
   {
@@ -1800,7 +1800,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2801386feaa7",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 398,
+    "line": 373,
     kind: 'lt-call'
   },
   {
@@ -1906,6 +1906,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/settings/tenant-mismatch-policy-settings.tsx",
     "line": 257,
     kind: 'lt-call'
+  },
+  {
+    "text": "= 0x20 && b",
+    "key": "literal.29fc0d370a8c",
+    namespace: 'literals',
+    "file": "src/lib/uploads/validate-upload.ts",
+    "line": 99,
+    kind: 'jsx-text'
   },
   {
     "text": "Handle transactions in any currency with real-time exchange rates and automatic gain/loss calculation.",
@@ -2040,7 +2048,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2c9192bf0006",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 667,
+    "line": 642,
     kind: 'lt-call'
   },
   {
@@ -2152,7 +2160,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2f20927e7647",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 377,
+    "line": 347,
     kind: 'lt-call'
   },
   {
@@ -2248,7 +2256,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3269f940a36d",
     namespace: 'literals',
     "file": "src/components/tenant/create-tenant-modal.tsx",
-    "line": 62,
+    "line": 61,
     kind: 'lt-call'
   },
   {
@@ -2280,7 +2288,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.335c04da1652",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 456,
+    "line": 431,
     kind: 'lt-call'
   },
   {
@@ -2311,8 +2319,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Upgrade to Yearly",
     "key": "literal.33c4f2697405",
     namespace: 'literals',
-    "file": "src/components/settings/billing-settings.tsx",
-    "line": 712,
+    "file": "src/components/subscription/available-plans.tsx",
+    "line": 147,
     kind: 'lt-call'
   },
   {
@@ -2607,8 +2615,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "(Save ~20%)",
     "key": "literal.3877abd7e037",
     namespace: 'literals',
-    "file": "src/components/settings/billing-settings.tsx",
-    "line": 685,
+    "file": "src/components/subscription/available-plans.tsx",
+    "line": 108,
     kind: 'lt-call'
   },
   {
@@ -2648,7 +2656,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.38ec7fb58641",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 215,
+    "line": 185,
     kind: 'lt-call'
   },
   {
@@ -2760,7 +2768,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3ab6ea43716b",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 442,
+    "line": 417,
     kind: 'lt-call'
   },
   {
@@ -2864,7 +2872,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3c25a75ff4c9",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 346,
+    "line": 316,
     kind: 'lt-call'
   },
   {
@@ -2896,7 +2904,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3d1a24d11db5",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 358,
+    "line": 328,
     kind: 'lt-call'
   },
   {
@@ -3128,7 +3136,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.434eb26f4835",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 650,
+    "line": 625,
     kind: 'lt-call'
   },
   {
@@ -3151,8 +3159,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Current Plan",
     "key": "literal.440a9f2ca18e",
     namespace: 'literals',
-    "file": "src/components/settings/billing-settings.tsx",
-    "line": 710,
+    "file": "src/components/subscription/available-plans.tsx",
+    "line": 145,
     kind: 'lt-call'
   },
   {
@@ -3496,7 +3504,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4a01b5c758ac",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 353,
+    "line": 328,
     kind: 'lt-call'
   },
   {
@@ -3552,7 +3560,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4af169e0f1e7",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 359,
+    "line": 334,
     kind: 'lt-call'
   },
   {
@@ -3640,7 +3648,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4d3affa32a16",
     namespace: 'literals',
     "file": "src/components/tenant/create-tenant-modal.tsx",
-    "line": 122,
+    "line": 128,
     kind: 'lt-call'
   },
   {
@@ -3696,7 +3704,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4e257cf6e957",
     namespace: 'literals',
     "file": "src/components/dashboard/onboarding-view.tsx",
-    "line": 78,
+    "line": 188,
     kind: 'lt-call'
   },
   {
@@ -3712,7 +3720,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4e4d0119cce6",
     namespace: 'literals',
     "file": "src/components/dashboard/onboarding-view.tsx",
-    "line": 128,
+    "line": 234,
     kind: 'lt-call'
   },
   {
@@ -3839,8 +3847,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "year",
     "key": "literal.4ff0b1538469",
     namespace: 'literals',
-    "file": "src/components/settings/billing-settings.tsx",
-    "line": 758,
+    "file": "src/components/subscription/available-plans.tsx",
+    "line": 196,
     kind: 'lt-call'
   },
   {
@@ -4000,7 +4008,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5334ef2c8c44",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 432,
+    "line": 407,
     kind: 'lt-call'
   },
   {
@@ -4008,7 +4016,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5366b4066258",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 536,
+    "line": 511,
     kind: 'lt-call'
   },
   {
@@ -4023,8 +4031,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Switch Plan",
     "key": "literal.538db0ff6de4",
     namespace: 'literals',
-    "file": "src/components/settings/billing-settings.tsx",
-    "line": 708,
+    "file": "src/components/subscription/available-plans.tsx",
+    "line": 143,
     kind: 'lt-call'
   },
   {
@@ -4256,7 +4264,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.58e1b0ce155a",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 173,
+    "line": 138,
     kind: 'lt-call'
   },
   {
@@ -4312,7 +4320,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5a57ab25dfd1",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 534,
+    "line": 509,
     kind: 'lt-call'
   },
   {
@@ -4447,8 +4455,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "No checkout URL returned",
     "key": "literal.5c5766f71546",
     namespace: 'literals',
-    "file": "src/components/settings/billing-settings.tsx",
-    "line": 327,
+    "file": "src/components/dashboard/onboarding-view.tsx",
+    "line": 83,
     kind: 'lt-call'
   },
   {
@@ -4472,7 +4480,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5c8d454c8450",
     namespace: 'literals',
     "file": "src/components/tenant/create-tenant-modal.tsx",
-    "line": 70,
+    "line": 76,
     kind: 'lt-call'
   },
   {
@@ -4608,7 +4616,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5e71265c0205",
     namespace: 'literals',
     "file": "src/components/dashboard/onboarding-view.tsx",
-    "line": 169,
+    "line": 289,
     kind: 'lt-call'
   },
   {
@@ -4680,7 +4688,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5fe61e2aae6b",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 291,
+    "line": 261,
     kind: 'lt-call'
   },
   {
@@ -4712,7 +4720,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.60a20af78919",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 603,
+    "line": 578,
     kind: 'lt-call'
   },
   {
@@ -5036,6 +5044,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "No subscription plans found.",
+    "key": "literal.669441b63875",
+    namespace: 'literals',
+    "file": "src/components/subscription/available-plans.tsx",
+    "line": 119,
+    kind: 'lt-call'
+  },
+  {
     "text": "Chat with us instantly",
     "key": "literal.669c7f7682c5",
     namespace: 'literals',
@@ -5135,8 +5151,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Switch to Monthly",
     "key": "literal.692e5c406168",
     namespace: 'literals',
-    "file": "src/components/settings/billing-settings.tsx",
-    "line": 713,
+    "file": "src/components/subscription/available-plans.tsx",
+    "line": 148,
     kind: 'lt-call'
   },
   {
@@ -5303,8 +5319,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Available Plans",
     "key": "literal.6c3032c87e49",
     namespace: 'literals',
-    "file": "src/components/settings/billing-settings.tsx",
-    "line": 676,
+    "file": "src/components/subscription/available-plans.tsx",
+    "line": 97,
     kind: 'lt-call'
   },
   {
@@ -5336,7 +5352,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6d327604fd42",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 643,
+    "line": 618,
     kind: 'lt-call'
   },
   {
@@ -5464,7 +5480,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6f5c2cffee6c",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 142,
+    "line": 149,
     kind: 'lt-call'
   },
   {
@@ -5624,7 +5640,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.740f20a0cafc",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 315,
+    "line": 285,
     kind: 'lt-call'
   },
   {
@@ -5688,7 +5704,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7544ddb8ff8b",
     namespace: 'literals',
     "file": "src/components/dashboard/onboarding-view.tsx",
-    "line": 108,
+    "line": 214,
     kind: 'lt-call'
   },
   {
@@ -5712,15 +5728,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.75e51d8c8593",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 453,
+    "line": 428,
     kind: 'lt-call'
   },
   {
     "text": "Free",
     "key": "literal.75f527181b57",
     namespace: 'literals',
-    "file": "src/components/landing/pricing-section.tsx",
-    "line": 47,
+    "file": "src/components/dashboard/onboarding-view.tsx",
+    "line": 239,
     kind: 'lt-call'
   },
   {
@@ -5767,8 +5783,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Downgrade",
     "key": "literal.770fbc1a9a8c",
     namespace: 'literals',
-    "file": "src/components/settings/billing-settings.tsx",
-    "line": 717,
+    "file": "src/components/subscription/available-plans.tsx",
+    "line": 152,
     kind: 'lt-call'
   },
   {
@@ -5888,7 +5904,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.79eda34585a4",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 302,
+    "line": 272,
     kind: 'lt-call'
   },
   {
@@ -5936,7 +5952,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7ac93b9afe21",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 602,
+    "line": 577,
     kind: 'lt-call'
   },
   {
@@ -6064,7 +6080,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7d03572ae2f1",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 350,
+    "line": 325,
     kind: 'lt-call'
   },
   {
@@ -6096,7 +6112,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7d62d002654d",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 323,
+    "line": 293,
     kind: 'lt-call'
   },
   {
@@ -6344,7 +6360,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.83835c95df81",
     namespace: 'literals',
     "file": "src/components/banking/bank-statement-upload.tsx",
-    "line": 127,
+    "line": 106,
     kind: 'lt-call'
   },
   {
@@ -6392,7 +6408,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.853eb78446c4",
     namespace: 'literals',
     "file": "src/components/tenant/create-tenant-modal.tsx",
-    "line": 65,
+    "line": 71,
     kind: 'lt-call'
   },
   {
@@ -6416,7 +6432,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8599f5cc48ff",
     namespace: 'literals',
     "file": "src/components/dashboard/onboarding-view.tsx",
-    "line": 190,
+    "line": 321,
     kind: 'lt-call'
   },
   {
@@ -6768,7 +6784,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8c29ce477dce",
     namespace: 'literals',
     "file": "src/components/tenant/create-tenant-modal.tsx",
-    "line": 91,
+    "line": 97,
     kind: 'lt-call'
   },
   {
@@ -6824,7 +6840,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8d886c0ba6f2",
     namespace: 'literals',
     "file": "src/components/dashboard/onboarding-view.tsx",
-    "line": 117,
+    "line": 223,
     kind: 'lt-call'
   },
   {
@@ -6984,7 +7000,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8fe180efd4f3",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 357,
+    "line": 332,
     kind: 'lt-call'
   },
   {
@@ -7104,7 +7120,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.91637e6f059d",
     namespace: 'literals',
     "file": "src/components/dashboard/onboarding-view.tsx",
-    "line": 184,
+    "line": 315,
     kind: 'lt-call'
   },
   {
@@ -7424,7 +7440,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.98e5ef062b2a",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 630,
+    "line": 605,
     kind: 'lt-call'
   },
   {
@@ -7680,7 +7696,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9d75bd3148e8",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 485,
+    "line": 460,
     kind: 'lt-call'
   },
   {
@@ -7696,7 +7712,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9da6d9c1c35d",
     namespace: 'literals',
     "file": "src/components/tenant/create-tenant-modal.tsx",
-    "line": 75,
+    "line": 81,
     kind: 'lt-call'
   },
   {
@@ -7720,7 +7736,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9dba7ad7c5bd",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 546,
+    "line": 521,
     kind: 'lt-call'
   },
   {
@@ -7752,7 +7768,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9e092dda4f0e",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 576,
+    "line": 551,
     kind: 'lt-call'
   },
   {
@@ -7768,7 +7784,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9e614585fe64",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 493,
+    "line": 468,
     kind: 'lt-call'
   },
   {
@@ -7992,7 +8008,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a194c36d823e",
     namespace: 'literals',
     "file": "src/components/dashboard/onboarding-view.tsx",
-    "line": 138,
+    "line": 258,
     kind: 'lt-call'
   },
   {
@@ -8096,7 +8112,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a3a4796ea28d",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 343,
+    "line": 313,
     kind: 'lt-call'
   },
   {
@@ -8136,7 +8152,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a4d5c8e996aa",
     namespace: 'literals',
     "file": "src/components/dashboard/onboarding-view.tsx",
-    "line": 126,
+    "line": 232,
     kind: 'lt-call'
   },
   {
@@ -8231,8 +8247,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Upgrade",
     "key": "literal.a6f47e00e036",
     namespace: 'literals',
-    "file": "src/components/settings/billing-settings.tsx",
-    "line": 715,
+    "file": "src/components/subscription/available-plans.tsx",
+    "line": 150,
     kind: 'lt-call'
   },
   {
@@ -8256,7 +8272,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a72e51300591",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 362,
+    "line": 332,
     kind: 'lt-call'
   },
   {
@@ -8416,7 +8432,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a98705b7a723",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 492,
+    "line": 467,
     kind: 'lt-call'
   },
   {
@@ -8576,7 +8592,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ad0d0603e2aa",
     namespace: 'literals',
     "file": "src/components/banking/bank-statement-upload.tsx",
-    "line": 103,
+    "line": 82,
     kind: 'lt-call'
   },
   {
@@ -8664,7 +8680,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b034605d102e",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 389,
+    "line": 364,
     kind: 'lt-call'
   },
   {
@@ -8679,8 +8695,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Upgrade Offer:",
     "key": "literal.b04ad1c2ef77",
     namespace: 'literals',
-    "file": "src/components/settings/billing-settings.tsx",
-    "line": 767,
+    "file": "src/components/subscription/available-plans.tsx",
+    "line": 205,
     kind: 'lt-call'
   },
   {
@@ -8696,7 +8712,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b06aa8a6ed79",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 209,
+    "line": 179,
     kind: 'ltvars-call'
   },
   {
@@ -8784,7 +8800,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b2d513576073",
     namespace: 'literals',
     "file": "src/components/banking/bank-statement-upload.tsx",
-    "line": 99,
+    "line": 78,
     kind: 'lt-call'
   },
   {
@@ -8864,7 +8880,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b38104f5b80a",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 488,
+    "line": 463,
     kind: 'lt-call'
   },
   {
@@ -8919,8 +8935,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Billing cycle",
     "key": "literal.b493d8acc7cc",
     namespace: 'literals',
-    "file": "src/components/settings/billing-settings.tsx",
-    "line": 378,
+    "file": "src/components/dashboard/onboarding-view.tsx",
+    "line": 243,
     kind: 'lt-call'
   },
   {
@@ -9088,7 +9104,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b633fc51fb11",
     namespace: 'literals',
     "file": "src/components/tenant/create-tenant-modal.tsx",
-    "line": 62,
+    "line": 68,
     kind: 'lt-call'
   },
   {
@@ -9248,7 +9264,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b8ce37a1915f",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 444,
+    "line": 419,
     kind: 'lt-call'
   },
   {
@@ -9279,8 +9295,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Failed to start upgrade: {message}",
     "key": "literal.bab49063f2a2",
     namespace: 'literals',
-    "file": "src/components/settings/billing-settings.tsx",
-    "line": 331,
+    "file": "src/components/dashboard/onboarding-view.tsx",
+    "line": 87,
     kind: 'lt-call'
   },
   {
@@ -9312,7 +9328,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.bbf22ccd3ae8",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 128,
+    "line": 123,
     kind: 'lt-call'
   },
   {
@@ -9432,7 +9448,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.bd9441094ced",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 489,
+    "line": 464,
     kind: 'lt-call'
   },
   {
@@ -9440,7 +9456,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.bde2ec10faf8",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 452,
+    "line": 427,
     kind: 'lt-call'
   },
   {
@@ -9448,7 +9464,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.be2218931154",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 290,
+    "line": 260,
     kind: 'lt-call'
   },
   {
@@ -9472,7 +9488,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.beaf30b87d47",
     namespace: 'literals',
     "file": "src/components/dashboard/onboarding-view.tsx",
-    "line": 140,
+    "line": 260,
     kind: 'lt-call'
   },
   {
@@ -9736,7 +9752,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c549a15a35e3",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 217,
+    "line": 187,
     kind: 'ltvars-call'
   },
   {
@@ -10192,7 +10208,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ceff82af6af4",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 528,
+    "line": 503,
     kind: 'lt-call'
   },
   {
@@ -10280,7 +10296,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.cfdfa0cff236",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 666,
+    "line": 641,
     kind: 'lt-call'
   },
   {
@@ -10424,7 +10440,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d258feabaee8",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 309,
+    "line": 279,
     kind: 'lt-call'
   },
   {
@@ -10432,7 +10448,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d29d3c138fd3",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 210,
+    "line": 180,
     kind: 'ltvars-call'
   },
   {
@@ -10489,6 +10505,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
     "line": 317,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Failed to select Free plan",
+    "key": "literal.d3df69e219e1",
+    namespace: 'literals',
+    "file": "src/components/settings/billing-settings.tsx",
+    "line": 275,
     kind: 'lt-call'
   },
   {
@@ -10616,7 +10640,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d6fbc9d2bdd5",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 655,
+    "line": 630,
     kind: 'lt-call'
   },
   {
@@ -10968,7 +10992,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.dfee44ce016f",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 484,
+    "line": 459,
     kind: 'lt-call'
   },
   {
@@ -11016,7 +11040,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e158519a7e7a",
     namespace: 'literals',
     "file": "src/components/dashboard/onboarding-view.tsx",
-    "line": 186,
+    "line": 317,
     kind: 'lt-call'
   },
   {
@@ -11112,7 +11136,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e40577203ec9",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 464,
+    "line": 439,
     kind: 'lt-call'
   },
   {
@@ -11296,7 +11320,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e82effa3a945",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 221,
+    "line": 191,
     kind: 'lt-call'
   },
   {
@@ -11600,7 +11624,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.edfbabc907c9",
     namespace: 'literals',
     "file": "src/components/tenant/create-tenant-modal.tsx",
-    "line": 102,
+    "line": 108,
     kind: 'lt-call'
   },
   {
@@ -11664,7 +11688,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ef39e2ed660f",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 215,
+    "line": 185,
     kind: 'ltvars-call'
   },
   {
@@ -11680,7 +11704,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.efafc1f74339",
     namespace: 'literals',
     "file": "src/components/tenant/create-tenant-modal.tsx",
-    "line": 100,
+    "line": 106,
     kind: 'attr'
   },
   {
@@ -12176,7 +12200,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fa2e85ace696",
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
-    "line": 643,
+    "line": 618,
     kind: 'lt-call'
   },
   {
@@ -12232,7 +12256,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fb6e37127d7f",
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
-    "line": 219,
+    "line": 189,
     kind: 'lt-call'
   },
   {

@@ -119,65 +119,35 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error(lt('Not authenticated'))
 
-      // Generate unique file path
-      const fileExt = uploadFile.file.name.split('.').pop()
-      const documentId = crypto.randomUUID()
-      const filePath = `${currentTenant.id}/${documentId}.${fileExt}`
-
-      setFiles(prev => prev.map(f => 
-        f.id === uploadFile.id ? { ...f, progress: 30, statusMessage: lt('Uploading to storage...'), documentId } : f
+      setFiles(prev => prev.map(f =>
+        f.id === uploadFile.id ? { ...f, progress: 30, statusMessage: lt('Uploading to storage...') } : f
       ))
 
-      // Upload to Supabase Storage
-      const { error: storageError } = await supabase.storage
-        .from('documents')
-        .upload(filePath, uploadFile.file, {
-          cacheControl: '3600',
-          upsert: false
-        })
-
-      if (storageError) throw storageError
-
-      setFiles(prev => prev.map(f => 
-        f.id === uploadFile.id ? { ...f, progress: 60, statusMessage: lt('Saving metadata...') } : f
-      ))
-
-      // Determine document type based on bank account selection
       const isBankStatement = selectedBankAccountId !== 'none'
-      const documentType = isBankStatement ? 'bank_statement' : null
-
-      // Create document record
-      const { error: dbError } = await (supabase
-        .from('documents') as any)
-        .insert({
-          id: documentId,
-          tenant_id: currentTenant.id,
-          file_path: filePath,
-          file_name: uploadFile.file.name,
-          file_size: uploadFile.file.size,
-          file_type: uploadFile.file.type,
-          uploaded_by: user.id,
-          status: 'UPLOADED',
-          document_type: documentType
-        })
-
-      if (dbError) {
-        // Cleanup storage if database insert fails
-        await supabase.storage.from('documents').remove([filePath])
-        throw dbError
-      }
-
-      // If bank account selected, create bank_statement record immediately
+      const form = new FormData()
+      form.set('tenantId', currentTenant.id)
+      form.set('file', uploadFile.file)
       if (isBankStatement) {
-        await (supabase
-          .from('bank_statements') as any)
-          .insert({
-            tenant_id: currentTenant.id,
-            bank_account_id: selectedBankAccountId,
-            document_id: documentId,
-            status: 'IMPORTED'
-          })
+        form.set('documentType', 'bank_statement')
+        form.set('bankAccountId', selectedBankAccountId)
       }
+
+      const uploadRes = await fetch('/api/documents/upload', {
+        method: 'POST',
+        body: form,
+      })
+
+      const uploadJson = await uploadRes.json().catch(() => null)
+      if (!uploadRes.ok) {
+        throw new Error(uploadJson?.error || lt('Upload failed'))
+      }
+
+      const documentId = String(uploadJson?.documentId || '')
+      if (!documentId) throw new Error(lt('Upload failed'))
+
+      setFiles(prev => prev.map(f =>
+        f.id === uploadFile.id ? { ...f, progress: 60, statusMessage: lt('Saving metadata...'), documentId } : f
+      ))
 
       setFiles(prev => prev.map(f => 
         f.id === uploadFile.id ? { ...f, progress: 80, statusMessage: lt('Triggering AI processing...') } : f
