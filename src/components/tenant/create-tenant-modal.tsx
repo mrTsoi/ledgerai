@@ -52,14 +52,20 @@ export function CreateTenantModal() {
     }
   }
 
-  const canCreate = subscription && (subscription.max_tenants === -1 || subscription.current_tenants < subscription.max_tenants)
+  const canCreate = !!subscription && (subscription.max_tenants === -1 || subscription.current_tenants < subscription.max_tenants)
+  const isDisabled = subLoading || !canCreate
+  const disabledTitle = subLoading
+    ? lt('Loading…')
+    : !subscription
+      ? lt('Please select a subscription plan.')
+      : lt('Subscription limit reached')
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          disabled={(!canCreate && !subLoading) || subLoading}
-          title={!canCreate ? lt('Subscription limit reached') : lt('Create new company')}
+          disabled={isDisabled}
+          title={isDisabled ? disabledTitle : lt('Create new company')}
         >
           {subLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
           {lt('Add Company')}

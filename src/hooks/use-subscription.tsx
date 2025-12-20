@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState, ReactNode } from 'react'
 
 export type SubscriptionDetails = {
   plan_name: string
@@ -37,19 +37,44 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [subscription, setSubscription] = useState<SubscriptionDetails | null>(null)
   const [loading, setLoading] = useState(true)
+  const didEnsureFreeRef = useRef(false)
 
   const fetchSubscription = useCallback(async () => {
-    try {
-      const res = await fetch('/api/subscription/me')
+    setLoading(true)
+
+    const fetchMe = async () => {
+      const res = await fetch('/api/subscription/me', { cache: 'no-store' })
       const json = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setSubscription(null)
-        return null
+      if (!res.ok) return { ok: false as const, subscription: null as SubscriptionDetails | null }
+      return { ok: true as const, subscription: (json?.subscription as SubscriptionDetails) || null }
+    }
+
+    try {
+      const first = await fetchMe()
+      if (first.ok && first.subscription) {
+        setSubscription(first.subscription)
+        return first.subscription
       }
 
-      const next = (json?.subscription as SubscriptionDetails) || null
-      setSubscription(next)
-      return next
+      // New users may not have a row in user_subscriptions yet.
+      // Best-effort: auto-assign Free plan once, then refetch.
+      if (!didEnsureFreeRef.current) {
+        didEnsureFreeRef.current = true
+        try {
+          await fetch('/api/subscription/ensure-free', { method: 'POST' })
+        } catch {
+          // Non-fatal: fall through and keep subscription as null.
+        }
+
+        const second = await fetchMe()
+        if (second.ok && second.subscription) {
+          setSubscription(second.subscription)
+          return second.subscription
+        }
+      }
+
+      setSubscription(null)
+      return null
     } catch (error) {
       console.error('Error fetching subscription:', error)
       setSubscription(null)

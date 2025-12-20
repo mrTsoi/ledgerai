@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CreateTenantModal } from '@/components/tenant/create-tenant-modal'
@@ -10,19 +11,105 @@ import { useTenant } from '@/hooks/use-tenant'
 import { useSubscription } from '@/hooks/use-subscription'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { Badge } from '@/components/ui/badge'
+import type { Database } from '@/types/database.types'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 
 export function OnboardingView() {
   const lt = useLiterals()
   const { refreshTenants } = useTenant()
-  const { refreshSubscription } = useSubscription()
+  const { subscription, loading: subLoading, refreshSubscription } = useSubscription()
   const [isDragging, setIsDragging] = useState(false)
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [companyName, setCompanyName] = useState('')
   const [creating, setCreating] = useState(false)
   const [showNameDialog, setShowNameDialog] = useState(false)
+  const [plans, setPlans] = useState<Array<Database['public']['Tables']['subscription_plans']['Row']>>([])
+  const [plansLoading, setPlansLoading] = useState(true)
+  const [upgradingPlanId, setUpgradingPlanId] = useState<string | null>(null)
+  const [billingCycle, setBillingCycle] = useState<'month' | 'year'>('month')
+
+  const supabase = useMemo(() => createClient(), [])
+
+  const subscribedCycle = useMemo<'month' | 'year' | null>(() => {
+    if (!subscription) return null
+    // If next billing interval is explicitly present, prefer it.
+    if (subscription.next_billing_interval === 'month' || subscription.next_billing_interval === 'year') {
+      return subscription.next_billing_interval
+    }
+
+    // Infer interval from the current period duration (approx > 40 days = yearly).
+    if (subscription.current_period_start && subscription.current_period_end) {
+      const dur = new Date(subscription.current_period_end).getTime() - new Date(subscription.current_period_start).getTime()
+      return dur > 40 * 24 * 60 * 60 * 1000 ? 'year' : 'month'
+    }
+
+    return 'month'
+  }, [subscription])
+
+  const handleSelectPlan = async (plan: Database['public']['Tables']['subscription_plans']['Row']) => {
+    try {
+      setUpgradingPlanId(plan.id)
+
+      const monthly = plan.price_monthly ?? 0
+      if (monthly === 0) {
+        const res = await fetch('/api/subscription/ensure-free', { method: 'POST' })
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(json?.error || 'Failed to select Free plan')
+        await refreshSubscription()
+        toast.success(lt('Subscription plan updated'))
+        return
+      }
+
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId: plan.id,
+          interval: billingCycle,
+          returnUrl: window.location.origin + window.location.pathname,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.text()
+        throw new Error(error)
+      }
+
+      const { url } = await response.json()
+      if (!url) throw new Error(lt('No checkout URL returned'))
+      window.location.href = url
+    } catch (error: any) {
+      console.error('Plan selection error:', error)
+      toast.error(lt('Failed to start upgrade: {message}', { message: error?.message || '' }))
+    } finally {
+      setUpgradingPlanId(null)
+    }
+  }
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const { data } = await supabase
+          .from('subscription_plans')
+          .select('*')
+          .eq('is_active', true)
+          .order('price_monthly', { ascending: true })
+        if (mounted) setPlans(data || [])
+      } catch {
+        // Ignore: onboarding can still render without plan list.
+      } finally {
+        if (mounted) setPlansLoading(false)
+      }
+    })()
+    return () => {
+      mounted = false
+    }
+  }, [supabase])
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -80,7 +167,6 @@ export function OnboardingView() {
       const tenantId = json.id
       
       // 2. Upload File
-      const supabase = createClient()
       const fileExt = uploadFile.name.split('.').pop()
       const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`
       const filePath = `${tenantId}/${fileName}`
@@ -127,6 +213,20 @@ export function OnboardingView() {
         <p className="text-xl text-muted-foreground">
           {lt('Get started by creating your first organization or uploading a document.')}
         </p>
+
+        <div className="mt-4 flex items-center justify-center gap-3">
+          <Badge variant="secondary">
+            {lt('Subscription Plan')}: {subscription?.plan_name || (subLoading ? lt('Loading…') : lt('Free'))}
+          </Badge>
+          {subscription && subscribedCycle && (
+            <Badge variant="outline">
+              {lt('Billing cycle')}: {subscribedCycle === 'year' ? lt('Yearly') : lt('Monthly')}
+            </Badge>
+          )}
+          <Button asChild variant="outline" size="sm">
+            <Link href="/dashboard/settings?tab=billing">{lt('Billing & Plans')}</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
@@ -174,6 +274,75 @@ export function OnboardingView() {
               <FileText className="w-4 h-4 mr-2" />
               {lt('Supports PDF, JPG, PNG, Excel')}
             </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mt-10">
+        <Card>
+          <CardHeader>
+            <CardTitle>{lt('Subscription Plans')}</CardTitle>
+            <CardDescription>
+              {subscription
+                ? lt('Upgrade anytime from Billing & Plans.')
+                : lt('No active subscription found. Please select a plan below.')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div className="text-sm text-muted-foreground">{lt('Billing cycle')}</div>
+              <div className="flex items-center gap-2">
+                <Label className={billingCycle === 'month' ? 'font-medium' : 'text-muted-foreground'}>{lt('Monthly')}</Label>
+                <Switch
+                  checked={billingCycle === 'year'}
+                  onCheckedChange={(v) => setBillingCycle(v ? 'year' : 'month')}
+                  aria-label={lt('Billing cycle')}
+                />
+                <Label className={billingCycle === 'year' ? 'font-medium' : 'text-muted-foreground'}>{lt('Yearly')}</Label>
+              </div>
+            </div>
+
+            {plansLoading ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {lt('Loading…')}
+              </div>
+            ) : plans.length === 0 ? (
+              <div className="text-sm text-muted-foreground">{lt('No subscription plans found.')}</div>
+            ) : (
+              <div className="grid gap-3 md:grid-cols-2">
+                {plans.map((p) => {
+                  const monthly = p.price_monthly ?? 0
+                  const yearly = p.price_yearly ?? null
+                  const selectedPrice = billingCycle === 'year' ? (yearly ?? monthly) : monthly
+                  const cycleLabel = billingCycle === 'year' ? lt('Yearly') : lt('Monthly')
+                  const isCurrent = !!subscription?.plan_name && subscription.plan_name.toLowerCase() === (p.name || '').toLowerCase()
+                  const isBusy = upgradingPlanId === p.id
+                  return (
+                    <div key={p.id} className="flex items-center justify-between rounded-md border p-3">
+                      <div className="min-w-0">
+                        <div className="font-medium truncate">{p.display_name || p.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {selectedPrice === 0 ? lt('Free') : `$${selectedPrice}`} / {cycleLabel}
+                        </div>
+                      </div>
+                      {isCurrent ? (
+                        <Badge variant="secondary">{lt('Current')}</Badge>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleSelectPlan(p)}
+                          disabled={upgradingPlanId !== null}
+                        >
+                          {isBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : (monthly === 0 ? lt('Select') : lt('Upgrade'))}
+                        </Button>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
