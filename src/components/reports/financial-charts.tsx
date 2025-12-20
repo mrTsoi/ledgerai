@@ -11,10 +11,12 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area
 } from 'recharts'
+import { useLiterals } from '@/hooks/use-literals'
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
 export function FinancialCharts() {
+  const lt = useLiterals()
   const { currentTenant } = useTenant()
   const supabase = useMemo(() => createClient(), [])
   const tenantId = currentTenant?.id
@@ -157,12 +159,12 @@ export function FinancialCharts() {
       <div className="flex justify-end">
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select range" />
+            <SelectValue placeholder={lt('Select range')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="month">Last 30 Days</SelectItem>
-            <SelectItem value="quarter">Last Quarter</SelectItem>
-            <SelectItem value="year">Last Year</SelectItem>
+            <SelectItem value="month">{lt('Last 30 Days')}</SelectItem>
+            <SelectItem value="quarter">{lt('Last Quarter')}</SelectItem>
+            <SelectItem value="year">{lt('Last Year')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -170,8 +172,8 @@ export function FinancialCharts() {
       {/* Income vs Expense Trend */}
       <Card>
         <CardHeader>
-          <CardTitle>Income vs Expenses</CardTitle>
-          <CardDescription>Financial performance over time</CardDescription>
+          <CardTitle>{lt('Income vs Expenses')}</CardTitle>
+          <CardDescription>{lt('Financial performance over time')}</CardDescription>
         </CardHeader>
         <CardContent className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -194,8 +196,8 @@ export function FinancialCharts() {
         {/* Expenses by Category */}
         <Card>
           <CardHeader>
-            <CardTitle>Expenses by Category</CardTitle>
-            <CardDescription>Top expense categories</CardDescription>
+            <CardTitle>{lt('Expenses by Category')}</CardTitle>
+            <CardDescription>{lt('Top expense categories')}</CardDescription>
           </CardHeader>
           <CardContent className="h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -214,7 +216,7 @@ export function FinancialCharts() {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']} />
+                <Tooltip formatter={(value: number) => [`$${value.toFixed(2)}`, lt('Amount')]} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -223,8 +225,8 @@ export function FinancialCharts() {
         {/* Expenses by Vendor */}
         <Card>
           <CardHeader>
-            <CardTitle>Top Vendors</CardTitle>
-            <CardDescription>Highest spending by vendor</CardDescription>
+            <CardTitle>{lt('Top Vendors')}</CardTitle>
+            <CardDescription>{lt('Highest spending by vendor')}</CardDescription>
           </CardHeader>
           <CardContent className="h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -232,7 +234,7 @@ export function FinancialCharts() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={100} />
-                <Tooltip formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']} />
+                <Tooltip formatter={(value: number) => [`$${value.toFixed(2)}`, lt('Amount')]} />
                 <Bar dataKey="value" fill="#8884d8" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>

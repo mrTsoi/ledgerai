@@ -17,6 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { ImagePreview } from '@/components/ui/image-preview'
+import { useLiterals } from '@/hooks/use-literals'
 
 type Document = Database['public']['Tables']['documents']['Row'] & {
   document_data?: {
@@ -39,6 +40,11 @@ interface Props {
 }
 
 export function DocumentsList({ onVerify, refreshKey }: Props) {
+  const lt = useLiterals()
+  const ltVars = (english: string, vars?: Record<string, string | number>) => {
+    return lt(english, vars)
+  }
+
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -96,18 +102,45 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
 
     try {
       setLoading(true)
-      let query = supabase
+      // Prefer including related extracted data, but fall back gracefully if the
+      // relationship/table isn't available in the current environment.
+      const primary = await supabase
         .from('documents')
         .select('*, document_data(confidence_score, extracted_data)')
         .eq('tenant_id', currentTenant.id)
         .order('created_at', { ascending: false })
 
-      const { data, error } = await query
+      if (!primary.error) {
+        setDocuments((primary.data as unknown as Document[]) || [])
+        return
+      }
 
-      if (error) throw error
-      setDocuments((data as unknown as Document[]) || [])
+      const code = String((primary.error as any)?.code ?? '')
+      const msg = String((primary.error as any)?.message ?? '')
+
+      // Common local/dev case: migrations not applied (table/relationship missing).
+      if (code === '42P01' || code === '42883' || /document_data/i.test(msg)) {
+        const fallback = await supabase
+          .from('documents')
+          .select('*')
+          .eq('tenant_id', currentTenant.id)
+          .order('created_at', { ascending: false })
+
+        if (fallback.error) throw fallback.error
+        setDocuments((fallback.data as unknown as Document[]) || [])
+        return
+      }
+
+      throw primary.error
     } catch (error) {
       console.error('Error fetching documents:', error)
+      const msg =
+        error && typeof error === 'object' && 'message' in error && typeof (error as any).message === 'string'
+          ? String((error as any).message)
+          : typeof error === 'string'
+            ? error
+            : 'Failed to load documents'
+      toast.error(msg)
     } finally {
       setLoading(false)
     }
@@ -159,7 +192,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
       URL.revokeObjectURL(url)
     } catch (error: any) {
       console.error('Download error:', error)
-      toast.error('Failed to download document: ' + error.message)
+      toast.error(`${lt('Failed to download document')}: ${error.message}`)
     }
   }
 
@@ -225,16 +258,16 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
     const associations = await checkAssociations(doc.id)
     const hasAssociations = associations.transactions > 0 || associations.bankStatements > 0
 
-    let description = `Are you sure you want to delete "${doc.file_name}"?`
+    let description = ltVars('Are you sure you want to delete "{fileName}"?', { fileName: doc.file_name })
     if (hasAssociations) {
-      description += ` This will also delete:`
-      if (associations.transactions > 0) description += `\n• ${associations.transactions} Transaction(s)`
-      if (associations.bankStatements > 0) description += `\n• ${associations.bankStatements} Bank Statement(s)`
-      if (associations.bankTransactions > 0) description += `\n• ${associations.bankTransactions} Bank Transaction(s)`
+      description += ` ${lt('This will also delete:')}`
+      if (associations.transactions > 0) description += `\n• ${ltVars('{count} Transaction(s)', { count: associations.transactions })}`
+      if (associations.bankStatements > 0) description += `\n• ${ltVars('{count} Bank Statement(s)', { count: associations.bankStatements })}`
+      if (associations.bankTransactions > 0) description += `\n• ${ltVars('{count} Bank Transaction(s)', { count: associations.bankTransactions })}`
     }
 
     setConfirmConfig({
-      title: 'Delete Document',
+      title: lt('Delete Document'),
       description: description,
       action: async () => {
         try {
@@ -273,13 +306,13 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
 
           setDocuments(prev => prev.filter(d => d.id !== doc.id))
           setShowConfirmDialog(false)
-          toast.success('Document and associated records deleted')
+          toast.success(lt('Document and associated records deleted'))
         } catch (error: any) {
           console.error('Delete error:', error)
-          toast.error('Failed to delete document: ' + error.message)
+          toast.error(`${lt('Failed to delete document')}: ${error.message}`)
         }
       },
-      actionLabel: 'Delete',
+      actionLabel: lt('Delete'),
       variant: 'destructive'
     })
     setShowConfirmDialog(true)
@@ -298,7 +331,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
       setPreviewDoc(doc)
     } catch (error: any) {
       console.error('Preview error:', error)
-      toast.error('Failed to load preview: ' + error.message)
+      toast.error(`${lt('Failed to load preview')}: ${error.message}`)
     }
   }
 
@@ -338,7 +371,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
       
       if (!response.ok) {
         const data = await response.json().catch(() => ({} as unknown)) as Record<string, unknown>
-        const msg = (data['error'] as string) || (data['message'] as string) || 'Failed to start processing'
+        const msg = (data['error'] as string) || (data['message'] as string) || lt('Failed to start processing')
         throw new Error(msg)
       }
       
@@ -360,7 +393,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
       
     } catch (error: any) {
       console.error('Reprocess error:', error)
-      toast.error('Failed to reprocess: ' + error.message)
+      toast.error(`${lt('Failed to reprocess')}: ${error.message}`)
       // Set to FAILED on error
       setDocuments(prev => prev.map(d => 
         d.id === doc.id ? { ...d, status: 'FAILED' } : d
@@ -397,16 +430,16 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
     const associations = await checkBulkAssociations(ids)
     const hasAssociations = associations.transactions > 0 || associations.bankStatements > 0
 
-    let description = `Are you sure you want to delete ${selectedIds.size} documents?`
+    let description = ltVars('Are you sure you want to delete {count} documents?', { count: selectedIds.size })
     if (hasAssociations) {
-      description += ` This will also delete:`
-      if (associations.transactions > 0) description += `\n• ${associations.transactions} Transaction(s)`
-      if (associations.bankStatements > 0) description += `\n• ${associations.bankStatements} Bank Statement(s)`
-      if (associations.bankTransactions > 0) description += `\n• ${associations.bankTransactions} Bank Transaction(s)`
+      description += ` ${lt('This will also delete:')}`
+      if (associations.transactions > 0) description += `\n• ${ltVars('{count} Transaction(s)', { count: associations.transactions })}`
+      if (associations.bankStatements > 0) description += `\n• ${ltVars('{count} Bank Statement(s)', { count: associations.bankStatements })}`
+      if (associations.bankTransactions > 0) description += `\n• ${ltVars('{count} Bank Transaction(s)', { count: associations.bankTransactions })}`
     }
 
     setConfirmConfig({
-      title: 'Delete Documents',
+      title: lt('Delete Documents'),
       description: description,
       action: async () => {
         try {
@@ -447,13 +480,13 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
           setDocuments(prev => prev.filter(d => !selectedIds.has(d.id)))
           setSelectedIds(new Set())
           setShowConfirmDialog(false)
-          toast.success('Documents and associated records deleted')
+          toast.success(lt('Documents and associated records deleted'))
         } catch (error: any) {
           console.error('Bulk delete error:', error)
-          toast.error('Failed to delete documents: ' + error.message)
+          toast.error(`${lt('Failed to delete documents')}: ${error.message}`)
         }
       },
-      actionLabel: 'Delete',
+      actionLabel: lt('Delete'),
       variant: 'destructive'
     })
     setShowConfirmDialog(true)
@@ -476,7 +509,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
       ))
       
       setSelectedIds(new Set())
-      toast.info(`Bulk processing started. Processing in batches of ${batchSize}.`)
+      toast.info(ltVars('Bulk processing started. Processing in batches of {batchSize}.', { batchSize }))
 
       // Process in batches
       const chunks = chunkArray(ids, batchSize)
@@ -526,7 +559,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
       
     } catch (error: any) {
       console.error('Bulk reprocess error:', error)
-      toast.error('Failed to reprocess: ' + error.message)
+      toast.error(`${lt('Failed to reprocess')}: ${error.message}`)
     }
   }
 
@@ -537,17 +570,17 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
     )
 
     if (docsToResolve.length === 0) {
-      toast.info("No documents with 'Wrong Tenant' flag selected.")
+      toast.info(lt("No documents with 'Wrong Tenant' flag selected."))
       return
     }
 
     setConfirmConfig({
-      title: 'Auto-Resolve Tenant Mismatches',
-      description: `Attempt to automatically reassign or create tenants for ${docsToResolve.length} documents? \n\nDocuments successfully moved will disappear from this tenant's list.`,
+      title: lt('Auto-Resolve Tenant Mismatches'),
+      description: ltVars("Attempt to automatically reassign or create tenants for {count} documents? \n\nDocuments successfully moved will disappear from this tenant's list.", { count: docsToResolve.length }),
       action: async () => {
         try {
           setBulkProgress({
-            label: 'Resolving tenant mismatches…',
+            label: lt('Resolving tenant mismatches…'),
             total: docsToResolve.length,
             completed: 0,
             moved: 0,
@@ -637,9 +670,9 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
           setShowConfirmDialog(false)
           
           if (failedCount === 0) {
-            toast.success(`Resolution complete: ${movedCount} moved, ${createdCount} tenants created.`)
+            toast.success(ltVars('Resolution complete: {moved} moved, {created} tenants created.', { moved: movedCount, created: createdCount }))
           } else {
-            toast.warning(`Resolution finished with issues: ${movedCount} moved, ${createdCount} created, ${failedCount} failed.`)
+            toast.warning(ltVars('Resolution finished with issues: {moved} moved, {created} created, {failed} failed.', { moved: movedCount, created: createdCount, failed: failedCount }))
           }
 
           if (createdCount > 0) {
@@ -653,10 +686,10 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
           fetchDocuments()
         } catch (error: any) {
           console.error('Bulk resolution error:', error)
-          toast.error('Bulk resolution failed: ' + error.message)
+          toast.error(`${lt('Bulk resolution failed')}: ${error.message}`)
         }
       },
-      actionLabel: 'Resolve All',
+      actionLabel: lt('Resolve All'),
       variant: 'default'
     })
     setShowConfirmDialog(true)
@@ -678,10 +711,10 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Documents</CardTitle>
+          <CardTitle>{lt('Documents')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-gray-500">Please select a tenant first</p>
+          <p className="text-gray-500">{lt('Please select a tenant first')}</p>
         </CardContent>
       </Card>
     )
@@ -691,22 +724,22 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>All Documents ({documents.length})</CardTitle>
+          <CardTitle>{ltVars('All Documents ({count})', { count: documents.length })}</CardTitle>
           {selectedIds.size > 0 && (
             <div className="flex gap-2">
               {hasTenantMismatchesSelected && (
                 <Button size="sm" variant="outline" onClick={bulkResolveTenants} className="border-yellow-200 bg-yellow-50 hover:bg-yellow-100 text-yellow-700">
                   <ArrowRightLeft className="w-4 h-4 mr-2" />
-                  Resolve Tenants
+                  {lt('Resolve Tenants')}
                 </Button>
               )}
               <Button size="sm" variant="outline" onClick={bulkReprocess}>
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Reprocess ({selectedIds.size})
+                {lt('Reprocess')} ({selectedIds.size})
               </Button>
               <Button size="sm" variant="destructive" onClick={bulkDelete}>
                 <Trash2 className="w-4 h-4 mr-2" />
-                Delete ({selectedIds.size})
+                {lt('Delete')} ({selectedIds.size})
               </Button>
             </div>
           )}
@@ -716,7 +749,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               type="text"
-              placeholder="Search documents..."
+              placeholder={lt('Search documents...')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 w-full"
@@ -727,11 +760,11 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary w-full md:w-auto"
           >
-            <option value="all">All Status</option>
-            <option value="UPLOADED">Uploaded</option>
-            <option value="PROCESSING">Processing</option>
-            <option value="PROCESSED">Processed</option>
-            <option value="FAILED">Failed</option>
+            <option value="all">{lt('All Status')}</option>
+            <option value="UPLOADED">{lt('Uploaded')}</option>
+            <option value="PROCESSING">{lt('Processing')}</option>
+            <option value="PROCESSED">{lt('Processed')}</option>
+            <option value="FAILED">{lt('Failed')}</option>
           </select>
         </div>
       </CardHeader>
@@ -759,8 +792,8 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
             <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500">
               {documents.length === 0 
-                ? 'No documents yet. Upload your first document above.' 
-                : 'No documents match your search.'}
+                ? lt('No documents yet. Upload your first document above.') 
+                : lt('No documents match your search.')}
             </p>
           </div>
         ) : (
@@ -770,9 +803,9 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                 checked={selectedIds.size === filteredDocuments.length && filteredDocuments.length > 0}
                 onCheckedChange={toggleAll}
               />
-              <span className="flex-1">Document Name</span>
-              <span className="w-24">Status</span>
-              <span className="w-32 text-right">Actions</span>
+              <span className="flex-1">{lt('Document Name')}</span>
+              <span className="w-24">{lt('Status')}</span>
+              <span className="w-32 text-right">{lt('Actions')}</span>
             </div>
             {filteredDocuments.map(doc => (
               <div
@@ -794,8 +827,8 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                         <div className="flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full" title={doc.validation_flags?.join(', ')}>
                           <AlertTriangle className="w-3 h-3" />
                           <span>
-                            {doc.validation_flags?.includes('DUPLICATE_DOCUMENT') ? 'Duplicate' : 
-                             doc.validation_flags?.includes('WRONG_TENANT') ? 'Wrong Tenant' : 'Review Needed'}
+                            {doc.validation_flags?.includes('DUPLICATE_DOCUMENT') ? lt('Duplicate') : 
+                             doc.validation_flags?.includes('WRONG_TENANT') ? lt('Wrong Tenant') : lt('Review Needed')}
                           </span>
                         </div>
                       )}
@@ -825,7 +858,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                                     : 'bg-red-50 text-red-700 border-red-200'
                               }`}>
                                 <Sparkles className="w-3 h-3" />
-                                <span>{Math.round(score)}% AI Confidence</span>
+                                <span>{ltVars('{percent}% AI Confidence', { percent: Math.round(score) })}</span>
                               </div>
                             </>
                           )
@@ -838,7 +871,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                            return (
                              <>
                               <span className="hidden md:inline">•</span>
-                              <span>{data.extracted_data.bank_transactions.length} Txns</span>
+                              <span>{ltVars('{count} Txns', { count: data.extracted_data.bank_transactions.length })}</span>
                              </>
                            )
                         }
@@ -857,7 +890,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                       size="sm"
                       variant="ghost"
                       onClick={() => onVerify?.(doc.id)}
-                      title="Verify Data"
+                      title={lt('Verify Data')}
                       className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                     >
                       <CheckSquare className="w-4 h-4" />
@@ -868,7 +901,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                       variant="ghost"
                       onClick={() => reprocessDocument(doc)}
                       disabled={reprocessingIds.has(doc.id) || doc.status === 'PROCESSING'}
-                      title="Reprocess with AI"
+                      title={lt('Reprocess with AI')}
                     >
                       {reprocessingIds.has(doc.id) ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -880,7 +913,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                       size="sm"
                       variant="ghost"
                       onClick={() => downloadDocument(doc)}
-                      title="Download"
+                      title={lt('Download')}
                     >
                       <Download className="w-4 h-4" />
                     </Button>
@@ -888,7 +921,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                       size="sm"
                       variant="ghost"
                       onClick={() => deleteDocument(doc)}
-                      title="Delete"
+                      title={lt('Delete')}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -939,9 +972,9 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
               ) : (
                 <div className="text-center">
                   <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500 mb-4">Preview not available for this file type.</p>
+                  <p className="text-gray-500 mb-4">{lt('Preview not available for this file type.')}</p>
                   <Button onClick={() => downloadDocument(previewDoc)}>
-                    Download to View
+                    {lt('Download to View')}
                   </Button>
                 </div>
               )}
@@ -975,10 +1008,10 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                   <Progress value={bulkProgress.total > 0 ? (bulkProgress.completed / bulkProgress.total) * 100 : 0} />
                   <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
                     <div>
-                      {bulkProgress.completed} / {bulkProgress.total} processed
+                      {ltVars('{completed} / {total} processed', { completed: bulkProgress.completed, total: bulkProgress.total })}
                     </div>
                     <div>
-                      Moved: {bulkProgress.moved} • Created: {bulkProgress.created} • Failed: {bulkProgress.failed}
+                      {ltVars('Moved: {moved}', { moved: bulkProgress.moved })} • {ltVars('Created: {created}', { created: bulkProgress.created })} • {ltVars('Failed: {failed}', { failed: bulkProgress.failed })}
                     </div>
                   </div>
                 </div>
@@ -987,7 +1020,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
           </DialogHeader>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => setShowConfirmDialog(false)} disabled={confirmWorking}>
-              Cancel
+              {lt('Cancel')}
             </Button>
             <Button 
               variant={confirmConfig?.variant || 'default'} 
@@ -997,7 +1030,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
               {confirmWorking ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Working…
+                  {lt('Working…')}
                 </>
               ) : (
                 confirmConfig?.actionLabel

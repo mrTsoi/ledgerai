@@ -23,6 +23,8 @@ CREATE INDEX IF NOT EXISTS idx_tenant_identifiers_value ON tenant_identifiers(id
 -- RLS for tenant_identifiers
 ALTER TABLE tenant_identifiers ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Tenant admins can manage their identifiers" ON tenant_identifiers;
+
 CREATE POLICY "Tenant admins can manage their identifiers"
   ON tenant_identifiers
   USING (
@@ -32,6 +34,8 @@ CREATE POLICY "Tenant admins can manage their identifiers"
       AND role IN ('COMPANY_ADMIN', 'SUPER_ADMIN')
     )
   );
+
+DROP POLICY IF EXISTS "Platform admins can view all identifiers" ON tenant_identifiers;
 
 CREATE POLICY "Platform admins can view all identifiers"
   ON tenant_identifiers FOR SELECT
@@ -59,6 +63,8 @@ CREATE INDEX IF NOT EXISTS idx_doc_candidates_doc_id ON document_tenant_candidat
 
 -- RLS for document_tenant_candidates
 ALTER TABLE document_tenant_candidates ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view candidates for their documents" ON document_tenant_candidates;
 
 CREATE POLICY "Users can view candidates for their documents"
   ON document_tenant_candidates

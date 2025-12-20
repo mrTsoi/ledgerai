@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { AiAgentWidget } from '@/components/ai-agent/ai-agent-widget'
 import { useTranslations } from 'next-intl'
+import { useLiterals } from '@/hooks/use-literals'
 import {
   Home,
   FileText,
@@ -63,8 +64,8 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const t = useTranslations('navigation')
   const tCommon = useTranslations('common')
+  const lt = useLiterals()
   const { currentTenant, tenants, switchTenant, loading } = useTenant()
   const { subscription } = useSubscription()
   const userRole = useUserRole()
@@ -86,6 +87,21 @@ export default function DashboardLayout({
   const [isCustomizing, setIsCustomizing] = useState(false)
 
   const canPublishTenantDashboard = userRole === 'COMPANY_ADMIN' || userRole === 'SUPER_ADMIN'
+
+  const getRoleLabel = (role: string | null | undefined) => {
+    switch (role) {
+      case 'COMPANY_ADMIN':
+        return lt('Company Admin')
+      case 'ACCOUNTANT':
+        return lt('Accountant')
+      case 'OPERATOR':
+        return lt('Operator')
+      case 'SUPER_ADMIN':
+        return lt('Super Admin')
+      default:
+        return role || ''
+    }
+  }
 
   useEffect(() => {
     // Clear the optimistic loader once navigation completes.
@@ -279,49 +295,49 @@ export default function DashboardLayout({
 
   const navigationItems: NavItem[] = [
     {
-      name: t('dashboard'),
+      name: lt('Dashboard'),
       href: '/dashboard',
       icon: <Home className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'ACCOUNTANT', 'OPERATOR', 'SUPER_ADMIN'],
     },
     {
-      name: t('documents'),
+      name: lt('Documents'),
       href: '/dashboard/documents',
       icon: <FileText className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'ACCOUNTANT', 'OPERATOR', 'SUPER_ADMIN'],
     },
     {
-      name: t('transactions'),
+      name: lt('Transactions'),
       href: '/dashboard/transactions',
       icon: <CreditCard className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'],
     },
     {
-      name: t('banking'),
+      name: lt('Banking'),
       href: '/dashboard/banking',
       icon: <Landmark className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'],
     },
     {
-      name: t('accounts'),
+      name: lt('Accounts'),
       href: '/dashboard/accounts',
       icon: <FolderTree className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'],
     },
     {
-      name: t('reports'),
+      name: lt('Reports'),
       href: '/dashboard/reports',
       icon: <BarChart3 className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'],
     },
     {
-      name: t('team'),
+      name: lt('Team'),
       href: '/dashboard/team',
       icon: <Users className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'SUPER_ADMIN'],
     },
     {
-      name: t('settings'),
+      name: lt('Settings'),
       href: '/dashboard/settings',
       icon: <Settings className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'ACCOUNTANT', 'OPERATOR', 'SUPER_ADMIN'],
@@ -382,7 +398,7 @@ export default function DashboardLayout({
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <h1 className="text-xl font-bold text-gray-900">LedgerAI</h1>
+            <h1 className="text-xl font-bold text-gray-900">{lt('LedgerAI')}</h1>
             <button
               onClick={() => setSidebarOpen(false)}
               className="lg:hidden"
@@ -396,7 +412,7 @@ export default function DashboardLayout({
             {tenants.length > 0 && (
               <div className="mb-3">
                 <label className="block text-xs font-medium text-gray-500 mb-2">
-                  Current Company
+                  {lt('Current Company')}
                 </label>
                 <Popover open={open} onOpenChange={setOpen}>
                   <PopoverTrigger asChild>
@@ -409,16 +425,16 @@ export default function DashboardLayout({
                       <span className="truncate">
                         {currentTenant
                           ? tenants.find((tenant) => tenant.id === currentTenant.id)?.name
-                          : "Select company..."}
+                          : lt('Select company...')}
                       </span>
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-[220px] p-0">
                     <Command>
-                      <CommandInput placeholder="Search company..." />
+                      <CommandInput placeholder={lt('Search company...')} />
                       <CommandList>
-                        <CommandEmpty>No company found.</CommandEmpty>
+                        <CommandEmpty>{lt('No company found.')}</CommandEmpty>
                         <CommandGroup>
                           {tenants.map((tenant) => (
                             <CommandItem
@@ -449,7 +465,7 @@ export default function DashboardLayout({
             <CreateTenantModal />
             {userRole && (
               <p className="mt-2 text-xs text-gray-500">
-                Role: <span className="font-medium">{userRole}</span>
+                {lt('Role:')} <span className="font-medium">{getRoleLabel(userRole)}</span>
               </p>
             )}
           </div>
@@ -459,7 +475,7 @@ export default function DashboardLayout({
             {/* Company Section */}
             <div>
               <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                Company
+                {lt('Company')}
               </h3>
               <div className="space-y-1">
                 {visibleNavItems.filter(item => item.href !== '/dashboard/settings').map((item) => (
@@ -488,7 +504,7 @@ export default function DashboardLayout({
             {/* User Section */}
             <div>
               <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                User & Billing
+                {lt('USER & BILLING')}
               </h3>
               <div className="space-y-1">
                 {visibleNavItems.filter(item => item.href === '/dashboard/settings').map((item) => (
@@ -523,7 +539,7 @@ export default function DashboardLayout({
               onClick={handleLogout}
             >
               <LogOut className="w-5 h-5 mr-3" />
-              {t('logout')}
+              {lt('Log out')}
             </Button>
           </div>
         </div>
@@ -542,7 +558,7 @@ export default function DashboardLayout({
                 <Menu className="w-6 h-6" />
               </button>
               <h2 className="text-lg font-semibold text-gray-800 block">
-                {visibleNavItems.find(item => item.href === pathname)?.name || t('dashboard')}
+                {visibleNavItems.find(item => item.href === pathname)?.name || lt('Dashboard')}
               </h2>
             </div>
             <div className="flex items-center space-x-4">
@@ -551,14 +567,14 @@ export default function DashboardLayout({
                   <Popover open={dashboardMenuOpen} onOpenChange={setDashboardMenuOpen}>
                     <PopoverTrigger asChild>
                       <Button variant="outline" size="sm" disabled={dashboardTemplatesLoading}>
-                        Dashboard
+                        {lt('Dashboard')}
                         <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-[280px] p-3" align="end">
                       <div className="space-y-3">
                         <div className="space-y-1">
-                          <div className="text-xs font-medium text-gray-500">Template</div>
+                          <div className="text-xs font-medium text-gray-500">{lt('Template')}</div>
                           <Select
                             value={dashboardSelectedTemplateKey || undefined}
                             onValueChange={(v) => {
@@ -567,13 +583,15 @@ export default function DashboardLayout({
                             }}
                             disabled={dashboardTemplatesLoading}
                           >
-                            <SelectTrigger className="h-9 w-full" aria-label="Dashboard template">
-                              <SelectValue placeholder={dashboardTemplatesLoading ? 'Loading templates…' : 'Select template…'} />
+                            <SelectTrigger className="h-9 w-full" aria-label={lt('Dashboard template')}>
+                              <SelectValue placeholder={dashboardTemplatesLoading ? lt('Loading templates…') : lt('Select template…')} />
                             </SelectTrigger>
                             <SelectContent>
                               {dashboardTemplates.map((tpl) => (
                                 <SelectItem key={tpl.key} value={tpl.key}>
-                                  {userRole === 'SUPER_ADMIN' && tpl.role ? `${tpl.role}: ${tpl.name}` : tpl.name}
+                                  {userRole === 'SUPER_ADMIN' && tpl.role
+                                    ? `${getRoleLabel(tpl.role)}: ${lt(tpl.name)}`
+                                    : lt(tpl.name)}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -587,7 +605,7 @@ export default function DashboardLayout({
                             className="flex-1"
                             onClick={() => setIsCustomizing(v => !v)}
                           >
-                            Customize
+                            {lt('Customize')}
                           </Button>
                           <Button
                             variant="outline"
@@ -596,7 +614,7 @@ export default function DashboardLayout({
                             onClick={handleSaveDashboardLayout}
                             disabled={!isCustomizing || !dashboardLayout || dashboardActionLoading !== null}
                           >
-                            {dashboardActionLoading === 'save' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+                            {dashboardActionLoading === 'save' ? <Loader2 className="h-4 w-4 animate-spin" /> : tCommon('save')}
                           </Button>
                         </div>
 
@@ -608,7 +626,7 @@ export default function DashboardLayout({
                             onClick={handleResetDashboardLayout}
                             disabled={!dashboardSelectedTemplateKey || dashboardActionLoading !== null}
                           >
-                            {dashboardActionLoading === 'reset' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reset'}
+                            {dashboardActionLoading === 'reset' ? <Loader2 className="h-4 w-4 animate-spin" /> : tCommon('reset')}
                           </Button>
                           {canPublishTenantDashboard ? (
                             <Button
@@ -618,7 +636,7 @@ export default function DashboardLayout({
                               onClick={handlePublishTenantDashboardLayout}
                               disabled={!dashboardLayout || dashboardActionLoading !== null}
                             >
-                              {dashboardActionLoading === 'publish' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Publish'}
+                              {dashboardActionLoading === 'publish' ? <Loader2 className="h-4 w-4 animate-spin" /> : lt('Publish')}
                             </Button>
                           ) : (
                             <div className="flex-1" />
@@ -637,13 +655,15 @@ export default function DashboardLayout({
                     onValueChange={handleDashboardTemplateChange}
                     disabled={dashboardTemplatesLoading}
                   >
-                    <SelectTrigger className="h-9 w-[210px]" aria-label="Dashboard template">
-                      <SelectValue placeholder={dashboardTemplatesLoading ? 'Loading templates…' : 'Select template…'} />
+                    <SelectTrigger className="h-9 w-[210px]" aria-label={lt('Dashboard template')}>
+                      <SelectValue placeholder={dashboardTemplatesLoading ? lt('Loading templates…') : lt('Select template…')} />
                     </SelectTrigger>
                     <SelectContent>
                       {dashboardTemplates.map((tpl) => (
                         <SelectItem key={tpl.key} value={tpl.key}>
-                          {userRole === 'SUPER_ADMIN' && tpl.role ? `${tpl.role}: ${tpl.name}` : tpl.name}
+                          {userRole === 'SUPER_ADMIN' && tpl.role
+                            ? `${getRoleLabel(tpl.role)}: ${lt(tpl.name)}`
+                            : lt(tpl.name)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -654,7 +674,7 @@ export default function DashboardLayout({
                     size="sm"
                     onClick={() => setIsCustomizing(v => !v)}
                   >
-                    Customize
+                    {lt('Customize')}
                   </Button>
 
                   <Button
@@ -663,7 +683,7 @@ export default function DashboardLayout({
                     onClick={handleSaveDashboardLayout}
                     disabled={!isCustomizing || !dashboardLayout || dashboardActionLoading !== null}
                   >
-                    {dashboardActionLoading === 'save' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+                    {dashboardActionLoading === 'save' ? <Loader2 className="h-4 w-4 animate-spin" /> : tCommon('save')}
                   </Button>
 
                   <Button
@@ -672,7 +692,7 @@ export default function DashboardLayout({
                     onClick={handleResetDashboardLayout}
                     disabled={!dashboardSelectedTemplateKey || dashboardActionLoading !== null}
                   >
-                    {dashboardActionLoading === 'reset' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reset'}
+                    {dashboardActionLoading === 'reset' ? <Loader2 className="h-4 w-4 animate-spin" /> : tCommon('reset')}
                   </Button>
 
                   {canPublishTenantDashboard && (
@@ -682,7 +702,7 @@ export default function DashboardLayout({
                       onClick={handlePublishTenantDashboardLayout}
                       disabled={!dashboardLayout || dashboardActionLoading !== null}
                     >
-                      {dashboardActionLoading === 'publish' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Publish'}
+                      {dashboardActionLoading === 'publish' ? <Loader2 className="h-4 w-4 animate-spin" /> : lt('Publish')}
                     </Button>
                   )}
                 </div>
@@ -697,7 +717,7 @@ export default function DashboardLayout({
                 >
                   <Button variant="outline" size="sm">
                     <Building2 className="w-4 h-4 md:mr-2" />
-                    <span className="hidden md:inline">{t('admin')}</span>
+                    <span className="hidden md:inline">{lt('Admin')}</span>
                   </Button>
                 </Link>
               )}
@@ -711,7 +731,7 @@ export default function DashboardLayout({
                 </div>
               )}
               <span className="text-sm font-medium text-gray-700">
-                {currentTenant?.name || 'No Company Selected'}
+                {currentTenant?.name || lt('No Company Selected')}
               </span>
             </div>
           </div>

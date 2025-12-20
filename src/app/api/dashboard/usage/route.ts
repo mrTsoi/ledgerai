@@ -7,6 +7,26 @@ function badRequest(message: string) {
   return NextResponse.json({ error: message }, { status: 400 })
 }
 
+function okEmpty(tenantId: string, startIso: string, endIso: string, warning?: string) {
+  return NextResponse.json({
+    tenant_id: tenantId,
+    start: startIso,
+    end: endIso,
+    ...(warning ? { warning } : {}),
+    usage: {
+      total_calls: 0,
+      success_calls: 0,
+      error_calls: 0,
+      tokens_input: 0,
+      tokens_output: 0,
+    },
+  })
+}
+
+function isValidDate(d: Date) {
+  return d instanceof Date && !Number.isNaN(d.getTime())
+}
+
 export async function GET(req: Request) {
   const supabase = await createClient()
 
@@ -24,8 +44,14 @@ export async function GET(req: Request) {
   if (!tenantId) return badRequest('tenant_id is required')
 
   const now = new Date()
-  const startIso = start ? new Date(start).toISOString() : new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-  const endIso = end ? new Date(end).toISOString() : new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString()
+  const startDate = start ? new Date(start) : new Date(now.getFullYear(), now.getMonth(), 1)
+  const endDate = end ? new Date(end) : new Date(now.getFullYear(), now.getMonth() + 1, 1)
+
+  if (!isValidDate(startDate)) return badRequest('Invalid start date')
+  if (!isValidDate(endDate)) return badRequest('Invalid end date')
+
+  const startIso = startDate.toISOString()
+  const endIso = endDate.toISOString()
 
   let data: any
   try {
@@ -38,12 +64,26 @@ export async function GET(req: Request) {
     if (res.error) {
       const code = String(res.error.code || '')
       if (code === '42501') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      return NextResponse.json({ error: res.error.message || 'Failed to load usage' }, { status: 400 })
+
+      // Don't break the dashboard if usage infrastructure isn't present or errors in local/dev.
+      // Keep auth/forbidden as errors, but otherwise degrade gracefully.
+      const warning = [
+        'Usage not available',
+        code ? `code=${code}` : null,
+        res.error.message ? `message=${res.error.message}` : null,
+      ]
+        .filter(Boolean)
+        .join(' ')
+
+      return okEmpty(tenantId, startIso, endIso, warning)
     }
 
     data = Array.isArray(res.data) ? res.data[0] : res.data
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message || 'Failed to load usage' }, { status: 400 })
+    const warning = ['Usage not available', e?.message ? `message=${e.message}` : null]
+      .filter(Boolean)
+      .join(' ')
+    return okEmpty(tenantId, startIso, endIso, warning)
   }
 
   return NextResponse.json({

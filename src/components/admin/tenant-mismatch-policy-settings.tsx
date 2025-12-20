@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { Loader2, Save, ShieldAlert } from 'lucide-react'
+import { useLiterals } from '@/hooks/use-literals'
 
 type TenantMismatchPolicy = {
   allow_auto_tenant_creation: boolean
@@ -45,6 +46,7 @@ function normalizePolicy(input: unknown): TenantMismatchPolicy {
 }
 
 export function TenantMismatchPolicySettings() {
+  const lt = useLiterals()
   const supabase = useMemo(() => createClient(), [])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -64,11 +66,11 @@ export function TenantMismatchPolicySettings() {
       setPolicy(next)
     } catch (e: any) {
       console.error('Error loading tenant mismatch policy:', e)
-      toast.error(e?.message ? `Failed to load policy: ${e.message}` : 'Failed to load policy')
+      toast.error(e?.message ? lt('Failed to load policy: {message}', { message: e.message }) : lt('Failed to load policy'))
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [supabase, lt])
 
   useEffect(() => {
     loadPolicy()
@@ -91,10 +93,10 @@ export function TenantMismatchPolicySettings() {
 
       if (error) throw error
       setPolicy(next)
-      toast.success('Tenant mismatch policy saved')
+      toast.success(lt('Tenant mismatch policy saved'))
     } catch (e: any) {
       console.error('Error saving tenant mismatch policy:', e)
-      toast.error(e?.message ? `Failed to save policy: ${e.message}` : 'Failed to save policy')
+      toast.error(e?.message ? lt('Failed to save policy: {message}', { message: e.message }) : lt('Failed to save policy'))
     } finally {
       setSaving(false)
     }
@@ -115,18 +117,18 @@ export function TenantMismatchPolicySettings() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <ShieldAlert className="h-5 w-5 text-orange-600" />
-          <CardTitle>Tenant Mismatch Policy</CardTitle>
+          <CardTitle>{lt('Tenant Mismatch Policy')}</CardTitle>
         </div>
         <CardDescription>
-          Controls automatic reassignment / tenant creation when AI detects a document belongs to a different tenant.
+          {lt('Controls automatic reassignment / tenant creation when AI detects a document belongs to a different tenant.')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-start justify-between gap-6">
           <div className="space-y-1">
-            <Label>Allow auto reassignment</Label>
+            <Label>{lt('Allow auto reassignment')}</Label>
             <p className="text-sm text-muted-foreground">
-              Automatically move documents to an existing matching tenant from the user’s accessible tenant list.
+              {lt('Automatically move documents to an existing matching tenant from the user’s accessible tenant list.')}
             </p>
           </div>
           <Switch
@@ -137,9 +139,9 @@ export function TenantMismatchPolicySettings() {
 
         <div className="flex items-start justify-between gap-6">
           <div className="space-y-1">
-            <Label>Allow auto tenant creation</Label>
+            <Label>{lt('Allow auto tenant creation')}</Label>
             <p className="text-sm text-muted-foreground">
-              If no matching tenant exists and the tenancy limit allows it, create a tenant and move the document.
+              {lt('If no matching tenant exists and the tenancy limit allows it, create a tenant and move the document.')}
             </p>
           </div>
           <Switch
@@ -149,8 +151,8 @@ export function TenantMismatchPolicySettings() {
         </div>
 
         <div className="space-y-2">
-          <Label>Minimum confidence</Label>
-          <p className="text-sm text-muted-foreground">Range: 0.50 – 1.00</p>
+          <Label>{lt('Minimum confidence')}</Label>
+          <p className="text-sm text-muted-foreground">{lt('Range: 0.50 – 1.00')}</p>
           <div className="max-w-[220px]">
             <Input
               type="number"
@@ -166,7 +168,7 @@ export function TenantMismatchPolicySettings() {
         <div className="flex justify-end">
           <Button onClick={savePolicy} disabled={saving}>
             {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            Save Policy
+            {lt('Save Policy')}
           </Button>
         </div>
       </CardContent>

@@ -1,5 +1,5 @@
 import { updateSession } from '@/lib/supabase/middleware'
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import createMiddleware from 'next-intl/middleware';
 import { locales, localePrefix } from './i18n/navigation';
 
@@ -10,6 +10,13 @@ const intlMiddleware = createMiddleware({
 });
 
 export async function middleware(request: NextRequest) {
+  // Legacy locale redirect: zh-TW -> zh-HK
+  if (request.nextUrl.pathname === '/zh-TW' || request.nextUrl.pathname.startsWith('/zh-TW/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = url.pathname.replace(/^\/zh-TW(\/|$)/, '/zh-HK$1')
+    return NextResponse.redirect(url)
+  }
+
   // 1. Run next-intl middleware to handle locale routing
   const response = intlMiddleware(request);
 

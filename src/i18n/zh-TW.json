@@ -40,6 +40,7 @@
     "logout": "登出",
     "banking": "銀行"
   },
+  "literals": {},
   "admin": {
     "title": "平台管理",
     "description": "管理租戶、用戶並監控系統活動",

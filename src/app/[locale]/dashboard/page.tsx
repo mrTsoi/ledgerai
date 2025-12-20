@@ -15,10 +15,12 @@ import { FileText, CreditCard, TrendingUp, Users, ArrowRight, Clock, CheckCircle
 import Link from 'next/link'
 import { format, startOfMonth, endOfMonth } from 'date-fns'
 import { useSubscription } from '@/hooks/use-subscription'
+import { useLiterals } from '@/hooks/use-literals'
 import type { DashboardLayoutV1, DashboardWidgetType, WidgetSize, UserRole } from '@/lib/dashboard/registry'
 import { getTemplateByKey } from '@/lib/dashboard/registry'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { OnboardingView } from '@/components/dashboard/onboarding-view'
 
 interface DashboardStats {
   documentCount: number
@@ -95,6 +97,7 @@ interface ActivityItem {
 }
 
 export default function DashboardPage() {
+  const lt = useLiterals()
   const { currentTenant } = useTenant()
   const {
     tenantId: personalizationTenantId,
@@ -205,21 +208,21 @@ export default function DashboardPage() {
   }, [selectedTemplateKey])
 
   const widgetLabels: Record<DashboardWidgetType, string> = {
-    kpis: 'KPIs',
-    quick_actions: 'Quick Actions',
-    recent_activity: 'Recent Activity',
-    subscription_status: 'Subscription Status',
-    admin_shortcuts: 'Admin Shortcuts',
-    alerts: 'Alerts',
-    work_queue: 'Work Queue',
-    document_pipeline: 'Document Pipeline',
-    transaction_health: 'Transaction Health',
-    profit_loss_snapshot: 'Profit & Loss Snapshot',
-    external_import_schedule: 'Import Schedule',
-    next_steps: 'What to do next',
-    usage: 'Usage',
-    reports_overview: 'Reports',
-    trends: 'Trends',
+    kpis: lt('KPIs'),
+    quick_actions: lt('Quick Actions'),
+    recent_activity: lt('Recent Activity'),
+    subscription_status: lt('Subscription Status'),
+    admin_shortcuts: lt('Admin Shortcuts'),
+    alerts: lt('Alerts'),
+    work_queue: lt('Work Queue'),
+    document_pipeline: lt('Document Pipeline'),
+    transaction_health: lt('Transaction Health'),
+    profit_loss_snapshot: lt('Profit & Loss Snapshot'),
+    external_import_schedule: lt('Import Schedule'),
+    next_steps: lt('What to do next'),
+    usage: lt('Usage'),
+    reports_overview: lt('Reports'),
+    trends: lt('Trends'),
   }
 
   const addableWidgets: DashboardWidgetType[] = useMemo(() => {
@@ -457,16 +460,16 @@ export default function DashboardPage() {
         ...((recentDocs.data as { id: string; file_name: string; created_at: string; status: string }[] ) || []).map(d => ({
           id: d.id,
           type: 'DOCUMENT' as const,
-          title: d.file_name,
-          subtitle: 'Document Upload',
+          title: d.file_name || lt('Unnamed Document'),
+          subtitle: lt('Document Upload'),
           status: d.status,
           date: d.created_at
         })),
         ...((recentTx.data as { id: string; description?: string; created_at: string; status: string; reference_number?: string }[] ) || []).map(t => ({
           id: t.id,
           type: 'TRANSACTION' as const,
-          title: t.description || 'Untitled Transaction',
-          subtitle: t.reference_number ? `Ref: ${t.reference_number}` : 'Transaction',
+          title: t.description || lt('Untitled Transaction'),
+          subtitle: t.reference_number ? lt('Ref: {ref}', { ref: t.reference_number }) : lt('Transaction'),
           status: t.status,
           date: t.created_at
         }))
@@ -490,28 +493,28 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      title: 'Total Documents',
+      title: lt('Total Documents'),
       value: stats.documentCount.toString(),
       icon: <FileText className="w-8 h-8 text-blue-600" />,
-      description: 'All time',
+      description: lt('All time'),
     },
     {
-      title: 'Pending Transactions',
+      title: lt('Pending Transactions'),
       value: stats.pendingTransactions.toString(),
       icon: <CreditCard className="w-8 h-8 text-yellow-600" />,
-      description: 'Draft status',
+      description: lt('Draft status'),
     },
     {
-      title: 'Monthly Revenue',
+      title: lt('Monthly Revenue'),
       value: `$${stats.monthlyRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: <TrendingUp className="w-8 h-8 text-green-600" />,
-      description: 'Current month',
+      description: lt('Current month'),
     },
     {
-      title: 'Team Members',
+      title: lt('Team Members'),
       value: stats.teamMembers.toString(),
       icon: <Users className="w-8 h-8 text-purple-600" />,
-      description: 'Active users',
+      description: lt('Active users'),
     },
   ]
 
@@ -615,8 +618,8 @@ export default function DashboardPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Get started with these common tasks</CardDescription>
+              <CardTitle>{lt('Quick Actions')}</CardTitle>
+              <CardDescription>{lt('Get started with these common tasks')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -629,7 +632,7 @@ export default function DashboardPage() {
                     <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
                   </div>
                   <h3 className="font-medium">Upload Document</h3>
-                  <p className="text-sm text-gray-500">Add a new invoice or receipt</p>
+                  <p className="text-sm text-gray-500">{lt('Add a new invoice or receipt')}</p>
                 </Link>
 
                 <Link
@@ -641,7 +644,7 @@ export default function DashboardPage() {
                     <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-green-600 transition-colors" />
                   </div>
                   <h3 className="font-medium">Create Transaction</h3>
-                  <p className="text-sm text-gray-500">Manually add a transaction</p>
+                  <p className="text-sm text-gray-500">{lt('Manually add a transaction')}</p>
                 </Link>
 
                 <Link
@@ -653,7 +656,7 @@ export default function DashboardPage() {
                     <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-purple-600 transition-colors" />
                   </div>
                   <h3 className="font-medium">View Reports</h3>
-                  <p className="text-sm text-gray-500">Check financial reports</p>
+                  <p className="text-sm text-gray-500">{lt('Check financial reports')}</p>
                 </Link>
 
                 <Link
@@ -665,7 +668,7 @@ export default function DashboardPage() {
                     <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-yellow-600 transition-colors" />
                   </div>
                   <h3 className="font-medium">Subscription</h3>
-                  <p className="text-sm text-gray-500">{subscription?.plan_name || 'Free Plan'}</p>
+                  <p className="text-sm text-gray-500">{subscription?.plan_name || lt('Free Plan')}</p>
                 </Link>
               </div>
             </CardContent>
@@ -675,16 +678,16 @@ export default function DashboardPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Your latest transactions and documents</CardDescription>
+              <CardTitle>{lt('Recent Activity')}</CardTitle>
+              <CardDescription>{lt('Your latest transactions and documents')}</CardDescription>
             </CardHeader>
             <CardContent>
               {loading ? (
-                <div className="text-center py-8 text-gray-500">Loading activity...</div>
+                <div className="text-center py-8 text-gray-500">{lt('Loading activity...')}</div>
               ) : recentActivity.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  <p>No recent activity</p>
-                  <p className="text-sm mt-1">Start by uploading your first document</p>
+                  <p>{lt('No recent activity')}</p>
+                  <p className="text-sm mt-1">{lt('Start by uploading your first document')}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -728,25 +731,25 @@ export default function DashboardPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Subscription</CardTitle>
-              <CardDescription>Plan and access status</CardDescription>
+              <CardTitle>{lt('Subscription')}</CardTitle>
+              <CardDescription>{lt('Plan and access status')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <div className="text-sm text-gray-600">Plan</div>
-                  <div className="text-base font-medium">{subscription?.plan_name || 'Free Plan'}</div>
+                  <div className="text-sm text-gray-600">{lt('Plan')}</div>
+                  <div className="text-base font-medium">{subscription?.plan_name || lt('Free Plan')}</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm text-gray-600">Status</div>
+                  <div className="text-sm text-gray-600">{lt('Status')}</div>
                   <Badge variant={subscription?.status === 'active' ? 'default' : 'secondary'} className="capitalize">
-                    {subscription?.status || 'unknown'}
+                    {subscription?.status || lt('unknown')}
                   </Badge>
                 </div>
               </div>
               <div className="mt-4">
                 <Link href="/dashboard/settings?tab=billing" className="text-sm text-primary underline">
-                  Manage billing
+                  {lt('Manage billing')}
                 </Link>
               </div>
             </CardContent>
@@ -756,13 +759,13 @@ export default function DashboardPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Admin Shortcuts</CardTitle>
-              <CardDescription>Platform administration</CardDescription>
+              <CardTitle>{lt('Admin Shortcuts')}</CardTitle>
+              <CardDescription>{lt('Platform administration')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-3">
                 <Link href="/admin">
-                  <Button variant="outline" size="sm">Go to Admin</Button>
+                  <Button variant="outline" size="sm">{lt('Go to Admin')}</Button>
                 </Link>
               </div>
             </CardContent>
@@ -772,47 +775,47 @@ export default function DashboardPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Alerts</CardTitle>
-              <CardDescription>What needs attention right now</CardDescription>
+              <CardTitle>{lt('Alerts')}</CardTitle>
+              <CardDescription>{lt('What needs attention right now')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">
                 {subscription && !['active', 'trialing'].includes(subscription.status) && (
                   <div className="flex items-center justify-between rounded-md border p-3">
                     <div>
-                      <div className="font-medium">Billing issue</div>
+                      <div className="font-medium">{lt('Billing issue')}</div>
                       <div className="text-gray-500">Subscription is {subscription.status}</div>
                     </div>
-                    <Link href="/dashboard/settings?tab=billing" className="text-primary underline">Fix</Link>
+                    <Link href="/dashboard/settings?tab=billing" className="text-primary underline">{lt('Fix')}</Link>
                   </div>
                 )}
 
                 {extraStats.documentsFailed > 0 && (
                   <div className="flex items-center justify-between rounded-md border p-3">
                     <div>
-                      <div className="font-medium">Failed documents</div>
+                      <div className="font-medium">{lt('Failed documents')}</div>
                       <div className="text-gray-500">{extraStats.documentsFailed} need review</div>
                     </div>
-                    <Link href="/dashboard/documents" className="text-primary underline">View</Link>
+                    <Link href="/dashboard/documents" className="text-primary underline">{lt('View')}</Link>
                   </div>
                 )}
 
                 {extraStats.transactionsDraft > 0 && (
                   <div className="flex items-center justify-between rounded-md border p-3">
                     <div>
-                      <div className="font-medium">Draft transactions</div>
+                      <div className="font-medium">{lt('Draft transactions')}</div>
                       <div className="text-gray-500">{extraStats.transactionsDraft} pending</div>
                     </div>
-                    <Link href="/dashboard/transactions" className="text-primary underline">Review</Link>
+                    <Link href="/dashboard/transactions" className="text-primary underline">{lt('Review')}</Link>
                   </div>
                 )}
 
                 {subscription && ['active', 'trialing'].includes(subscription.status) && extraStats.documentsFailed === 0 && extraStats.transactionsDraft === 0 && (
-                  <div className="text-gray-500">No urgent alerts.</div>
+                  <div className="text-gray-500">{lt('No urgent alerts.')}</div>
                 )}
 
                 {!subscription && (
-                  <div className="text-gray-500">Loading alerts…</div>
+                  <div className="text-gray-500">{lt('Loading alerts…')}</div>
                 )}
               </div>
             </CardContent>
@@ -822,26 +825,26 @@ export default function DashboardPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Profit & Loss</CardTitle>
-              <CardDescription>Current month snapshot</CardDescription>
+              <CardTitle>{lt('Profit & Loss')}</CardTitle>
+              <CardDescription>{lt('Current month snapshot')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="rounded-md border p-3">
-                  <div className="text-xs text-gray-600">Revenue</div>
+                  <div className="text-xs text-gray-600">{lt('Revenue')}</div>
                   <div className="text-lg font-semibold">{loading ? '-' : `$${extraStats.monthRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</div>
                 </div>
                 <div className="rounded-md border p-3">
-                  <div className="text-xs text-gray-600">Expenses</div>
+                  <div className="text-xs text-gray-600">{lt('Expenses')}</div>
                   <div className="text-lg font-semibold">{loading ? '-' : `$${extraStats.monthExpenses.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</div>
                 </div>
                 <div className="rounded-md border p-3">
-                  <div className="text-xs text-gray-600">Net</div>
+                  <div className="text-xs text-gray-600">{lt('Net')}</div>
                   <div className="text-lg font-semibold">{loading ? '-' : `$${extraStats.monthNet.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</div>
                 </div>
               </div>
               <div className="mt-4">
-                <Link href="/dashboard/reports" className="text-sm text-primary underline">Open reports</Link>
+                <Link href="/dashboard/reports" className="text-sm text-primary underline">{lt('Open reports')}</Link>
               </div>
             </CardContent>
           </Card>
@@ -850,26 +853,26 @@ export default function DashboardPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Document Pipeline</CardTitle>
-              <CardDescription>Status breakdown</CardDescription>
+              <CardTitle>{lt('Document Pipeline')}</CardTitle>
+              <CardDescription>{lt('Status breakdown')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="rounded-md border p-3">
-                  <div className="text-xs text-gray-600">Processing</div>
+                  <div className="text-xs text-gray-600">{lt('Processing')}</div>
                   <div className="text-lg font-semibold">{loading ? '-' : extraStats.documentsProcessing}</div>
                 </div>
                 <div className="rounded-md border p-3">
-                  <div className="text-xs text-gray-600">Processed</div>
+                  <div className="text-xs text-gray-600">{lt('Processed')}</div>
                   <div className="text-lg font-semibold">{loading ? '-' : extraStats.documentsProcessed}</div>
                 </div>
                 <div className="rounded-md border p-3">
-                  <div className="text-xs text-gray-600">Failed</div>
+                  <div className="text-xs text-gray-600">{lt('Failed')}</div>
                   <div className="text-lg font-semibold">{loading ? '-' : extraStats.documentsFailed}</div>
                 </div>
               </div>
               <div className="mt-4">
-                <Link href="/dashboard/documents" className="text-sm text-primary underline">Go to documents</Link>
+                <Link href="/dashboard/documents" className="text-sm text-primary underline">{lt('Go to documents')}</Link>
               </div>
             </CardContent>
           </Card>
@@ -878,26 +881,26 @@ export default function DashboardPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Transaction Health</CardTitle>
-              <CardDescription>Status breakdown</CardDescription>
+              <CardTitle>{lt('Transaction Health')}</CardTitle>
+              <CardDescription>{lt('Status breakdown')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="rounded-md border p-3">
-                  <div className="text-xs text-gray-600">Draft</div>
+                  <div className="text-xs text-gray-600">{lt('Draft')}</div>
                   <div className="text-lg font-semibold">{loading ? '-' : extraStats.transactionsDraft}</div>
                 </div>
                 <div className="rounded-md border p-3">
-                  <div className="text-xs text-gray-600">Posted</div>
+                  <div className="text-xs text-gray-600">{lt('Posted')}</div>
                   <div className="text-lg font-semibold">{loading ? '-' : extraStats.transactionsPosted}</div>
                 </div>
                 <div className="rounded-md border p-3">
-                  <div className="text-xs text-gray-600">Void</div>
+                  <div className="text-xs text-gray-600">{lt('Void')}</div>
                   <div className="text-lg font-semibold">{loading ? '-' : extraStats.transactionsVoid}</div>
                 </div>
               </div>
               <div className="mt-4">
-                <Link href="/dashboard/transactions" className="text-sm text-primary underline">Go to transactions</Link>
+                <Link href="/dashboard/transactions" className="text-sm text-primary underline">{lt('Go to transactions')}</Link>
               </div>
             </CardContent>
           </Card>
@@ -906,31 +909,31 @@ export default function DashboardPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Work Queue</CardTitle>
-              <CardDescription>Next actions for this tenant</CardDescription>
+              <CardTitle>{lt('Work Queue')}</CardTitle>
+              <CardDescription>{lt('Next actions for this tenant')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between rounded-md border p-3">
                   <div>
-                    <div className="font-medium">Draft transactions</div>
+                    <div className="font-medium">{lt('Draft transactions')}</div>
                     <div className="text-gray-500">{loading ? '-' : extraStats.transactionsDraft} pending</div>
                   </div>
-                  <Link href="/dashboard/transactions" className="text-primary underline">Open</Link>
+                  <Link href="/dashboard/transactions" className="text-primary underline">{lt('Open')}</Link>
                 </div>
                 <div className="flex items-center justify-between rounded-md border p-3">
                   <div>
-                    <div className="font-medium">Failed documents</div>
+                    <div className="font-medium">{lt('Failed documents')}</div>
                     <div className="text-gray-500">{loading ? '-' : extraStats.documentsFailed} need review</div>
                   </div>
-                  <Link href="/dashboard/documents" className="text-primary underline">Open</Link>
+                  <Link href="/dashboard/documents" className="text-primary underline">{lt('Open')}</Link>
                 </div>
                 <div className="flex items-center justify-between rounded-md border p-3">
                   <div>
-                    <div className="font-medium">Documents processing</div>
+                    <div className="font-medium">{lt('Documents processing')}</div>
                     <div className="text-gray-500">{loading ? '-' : extraStats.documentsProcessing} in progress</div>
                   </div>
-                  <Link href="/dashboard/documents" className="text-primary underline">View</Link>
+                  <Link href="/dashboard/documents" className="text-primary underline">{lt('View')}</Link>
                 </div>
               </div>
             </CardContent>
@@ -940,22 +943,22 @@ export default function DashboardPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Reports</CardTitle>
-              <CardDescription>Financial reporting shortcuts</CardDescription>
+              <CardTitle>{lt('Reports')}</CardTitle>
+              <CardDescription>{lt('Financial reporting shortcuts')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Link href="/dashboard/reports" className="rounded-md border p-3 hover:bg-gray-50">
-                  <div className="font-medium text-sm">Financial Reports</div>
-                  <div className="text-xs text-gray-500">P&L, balance sheet, exports</div>
+                  <div className="font-medium text-sm">{lt('Financial Reports')}</div>
+                  <div className="text-xs text-gray-500">{lt('P&L, balance sheet, exports')}</div>
                 </Link>
                 <Link href="/dashboard/transactions" className="rounded-md border p-3 hover:bg-gray-50">
-                  <div className="font-medium text-sm">Transactions</div>
-                  <div className="text-xs text-gray-500">Review drafts and postings</div>
+                  <div className="font-medium text-sm">{lt('Transactions')}</div>
+                  <div className="text-xs text-gray-500">{lt('Review drafts and postings')}</div>
                 </Link>
               </div>
               <div className="mt-4">
-                <Link href="/dashboard/reports" className="text-sm text-primary underline">Open reports</Link>
+                <Link href="/dashboard/reports" className="text-sm text-primary underline">{lt('Open reports')}</Link>
               </div>
             </CardContent>
           </Card>
@@ -964,15 +967,15 @@ export default function DashboardPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Import Schedule</CardTitle>
-              <CardDescription>External sources and next runs</CardDescription>
+              <CardTitle>{lt('Import Schedule')}</CardTitle>
+              <CardDescription>{lt('External sources and next runs')}</CardDescription>
             </CardHeader>
             <CardContent>
               {externalSources.length === 0 ? (
                 <div className="text-sm text-gray-500">
-                  No external sources configured.
+                  {lt('No external sources configured.')}
                   <div className="mt-2">
-                    <Link href="/dashboard/settings?tab=external-sources" className="text-primary underline">Set up External Sources</Link>
+                    <Link href="/dashboard/settings?tab=external-sources" className="text-primary underline">{lt('Set up External Sources')}</Link>
                   </div>
                 </div>
               ) : (
@@ -1048,9 +1051,7 @@ export default function DashboardPage() {
                   })}
 
                   <div>
-                    <Link href="/dashboard/settings?tab=external-sources" className="text-sm text-primary underline">
-                      Manage external sources
-                    </Link>
+                    <Link href="/dashboard/settings?tab=external-sources" className="text-sm text-primary underline">{lt('Manage external sources')}</Link>
                   </div>
                 </div>
               )}
@@ -1061,57 +1062,57 @@ export default function DashboardPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>What to do next</CardTitle>
-              <CardDescription>Suggested actions based on your activity</CardDescription>
+              <CardTitle>{lt('What to do next')}</CardTitle>
+              <CardDescription>{lt('Suggested actions based on your activity')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">
                 {stats.documentCount === 0 && (
                   <div className="flex items-center justify-between rounded-md border p-3">
                     <div>
-                      <div className="font-medium">Upload your first document</div>
-                      <div className="text-gray-500">Start building your records</div>
+                      <div className="font-medium">{lt('Upload your first document')}</div>
+                      <div className="text-gray-500">{lt('Start building your records')}</div>
                     </div>
-                    <Link href="/dashboard/documents" className="text-primary underline">Upload</Link>
+                    <Link href="/dashboard/documents" className="text-primary underline">{lt('Upload')}</Link>
                   </div>
                 )}
 
                 {externalSources.length === 0 && (
                   <div className="flex items-center justify-between rounded-md border p-3">
                     <div>
-                      <div className="font-medium">Connect an import source</div>
-                      <div className="text-gray-500">Schedule folder/SFTP imports</div>
+                      <div className="font-medium">{lt('Connect an import source')}</div>
+                      <div className="text-gray-500">{lt('Schedule folder/SFTP imports')}</div>
                     </div>
-                    <Link href="/dashboard/settings?tab=external-sources" className="text-primary underline">Set up</Link>
+                    <Link href="/dashboard/settings?tab=external-sources" className="text-primary underline">{lt('Set up')}</Link>
                   </div>
                 )}
 
                 {extraStats.transactionsDraft > 0 && (
                   <div className="flex items-center justify-between rounded-md border p-3">
                     <div>
-                      <div className="font-medium">Review draft transactions</div>
+                      <div className="font-medium">{lt('Review draft transactions')}</div>
                       <div className="text-gray-500">{extraStats.transactionsDraft} drafts waiting</div>
                     </div>
-                    <Link href="/dashboard/transactions" className="text-primary underline">Review</Link>
+                    <Link href="/dashboard/transactions" className="text-primary underline">{lt('Review')}</Link>
                   </div>
                 )}
 
                 {extraStats.documentsFailed > 0 && (
                   <div className="flex items-center justify-between rounded-md border p-3">
                     <div>
-                      <div className="font-medium">Fix failed documents</div>
+                      <div className="font-medium">{lt('Fix failed documents')}</div>
                       <div className="text-gray-500">{extraStats.documentsFailed} failed</div>
                     </div>
-                    <Link href="/dashboard/documents" className="text-primary underline">View</Link>
+                    <Link href="/dashboard/documents" className="text-primary underline">{lt('View')}</Link>
                   </div>
                 )}
 
                 <div className="flex items-center justify-between rounded-md border p-3">
                   <div>
-                    <div className="font-medium">Generate a report</div>
-                    <div className="text-gray-500">P&L, balance sheet, exports</div>
+                    <div className="font-medium">{lt('Generate a report')}</div>
+                    <div className="text-gray-500">{lt('P&L, balance sheet, exports')}</div>
                   </div>
-                  <Link href="/dashboard/reports" className="text-primary underline">Open</Link>
+                  <Link href="/dashboard/reports" className="text-primary underline">{lt('Open')}</Link>
                 </div>
               </div>
             </CardContent>
@@ -1121,28 +1122,28 @@ export default function DashboardPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Usage</CardTitle>
-              <CardDescription>AI usage for this tenant (this month)</CardDescription>
+              <CardTitle>{lt('Usage')}</CardTitle>
+              <CardDescription>{lt('AI usage for this tenant (this month)')}</CardDescription>
             </CardHeader>
             <CardContent>
               {!usageSummary ? (
-                <div className="text-sm text-gray-500">Usage data not available.</div>
+                <div className="text-sm text-gray-500">{lt('Usage data not available.')}</div>
               ) : (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="rounded-md border p-3">
-                    <div className="text-xs text-gray-600">Calls</div>
+                    <div className="text-xs text-gray-600">{lt('Calls')}</div>
                     <div className="text-lg font-semibold">{usageSummary.total_calls.toLocaleString()}</div>
-                    <div className="text-xs text-gray-500">{usageSummary.success_calls.toLocaleString()} success • {usageSummary.error_calls.toLocaleString()} error</div>
+                    <div className="text-xs text-gray-500">{usageSummary.success_calls.toLocaleString()} {lt('success')} • {usageSummary.error_calls.toLocaleString()} {lt('error')}</div>
                   </div>
                   <div className="rounded-md border p-3">
-                    <div className="text-xs text-gray-600">Tokens</div>
+                    <div className="text-xs text-gray-600">{lt('Tokens')}</div>
                     <div className="text-lg font-semibold">{(usageSummary.tokens_input + usageSummary.tokens_output).toLocaleString()}</div>
-                    <div className="text-xs text-gray-500">In {usageSummary.tokens_input.toLocaleString()} • Out {usageSummary.tokens_output.toLocaleString()}</div>
+                    <div className="text-xs text-gray-500">{lt('In')} {usageSummary.tokens_input.toLocaleString()} • {lt('Out')} {usageSummary.tokens_output.toLocaleString()}</div>
                   </div>
                 </div>
               )}
               <div className="mt-4">
-                <Link href="/dashboard/settings?tab=ai" className="text-sm text-primary underline">AI settings</Link>
+                <Link href="/dashboard/settings?tab=ai" className="text-sm text-primary underline">{lt('AI settings')}</Link>
               </div>
             </CardContent>
           </Card>
@@ -1151,20 +1152,20 @@ export default function DashboardPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Trends</CardTitle>
-              <CardDescription>Recent activity signals</CardDescription>
+              <CardTitle>{lt('Trends')}</CardTitle>
+              <CardDescription>{lt('Recent activity signals')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="rounded-md border p-3">
-                  <div className="text-xs text-gray-600">Documents (7 days)</div>
+                  <div className="text-xs text-gray-600">{lt('Documents (7 days)')}</div>
                   <div className="text-lg font-semibold">{loading ? '-' : trendSummary.docs_current_7d}</div>
-                  <div className="text-xs text-gray-500">Prev 7 days: {loading ? '-' : trendSummary.docs_prev_7d}</div>
+                  <div className="text-xs text-gray-500">{lt('Prev 7 days:')} {loading ? '-' : trendSummary.docs_prev_7d}</div>
                 </div>
                 <div className="rounded-md border p-3">
-                  <div className="text-xs text-gray-600">Revenue (month)</div>
+                  <div className="text-xs text-gray-600">{lt('Revenue (month)')}</div>
                   <div className="text-lg font-semibold">{loading ? '-' : `$${trendSummary.revenue_current_month.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</div>
-                  <div className="text-xs text-gray-500">Prev month: {loading ? '-' : `$${trendSummary.revenue_prev_month.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</div>
+                  <div className="text-xs text-gray-500">{lt('Prev month:')} {loading ? '-' : `$${trendSummary.revenue_prev_month.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</div>
                 </div>
               </div>
             </CardContent>
@@ -1182,22 +1183,22 @@ export default function DashboardPage() {
       <Dialog open={showPaymentModal} onOpenChange={() => {}}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Subscription Required</DialogTitle>
+            <DialogTitle>{lt('Subscription Required')}</DialogTitle>
             <DialogDescription>
-              {subLoading ? 'Checking your subscription...' : (
+              {subLoading ? lt('Checking your subscription...') : (
                 <div>
                   {subscription?.plan_name ? (
                     <>
-                      <div className="mb-2">Your current plan: <b>{subscription.plan_name}</b></div>
-                      <div className="mb-2">Status: <span className="capitalize">{subscription.status}</span></div>
+                      <div className="mb-2">{lt('Your current plan:')} <b>{subscription.plan_name}</b></div>
+                      <div className="mb-2">{lt('Status:')} <span className="capitalize">{subscription.status}</span></div>
                     </>
                   ) : (
-                    <div className="mb-2">No active subscription found.</div>
+                    <div className="mb-2">{lt('No active subscription found.')}</div>
                   )}
-                  <div className="mb-4 text-red-600 font-medium">You must complete payment to access the dashboard.</div>
+                  <div className="mb-4 text-red-600 font-medium">{lt('You must complete payment to access the dashboard.')}</div>
                   {checkoutError && <div className="mb-2 text-red-500 text-sm">{checkoutError}</div>}
                   <Button onClick={handleCheckout} disabled={checkoutLoading} className="w-full">
-                    {checkoutLoading ? 'Redirecting to Payment...' : 'Complete Payment'}
+                    {checkoutLoading ? lt('Redirecting to Payment...') : lt('Complete Payment')}
                   </Button>
                 </div>
               )}
@@ -1213,24 +1214,26 @@ export default function DashboardPage() {
           style={showPaymentModal ? { filter: 'blur(2px)', pointerEvents: 'none', userSelect: 'none' } : {}}
         >
           {!effectiveTenantId ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>No company selected</CardTitle>
-                <CardDescription>Select a company to view your dashboard.</CardDescription>
-              </CardHeader>
-            </Card>
+            <OnboardingView />
           ) : !layout || !selectedTemplateKey ? (
             <Card>
               <CardHeader>
-                <CardTitle>Loading dashboard…</CardTitle>
-                <CardDescription>Fetching your template and layout.</CardDescription>
+                <CardTitle>{lt('Loading dashboard…')}</CardTitle>
+                <CardDescription>{lt('Fetching your template and layout.')}</CardDescription>
               </CardHeader>
             </Card>
           ) : (
             <>
               <div className="flex items-center justify-between gap-3">
                 <div className="text-sm text-gray-600">
-                  Template: <span className="font-medium">{selectedTemplateKey}</span>
+                  {lt('Template:')}{' '}
+                  <span className="font-medium">
+                    {(() => {
+                      const template = getTemplateByKey(selectedTemplateKey)
+                      const title = (template as any)?.name
+                      return title ? lt(String(title)) : selectedTemplateKey
+                    })()}
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -1239,15 +1242,15 @@ export default function DashboardPage() {
                       <PopoverTrigger asChild>
                         <Button variant="outline" size="sm">
                           <Plus className="mr-2 h-4 w-4" />
-                          Add widget
+                          {lt('Add widget')}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[320px] p-0" align="end">
+                      <PopoverContent className="z-[60] w-[320px] p-0" align="end">
                         <Command>
-                          <CommandInput placeholder="Search widgets…" />
+                          <CommandInput placeholder={lt('Search widgets…')} />
                           <CommandList>
-                            <CommandEmpty>No widgets found.</CommandEmpty>
-                            <CommandGroup heading="Widgets">
+                            <CommandEmpty>{lt('No widgets found.')}</CommandEmpty>
+                            <CommandGroup heading={lt('Widgets')}>
                               {addableWidgets
                                 .filter((type) => {
                                   const existingTypes = new Set(layout.widgets.map(w => w.type))
@@ -1257,6 +1260,11 @@ export default function DashboardPage() {
                                   <CommandItem
                                     key={type}
                                     value={type}
+                                    className="cursor-pointer"
+                                    onClick={() => {
+                                      addWidget(type)
+                                      setAddWidgetOpen(false)
+                                    }}
                                     onSelect={() => {
                                       addWidget(type)
                                       setAddWidgetOpen(false)
@@ -1273,7 +1281,7 @@ export default function DashboardPage() {
                   )}
 
                   {isCustomizing && (
-                    <Badge variant="secondary">Customizing</Badge>
+                    <Badge variant="secondary">{lt('Customizing')}</Badge>
                   )}
                 </div>
               </div>
@@ -1300,12 +1308,12 @@ export default function DashboardPage() {
                                       variant="outline"
                                       size="sm"
                                       onClick={() => moveWidget(widget.id, 'up')}
-                                      aria-label="Move widget up"
+                                      aria-label={lt('Move widget up')}
                                     >
                                       <ChevronUp className="h-4 w-4" />
                                     </Button>
                                   </TooltipTrigger>
-                                  <TooltipContent>Move up</TooltipContent>
+                                  <TooltipContent>{lt('Move up')}</TooltipContent>
                                 </Tooltip>
 
                                 <Tooltip>
@@ -1314,26 +1322,26 @@ export default function DashboardPage() {
                                       variant="outline"
                                       size="sm"
                                       onClick={() => moveWidget(widget.id, 'down')}
-                                      aria-label="Move widget down"
+                                      aria-label={lt('Move widget down')}
                                     >
                                       <ChevronDown className="h-4 w-4" />
                                     </Button>
                                   </TooltipTrigger>
-                                  <TooltipContent>Move down</TooltipContent>
+                                  <TooltipContent>{lt('Move down')}</TooltipContent>
                                 </Tooltip>
 
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs text-gray-600">Hide</span>
+                                  <span className="text-xs text-gray-600">{lt('Hide')}</span>
                                   <Switch
                                     checked={!hidden}
                                     onCheckedChange={(checked) => setWidgetHidden(widget.id, !checked)}
-                                    aria-label="Toggle widget visibility"
+                                    aria-label={lt('Toggle widget visibility')}
                                   />
                                 </div>
                               </div>
 
                               <div className="flex items-center gap-2">
-                                <span className="text-xs text-gray-600">Size</span>
+                                <span className="text-xs text-gray-600">{lt('Size')}</span>
                                 <Select
                                   value={widget.size}
                                   onValueChange={(v) => setWidgetSize(widget.id, v as WidgetSize)}
@@ -1342,9 +1350,9 @@ export default function DashboardPage() {
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="S">Small</SelectItem>
-                                    <SelectItem value="M">Medium</SelectItem>
-                                    <SelectItem value="L">Large</SelectItem>
+                                    <SelectItem value="S">{lt('Small')}</SelectItem>
+                                    <SelectItem value="M">{lt('Medium')}</SelectItem>
+                                    <SelectItem value="L">{lt('Large')}</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
@@ -1354,7 +1362,7 @@ export default function DashboardPage() {
                           {hidden ? (
                             <Card>
                               <CardHeader>
-                                <CardTitle className="text-base">Hidden widget</CardTitle>
+                                <CardTitle className="text-base">{lt('Hidden widget')}</CardTitle>
                                 <CardDescription>{widget.type}</CardDescription>
                               </CardHeader>
                             </Card>

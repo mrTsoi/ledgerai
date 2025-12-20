@@ -8,6 +8,7 @@ import { Check, X, Loader2, Phone, Mail } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
 import { FEATURE_DEFINITIONS, isFeatureEnabled } from '@/lib/subscription/features'
+import { useLiterals } from '@/hooks/use-literals'
 
 type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
 
@@ -17,6 +18,7 @@ interface ContactConfig {
 }
 
 export function PricingSection() {
+  const lt = useLiterals()
   const [plans, setPlans] = useState<SubscriptionPlan[]>([])
   const [loading, setLoading] = useState(true)
   const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly')
@@ -42,12 +44,12 @@ export function PricingSection() {
   }, [fetchPlans])
 
   const formatPrice = (price: number | null) => {
-    if (price === 0 || price === null) return 'Free'
+    if (price === 0 || price === null) return lt('Free')
     return `$${price}`
   }
 
   const formatStorage = (bytes: number) => {
-    if (bytes === -1) return 'Unlimited'
+    if (bytes === -1) return lt('Unlimited')
     const gb = bytes / (1024 * 1024 * 1024)
     return `${gb} GB`
   }
@@ -57,15 +59,23 @@ export function PricingSection() {
 
     // Limits
     features.push({
-      text: plan.max_tenants === -1 ? 'Unlimited Tenants' : `${plan.max_tenants} Tenant${plan.max_tenants > 1 ? 's' : ''}`,
+      text:
+        plan.max_tenants === -1
+          ? lt('Unlimited Tenants')
+          : plan.max_tenants > 1
+            ? lt('{count} Tenants', { count: plan.max_tenants })
+            : lt('{count} Tenant', { count: plan.max_tenants }),
       included: true
     })
     features.push({
-      text: plan.max_documents === -1 ? 'Unlimited Documents' : `${plan.max_documents.toLocaleString()} Documents/mo`,
+      text:
+        plan.max_documents === -1
+          ? lt('Unlimited Documents')
+          : lt('{count} Documents/mo', { count: plan.max_documents.toLocaleString() }),
       included: true
     })
     features.push({
-      text: `${formatStorage(plan.max_storage_bytes)} Storage`,
+      text: lt('{amount} Storage', { amount: formatStorage(plan.max_storage_bytes) }),
       included: true
     })
 
@@ -73,7 +83,7 @@ export function PricingSection() {
     const featureFlags = (plan.features || {}) as Record<string, unknown>
     for (const def of FEATURE_DEFINITIONS) {
       features.push({
-        text: def.label,
+        text: lt(def.label),
         included: isFeatureEnabled(featureFlags, def.key),
         isNew: def.isNew,
       })
@@ -94,12 +104,12 @@ export function PricingSection() {
     <section id="pricing" className="py-20 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Simple, transparent pricing</h2>
-          <p className="text-lg text-gray-600 mb-8">Choose the plan that&apos;s right for your business.</p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">{lt('Simple, transparent pricing')}</h2>
+          <p className="text-lg text-gray-600 mb-8">{lt("Choose the plan that's right for your business.")}</p>
           
           {/* Billing Toggle */}
           <div className="flex items-center justify-center gap-4">
-            <span className={`text-sm font-medium ${billingInterval === 'monthly' ? 'text-gray-900' : 'text-gray-500'}`}>Monthly</span>
+            <span className={`text-sm font-medium ${billingInterval === 'monthly' ? 'text-gray-900' : 'text-gray-500'}`}>{lt('Monthly')}</span>
             <button
               onClick={() => setBillingInterval(prev => prev === 'monthly' ? 'yearly' : 'monthly')}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
@@ -113,7 +123,7 @@ export function PricingSection() {
               />
             </button>
             <span className={`text-sm font-medium ${billingInterval === 'yearly' ? 'text-gray-900' : 'text-gray-500'}`}>
-              Yearly <span className="text-green-600 font-bold">(Save 20%)</span>
+              {lt('Yearly')} <span className="text-green-600 font-bold">{lt('(Save 20%)')}</span>
             </span>
           </div>
         </div>
@@ -140,7 +150,7 @@ export function PricingSection() {
               >
                 {isPopular && (
                   <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-                    Most Popular
+                    {lt('Most Popular')}
                   </div>
                 )}
                 <CardHeader>
@@ -150,14 +160,14 @@ export function PricingSection() {
                 <CardContent className="flex-grow">
                   <div className="mb-6">
                     {isEnterprise ? (
-                      <span className="text-4xl font-bold">Contact Sales</span>
+                      <span className="text-4xl font-bold">{lt('Contact Sales')}</span>
                     ) : (
                       <>
                         <span className="text-4xl font-bold">{formatPrice(price)}</span>
-                        <span className="text-gray-500">/mo</span>
+                        <span className="text-gray-500">{lt('/mo')}</span>
                         {billingInterval === 'yearly' && price > 0 && (
                           <div className="text-xs text-green-600 font-medium mt-1">
-                            Billed ${yearlyPrice} yearly (Save {discountPercent}%)
+                            {lt('Billed ${amount} yearly (Save {percent}%)', { amount: yearlyPrice, percent: discountPercent })}
                           </div>
                         )}
                       </>
@@ -174,7 +184,7 @@ export function PricingSection() {
                         <span className={feature.included ? 'text-gray-700' : 'text-gray-400'}>
                           {feature.text}
                           {feature.isNew && feature.included && (
-                            <span className="ml-2 px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">New</span>
+                            <span className="ml-2 px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">{lt('New')}</span>
                           )}
                         </span>
                       </li>
@@ -185,13 +195,13 @@ export function PricingSection() {
                   {isEnterprise ? (
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button className="w-full" variant="outline">Contact Sales</Button>
+                        <Button className="w-full" variant="outline">{lt('Contact Sales')}</Button>
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Contact Enterprise Sales</DialogTitle>
+                          <DialogTitle>{lt('Contact Enterprise Sales')}</DialogTitle>
                           <DialogDescription>
-                            Get in touch with our team to discuss a custom plan for your organization.
+                            {lt('Get in touch with our team to discuss a custom plan for your organization.')}
                           </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
@@ -206,8 +216,8 @@ export function PricingSection() {
                                 <Phone className="w-5 h-5 text-green-600" />
                               </div>
                               <div>
-                                <div className="font-semibold">WhatsApp</div>
-                                <div className="text-sm text-gray-500">Chat with us instantly</div>
+                                <div className="font-semibold">{lt('WhatsApp')}</div>
+                                <div className="text-sm text-gray-500">{lt('Chat with us instantly')}</div>
                               </div>
                             </a>
                           )}
@@ -221,7 +231,7 @@ export function PricingSection() {
                                 <Mail className="w-5 h-5 text-blue-600" />
                               </div>
                               <div>
-                                <div className="font-semibold">Email</div>
+                                <div className="font-semibold">{lt('Email')}</div>
                                 <div className="text-sm text-gray-500">{contactConfig.email}</div>
                               </div>
                             </a>
@@ -235,7 +245,7 @@ export function PricingSection() {
                         className="w-full" 
                         variant={isPopular ? 'default' : 'outline'}
                       >
-                        {price === 0 ? 'Get Started Free' : 'Start Free Trial'}
+                        {price === 0 ? lt('Get Started Free') : lt('Start Free Trial')}
                       </Button>
                     </Link>
                   )}

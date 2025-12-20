@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS external_document_sources (
 
 ALTER TABLE external_document_sources ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view external sources in their tenant" ON external_document_sources;
 CREATE POLICY "Users can view external sources in their tenant" ON external_document_sources
   FOR SELECT USING (
     tenant_id IN (
@@ -38,6 +39,7 @@ CREATE POLICY "Users can view external sources in their tenant" ON external_docu
     )
   );
 
+DROP POLICY IF EXISTS "Admins can manage external sources" ON external_document_sources;
 CREATE POLICY "Admins can manage external sources" ON external_document_sources
   FOR ALL USING (
     tenant_id IN (
@@ -49,6 +51,7 @@ CREATE POLICY "Admins can manage external sources" ON external_document_sources
 CREATE INDEX IF NOT EXISTS idx_external_document_sources_tenant ON external_document_sources(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_external_document_sources_enabled ON external_document_sources(enabled);
 
+DROP TRIGGER IF EXISTS set_updated_at_external_document_sources ON external_document_sources;
 CREATE TRIGGER set_updated_at_external_document_sources
   BEFORE UPDATE ON external_document_sources
   FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
@@ -71,6 +74,7 @@ CREATE TABLE IF NOT EXISTS external_document_source_secrets (
 ALTER TABLE external_document_source_secrets ENABLE ROW LEVEL SECURITY;
 -- Intentionally no RLS policies.
 
+DROP TRIGGER IF EXISTS set_updated_at_external_document_source_secrets ON external_document_source_secrets;
 CREATE TRIGGER set_updated_at_external_document_source_secrets
   BEFORE UPDATE ON external_document_source_secrets
   FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
@@ -96,6 +100,7 @@ CREATE TABLE IF NOT EXISTS external_document_source_items (
 
 ALTER TABLE external_document_source_items ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view external source items in their tenant" ON external_document_source_items;
 CREATE POLICY "Users can view external source items in their tenant" ON external_document_source_items
   FOR SELECT USING (
     tenant_id IN (
@@ -104,6 +109,7 @@ CREATE POLICY "Users can view external source items in their tenant" ON external
     )
   );
 
+DROP POLICY IF EXISTS "Admins can manage external source items" ON external_document_source_items;
 CREATE POLICY "Admins can manage external source items" ON external_document_source_items
   FOR ALL USING (
     tenant_id IN (
@@ -142,6 +148,7 @@ CREATE TABLE IF NOT EXISTS external_document_source_runs (
 
 ALTER TABLE external_document_source_runs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view external source runs in their tenant" ON external_document_source_runs;
 CREATE POLICY "Users can view external source runs in their tenant" ON external_document_source_runs
   FOR SELECT USING (
     tenant_id IN (
@@ -150,6 +157,7 @@ CREATE POLICY "Users can view external source runs in their tenant" ON external_
     )
   );
 
+DROP POLICY IF EXISTS "Admins can manage external source runs" ON external_document_source_runs;
 CREATE POLICY "Admins can manage external source runs" ON external_document_source_runs
   FOR ALL USING (
     tenant_id IN (

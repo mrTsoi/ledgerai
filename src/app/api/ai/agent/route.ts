@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { userHasFeature } from '@/lib/subscription/server'
+import { resolveAiProviderForPurpose } from '@/lib/ai/provider-resolver'
 
 // Helper to get AI config
 async function getTenantAIConfig(supabase: any, tenantId: string) {
@@ -15,14 +16,8 @@ async function getTenantAIConfig(supabase: any, tenantId: string) {
 
   if (tenantConfig) return tenantConfig
 
-  // 2. Fallback to default provider
-  const { data: defaultProvider } = await supabase
-    .from('ai_providers')
-    .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  // 2. Fallback to platform routing for CHATBOT, then platform default.
+  const defaultProvider = await resolveAiProviderForPurpose(supabase as any, 'CHATBOT')
 
   if (!defaultProvider) return null
 
@@ -78,7 +73,7 @@ export async function POST(request: Request) {
 
     if (!apiKey) {
       // Check if key is in the provider config (Admin might have saved it there)
-      apiKey = aiConfig.ai_providers?.config?.api_key
+      apiKey = aiConfig.ai_providers?.config?.platform_api_key || aiConfig.ai_providers?.config?.api_key
 
       // Fallback to Environment Variables based on provider name
       if (!apiKey) {

@@ -20,7 +20,7 @@ export function LanguageSwitcher() {
   const [languages, setLanguages] = useState<Language[]>([
     { code: 'en', name: 'English', flag_emoji: '🇺🇸' },
     { code: 'zh-CN', name: '简体中文', flag_emoji: '🇨🇳' },
-    { code: 'zh-TW', name: '繁體中文', flag_emoji: '🇹🇼' }
+    { code: 'zh-HK', name: '繁體中文', flag_emoji: '🇭🇰' }
   ]);
 
   useEffect(() => {
@@ -32,7 +32,16 @@ export function LanguageSwitcher() {
 
         const active = (json?.languages || []).filter((l: any) => l?.is_active !== false);
         if (active.length > 0) {
-          setLanguages(active);
+          const mapped: Language[] = (active as any[]).map((l: any) => {
+            const next: Language = {
+              code: String(l?.code ?? ''),
+              name: String(l?.name ?? ''),
+              flag_emoji: String(l?.flag_emoji ?? ''),
+            }
+            return next.code === 'zh-TW' ? { ...next, code: 'zh-HK', flag_emoji: '🇭🇰' } : next
+          });
+          const uniq: Language[] = Array.from(new Map(mapped.map((l) => [l.code, l])).values());
+          setLanguages(uniq);
         }
       } catch {
         // Keep default languages on failure
@@ -43,7 +52,7 @@ export function LanguageSwitcher() {
 
   const handleChange = (nextLocale: string) => {
     startTransition(() => {
-      router.replace(pathname, { locale: nextLocale as 'en' | 'zh-CN' | 'zh-TW' | undefined });
+      router.replace(pathname, { locale: nextLocale as 'en' | 'zh-CN' | 'zh-HK' | undefined });
     });
   };
 

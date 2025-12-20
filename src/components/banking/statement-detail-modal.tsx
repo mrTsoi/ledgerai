@@ -15,6 +15,7 @@ import { toast } from "sonner"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ImagePreview } from '@/components/ui/image-preview'
+import { useLiterals } from '@/hooks/use-literals'
 
 type Document = Database['public']['Tables']['documents']['Row']
 type BankTransaction = Database['public']['Tables']['bank_transactions']['Row']
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
+  const lt = useLiterals()
   const [document, setDocument] = useState<Document | null>(null)
   const [transactions, setTransactions] = useState<Partial<BankTransaction>[]>([])
   const [loading, setLoading] = useState(true)
@@ -137,7 +139,7 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
 
     } catch (error) {
       console.error('Error fetching details:', error)
-      toast.error('Failed to load statement details')
+      toast.error(lt('Failed to load statement details'))
     } finally {
       setLoading(false)
     }
@@ -235,13 +237,13 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
           .eq('document_id', documentId)
         }
 
-      toast.success('Changes saved successfully')
+      toast.success(lt('Changes saved successfully'))
       if (onSaved) onSaved()
       onClose()
 
     } catch (error: any) {
       console.error('Error saving:', error)
-      toast.error('Failed to save: ' + error.message)
+      toast.error(lt('Failed to save: {message}', { message: error.message }))
     } finally {
       setSaving(false)
     }
@@ -269,13 +271,13 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
       if (!tx) return
 
         if (tx.id && !tx.id.toString().startsWith('temp-')) {
-          if (!confirm('Delete this transaction permanently?')) return
+          if (!confirm(lt('Delete this transaction permanently?'))) return
           
           try {
           await supabase.from('bank_transactions').delete().eq('id', tx.id)
           } catch (e) {
               console.error(e)
-              toast.error('Failed to delete')
+            toast.error(lt('Failed to delete'))
               return
           }
       }
@@ -287,7 +289,7 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
     const newTx: Partial<BankTransaction> = {
       id: `temp-new-${Date.now()}`,
       transaction_date: new Date().toISOString().split('T')[0],
-      description: 'New Transaction',
+      description: lt('New Transaction'),
       amount: 0,
       transaction_type: 'DEBIT',
       status: 'PENDING'

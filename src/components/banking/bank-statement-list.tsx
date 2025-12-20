@@ -18,6 +18,7 @@ import { EditStatementModal } from './edit-statement-modal'
 import { StatementVerificationModal } from './statement-verification-modal'
 import { toast } from 'sonner'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { useLiterals } from '@/hooks/use-literals'
 
 type BankStatement = Database['public']['Tables']['bank_statements']['Row'] & {
   documents: {
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export function BankStatementList({ accountId }: Props) {
+  const lt = useLiterals()
   const [statements, setStatements] = useState<BankStatement[]>([])
   const [loading, setLoading] = useState(true)
   const [reprocessingId, setReprocessingId] = useState<string | null>(null)
@@ -92,12 +94,12 @@ export function BankStatementList({ accountId }: Props) {
       document.body.removeChild(a)
     } catch (error) {
       console.error('Error downloading file:', error)
-      toast.error('Failed to download file')
+      toast.error(lt('Failed to download file'))
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this statement? This will also delete all associated transactions.')) return
+    if (!confirm(lt('Are you sure you want to delete this statement? This will also delete all associated transactions.'))) return
 
     try {
       const { error } = await (supabase
@@ -106,24 +108,24 @@ export function BankStatementList({ accountId }: Props) {
         .eq('id', id)
 
       if (error) throw error
-      toast.success('Statement deleted')
+      toast.success(lt('Statement deleted'))
       await fetchStatements()
     } catch (error) {
       console.error('Error deleting statement:', error)
-      toast.error('Failed to delete statement')
+      toast.error(lt('Failed to delete statement'))
     }
   }
 
   const handleReprocess = async (id: string) => {
     const statement = statements.find(s => s.id === id)
     if (!statement || !statement.document_id) {
-        toast.error('Cannot reprocess: Missing document')
+      toast.error(lt('Cannot reprocess: Missing document'))
         return
     }
 
     try {
       setReprocessingId(id)
-      toast.info('Starting reprocessing...')
+      toast.info(lt('Starting reprocessing...'))
 
       // 1. Reset status to IMPORTED (valid enum value)
       const { error } = await (supabase
@@ -142,16 +144,16 @@ export function BankStatementList({ accountId }: Props) {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Processing failed')
+        throw new Error(errorData.error || lt('Processing failed'))
       }
 
-      toast.success('Statement reprocessed successfully')
+      toast.success(lt('Statement reprocessed successfully'))
       
       // 3. Refresh list to show updated data
       await fetchStatements()
     } catch (error: any) {
       console.error('Error reprocessing statement:', error)
-      toast.error('Failed to reprocess: ' + error.message)
+      toast.error(lt('Failed to reprocess: {message}', { message: error.message }))
     } finally {
       setReprocessingId(null)
     }
@@ -165,8 +167,8 @@ export function BankStatementList({ accountId }: Props) {
     return (
       <div className="text-center p-8 border rounded-md bg-gray-50">
         <FileText className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-        <h3 className="text-lg font-medium text-gray-900">No Statements Found</h3>
-        <p className="text-gray-500">Upload a bank statement to get started.</p>
+        <h3 className="text-lg font-medium text-gray-900">{lt('No Statements Found')}</h3>
+        <p className="text-gray-500">{lt('Upload a bank statement to get started.')}</p>
       </div>
     )
   }
@@ -174,22 +176,22 @@ export function BankStatementList({ accountId }: Props) {
   return (
     <div className="border rounded-md">
       <div className="p-4 border-b flex justify-between items-center bg-gray-50">
-        <h3 className="font-medium">Statement History</h3>
+        <h3 className="font-medium">{lt('Statement History')}</h3>
         <Button variant="outline" size="sm" onClick={() => setIsVerificationOpen(true)}>
           <ShieldCheck className="w-4 h-4 mr-2" />
-          Verify All
+          {lt('Verify All')}
         </Button>
       </div>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Period</TableHead>
-            <TableHead>File Name</TableHead>
-            <TableHead className="text-right">Opening Balance</TableHead>
-            <TableHead className="text-right">Closing Balance</TableHead>
-            <TableHead>AI Analysis</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>{lt('Period')}</TableHead>
+            <TableHead>{lt('File Name')}</TableHead>
+            <TableHead className="text-right">{lt('Opening Balance')}</TableHead>
+            <TableHead className="text-right">{lt('Closing Balance')}</TableHead>
+            <TableHead>{lt('AI Analysis')}</TableHead>
+            <TableHead>{lt('Status')}</TableHead>
+            <TableHead className="text-right">{lt('Actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -206,13 +208,13 @@ export function BankStatementList({ accountId }: Props) {
                     {format(new Date(statement.start_date), 'MMM d, yyyy')} - {format(new Date(statement.end_date), 'MMM d, yyyy')}
                   </>
                 ) : (
-                  <span className="text-gray-400">Unknown Period</span>
+                  <span className="text-gray-400">{lt('Unknown Period')}</span>
                 )}
               </TableCell>
               <TableCell className="font-medium">
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-blue-500" />
-                  {statement.documents?.file_name || 'Unknown File'}
+                  {statement.documents?.file_name || lt('Unknown File')}
                 </div>
               </TableCell>
               <TableCell className="text-right">

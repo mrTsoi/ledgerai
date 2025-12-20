@@ -1,16 +1,56 @@
 import {getRequestConfig} from 'next-intl/server';
-import { createClient as createServerSupabaseClient } from '@/lib/supabase/server';
-import type { Database } from '@/types/database.types';
+import { createClient } from '@/lib/supabase/server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+function setNested(target: any, path: string, value: any) {
+  const parts = String(path || '').split('.').filter(Boolean)
+  if (parts.length === 0) return
+
+  let cur = target
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i]
+    if (i === parts.length - 1) {
+      cur[p] = value
+      return
+    }
+    if (!cur[p] || typeof cur[p] !== 'object') {
+      cur[p] = {}
+    }
+    cur = cur[p]
+  }
+}
+
+function normalizeDotKeys(obj: any) {
+  if (!obj || typeof obj !== 'object') return
+
+  for (const key of Object.keys(obj)) {
+    const value = (obj as any)[key]
+
+    if (key.includes('.')) {
+      delete (obj as any)[key]
+      setNested(obj, key, value)
+      continue
+    }
+
+    if (value && typeof value === 'object') {
+      normalizeDotKeys(value)
+    }
+  }
+}
+
 export default getRequestConfig(async ({requestLocale}) => {
   // This typically comes from the URL or a cookie
   let locale = await requestLocale;
+
+  // Legacy alias: treat zh-TW as zh-HK
+  if (locale === 'zh-TW') {
+    locale = 'zh-HK'
+  }
  
   // Ensure that a valid locale is used
-  if (!locale || !['en', 'zh-CN', 'zh-TW'].includes(locale)) {
+  if (!locale || !['en', 'zh-CN', 'zh-HK'].includes(locale)) {
     locale = 'en';
   }
 
@@ -30,24 +70,48 @@ export default getRequestConfig(async ({requestLocale}) => {
     }
   }
 
+  // Normalize any dot-notation keys in JSON messages into nested objects.
+  // next-intl rejects message objects that contain literal '.' characters in keys.
+  normalizeDotKeys(fileMessages)
+
   // 2. Load DB messages
   if (supabaseUrl && supabaseKey) {
     try {
-      const supabase = await createServerSupabaseClient()
-      const { data: dbTranslations } = await supabase
+      // Use the cookie-aware server client when possible so authenticated requests
+      // read translations consistently under RLS.
+      const supabase = await createClient()
+
+      // Legacy alias handling:
+      // - If DB still contains zh-TW rows, treat them as fallback.
+      // - Ensure zh-HK overrides zh-TW (so legacy values never overwrite canonical).
+      const localesToFetch = locale === 'zh-HK' ? ['zh-TW', 'zh-HK'] : [locale]
+
+      const { data: dbTranslations, error: dbError } = await supabase
         .from('app_translations')
-        .select('namespace, key, value')
-        .eq('locale', locale);
+        .select('locale, namespace, key, value')
+        .in('locale', localesToFetch)
+
+      if (dbError) {
+        console.error('Error loading translations from DB:', dbError)
+      }
 
       // 3. Merge
       if (dbTranslations && dbTranslations.length > 0) {
-        // Deep merge or namespace merge
-        // Our structure is { namespace: { key: value } }
-        dbTranslations.forEach((t: any) => {
+        const order = new Map<string, number>()
+        localesToFetch.forEach((l, idx) => order.set(l, idx))
+        const sorted = [...dbTranslations].sort((a: any, b: any) => {
+          return (order.get(String(a.locale)) ?? 0) - (order.get(String(b.locale)) ?? 0)
+        })
+
+        // Deep merge by namespace. Later entries override earlier ones.
+        sorted.forEach((t: any) => {
           if (!fileMessages[t.namespace]) {
             fileMessages[t.namespace] = {};
           }
-          fileMessages[t.namespace][t.key] = t.value;
+
+          // Support nested keys via dot-notation (e.g. admin.tabs.overview stored as namespace=admin, key=tabs.overview)
+          // Backward compatible for flat keys.
+          setNested(fileMessages[t.namespace], t.key, t.value)
         });
       }
     } catch (error) {
@@ -55,6 +119,9 @@ export default getRequestConfig(async ({requestLocale}) => {
       // Fallback to file messages only
     }
   }
+
+  // Defensive: DB merges may also bring in dotted paths.
+  normalizeDotKeys(fileMessages)
  
   return {
     locale,

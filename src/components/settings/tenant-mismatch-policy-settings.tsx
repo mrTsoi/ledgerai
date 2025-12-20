@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { Loader2, Save, Trash2 } from 'lucide-react'
+import { useLiterals } from '@/hooks/use-literals'
 
 type TenantMismatchPolicy = {
   allow_auto_tenant_creation: boolean
@@ -46,6 +47,7 @@ function normalizePolicy(input: unknown): TenantMismatchPolicy {
 }
 
 export function TenantMismatchPolicyTenantSettings() {
+  const lt = useLiterals()
   const supabase = useMemo(() => createClient(), [])
   const { currentTenant } = useTenant()
   const role = useUserRole()
@@ -95,11 +97,11 @@ export function TenantMismatchPolicyTenantSettings() {
       setDraft(initialDraft)
     } catch (e: any) {
       console.error('Error loading tenant mismatch policy (tenant settings):', e)
-      toast.error(e?.message ? `Failed to load policy: ${e.message}` : 'Failed to load policy')
+      toast.error(e?.message ? lt('Failed to load policy: {message}', { message: e.message }) : lt('Failed to load policy'))
     } finally {
       setLoading(false)
     }
-  }, [currentTenant, supabase])
+  }, [currentTenant, supabase, lt])
 
   useEffect(() => {
     load()
@@ -109,7 +111,7 @@ export function TenantMismatchPolicyTenantSettings() {
     if (!currentTenant) return
 
     if (!canEdit) {
-      toast.error('Only Company Admins can change this setting')
+      toast.error(lt('Only Company Admins can change this setting'))
       return
     }
 
@@ -129,10 +131,10 @@ export function TenantMismatchPolicyTenantSettings() {
       if (error) throw error
 
       setTenantOverride(next)
-      toast.success('Tenant override saved')
+      toast.success(lt('Tenant override saved'))
     } catch (e: any) {
       console.error('Error saving tenant override:', e)
-      toast.error(e?.message ? `Failed to save: ${e.message}` : 'Failed to save')
+      toast.error(e?.message ? lt('Failed to save: {message}', { message: e.message }) : lt('Failed to save'))
     } finally {
       setSaving(false)
     }
@@ -142,7 +144,7 @@ export function TenantMismatchPolicyTenantSettings() {
     if (!currentTenant) return
 
     if (!canEdit) {
-      toast.error('Only Company Admins can change this setting')
+      toast.error(lt('Only Company Admins can change this setting'))
       return
     }
 
@@ -158,10 +160,10 @@ export function TenantMismatchPolicyTenantSettings() {
 
       setTenantOverride(null)
       setDraft(systemPolicy)
-      toast.success('Tenant override cleared')
+      toast.success(lt('Tenant override cleared'))
     } catch (e: any) {
       console.error('Error clearing tenant override:', e)
-      toast.error(e?.message ? `Failed to clear: ${e.message}` : 'Failed to clear')
+      toast.error(e?.message ? lt('Failed to clear: {message}', { message: e.message }) : lt('Failed to clear'))
     } finally {
       setSaving(false)
     }
@@ -182,21 +184,21 @@ export function TenantMismatchPolicyTenantSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Document Processing: Tenant Mismatch</CardTitle>
+        <CardTitle>{lt('Document Processing: Tenant Mismatch')}</CardTitle>
         <CardDescription>
-          {tenantOverride ? 'Using tenant override.' : 'Using platform default.'} Effective values shown below.
+          {tenantOverride ? lt('Using tenant override.') : lt('Using platform default.')} {lt('Effective values shown below.')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {!canEdit && (
-          <div className="text-sm text-muted-foreground">Only Company Admins can change these settings.</div>
+          <div className="text-sm text-muted-foreground">{lt('Only Company Admins can change these settings.')}</div>
         )}
 
         <div className="flex items-start justify-between gap-6">
           <div className="space-y-1">
-            <Label>Allow auto reassignment</Label>
+            <Label>{lt('Allow auto reassignment')}</Label>
             <p className="text-sm text-muted-foreground">
-              Automatically move documents to an existing matching tenant from the user’s accessible tenant list.
+              {lt("Automatically move documents to an existing matching tenant from the user's accessible tenant list.")}
             </p>
           </div>
           <Switch
@@ -208,9 +210,9 @@ export function TenantMismatchPolicyTenantSettings() {
 
         <div className="flex items-start justify-between gap-6">
           <div className="space-y-1">
-            <Label>Allow auto tenant creation</Label>
+            <Label>{lt('Allow auto tenant creation')}</Label>
             <p className="text-sm text-muted-foreground">
-              If no matching tenant exists and the tenancy limit allows it, create a tenant and move the document.
+              {lt('If no matching tenant exists and the tenancy limit allows it, create a tenant and move the document.')}
             </p>
           </div>
           <Switch
@@ -221,8 +223,8 @@ export function TenantMismatchPolicyTenantSettings() {
         </div>
 
         <div className="space-y-2">
-          <Label>Minimum confidence</Label>
-          <p className="text-sm text-muted-foreground">Range: 0.50 – 1.00</p>
+          <Label>{lt('Minimum confidence')}</Label>
+          <p className="text-sm text-muted-foreground">{lt('Range: 0.50 – 1.00')}</p>
           <div className="max-w-[220px]">
             <Input
               disabled={!canEdit}
@@ -239,20 +241,20 @@ export function TenantMismatchPolicyTenantSettings() {
         <div className="flex items-center justify-end gap-2">
           <Button onClick={saveOverride} disabled={!canEdit || saving}>
             {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            Save Override
+            {lt('Save Override')}
           </Button>
           <Button variant="outline" onClick={clearOverride} disabled={!canEdit || saving || !tenantOverride}>
             <Trash2 className="mr-2 h-4 w-4" />
-            Clear Override
+            {lt('Clear Override')}
           </Button>
         </div>
 
         <div className="rounded-md border p-3 text-sm">
-          <div className="font-medium mb-1">Effective policy</div>
+          <div className="font-medium mb-1">{lt('Effective policy')}</div>
           <div className="text-muted-foreground">
-            Auto reassignment: <span className="font-medium text-foreground">{String(effectivePolicy.allow_auto_reassignment)}</span>
-            {' • '}Auto creation: <span className="font-medium text-foreground">{String(effectivePolicy.allow_auto_tenant_creation)}</span>
-            {' • '}Min confidence: <span className="font-medium text-foreground">{effectivePolicy.min_confidence.toFixed(2)}</span>
+            {lt('Auto reassignment:')} <span className="font-medium text-foreground">{String(effectivePolicy.allow_auto_reassignment)}</span>
+            {' • '}{lt('Auto creation:')} <span className="font-medium text-foreground">{String(effectivePolicy.allow_auto_tenant_creation)}</span>
+            {' • '}{lt('Min confidence:')} <span className="font-medium text-foreground">{effectivePolicy.min_confidence.toFixed(2)}</span>
           </div>
         </div>
       </CardContent>

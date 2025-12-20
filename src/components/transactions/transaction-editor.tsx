@@ -17,6 +17,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { toast } from "sonner"
+import { useLiterals } from '@/hooks/use-literals'
+import { useLocale } from 'next-intl'
+import { fetchEntityTranslationMap, overlayEntityTranslations } from '@/lib/i18n/entity-translations'
 
 import { getExchangeRate } from '@/lib/currency'
 import { ImagePreview } from '@/components/ui/image-preview'
@@ -42,6 +45,12 @@ interface Props {
 }
 
 export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
+  const lt = useLiterals()
+  const locale = useLocale()
+  const ltVars = (english: string, vars?: Record<string, string | number>) => {
+    return lt(english, vars)
+  }
+
   const [transaction, setTransaction] = useState<TransactionWithLineItems | null>(null)
   const [accounts, setAccounts] = useState<Account[]>([])
   const [tenantCurrency, setTenantCurrency] = useState<string>('')
@@ -58,15 +67,15 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
       if (ok) {
         setTransaction({ ...transaction, exchange_rate: fetched })
         setRateFetchFailed(false)
-        toast.success('Exchange rate auto-fetch succeeded')
+        toast.success(lt('Exchange rate auto-fetch succeeded'))
       } else {
         setRateFetchFailed(true)
-        toast.error('Auto-fetch failed — please enter rate manually')
+        toast.error(lt('Auto-fetch failed — please enter rate manually'))
       }
     } catch (e) {
       console.error('Retry fetch failed', e)
       setRateFetchFailed(true)
-      toast.error('Auto-fetch failed — please enter rate manually')
+      toast.error(lt('Auto-fetch failed — please enter rate manually'))
     } finally {
       setRateRetrying(false)
     }
@@ -323,11 +332,25 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
         .order('code')
 
       if (error) throw error
-      setAccounts(data || [])
+      const base = (data || [])
+
+      if (locale && locale !== 'en' && base.length > 0) {
+        const translationMap = await fetchEntityTranslationMap(supabase, {
+          tenantId: currentTenant.id,
+          entityType: 'chart_of_accounts',
+          entityIds: base.map((a: any) => a.id),
+          locale,
+          fields: ['name', 'description']
+        })
+        setAccounts(overlayEntityTranslations(base as any, translationMap, ['name', 'description']) as any)
+        return
+      }
+
+      setAccounts(base as any)
     } catch (error) {
       console.error('Error fetching accounts:', error)
     }
-  }, [currentTenant, supabase])
+  }, [currentTenant, supabase, locale])
 
   useEffect(() => {
     if (currentTenant && transactionId) {
@@ -530,7 +553,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
         account_id: accounts[0]?.id || null,
         debit: 0,
         credit: 0,
-        description: 'New line item'
+        description: lt('New line item')
       }
 
       setTransaction({
@@ -544,7 +567,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
       }
     } catch (error: any) {
       console.error('Error adding line item:', error)
-      toast.error('Failed to add line item: ' + error.message)
+      toast.error(`${lt('Failed to add line item')}: ${error.message}`)
     } finally {
       setSaving(false)
     }
@@ -611,10 +634,10 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
       }
 
       onSaved()
-      toast.success('Transaction saved successfully')
+      toast.success(lt('Transaction saved successfully'))
     } catch (error: any) {
       console.error('Error saving transaction:', error)
-      toast.error('Failed to save: ' + error.message)
+      toast.error(`${lt('Failed to save')}: ${error.message}`)
     } finally {
       setSaving(false)
     }
@@ -628,13 +651,16 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
     const totalCredits = transaction.line_items.reduce((sum, li) => sum + li.credit, 0)
 
     if (Math.abs(totalDebits - totalCredits) > 0.01) {
-      toast.error('Transaction is not balanced!', {
-        description: `Debits: $${totalDebits.toFixed(2)} | Credits: $${totalCredits.toFixed(2)}`
+      toast.error(lt('Transaction is not balanced!'), {
+        description: ltVars('Debits: {debits} | Credits: {credits}', {
+          debits: `$${totalDebits.toFixed(2)}`,
+          credits: `$${totalCredits.toFixed(2)}`
+        })
       })
       return
     }
 
-    if (!confirm('Post this transaction? This action cannot be easily undone.')) return
+    if (!confirm(lt('Post this transaction? This action cannot be easily undone.'))) return
 
     try {
       setSaving(true)
@@ -653,10 +679,10 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
       if (error) throw error
 
       onSaved()
-      toast.success('Transaction posted successfully')
+      toast.success(lt('Transaction posted successfully'))
     } catch (error: any) {
       console.error('Error posting transaction:', error)
-      toast.error('Failed to post: ' + error.message)
+      toast.error(`${lt('Failed to post')}: ${error.message}`)
     } finally {
       setSaving(false)
     }
@@ -673,7 +699,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
   }
 
   if (!transaction) {
-    return <div className="p-4 text-center text-gray-500">Transaction not found</div>
+    return <div className="p-4 text-center text-gray-500">{lt('Transaction not found')}</div>
   }
 
   const totalDebits = transaction.line_items.reduce((sum, li) => sum + li.debit, 0)
@@ -713,7 +739,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
                 setZoomLevel(100)
                 setPosition({ x: 0, y: 0 })
               }}
-              title="Reset View"
+              title={lt('Reset View')}
             >
               <RotateCcw className="w-4 h-4" />
             </Button>
@@ -732,7 +758,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
             {fileType.startsWith('image/') ? (
               <ImagePreview
                 src={previewUrl}
-                alt="Document Preview"
+                alt={lt('Document Preview')}
                 style={{
                   transform: `translate(${position.x}px, ${position.y}px) scale(${zoomLevel / 100})`,
                   transition: isDragging ? 'none' : 'transform 0.2s',
@@ -743,7 +769,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
               <iframe 
                 src={previewUrl} 
                 className="w-full h-full bg-white"
-                title="PDF Preview"
+                title={lt('PDF Preview')}
               />
             )}
           </div>
@@ -752,7 +778,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
         <div className="hidden lg:flex flex-1 items-center justify-center bg-gray-900 text-white">
           <div className="text-center opacity-50">
             <FileText className="w-16 h-16 mx-auto mb-4" />
-            <p>No source document attached</p>
+            <p>{lt('No source document attached')}</p>
           </div>
         </div>
       )}
@@ -761,9 +787,9 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
       <div className="w-full lg:w-[600px] bg-white h-[60vh] lg:h-full flex flex-col shadow-2xl">
         <div className="p-4 border-b flex items-center justify-between bg-gray-50">
           <div>
-            <h2 className="font-semibold text-lg">Edit Transaction</h2>
+            <h2 className="font-semibold text-lg">{lt('Edit Transaction')}</h2>
             <p className="text-xs text-gray-500">
-              Status: <span className={`font-medium ${
+              {lt('Status')}: <span className={`font-medium ${
                 transaction.status === 'POSTED' ? 'text-green-600' : 
                 transaction.status === 'VOID' ? 'text-red-600' : 'text-yellow-600'
               }`}>{transaction.status}</span>
@@ -778,7 +804,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
           {/* Transaction Details */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date">{lt('Date')}</Label>
               <Input
                 id="date"
                 type="date"
@@ -788,7 +814,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
               />
             </div>
             <div>
-              <Label htmlFor="reference">Reference Number</Label>
+              <Label htmlFor="reference">{lt('Reference Number')}</Label>
               <Input
                 id="reference"
                 value={transaction.reference_number || ''}
@@ -799,7 +825,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
           </div>
 
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{lt('Description')}</Label>
             <Input
               id="description"
               value={transaction.description || ''}
@@ -810,7 +836,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="currency">Currency</Label>
+              <Label htmlFor="currency">{lt('Currency')}</Label>
               <CurrencySelect
                 value={transaction.currency || tenantCurrency}
                 onChange={(value) => handleCurrencyChange(value)}
@@ -819,12 +845,14 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
             </div>
             {transaction.currency && transaction.currency !== tenantCurrency && (
               <div>
-                <Label htmlFor="exchange_rate">Exchange Rate (1 {transaction.currency} = ? {tenantCurrency})</Label>
+                <Label htmlFor="exchange_rate">
+                  {ltVars('Exchange Rate (1 {from} = ? {to})', { from: transaction.currency, to: tenantCurrency })}
+                </Label>
                 {rateFetchFailed && (
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="text-sm text-red-600">Auto-fetch failed — please enter the exchange rate manually.</div>
+                    <div className="text-sm text-red-600">{lt('Auto-fetch failed — please enter the exchange rate manually.')}</div>
                     <Button size="sm" variant="outline" onClick={retryFetchRate} disabled={rateRetrying}>
-                      {rateRetrying ? 'Retrying...' : 'Retry'}
+                      {rateRetrying ? lt('Retrying...') : lt('Retry')}
                     </Button>
                   </div>
                 )}
@@ -849,7 +877,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-4">
-                <h3 className="text-sm font-medium">Line Items</h3>
+                <h3 className="text-sm font-medium">{lt('Line Items')}</h3>
                 {transaction.line_items.length === 2 && (
                   <div className="flex items-center space-x-2">
                     <input
@@ -860,14 +888,14 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
                       className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                     />
                     <Label htmlFor="autoBalance" className="text-xs font-normal text-gray-500 cursor-pointer flex items-center gap-1">
-                      Auto-balance
+                      {lt('Auto-balance')}
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Info className="w-3 h-3 text-gray-400" />
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p className="w-[200px] text-xs">When enabled, editing one side (Debit/Credit) automatically updates the other side to keep the transaction balanced.</p>
+                            <p className="w-[200px] text-xs">{lt('When enabled, editing one side (Debit/Credit) automatically updates the other side to keep the transaction balanced.')}</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -880,9 +908,9 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
                   size="sm" 
                   variant="outline" 
                   onClick={addLineItem}
-                  title="Add Line Item"
+                  title={lt('Add Line Item')}
                 >
-                  Add Line
+                  {lt('Add Line')}
                 </Button>
               )}
             </div>
@@ -894,14 +922,14 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
                 return (
                   <div key={line.id} className="grid grid-cols-12 gap-2 p-3 border rounded-lg bg-gray-50/50">
                     <div className="col-span-12 md:col-span-4">
-                      <Label className="text-xs text-gray-500">Account</Label>
+                      <Label className="text-xs text-gray-500">{lt('Account')}</Label>
                       <select
                         value={line.account_id ?? undefined}
                         onChange={(e) => updateLineItem(index, 'account_id', e.target.value)}
                         disabled={transaction.status === 'POSTED'}
                         className="w-full px-2 py-1.5 text-sm border rounded bg-white"
                       >
-                        <option value="">Select account...</option>
+                        <option value="">{lt('Select account...')}</option>
                         {accounts.map(acc => (
                           <option key={acc.id} value={acc.id}>
                             {acc.code} - {acc.name}
@@ -913,7 +941,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
                     {isForeign ? (
                       <>
                         <div className="col-span-6 md:col-span-2">
-                          <Label className="text-xs text-gray-500">Debit ({transaction.currency})</Label>
+                          <Label className="text-xs text-gray-500">{ltVars('Debit ({currency})', { currency: transaction.currency! })}</Label>
                           <Input
                             type="number"
                             step="0.01"
@@ -925,7 +953,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
                           />
                         </div>
                         <div className="col-span-6 md:col-span-2">
-                          <Label className="text-xs text-gray-500">Credit ({transaction.currency})</Label>
+                          <Label className="text-xs text-gray-500">{ltVars('Credit ({currency})', { currency: transaction.currency! })}</Label>
                           <Input
                             type="number"
                             step="0.01"
@@ -937,13 +965,13 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
                           />
                         </div>
                         <div className="col-span-6 md:col-span-2">
-                          <Label className="text-xs text-gray-500">Debit ({tenantCurrency})</Label>
+                          <Label className="text-xs text-gray-500">{ltVars('Debit ({currency})', { currency: tenantCurrency })}</Label>
                           <div className="text-sm h-8 flex items-center px-3 bg-gray-100 rounded border text-gray-600">
                             {line.debit?.toFixed(2)}
                           </div>
                         </div>
                         <div className="col-span-6 md:col-span-2">
-                          <Label className="text-xs text-gray-500">Credit ({tenantCurrency})</Label>
+                          <Label className="text-xs text-gray-500">{ltVars('Credit ({currency})', { currency: tenantCurrency })}</Label>
                           <div className="text-sm h-8 flex items-center px-3 bg-gray-100 rounded border text-gray-600">
                             {line.credit?.toFixed(2)}
                           </div>
@@ -952,7 +980,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
                     ) : (
                       <>
                         <div className="col-span-5 md:col-span-3">
-                          <Label className="text-xs text-gray-500">Debit</Label>
+                          <Label className="text-xs text-gray-500">{lt('Debit')}</Label>
                           <Input
                             type="number"
                             step="0.01"
@@ -964,7 +992,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
                           />
                         </div>
                         <div className="col-span-5 md:col-span-3">
-                          <Label className="text-xs text-gray-500">Credit</Label>
+                          <Label className="text-xs text-gray-500">{lt('Credit')}</Label>
                           <Input
                             type="number"
                             step="0.01"
@@ -976,7 +1004,7 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
                           />
                         </div>
                         <div className="col-span-2 md:col-span-2 flex items-end justify-center pb-2">
-                          <div className={`w-3 h-3 rounded-full ${line.debit === line.credit ? 'bg-red-500' : 'bg-green-500'}`} title={line.debit === line.credit ? 'Zero amount' : 'Active'} />
+                          <div className={`w-3 h-3 rounded-full ${line.debit === line.credit ? 'bg-red-500' : 'bg-green-500'}`} title={line.debit === line.credit ? lt('Zero amount') : lt('Active')} />
                         </div>
                       </>
                     )}
@@ -989,18 +1017,18 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
           {/* Totals */}
           <div className="flex justify-between items-center p-4 bg-gray-100 rounded-lg">
             <div>
-              <p className="text-sm text-gray-600">Total Debits: <span className="font-medium">${totalDebits.toFixed(2)}</span></p>
-              <p className="text-sm text-gray-600">Total Credits: <span className="font-medium">${totalCredits.toFixed(2)}</span></p>
+              <p className="text-sm text-gray-600">{lt('Total Debits')}: <span className="font-medium">${totalDebits.toFixed(2)}</span></p>
+              <p className="text-sm text-gray-600">{lt('Total Credits')}: <span className="font-medium">${totalCredits.toFixed(2)}</span></p>
             </div>
             <div>
               {isBalanced ? (
                 <div className="flex items-center text-green-600 bg-green-50 px-2 py-1 rounded">
                   <Check className="w-4 h-4 mr-1" />
-                  <span className="text-sm font-medium">Balanced</span>
+                  <span className="text-sm font-medium">{lt('Balanced')}</span>
                 </div>
               ) : (
                 <div className="text-red-600 font-medium text-sm bg-red-50 px-2 py-1 rounded">
-                  Diff: ${Math.abs(totalDebits - totalCredits).toFixed(2)}
+                  {lt('Diff')}: ${Math.abs(totalDebits - totalCredits).toFixed(2)}
                 </div>
               )}
             </div>
@@ -1013,16 +1041,16 @@ export function TransactionEditor({ transactionId, onClose, onSaved }: Props) {
             <>
               <Button className="flex-1" variant="outline" onClick={saveTransaction} disabled={saving}>
                 {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                Save Draft
+                {lt('Save Draft')}
               </Button>
               <Button className="flex-1" onClick={postTransaction} disabled={saving || !isBalanced} variant="default">
                 {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
-                Post
+                {lt('Post')}
               </Button>
             </>
           ) : (
             <Button className="w-full" variant="outline" onClick={onClose}>
-              Close
+              {lt('Close')}
             </Button>
           )}
         </div>

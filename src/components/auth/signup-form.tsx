@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useLiterals } from '@/hooks/use-literals'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 
@@ -13,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 type Plan = { id: string; name: string; description: string; price_monthly: number; price_yearly?: number; yearly_discount_percent?: number }
 
 export default function SignupForm() {
+  const lt = useLiterals()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
@@ -31,7 +33,7 @@ export default function SignupForm() {
   const handleGoogleSignup = async () => {
     setError(null)
     if (!planId) {
-      setError('Please select a subscription plan.')
+      setError(lt('Please select a subscription plan.'))
       return
     }
 
@@ -48,7 +50,7 @@ export default function SignupForm() {
       if (error) throw error
       // Redirect handled by Supabase
     } catch (err: any) {
-      setError(err?.message || 'Failed to start Google signup')
+      setError(err?.message || lt('Failed to start Google signup'))
       setLoading(false)
     }
   }
@@ -57,7 +59,13 @@ export default function SignupForm() {
     // Fetch plans from Supabase
     (async () => {
       const { data, error } = await supabase.from('subscription_plans').select('*').eq('is_active', true).order('price_monthly', { ascending: true })
-      if (!error && data) setPlans(data)
+      if (!error && data) {
+        setPlans(data)
+        // Auto-select the first plan (usually Free)
+        if (data.length > 0 && !planId) {
+          setPlanId(data[0].id)
+        }
+      }
     })()
   }, [supabase])
 
@@ -67,7 +75,7 @@ export default function SignupForm() {
     setLoading(true)
 
     if (!planId) {
-      setError('Please select a subscription plan.')
+      setError(lt('Please select a subscription plan.'))
       setLoading(false)
       return
     }
@@ -111,19 +119,47 @@ export default function SignupForm() {
       }
       // Show confirmation message and prompt user to check email
     } catch (err) {
-      setError('An unexpected error occurred')
+      setError(lt('An unexpected error occurred'))
     } finally {
       setLoading(false)
     }
+  }
+
+  if (success) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-green-600">{lt('Account Created!')}</CardTitle>
+            <CardDescription>
+              {lt('Please check your email to confirm your address.')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-4 bg-green-50 border border-green-200 rounded-md text-center">
+              <p className="text-sm text-green-800 mb-2">
+                {lt('We have sent a confirmation link to')} <strong>{email}</strong>.
+              </p>
+              <p className="text-sm text-green-800">
+                {lt('Click the link in the email to activate your account and sign in.')}
+              </p>
+            </div>
+            <Button className="w-full" variant="outline" onClick={() => router.push('/login')}>
+              {lt('Go to Login')}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Create an Account</CardTitle>
+          <CardTitle className="text-2xl font-bold">{lt('Create an Account')}</CardTitle>
           <CardDescription>
-            Enter your information to get started with LedgerAI
+            {lt('Enter your information to get started with LedgerAI')}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSignup}>
@@ -135,16 +171,17 @@ export default function SignupForm() {
             )}
             {success && (
               <div className="p-3 text-sm text-green-600 bg-green-50 border border-green-200 rounded-md">
-                Account created! Please check your email to confirm your address before logging in.<br />
-                After confirming, log in to complete your subscription payment if required.
+                {lt('Account created! Please check your email to confirm your address before logging in.')}
+                <br />
+                {lt('After confirming, log in to complete your subscription payment if required.')}
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName">{lt('Full Name')}</Label>
               <Input
                 id="fullName"
                 type="text"
-                placeholder="John Doe"
+                placeholder={lt('John Doe')}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
@@ -153,16 +190,16 @@ export default function SignupForm() {
             </div>
 
             <Button type="button" variant="outline" className="w-full" onClick={handleGoogleSignup} disabled={loading || success}>
-              Continue with Google
+              {lt('Continue with Google')}
             </Button>
 
             <div className="flex items-center gap-3">
               <div className="h-px flex-1 bg-border" />
-              <span className="text-xs text-muted-foreground">or</span>
+              <span className="text-xs text-muted-foreground">{lt('or')}</span>
               <div className="h-px flex-1 bg-border" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="plan">Subscription Plan</Label>
+              <Label htmlFor="plan">{lt('Subscription Plan')}</Label>
               <div className="flex flex-col gap-2">
                 <div className="flex gap-2">
                   <button
@@ -171,7 +208,7 @@ export default function SignupForm() {
                     onClick={() => setInterval('month')}
                     disabled={loading}
                   >
-                    Monthly
+                    {lt('Monthly')}
                   </button>
                   <button
                     type="button"
@@ -179,12 +216,12 @@ export default function SignupForm() {
                     onClick={() => setInterval('year')}
                     disabled={loading}
                   >
-                    Yearly
+                    {lt('Yearly')}
                   </button>
                 </div>
                 <Select value={planId} onValueChange={setPlanId} disabled={loading || plans.length === 0}>
                   <SelectTrigger id="plan" className="truncate">
-                    <SelectValue placeholder="Select a plan" className="truncate" />
+                    <SelectValue placeholder={lt('Select a plan')} className="truncate" />
                   </SelectTrigger>
                   <SelectContent>
                     {plans.map((plan) => (
@@ -192,9 +229,14 @@ export default function SignupForm() {
                         <div className="flex flex-col w-56 truncate">
                           <span className="font-medium truncate">{plan.name}</span>
                           {interval === 'month' ? (
-                            <span className="text-xs text-muted-foreground truncate">${plan.price_monthly}/mo</span>
+                            <span className="text-xs text-muted-foreground truncate">
+                              ${plan.price_monthly}/{lt('mo')}
+                            </span>
                           ) : (
-                            <span className="text-xs text-muted-foreground truncate">${plan.price_yearly} /yr {plan.yearly_discount_percent ? `(${plan.yearly_discount_percent}% off)` : ''}</span>
+                            <span className="text-xs text-muted-foreground truncate">
+                              ${plan.price_yearly}/{lt('yr')}{' '}
+                              {plan.yearly_discount_percent ? `(${plan.yearly_discount_percent}% ${lt('off')})` : ''}
+                            </span>
                           )}
                           <span className="text-xs text-muted-foreground truncate">{plan.description}</span>
                         </div>
@@ -205,11 +247,11 @@ export default function SignupForm() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{lt('Email')}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder={lt('you@example.com')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -217,11 +259,11 @@ export default function SignupForm() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{lt('Password')}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Create a strong password"
+                placeholder={lt('Create a strong password')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -229,18 +271,18 @@ export default function SignupForm() {
                 disabled={loading}
               />
               <p className="text-xs text-gray-500">
-                Password must be at least 6 characters
+                {lt('Password must be at least 6 characters')}
               </p>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={loading || success}>
-              {loading ? 'Creating Account...' : 'Sign Up'}
+              {loading ? lt('Creating Account...') : lt('Sign Up')}
             </Button>
             <p className="text-sm text-center text-gray-600">
-              Already have an account?{' '}
+              {lt('Already have an account?')}{' '}
               <Link href="/login" className="text-primary hover:underline">
-                Login
+                {lt('Login')}
               </Link>
             </p>
           </CardFooter>

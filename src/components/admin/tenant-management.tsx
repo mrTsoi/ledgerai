@@ -436,7 +436,7 @@ function CreateTenantForm({ onSubmit, onCancel }: { onSubmit: (data: any) => voi
               >
                 <option value="en">English</option>
                 <option value="zh-CN">Chinese (Simplified)</option>
-                <option value="zh-TW">Chinese (Traditional)</option>
+                <option value="zh-HK">Chinese (Traditional)</option>
               </select>
             </div>
             <div>

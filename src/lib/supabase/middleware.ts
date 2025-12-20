@@ -59,7 +59,7 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname
   // Regex to match locale prefix (optional)
-  const localePrefix = /^\/(en|zh-CN|zh-TW)/
+  const localePrefix = /^\/(en|zh-CN|zh-HK|zh-TW)/
   const pathWithoutLocale = path.replace(localePrefix, '') || '/'
 
   // Protect routes that require authentication

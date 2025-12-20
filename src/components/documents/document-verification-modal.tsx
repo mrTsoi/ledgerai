@@ -16,6 +16,7 @@ import { getExchangeRate } from '@/lib/currency'
 import { CurrencySelect } from '@/components/ui/currency-select'
 import { ImagePreview } from '@/components/ui/image-preview'
 import { toast } from "sonner"
+import { useLiterals } from '@/hooks/use-literals'
 
 type Document = Database['public']['Tables']['documents']['Row']
 type DocumentData = Database['public']['Tables']['document_data']['Row']
@@ -27,6 +28,9 @@ interface Props {
 }
 
 export function DocumentVerificationModal({ documentId, onClose, onSaved }: Props) {
+  const lt = useLiterals()
+  const ltVars = (english: string, vars?: Record<string, string | number>) => lt(english, vars)
+
   const [document, setDocument] = useState<Document | null>(null)
   const [docData, setDocData] = useState<DocumentData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -380,7 +384,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
             .update({
               transaction_date: formData.document_date || new Date().toISOString().split('T')[0],
               reference_number: formData.invoice_number || null,
-              description: `${formData.vendor_name || 'Vendor'} - ${document.file_name}`,
+              description: `${formData.vendor_name || lt('Vendor')} - ${document.file_name}`,
               currency: docCurrency,
               exchange_rate: exchangeRate
             })
@@ -439,11 +443,11 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
 
       if (onSaved) onSaved()
       onClose()
-      toast.success('Document verified and saved')
+      toast.success(lt('Document verified and saved'))
 
     } catch (error: any) {
       console.error('Save error:', error)
-      toast.error('Failed to save: ' + error.message)
+      toast.error(ltVars('Failed to save: {message}', { message: error?.message ?? '' }))
     } finally {
       setSaving(false)
     }
@@ -491,7 +495,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
               setZoomLevel(100)
               setPosition({ x: 0, y: 0 })
             }}
-            title="Reset View"
+            title={lt('Reset View')}
           >
             <RotateCcw className="w-4 h-4" />
           </Button>
@@ -511,7 +515,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
             document?.file_type.startsWith('image/') ? (
               <ImagePreview
                 src={previewUrl}
-                alt="Document Preview"
+                alt={lt('Document Preview')}
                 style={{
                   transform: `translate(${position.x}px, ${position.y}px) scale(${zoomLevel / 100})`,
                   transition: isDragging ? 'none' : 'transform 0.2s',
@@ -522,13 +526,13 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
               <iframe 
                 src={previewUrl} 
                 className="w-full h-full bg-white"
-                title="PDF Preview"
+                title={lt('PDF Preview')}
               />
             )
           ) : (
             <div className="text-white text-center">
               <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <p>Preview not available</p>
+              <p>{lt('Preview not available')}</p>
             </div>
           )}
         </div>
@@ -537,7 +541,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
       {/* Right Pane: Data Form */}
       <div className="w-full lg:w-[450px] bg-white h-[60vh] lg:h-full flex flex-col shadow-2xl">
         <div className="p-4 border-b flex items-center justify-between bg-gray-50">
-          <h2 className="font-semibold text-lg">Verify Data</h2>
+          <h2 className="font-semibold text-lg">{lt('Verify Data')}</h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
             <X className="w-5 h-5" />
           </Button>
@@ -548,12 +552,12 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
             <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-sm font-medium text-yellow-800">Validation Warning</h4>
+                <h4 className="text-sm font-medium text-yellow-800">{lt('Validation Warning')}</h4>
                 <ul className="text-xs text-yellow-700 mt-1 list-disc list-inside">
                   {document.validation_flags?.map(flag => (
                     <li key={flag}>
-                      {flag === 'DUPLICATE_DOCUMENT' ? 'This document appears to be a duplicate.' :
-                       flag === 'WRONG_TENANT' ? 'The bill-to name does not match the tenant.' :
+                      {flag === 'DUPLICATE_DOCUMENT' ? lt('This document appears to be a duplicate.') :
+                       flag === 'WRONG_TENANT' ? lt('The bill-to name does not match the tenant.') :
                        flag}
                     </li>
                   ))}
@@ -565,29 +569,29 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Document Type</Label>
+                <Label>{lt('Document Type')}</Label>
                 <select 
                   className="w-full p-2 border rounded-md text-sm"
                   value={formData.document_type}
                   onChange={e => setFormData({...formData, document_type: e.target.value})}
                 >
-                  <option value="invoice">Invoice</option>
-                  <option value="receipt">Receipt</option>
-                  <option value="credit_note">Credit Note</option>
-                  <option value="bank_statement">Bank Statement</option>
-                  <option value="other">Other</option>
+                  <option value="invoice">{lt('Invoice')}</option>
+                  <option value="receipt">{lt('Receipt')}</option>
+                  <option value="credit_note">{lt('Credit Note')}</option>
+                  <option value="bank_statement">{lt('Bank Statement')}</option>
+                  <option value="other">{lt('Other')}</option>
                 </select>
               </div>
               {formData.document_type !== 'bank_statement' && (
                 <div className="space-y-2">
-                  <Label>Transaction Type</Label>
+                  <Label>{lt('Transaction Type')}</Label>
                   <select 
                     className="w-full p-2 border rounded-md text-sm"
                     value={formData.transaction_type}
                     onChange={e => setFormData({...formData, transaction_type: e.target.value})}
                   >
-                    <option value="expense">Expense</option>
-                    <option value="income">Income</option>
+                    <option value="expense">{lt('Expense')}</option>
+                    <option value="income">{lt('Income')}</option>
                   </select>
                 </div>
               )}
@@ -596,24 +600,24 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
             {formData.document_type === 'bank_statement' ? (
               <>
                 <div className="space-y-2">
-                  <Label>Bank Name</Label>
+                  <Label>{lt('Bank Name')}</Label>
                   <Input 
                     value={formData.bank_name}
                     onChange={e => setFormData({...formData, bank_name: e.target.value})}
-                    placeholder="e.g. Chase Bank"
+                    placeholder={lt('e.g. Chase Bank')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Account Number (Last 4)</Label>
+                  <Label>{lt('Account Number (Last 4)')}</Label>
                   <Input 
                     value={formData.account_number}
                     onChange={e => setFormData({...formData, account_number: e.target.value})}
-                    placeholder="e.g. 1234"
+                    placeholder={lt('e.g. 1234')}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Start Date</Label>
+                    <Label>{lt('Start Date')}</Label>
                     <Input 
                       type="date"
                       value={formData.statement_period_start}
@@ -621,7 +625,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>End Date</Label>
+                    <Label>{lt('End Date')}</Label>
                     <Input 
                       type="date"
                       value={formData.statement_period_end}
@@ -631,7 +635,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Opening Balance</Label>
+                    <Label>{lt('Opening Balance')}</Label>
                     <Input 
                       type="number"
                       step="0.01"
@@ -640,7 +644,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Closing Balance</Label>
+                    <Label>{lt('Closing Balance')}</Label>
                     <Input 
                       type="number"
                       step="0.01"
@@ -652,14 +656,16 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
 
                 <div className="pt-4 border-t">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-medium text-gray-900">Extracted Transactions ({bankTransactions.length})</h3>
+                    <h3 className="text-sm font-medium text-gray-900">
+                      {ltVars('Extracted Transactions ({count})', { count: bankTransactions.length })}
+                    </h3>
                     <Button 
                       size="sm" 
                       variant="outline" 
                       onClick={() => setBankTransactions([...bankTransactions, { date: '', description: '', amount: '', type: 'DEBIT' }])}
                     >
                       <Plus className="w-4 h-4 mr-2" />
-                      Add Item
+                      {lt('Add Item')}
                     </Button>
                   </div>
                   
@@ -668,7 +674,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
                       <div key={index} className="flex gap-2 items-start p-3 bg-gray-50 rounded-md border">
                         <div className="grid grid-cols-12 gap-2 flex-1">
                           <div className="col-span-3">
-                            <Label className="text-xs text-gray-500 mb-1 block">Date</Label>
+                            <Label className="text-xs text-gray-500 mb-1 block">{lt('Date')}</Label>
                             <Input 
                               type="date" 
                               className="h-8 text-xs"
@@ -681,7 +687,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
                             />
                           </div>
                           <div className="col-span-5">
-                            <Label className="text-xs text-gray-500 mb-1 block">Description</Label>
+                            <Label className="text-xs text-gray-500 mb-1 block">{lt('Description')}</Label>
                             <Input 
                               className="h-8 text-xs"
                               value={tx.description}
@@ -693,7 +699,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
                             />
                           </div>
                           <div className="col-span-2">
-                            <Label className="text-xs text-gray-500 mb-1 block">Amount</Label>
+                            <Label className="text-xs text-gray-500 mb-1 block">{lt('Amount')}</Label>
                             <Input 
                               type="number" 
                               className="h-8 text-xs"
@@ -706,7 +712,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
                             />
                           </div>
                           <div className="col-span-2">
-                            <Label className="text-xs text-gray-500 mb-1 block">Type</Label>
+                            <Label className="text-xs text-gray-500 mb-1 block">{lt('Type')}</Label>
                             <select 
                               className="w-full h-8 text-xs border rounded-md px-1 bg-white"
                               value={tx.type}
@@ -716,8 +722,8 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
                                 setBankTransactions(newTxs)
                               }}
                             >
-                              <option value="DEBIT">Debit</option>
-                              <option value="CREDIT">Credit</option>
+                              <option value="DEBIT">{lt('Debit')}</option>
+                              <option value="CREDIT">{lt('Credit')}</option>
                             </select>
                           </div>
                         </div>
@@ -736,7 +742,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
                     ))}
                     {bankTransactions.length === 0 && (
                       <div className="text-center py-8 text-gray-400 border-2 border-dashed rounded-lg">
-                        No transactions extracted
+                        {lt('No transactions extracted')}
                       </div>
                     )}
                   </div>
@@ -745,17 +751,17 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
             ) : (
               <>
                 <div className="space-y-2">
-                  <Label>Vendor / Payee</Label>
+                  <Label>{lt('Vendor / Payee')}</Label>
                   <Input 
                     value={formData.vendor_name}
                     onChange={e => setFormData({...formData, vendor_name: e.target.value})}
-                    placeholder="e.g. Amazon Web Services"
+                    placeholder={lt('e.g. Amazon Web Services')}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Date</Label>
+                    <Label>{lt('Date')}</Label>
                     <Input 
                       type="date"
                       value={formData.document_date}
@@ -763,18 +769,18 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Reference #</Label>
+                    <Label>{lt('Reference #')}</Label>
                     <Input 
                       value={formData.invoice_number}
                       onChange={e => setFormData({...formData, invoice_number: e.target.value})}
-                      placeholder="INV-001"
+                      placeholder={lt('INV-001')}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="col-span-2 space-y-2">
-                    <Label>Total Amount</Label>
+                    <Label>{lt('Total Amount')}</Label>
                     <Input 
                       type="number"
                       step="0.01"
@@ -783,7 +789,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Currency</Label>
+                    <Label>{lt('Currency')}</Label>
                     <CurrencySelect 
                       value={formData.currency}
                       onChange={value => setFormData({...formData, currency: value})}
@@ -794,7 +800,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
             )}
 
             <div className="pt-4 border-t">
-              <h3 className="text-sm font-medium mb-2 text-gray-500">AI Confidence</h3>
+              <h3 className="text-sm font-medium mb-2 text-gray-500">{lt('AI Confidence')}</h3>
               <div className="flex items-center gap-2">
                 <div className="h-2 flex-1 bg-gray-100 rounded-full overflow-hidden">
                   <div 
@@ -819,12 +825,12 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
             {saving ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
+                {lt('Saving...')}
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Verify & Save
+                {lt('Verify & Save')}
               </>
             )}
           </Button>

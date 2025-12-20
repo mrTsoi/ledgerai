@@ -9,10 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Loader2, Save, Bot, AlertCircle, CheckCircle2, XCircle, Zap } from 'lucide-react'
 import { Database } from '@/types/database.types'
 import { toast } from "sonner"
+import { useLiterals } from '@/hooks/use-literals'
 
 type AIProvider = Database['public']['Tables']['ai_providers']['Row']
 
 export function AISettings() {
+  const lt = useLiterals()
   const { currentTenant } = useTenant()
   const [loading, setLoading] = useState(false)
   const [testing, setTesting] = useState(false)
@@ -210,14 +212,14 @@ export function AISettings() {
       return (
         <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 px-3 py-2 rounded-md border border-green-100">
           <Zap className="w-4 h-4" />
-          <span>Supports Vision / Image Processing</span>
+          <span>{lt('Supports Vision / Image Processing')}</span>
         </div>
       )
     } else {
       return (
         <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-md border border-amber-100">
           <AlertCircle className="w-4 h-4" />
-          <span>Text Only (No Vision Support)</span>
+          <span>{lt('Text Only (No Vision Support)')}</span>
         </div>
       )
     }
@@ -225,7 +227,7 @@ export function AISettings() {
 
   const handleTestConnection = async () => {
     if (!config.providerId || !config.apiKey) {
-      toast.error('Please select a provider and enter an API key')
+      toast.error(lt('Please select a provider and enter an API key'))
       return
     }
 
@@ -260,7 +262,7 @@ export function AISettings() {
       }
     } catch (error: any) {
       setTestStatus('error')
-      setTestMessage(error.message || 'An unexpected error occurred during testing')
+      setTestMessage(error.message || lt('An unexpected error occurred during testing'))
     } finally {
       setTesting(false)
     }
@@ -277,7 +279,7 @@ export function AISettings() {
       try {
         parsedConfig = JSON.parse(config.customConfig)
       } catch (e) {
-        toast.error('Invalid JSON in Custom Config')
+        toast.error(lt('Invalid JSON in Custom Config'))
         return
       }
 
@@ -294,12 +296,12 @@ export function AISettings() {
         }),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to save AI configuration')
+      if (!res.ok) throw new Error(json?.error || lt('Failed to save AI configuration'))
       
-      toast.success('AI Configuration saved successfully')
+      toast.success(lt('AI Configuration saved successfully'))
     } catch (error: any) {
       console.error('Error saving AI config:', error)
-      toast.error('Failed to save AI config: ' + error.message)
+      toast.error(lt('Failed to save AI config: {message}', { message: error.message }))
     } finally {
       setLoading(false)
     }
@@ -312,14 +314,14 @@ export function AISettings() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bot className="w-5 h-5" />
-          AI Configuration
+          {lt('AI Configuration')}
         </CardTitle>
-        <CardDescription>Configure the AI provider for document processing.</CardDescription>
+        <CardDescription>{lt('Configure the AI provider for document processing.')}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSave} className="space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="provider">AI Provider</Label>
+            <Label htmlFor="provider">{lt('AI Provider')}</Label>
             <select
               id="provider"
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -327,7 +329,7 @@ export function AISettings() {
               onChange={(e) => handleProviderChange(e.target.value)}
               required
             >
-              <option value="">Select a provider...</option>
+              <option value="">{lt('Select a provider...')}</option>
               {providers.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.display_name}
@@ -337,22 +339,22 @@ export function AISettings() {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="apiKey">API Key / Credentials</Label>
+            <Label htmlFor="apiKey">{lt('API Key / Credentials')}</Label>
             <Input
               id="apiKey"
               type="password"
               value={config.apiKey}
               onChange={(e) => setConfig({ ...config, apiKey: e.target.value })}
-              placeholder="sk-..."
+              placeholder={lt('sk-...')}
             />
             <p className="text-xs text-muted-foreground">
-              For Google Cloud, paste your Private Key here.
+              {lt('For Google Cloud, paste your Private Key here.')}
             </p>
           </div>
 
           <div className="grid gap-2 relative">
             <Label htmlFor="modelName">
-              Model Name
+              {lt('Model Name')}
               {isFetchingModels && <Loader2 className="w-3 h-3 inline ml-2 animate-spin" />}
             </Label>
             {availableModels.length > 0 && !isCustomModel ? (
@@ -366,7 +368,7 @@ export function AISettings() {
                   }}
                   onFocus={() => setShowModelDropdown(true)}
                   onBlur={() => setTimeout(() => setShowModelDropdown(false), 200)}
-                  placeholder="Select or type a model..."
+                  placeholder={lt('Select or type a model...')}
                   autoComplete="off"
                 />
                 {showModelDropdown && (
@@ -387,7 +389,7 @@ export function AISettings() {
                       ))}
                     {availableModels.filter(m => m.toLowerCase().includes(config.modelName.toLowerCase())).length === 0 && (
                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                         No matching models found. Custom model will be used.
+                         {lt('No matching models found. Custom model will be used.')}
                        </div>
                     )}
                     <div 
@@ -397,7 +399,7 @@ export function AISettings() {
                         setShowModelDropdown(false)
                       }}
                     >
-                      Switch to Custom Input Mode...
+                      {lt('Switch to Custom Input Mode...')}
                     </div>
                   </div>
                 )}
@@ -408,7 +410,7 @@ export function AISettings() {
                   id="modelName"
                   value={config.modelName}
                   onChange={(e) => setConfig({ ...config, modelName: e.target.value })}
-                  placeholder="e.g. gpt-4-vision-preview, qwen-vl-max"
+                  placeholder={lt('e.g. gpt-4-vision-preview, qwen-vl-max')}
                 />
                 {availableModels.length > 0 && (
                   <Button 
@@ -419,7 +421,7 @@ export function AISettings() {
                       setConfig({ ...config, modelName: availableModels[0] || '' })
                     }}
                   >
-                    Select from List
+                    {lt('Select from List')}
                   </Button>
                 )}
               </div>
@@ -427,7 +429,7 @@ export function AISettings() {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="customConfig">Custom Configuration (JSON)</Label>
+            <Label htmlFor="customConfig">{lt('Custom Configuration (JSON)')}</Label>
             <textarea
               id="customConfig"
               className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono"
@@ -436,7 +438,7 @@ export function AISettings() {
               placeholder='{ "projectId": "...", "location": "..." }'
             />
             <p className="text-xs text-muted-foreground">
-              Additional settings required by the provider (e.g. Google Cloud Project ID).
+              {lt('Additional settings required by the provider (e.g. Google Cloud Project ID).')}
             </p>
           </div>
 
@@ -460,7 +462,7 @@ export function AISettings() {
           <div className="flex gap-2">
             <Button type="submit" disabled={loading}>
               {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-              Save Configuration
+              {lt('Save Configuration')}
             </Button>
             
             <Button 
@@ -470,7 +472,7 @@ export function AISettings() {
               disabled={testing || !config.providerId}
             >
               {testing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Zap className="w-4 h-4 mr-2" />}
-              Test Connection
+              {lt('Test Connection')}
             </Button>
           </div>
         </form>

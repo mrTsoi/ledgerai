@@ -14,26 +14,28 @@ import { ExternalSourcesSettings } from '@/components/settings/external-sources-
 import { AutomatedSyncSettings } from '@/components/settings/automated-sync-settings'
 import { TenantMismatchPolicyTenantSettings } from '@/components/settings/tenant-mismatch-policy-settings'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useLiterals } from '@/hooks/use-literals'
 
 export default function SettingsPage() {
+  const lt = useLiterals()
   const searchParams = useSearchParams()
   const defaultTab = searchParams.get('tab') || 'profile'
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{lt('Settings')}</h1>
       </div>
       <Tabs defaultValue={defaultTab} className="space-y-4">
         <TabsList>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="general">Tenant</TabsTrigger>
-          <TabsTrigger value="domains">Domains</TabsTrigger>
-          <TabsTrigger value="bank-feeds">Bank Feeds</TabsTrigger>
-          <TabsTrigger value="external-sources">External Sources</TabsTrigger>
-          <TabsTrigger value="billing">Billing & Plans</TabsTrigger>
-          <TabsTrigger value="ai">AI Integration</TabsTrigger>
+          <TabsTrigger value="profile">{lt('Profile')}</TabsTrigger>
+          <TabsTrigger value="security">{lt('Security')}</TabsTrigger>
+          <TabsTrigger value="general">{lt('Tenant')}</TabsTrigger>
+          <TabsTrigger value="domains">{lt('Domains')}</TabsTrigger>
+          <TabsTrigger value="bank-feeds">{lt('Bank Feeds')}</TabsTrigger>
+          <TabsTrigger value="external-sources">{lt('External Sources')}</TabsTrigger>
+          <TabsTrigger value="billing">{lt('Billing & Plans')}</TabsTrigger>
+          <TabsTrigger value="ai">{lt('AI Integration')}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="profile" className="space-y-4">

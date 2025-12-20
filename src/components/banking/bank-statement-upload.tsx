@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Upload, Loader2, FileText } from 'lucide-react'
 import { useTenant } from '@/hooks/use-tenant'
 import { toast } from "sonner"
+import { useLiterals } from '@/hooks/use-literals'
 
 interface Props {
   accountId: string
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function BankStatementUpload({ accountId, onUploadComplete }: Props) {
+  const lt = useLiterals()
   const [uploading, setUploading] = useState(false)
   const { currentTenant } = useTenant()
   const supabase = createClient()
@@ -94,11 +96,11 @@ export function BankStatementUpload({ accountId, onUploadComplete }: Props) {
       if (stmtError) console.error('Error linking statement:', stmtError)
 
       onUploadComplete()
-      toast.success('Statement uploaded successfully')
+      toast.success(lt('Statement uploaded successfully'))
 
     } catch (error) {
       console.error('Upload error:', error)
-      toast.error('Upload failed')
+      toast.error(lt('Upload failed'))
     } finally {
       setUploading(false)
     }
@@ -117,12 +119,12 @@ export function BankStatementUpload({ accountId, onUploadComplete }: Props) {
         {uploading ? (
           <>
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Processing...
+            {lt('Processing...')}
           </>
         ) : (
           <>
             <Upload className="w-4 h-4 mr-2" />
-            Upload Statement
+            {lt('Upload Statement')}
           </>
         )}
       </Button>

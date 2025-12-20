@@ -14,6 +14,24 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+function setNested(target, pathStr, value) {
+  const parts = String(pathStr || '').split('.').filter(Boolean);
+  if (parts.length === 0) return;
+
+  let cur = target;
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i];
+    if (i === parts.length - 1) {
+      cur[p] = value;
+      return;
+    }
+    if (!cur[p] || typeof cur[p] !== 'object') {
+      cur[p] = {};
+    }
+    cur = cur[p];
+  }
+}
+
 async function syncTranslations() {
   console.log('🔄 Fetching translations from database...');
   
@@ -69,8 +87,8 @@ async function syncTranslations() {
       if (!fileContent[t.namespace]) {
         fileContent[t.namespace] = {};
       }
-      // Update the value
-      fileContent[t.namespace][t.key] = t.value;
+      // Support nested keys via dot-notation in the DB (e.g. key=tabs.overview)
+      setNested(fileContent[t.namespace], t.key, t.value);
       updateCount++;
     });
 

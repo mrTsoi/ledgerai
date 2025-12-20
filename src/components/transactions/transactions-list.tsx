@@ -19,6 +19,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { toast } from 'sonner'
+import { useLiterals } from '@/hooks/use-literals'
 
 type Transaction = Database['public']['Tables']['transactions']['Row']
 
@@ -27,6 +28,11 @@ interface Props {
 }
 
 export function TransactionsList({ status }: Props) {
+  const lt = useLiterals()
+  const ltVars = (english: string, vars?: Record<string, string | number>) => {
+    return lt(english, vars)
+  }
+
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
@@ -175,8 +181,8 @@ export function TransactionsList({ status }: Props) {
 
   const voidTransaction = async (id: string) => {
     setConfirmConfig({
-      title: 'Void Transaction',
-      description: 'Are you sure you want to void this transaction?',
+      title: lt('Void Transaction'),
+      description: lt('Are you sure you want to void this transaction?'),
       action: async () => {
         try {
           const { error } = await supabase
@@ -190,10 +196,10 @@ export function TransactionsList({ status }: Props) {
           setShowConfirmDialog(false)
         } catch (error: any) {
           console.error('Error voiding transaction:', error)
-          toast.error('Failed to void: ' + error.message)
+          toast.error(`${lt('Failed to void')}: ${error.message}`)
         }
       },
-      actionLabel: 'Void',
+      actionLabel: lt('Void'),
       variant: 'destructive'
     })
     setShowConfirmDialog(true)
@@ -201,8 +207,8 @@ export function TransactionsList({ status }: Props) {
 
   const deleteTransaction = async (id: string) => {
     setConfirmConfig({
-      title: 'Delete Transaction',
-      description: 'Are you sure you want to delete this transaction?',
+      title: lt('Delete Transaction'),
+      description: lt('Are you sure you want to delete this transaction?'),
       action: async () => {
         try {
             const { error } = await supabase
@@ -212,16 +218,16 @@ export function TransactionsList({ status }: Props) {
 
           if (error) throw error
           
-          toast.success('Transaction deleted')
+          toast.success(lt('Transaction deleted'))
           fetchTransactions()
           setAuditResults(prev => prev.filter(i => i.transactionId !== id))
           setShowConfirmDialog(false)
         } catch (error: any) {
           console.error('Error deleting transaction:', error)
-          toast.error('Failed to delete: ' + error.message)
+          toast.error(`${lt('Failed to delete')}: ${error.message}`)
         }
       },
-      actionLabel: 'Delete',
+      actionLabel: lt('Delete'),
       variant: 'destructive'
     })
     setShowConfirmDialog(true)
@@ -278,13 +284,13 @@ export function TransactionsList({ status }: Props) {
     })
     
     setSelectedIds(verifiedIds)
-    toast.success(`Selected ${verifiedIds.size} verified transactions`)
+    toast.success(ltVars('Selected {count} verified transactions', { count: verifiedIds.size }))
   }
 
   const bulkPost = async () => {
     setConfirmConfig({
-      title: 'Post Transactions',
-      description: `Post ${selectedIds.size} transactions?`,
+      title: lt('Post Transactions'),
+      description: ltVars('Post {count} transactions?', { count: selectedIds.size }),
       action: async () => {
         try {
           const ids = Array.from(selectedIds)
@@ -292,7 +298,7 @@ export function TransactionsList({ status }: Props) {
           const draftsToPost = transactions.filter(t => selectedIds.has(t.id) && t.status === 'DRAFT')
           
           if (draftsToPost.length === 0) {
-            toast.warning('No DRAFT transactions selected.')
+            toast.warning(lt('No DRAFT transactions selected.'))
             return
           }
 
@@ -312,14 +318,14 @@ export function TransactionsList({ status }: Props) {
           
           fetchTransactions()
           setSelectedIds(new Set())
-          toast.success(`Posted ${processedCount} transactions`)
+          toast.success(ltVars('Posted {count} transactions', { count: processedCount }))
           setShowConfirmDialog(false)
         } catch (error: any) {
           console.error('Bulk post error:', error)
-          toast.error('Failed to post transactions: ' + error.message)
+          toast.error(`${lt('Failed to post transactions')}: ${error.message}`)
         }
       },
-      actionLabel: 'Post',
+      actionLabel: lt('Post'),
       variant: 'default'
     })
     setShowConfirmDialog(true)
@@ -327,8 +333,8 @@ export function TransactionsList({ status }: Props) {
 
   const bulkVoid = async () => {
     setConfirmConfig({
-      title: 'Void Transactions',
-      description: `Void ${selectedIds.size} transactions?`,
+      title: lt('Void Transactions'),
+      description: ltVars('Void {count} transactions?', { count: selectedIds.size }),
       action: async () => {
         try {
           const ids = Array.from(selectedIds)
@@ -348,10 +354,10 @@ export function TransactionsList({ status }: Props) {
           setShowConfirmDialog(false)
         } catch (error: any) {
           console.error('Bulk void error:', error)
-          toast.error('Failed to void transactions: ' + error.message)
+          toast.error(`${lt('Failed to void transactions')}: ${error.message}`)
         }
       },
-      actionLabel: 'Void',
+      actionLabel: lt('Void'),
       variant: 'destructive'
     })
     setShowConfirmDialog(true)
@@ -359,8 +365,8 @@ export function TransactionsList({ status }: Props) {
 
   const bulkDeleteDrafts = async () => {
     setConfirmConfig({
-      title: 'Delete Draft Transactions',
-      description: `Delete ${selectedIds.size} draft transactions?`,
+      title: lt('Delete Draft Transactions'),
+      description: ltVars('Delete {count} draft transactions?', { count: selectedIds.size }),
       action: async () => {
         try {
           const ids = Array.from(selectedIds)
@@ -368,7 +374,7 @@ export function TransactionsList({ status }: Props) {
           const draftsToDelete = transactions.filter(t => selectedIds.has(t.id) && t.status === 'DRAFT')
           
           if (draftsToDelete.length !== ids.length) {
-            toast.warning('Only DRAFT transactions can be deleted. Others will be skipped.')
+            toast.warning(lt('Only DRAFT transactions can be deleted. Others will be skipped.'))
           }
 
           if (draftsToDelete.length === 0) return
@@ -389,10 +395,10 @@ export function TransactionsList({ status }: Props) {
           setShowConfirmDialog(false)
         } catch (error: any) {
           console.error('Bulk delete error:', error)
-          toast.error('Failed to delete transactions: ' + error.message)
+          toast.error(`${lt('Failed to delete transactions')}: ${error.message}`)
         }
       },
-      actionLabel: 'Delete',
+      actionLabel: lt('Delete'),
       variant: 'destructive'
     })
     setShowConfirmDialog(true)
@@ -430,7 +436,7 @@ export function TransactionsList({ status }: Props) {
       setShowAuditResults(true)
     } catch (e) {
       console.error(e)
-      toast.error('Audit failed')
+      toast.error(lt('Audit failed'))
     } finally {
       setIsAuditing(false)
     }
@@ -482,13 +488,13 @@ export function TransactionsList({ status }: Props) {
     )
 
     if (issuesToFix.length === 0) {
-      toast.warning('No auto-fixable issues selected (Duplicate or Wrong Tenant).')
+      toast.warning(lt('No auto-fixable issues selected (Duplicate or Wrong Tenant).'))
       return
     }
 
     setConfirmConfig({
-      title: 'Fix Selected Issues',
-      description: `Auto-fix ${issuesToFix.length} selected issues? This will Delete drafts and Void posted transactions.`,
+      title: lt('Fix Selected Issues'),
+      description: ltVars('Auto-fix {count} selected issues? This will Delete drafts and Void posted transactions.', { count: issuesToFix.length }),
       action: async () => {
         try {
           const txIdsToDelete: string[] = []
@@ -529,7 +535,7 @@ export function TransactionsList({ status }: Props) {
             }
           }
 
-          toast.success(`Fixed ${issuesToFix.length} issues`)
+          toast.success(ltVars('Fixed {count} issues', { count: issuesToFix.length }))
           
           // Refresh and update local state
           await fetchTransactions()
@@ -542,10 +548,10 @@ export function TransactionsList({ status }: Props) {
 
         } catch (error: any) {
           console.error('Bulk fix error:', error)
-          toast.error('Failed to fix issues: ' + error.message)
+          toast.error(`${lt('Failed to fix issues')}: ${error.message}`)
         }
       },
-      actionLabel: 'Fix Issues',
+      actionLabel: lt('Fix Issues'),
       variant: 'destructive'
     })
     setShowConfirmDialog(true)
@@ -613,8 +619,8 @@ export function TransactionsList({ status }: Props) {
     // Ideally, we'd know which account is the "source" (bank) and which is "destination" (expense).
     // Heuristic: If it's an expense, the category is the Debit side (usually).
     
-    let category = 'Uncategorized'
-    let type = 'Expense' // Default
+    let category = lt('Uncategorized')
+    let typeKey: 'INCOME' | 'EXPENSE' = 'EXPENSE'
     
     // Try to find a non-asset account (likely the expense/revenue category)
     const categoryItem = lineItems.find((item: any) => 
@@ -623,17 +629,17 @@ export function TransactionsList({ status }: Props) {
     )
     
     if (categoryItem) {
-      category = categoryItem.chart_of_accounts?.name || 'Unknown Account'
+      category = categoryItem.chart_of_accounts?.name || lt('Unknown Account')
       // If the category account was credited, it's likely Revenue
       if (categoryItem.credit > 0) {
-        type = 'Income'
+        typeKey = 'INCOME'
       }
     } else if (lineItems.length > 0) {
       // Fallback to first item
-      category = lineItems[0].chart_of_accounts?.name || 'Unknown'
+      category = lineItems[0].chart_of_accounts?.name || lt('Unknown')
     }
 
-    return { amount, currency, category, type }
+    return { amount, currency, category, typeKey }
   }
 
   if (loading) {
@@ -652,33 +658,33 @@ export function TransactionsList({ status }: Props) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>All Transactions</CardTitle>
+              <CardTitle>{lt('All Transactions')}</CardTitle>
               <CardDescription>
-                View and manage accounting transactions
+                {lt('View and manage accounting transactions')}
               </CardDescription>
             </div>
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={runAudit} disabled={isAuditing}>
                 {isAuditing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ShieldAlert className="w-4 h-4 mr-2" />}
-                AI Audit
+                {lt('AI Audit')}
               </Button>
               <Button size="sm" variant="outline" onClick={selectVerified}>
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Select Verified
+                {lt('Select Verified')}
               </Button>
               {selectedIds.size > 0 && (
                 <>
                   <Button size="sm" variant="default" onClick={bulkPost}>
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    Post ({selectedIds.size})
+                    {ltVars('Post ({count})', { count: selectedIds.size })}
                   </Button>
                   <Button size="sm" variant="outline" onClick={bulkVoid}>
                     <XCircle className="w-4 h-4 mr-2" />
-                    Void ({selectedIds.size})
+                    {ltVars('Void ({count})', { count: selectedIds.size })}
                   </Button>
                   <Button size="sm" variant="destructive" onClick={bulkDeleteDrafts}>
                     <Trash2 className="w-4 h-4 mr-2" />
-                    Delete Drafts
+                    {lt('Delete Drafts')}
                   </Button>
                 </>
               )}
@@ -689,7 +695,7 @@ export function TransactionsList({ status }: Props) {
           {/* Filters */}
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <Input
-              placeholder="Search transactions..."
+              placeholder={lt('Search transactions...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full md:max-w-sm"
@@ -699,10 +705,10 @@ export function TransactionsList({ status }: Props) {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="px-3 py-2 border rounded-md w-full md:w-auto"
             >
-              <option value="ALL">All Status</option>
-              <option value="DRAFT">Draft</option>
-              <option value="POSTED">Posted</option>
-              <option value="VOID">Void</option>
+              <option value="ALL">{lt('All Status')}</option>
+              <option value="DRAFT">{lt('Draft')}</option>
+              <option value="POSTED">{lt('Posted')}</option>
+              <option value="VOID">{lt('Void')}</option>
             </select>
           </div>
 
@@ -710,7 +716,7 @@ export function TransactionsList({ status }: Props) {
           {filteredTransactions.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No transactions found</p>
+              <p>{lt('No transactions found')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -719,10 +725,10 @@ export function TransactionsList({ status }: Props) {
                   checked={selectedIds.size === filteredTransactions.length && filteredTransactions.length > 0}
                   onCheckedChange={toggleAll}
                 />
-                <span className="flex-[2]">Description</span>
-                <span className="flex-1">Category</span>
-                <span className="flex-1 text-right">Amount</span>
-                <span className="w-32 text-right">Actions</span>
+                <span className="flex-[2]">{lt('Description')}</span>
+                <span className="flex-1">{lt('Category')}</span>
+                <span className="flex-1 text-right">{lt('Amount')}</span>
+                <span className="w-32 text-right">{lt('Actions')}</span>
               </div>
               {filteredTransactions.map((tx) => {
                 // Combine audit issues with document validation issues
@@ -739,18 +745,18 @@ export function TransactionsList({ status }: Props) {
                     if (flag === 'DUPLICATE_DOCUMENT') {
                       docIssues.push({
                         transactionId: tx.id,
-                        description: 'Duplicate Document',
+                        description: lt('Duplicate Document'),
                         issueType: 'DUPLICATE',
                         severity: 'HIGH',
-                        details: 'Duplicate document file detected during upload'
+                        details: lt('Duplicate document file detected during upload')
                       })
                     } else if (flag === 'WRONG_TENANT') {
                       docIssues.push({
                         transactionId: tx.id,
-                        description: 'Wrong Tenant',
+                        description: lt('Wrong Tenant'),
                         issueType: 'WRONG_TENANT',
                         severity: 'HIGH',
-                        details: 'Document does not appear to belong to this tenant'
+                        details: lt('Document does not appear to belong to this tenant')
                       })
                     }
                   })
@@ -768,7 +774,8 @@ export function TransactionsList({ status }: Props) {
                 const hasIssues = allIssues.length > 0
                 const isExpanded = expandedIds.has(tx.id)
                 
-                const { amount, currency, category, type } = getTransactionDetails(tx)
+                const { amount, currency, category, typeKey } = getTransactionDetails(tx)
+                const typeLabel = typeKey === 'INCOME' ? lt('Income') : lt('Expense')
 
                 return (
                 <div
@@ -810,7 +817,7 @@ export function TransactionsList({ status }: Props) {
                             </TooltipTrigger>
                             <TooltipContent className="max-w-xs p-3 bg-white border shadow-lg z-50">
                               <div className="space-y-2">
-                                <p className="font-semibold text-sm border-b pb-1 mb-2">Detected Issues</p>
+                                <p className="font-semibold text-sm border-b pb-1 mb-2">{lt('Detected Issues')}</p>
                                 {allIssues.map((issue, idx) => (
                                   <div key={idx} className="text-xs">
                                     <div className="flex items-center gap-2 mb-1">
@@ -835,7 +842,7 @@ export function TransactionsList({ status }: Props) {
                       {/* Description & Meta */}
                       <div className="flex-[2]">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="font-medium">{tx.description || 'No description'}</p>
+                          <p className="font-medium">{tx.description || lt('No description')}</p>
                           {getStatusBadge(tx.status ?? '')}
                           {confidence !== null && (
                             <Badge variant="outline" className={`
@@ -851,12 +858,12 @@ export function TransactionsList({ status }: Props) {
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Badge variant="outline" className={`cursor-help ${hasHighSeverity ? "text-red-600 border-red-200 bg-red-50" : "text-yellow-600 border-yellow-200 bg-yellow-50"}`}>
-                                    {allIssues.length} Issue{allIssues.length > 1 ? 's' : ''}
+                                    {ltVars('{count} Issue(s)', { count: allIssues.length })}
                                   </Badge>
                                 </TooltipTrigger>
                                 <TooltipContent className="max-w-xs p-3 bg-white border shadow-lg z-50">
                                   <div className="space-y-2">
-                                    <p className="font-semibold text-sm border-b pb-1 mb-2">Detected Issues</p>
+                                    <p className="font-semibold text-sm border-b pb-1 mb-2">{lt('Detected Issues')}</p>
                                     {allIssues.map((issue, idx) => (
                                       <div key={idx} className="text-xs">
                                         <div className="flex items-center gap-2 mb-1">
@@ -878,20 +885,20 @@ export function TransactionsList({ status }: Props) {
                         </div>
                         <p className="text-sm text-gray-500">
                           {format(new Date(tx.transaction_date), 'MMM dd, yyyy')}
-                          {tx.reference_number && ` • Ref: ${tx.reference_number}`}
+                          {tx.reference_number && ` • ${lt('Ref')}: ${tx.reference_number}`}
                         </p>
                       </div>
 
                       {/* Category */}
                       <div className="flex-1 hidden md:block">
                         <p className="text-sm font-medium">{category}</p>
-                        <p className="text-xs text-gray-500">{type}</p>
+                        <p className="text-xs text-gray-500">{typeLabel}</p>
                       </div>
 
                       {/* Amount */}
                       <div className="flex-1 text-right hidden md:block">
-                        <p className={`font-medium ${type === 'Income' ? 'text-green-600' : ''}`}>
-                          {type === 'Income' ? '+' : ''}
+                        <p className={`font-medium ${typeKey === 'INCOME' ? 'text-green-600' : ''}`}>
+                          {typeKey === 'INCOME' ? '+' : ''}
                           {new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(amount)}
                         </p>
                         <p className="text-xs text-gray-500">{currency}</p>
@@ -907,7 +914,7 @@ export function TransactionsList({ status }: Props) {
                           className="flex-1 md:flex-none"
                         >
                           <Edit className="w-4 h-4 mr-1" />
-                          {tx.status === 'DRAFT' ? 'Edit' : 'View'}
+                          {tx.status === 'DRAFT' ? lt('Edit') : lt('View')}
                         </Button>
                         {tx.status === 'POSTED' && (
                           <Button
@@ -917,7 +924,7 @@ export function TransactionsList({ status }: Props) {
                             className="flex-1 md:flex-none"
                           >
                             <XCircle className="w-4 h-4 mr-1" />
-                            Void
+                            {lt('Void')}
                           </Button>
                         )}
                       </div>
@@ -933,12 +940,12 @@ export function TransactionsList({ status }: Props) {
                             {/* Mobile View Details */}
                             <div className="md:hidden grid grid-cols-2 gap-4 mb-4">
                                 <div>
-                                    <p className="text-xs text-gray-500">Category</p>
+                                <p className="text-xs text-gray-500">{lt('Category')}</p>
                                     <p className="text-sm font-medium">{category}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-500">Amount</p>
-                                    <p className={`text-sm font-medium ${type === 'Income' ? 'text-green-600' : ''}`}>
+                                <p className="text-xs text-gray-500">{lt('Amount')}</p>
+                                <p className={`text-sm font-medium ${typeKey === 'INCOME' ? 'text-green-600' : ''}`}>
                                         {new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(amount)}
                                         <span className="ml-1 text-xs text-gray-500">{currency}</span>
                                     </p>
@@ -947,7 +954,7 @@ export function TransactionsList({ status }: Props) {
 
                             {hasIssues ? (
                                 <div className="space-y-2">
-                                    <p className="font-semibold text-sm text-gray-700">Detected Issues</p>
+                                <p className="font-semibold text-sm text-gray-700">{lt('Detected Issues')}</p>
                                     {allIssues.map((issue, idx) => (
                                         <div key={idx} className="text-sm bg-white p-3 rounded border border-gray-200">
                                             <div className="flex items-center gap-2 mb-1">
@@ -963,7 +970,7 @@ export function TransactionsList({ status }: Props) {
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-sm text-gray-500 italic">No issues detected for this transaction.</p>
+                                <p className="text-sm text-gray-500 italic">{lt('No issues detected for this transaction.')}</p>
                             )}
                         </div>
                     </div>
@@ -977,7 +984,7 @@ export function TransactionsList({ status }: Props) {
           {/* Summary */}
           <div className="mt-6 pt-6 border-t">
             <p className="text-sm text-gray-600">
-              Showing {filteredTransactions.length} of {transactions.length} transactions
+              {ltVars('Showing {shown} of {total} transactions', { shown: filteredTransactions.length, total: transactions.length })}
             </p>
           </div>
         </CardContent>
@@ -1009,22 +1016,22 @@ export function TransactionsList({ status }: Props) {
           <DialogHeader>
             <div className="flex items-center justify-between pr-8">
               <div>
-                <DialogTitle>Transaction Audit Results</DialogTitle>
+                <DialogTitle>{lt('Transaction Audit Results')}</DialogTitle>
                 <DialogDescription>
-                  AI-powered analysis found {auditResults.length} potential issues.
+                  {ltVars('AI-powered analysis found {count} potential issues.', { count: auditResults.length })}
                 </DialogDescription>
               </div>
               {selectedAuditKeys.size > 0 && (
                 <Button variant="destructive" size="sm" onClick={bulkFixAudit}>
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Fix Selected ({selectedAuditKeys.size})
+                  {ltVars('Fix Selected ({count})', { count: selectedAuditKeys.size })}
                 </Button>
               )}
             </div>
             
             <div className="mt-4 flex gap-2">
               <Input 
-                placeholder="Search issues..." 
+                placeholder={lt('Search issues...')} 
                 value={auditSearchTerm}
                 onChange={(e) => setAuditSearchTerm(e.target.value)}
                 className="flex-1"
@@ -1038,11 +1045,11 @@ export function TransactionsList({ status }: Props) {
                 {auditResults.length === 0 ? (
                   <>
                     <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-600" />
-                    <p className="font-medium text-green-600">No issues found!</p>
-                    <p className="text-sm">Your transactions look healthy.</p>
+                    <p className="font-medium text-green-600">{lt('No issues found!')}</p>
+                    <p className="text-sm">{lt('Your transactions look healthy.')}</p>
                   </>
                 ) : (
-                  <p>No issues match your search.</p>
+                  <p>{lt('No issues match your search.')}</p>
                 )}
               </div>
             ) : (
@@ -1052,7 +1059,7 @@ export function TransactionsList({ status }: Props) {
                     checked={filteredAuditResults.length > 0 && Array.from(new Set(filteredAuditResults.map(i => getAuditKey(i)))).every(k => selectedAuditKeys.has(k))}
                     onCheckedChange={toggleAllAuditSelection}
                   />
-                  <span>Select All</span>
+                  <span>{lt('Select All')}</span>
                 </div>
 
                 {filteredAuditResults.map((issue, i) => {
@@ -1079,16 +1086,16 @@ export function TransactionsList({ status }: Props) {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-medium text-sm">{issue.issueType.replace('_', ' ')}</h4>
-                          <span className="text-xs text-gray-500">• {tx.description || 'No Description'}</span>
+                          <h4 className="font-medium text-sm">{lt(issue.issueType.replaceAll('_', ' '))}</h4>
+                          <span className="text-xs text-gray-500">• {tx.description || lt('No Description')}</span>
                         </div>
                         <Badge variant={issue.severity === 'HIGH' ? 'destructive' : 'secondary'}>
-                          {issue.severity}
+                          {lt(issue.severity)}
                         </Badge>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">{issue.description}</p>
+                      <p className="text-sm text-gray-600 mb-2">{lt(issue.description)}</p>
                       <p className="text-xs text-gray-500 bg-white p-2 rounded border">
-                        {issue.details}
+                        {issue.details ? lt(issue.details) : null}
                       </p>
                       
                       <div className="flex gap-2 mt-2">
@@ -1101,7 +1108,7 @@ export function TransactionsList({ status }: Props) {
                             setEditingId(issue.transactionId)
                           }}
                         >
-                          Review
+                          {lt('Review')}
                         </Button>
                         
                         {issue.issueType === 'DUPLICATE' && (
@@ -1112,7 +1119,7 @@ export function TransactionsList({ status }: Props) {
                               onClick={() => deleteTransaction(tx.id)}
                             >
                               <Trash2 className="w-3 h-3 mr-1" />
-                              Delete Duplicate
+                              {lt('Delete Duplicate')}
                             </Button>
                           ) : (
                             <Button 
@@ -1121,7 +1128,7 @@ export function TransactionsList({ status }: Props) {
                               onClick={() => voidTransaction(tx.id)}
                             >
                               <XCircle className="w-3 h-3 mr-1" />
-                              Void Duplicate
+                              {lt('Void Duplicate')}
                             </Button>
                           )
                         )}
@@ -1134,7 +1141,7 @@ export function TransactionsList({ status }: Props) {
                               onClick={() => deleteTransaction(tx.id)}
                             >
                               <Trash2 className="w-3 h-3 mr-1" />
-                              Delete
+                              {lt('Delete')}
                             </Button>
                           ) : (
                              <Button 
@@ -1143,7 +1150,7 @@ export function TransactionsList({ status }: Props) {
                               onClick={() => voidTransaction(tx.id)}
                             >
                               <XCircle className="w-3 h-3 mr-1" />
-                              Void
+                              {lt('Void')}
                             </Button>
                           )
                         )}
@@ -1167,7 +1174,7 @@ export function TransactionsList({ status }: Props) {
           </DialogHeader>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
-              Cancel
+              {lt('Cancel')}
             </Button>
             <Button 
               variant={confirmConfig?.variant || 'default'} 

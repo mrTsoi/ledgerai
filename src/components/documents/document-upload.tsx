@@ -13,6 +13,7 @@ import { Upload, X, FileText, Loader2, CheckCircle2, AlertCircle } from 'lucide-
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
+import { useLiterals } from '@/hooks/use-literals'
 
 interface UploadFile {
   file: File
@@ -53,6 +54,10 @@ interface Props {
 }
 
 export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
+  const lt = useLiterals()
+  const ltVars = (english: string, vars?: Record<string, string | number>) => {
+    return lt(english, vars)
+  }
   const [files, setFiles] = useState<UploadFile[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [selectedBankAccountId, setSelectedBankAccountId] = useState<string>('none')
@@ -79,18 +84,18 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
     fetchBankAccounts()
   }, [fetchBankAccounts])
 
-  const validateFile = (file: File): string | null => {
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return 'File type not supported. Please upload PDF, images, or spreadsheets.'
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      return 'File size exceeds 50MB limit.'
-    }
-    return null
-  }
-
   const handleFiles = useCallback((fileList: FileList | null) => {
     if (!fileList || !currentTenant) return
+
+    const validateFile = (file: File): string | null => {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        return lt('File type not supported. Please upload PDF, images, or spreadsheets.')
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        return lt('File size exceeds 50MB limit.')
+      }
+      return null
+    }
 
     const newFiles: UploadFile[] = Array.from(fileList).map(file => ({
       file,
@@ -101,18 +106,18 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
     }))
 
     setFiles(prev => [...prev, ...newFiles])
-  }, [currentTenant])
+  }, [currentTenant, lt])
 
   const uploadFile = async (uploadFile: UploadFile) => {
     if (!currentTenant || uploadFile.error) return
 
     try {
       setFiles(prev => prev.map(f => 
-        f.id === uploadFile.id ? { ...f, status: 'uploading' as const, progress: 10, statusMessage: 'Starting upload...' } : f
+        f.id === uploadFile.id ? { ...f, status: 'uploading' as const, progress: 10, statusMessage: lt('Starting upload...') } : f
       ))
 
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      if (!user) throw new Error(lt('Not authenticated'))
 
       // Generate unique file path
       const fileExt = uploadFile.file.name.split('.').pop()
@@ -120,7 +125,7 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
       const filePath = `${currentTenant.id}/${documentId}.${fileExt}`
 
       setFiles(prev => prev.map(f => 
-        f.id === uploadFile.id ? { ...f, progress: 30, statusMessage: 'Uploading to storage...', documentId } : f
+        f.id === uploadFile.id ? { ...f, progress: 30, statusMessage: lt('Uploading to storage...'), documentId } : f
       ))
 
       // Upload to Supabase Storage
@@ -134,7 +139,7 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
       if (storageError) throw storageError
 
       setFiles(prev => prev.map(f => 
-        f.id === uploadFile.id ? { ...f, progress: 60, statusMessage: 'Saving metadata...' } : f
+        f.id === uploadFile.id ? { ...f, progress: 60, statusMessage: lt('Saving metadata...') } : f
       ))
 
       // Determine document type based on bank account selection
@@ -175,7 +180,7 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
       }
 
       setFiles(prev => prev.map(f => 
-        f.id === uploadFile.id ? { ...f, progress: 80, statusMessage: 'Triggering AI processing...' } : f
+        f.id === uploadFile.id ? { ...f, progress: 80, statusMessage: lt('Triggering AI processing...') } : f
       ))
 
       // Trigger AI processing
@@ -188,7 +193,7 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Processing failed')
+        throw new Error(result.error || lt('Processing failed'))
       }
 
       const needsReview = result.validationStatus === 'NEEDS_REVIEW'
@@ -201,19 +206,19 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
       const tenantHint =
         hasWrongTenantFlag && tenantCandidates.length > 0
           ? isMultiTenant
-            ? `Tenant mismatch: multiple companies detected (${tenantCandidates.length} matches)`
-            : `Tenant mismatch detected (${tenantCandidates.length} possible match${tenantCandidates.length === 1 ? '' : 'es'})`
+            ? ltVars('Tenant mismatch: multiple companies detected ({count} matches)', { count: tenantCandidates.length })
+            : ltVars('Tenant mismatch detected ({count} possible matches)', { count: tenantCandidates.length })
           : null
 
       const correctionHint =
         tenantCorrection?.actionTaken === 'REASSIGNED'
-          ? `Moved to ${tenantCorrection?.toTenantName || 'another company'}`
+          ? ltVars('Moved to {company}', { company: tenantCorrection?.toTenantName || lt('another company') })
           : tenantCorrection?.actionTaken === 'CREATED'
-            ? `Created ${tenantCorrection?.toTenantName || 'a new company'} and moved`
+            ? ltVars('Created {company} and moved', { company: tenantCorrection?.toTenantName || lt('a new company') })
             : tenantCorrection?.actionTaken === 'LIMIT_REACHED'
-              ? 'Tenant limit reached — upgrade to create a new company'
+              ? lt('Tenant limit reached — upgrade to create a new company')
               : tenantCorrection?.actionTaken === 'FAILED'
-                ? (tenantCorrection?.message || 'Tenant correction failed')
+                ? (tenantCorrection?.message || lt('Tenant correction failed'))
                 : null
 
       setFiles(prev => prev.map(f => 
@@ -222,8 +227,8 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
           status: needsReview ? 'needs_review' : 'success', 
           progress: 100, 
           statusMessage: needsReview
-            ? (correctionHint || tenantHint || `Needs Review: ${flags.join(', ')}`)
-            : (correctionHint || 'Complete'),
+            ? (correctionHint || tenantHint || ltVars('Needs Review: {flags}', { flags: flags.join(', ') }))
+            : (correctionHint || lt('Complete')),
           validationFlags: flags,
           tenantCandidates,
           isMultiTenant,
@@ -239,7 +244,7 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
       console.error('Upload error:', error)
       setFiles(prev => prev.map(f => 
         f.id === uploadFile.id 
-          ? { ...f, status: 'error' as const, error: error.message || 'Upload failed', progress: 0, statusMessage: 'Failed' } 
+          ? { ...f, status: 'error' as const, error: error.message || lt('Upload failed'), progress: 0, statusMessage: lt('Failed') } 
           : f
       ))
     }
@@ -282,8 +287,8 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Upload Documents</CardTitle>
-          <CardDescription>Please select a tenant first</CardDescription>
+          <CardTitle>{lt('Upload Documents')}</CardTitle>
+          <CardDescription>{lt('Please select a tenant first')}</CardDescription>
         </CardHeader>
       </Card>
     )
@@ -292,22 +297,22 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Upload Documents</CardTitle>
+        <CardTitle>{lt('Upload Documents')}</CardTitle>
         <CardDescription>
-          Upload invoices, receipts, or other financial documents for processing
+          {lt('Upload invoices, receipts, or other financial documents for processing')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Bank Account Selection */}
         {bankAccounts.length > 0 && (
           <div className="mb-4">
-            <Label className="mb-2 block">Associate with Bank Account (Optional)</Label>
+            <Label className="mb-2 block">{lt('Associate with Bank Account (Optional)')}</Label>
             <select
               className="w-full p-2 border rounded-md text-sm"
               value={selectedBankAccountId}
               onChange={(e) => setSelectedBankAccountId(e.target.value)}
             >
-              <option value="none">-- No Bank Account (General Document) --</option>
+              <option value="none">{lt('-- No Bank Account (General Document) --')}</option>
               {bankAccounts.map(acc => (
                 <option key={acc.id} value={acc.id}>
                   {acc.account_name} ({acc.bank_name})
@@ -315,7 +320,7 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
               ))}
             </select>
             <p className="text-xs text-gray-500 mt-1">
-              Select a bank account if you are uploading bank statements.
+              {lt('Select a bank account if you are uploading bank statements.')}
             </p>
           </div>
         )}
@@ -335,10 +340,10 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
         >
           <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <p className="text-lg font-medium text-gray-700 mb-2">
-            Drag and drop files here
+            {lt('Drag and drop files here')}
           </p>
           <p className="text-sm text-gray-500 mb-4">
-            or click to browse
+            {lt('or click to browse')}
           </p>
           <input
             type="file"
@@ -350,11 +355,11 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
           />
           <label htmlFor="file-upload">
             <Button type="button" variant="outline" asChild>
-              <span>Choose Files</span>
+              <span>{lt('Choose Files')}</span>
             </Button>
           </label>
           <p className="text-xs text-gray-500 mt-4">
-            Supported: PDF, Images, Excel/CSV • Max 50MB per file
+            {lt('Supported: PDF, Images, Excel/CSV • Max 50MB per file')}
           </p>
         </div>
 
@@ -362,14 +367,14 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
         {files.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium">Files ({files.length})</h3>
+              <h3 className="text-sm font-medium">{ltVars('Files ({count})', { count: files.length })}</h3>
               <Button
                 onClick={handleUploadAll}
                 disabled={!files.some(f => f.status === 'pending' && !f.error)}
                 size="sm"
               >
                 <Upload className="w-4 h-4 mr-2" />
-                Upload All
+                {lt('Upload All')}
               </Button>
             </div>
             {files.map(file => (
@@ -415,7 +420,7 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
                       className="ml-2 h-7 text-xs border-yellow-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 hover:text-yellow-800"
                       onClick={() => onVerify(file.documentId!)}
                     >
-                      Review
+                      {lt('Review')}
                     </Button>
                   )}
                 </div>

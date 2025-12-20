@@ -15,10 +15,12 @@ import { StripeSettings } from './stripe-settings'
 import { ContactSettings } from './contact-settings'
 import { toast } from "sonner"
 import { FEATURE_DEFINITIONS, isFeatureEnabled } from '@/lib/subscription/features'
+import { useLiterals } from '@/hooks/use-literals'
 
 type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
 
 export function SubscriptionManagement() {
+  const lt = useLiterals()
   const [plans, setPlans] = useState<SubscriptionPlan[]>([])
   const [loading, setLoading] = useState(true)
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null)
@@ -70,15 +72,15 @@ export function SubscriptionManagement() {
       setEditingPlan(null)
       setIsCreating(false)
       fetchPlans()
-      toast.success('Plan saved successfully')
+      toast.success(lt('Plan saved successfully'))
     } catch (error: any) {
       console.error('Error saving plan:', error)
-      toast.error('Failed to save plan: ' + error.message)
+      toast.error(lt('Failed to save plan: {message}', { message: error.message }))
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure? This might affect users on this plan.')) return
+    if (!confirm(lt('Are you sure? This might affect users on this plan.'))) return
     try {
       const { error } = await (supabase
         .from('subscription_plans') as any)
@@ -86,10 +88,10 @@ export function SubscriptionManagement() {
         .eq('id', id)
       if (error) throw error
       fetchPlans()
-      toast.success('Plan deleted successfully')
+      toast.success(lt('Plan deleted successfully'))
     } catch (error: any) {
       console.error('Error deleting plan:', error)
-      toast.error('Failed to delete plan: ' + error.message)
+      toast.error(lt('Failed to delete plan: {message}', { message: error.message }))
     }
   }
 
@@ -100,11 +102,11 @@ export function SubscriptionManagement() {
   return (
     <Tabs defaultValue="plans" className="w-full">
       <TabsList className="mb-4">
-        <TabsTrigger value="plans">Subscription Plans</TabsTrigger>
-        <TabsTrigger value="users">User Subscriptions</TabsTrigger>
-        <TabsTrigger value="promocodes">Promo Codes</TabsTrigger>
-        <TabsTrigger value="stripe">Stripe Settings</TabsTrigger>
-        <TabsTrigger value="contact">Contact Info</TabsTrigger>
+        <TabsTrigger value="plans">{lt('Subscription Plans')}</TabsTrigger>
+        <TabsTrigger value="users">{lt('User Subscriptions')}</TabsTrigger>
+        <TabsTrigger value="promocodes">{lt('Promo Codes')}</TabsTrigger>
+        <TabsTrigger value="stripe">{lt('Stripe Settings')}</TabsTrigger>
+        <TabsTrigger value="contact">{lt('Contact Info')}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="plans">
@@ -112,10 +114,10 @@ export function SubscriptionManagement() {
           <CardHeader>
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle>Subscription Plans</CardTitle>
-                <CardDescription>Manage available subscription tiers and limits</CardDescription>
+                <CardTitle>{lt('Subscription Plans')}</CardTitle>
+                <CardDescription>{lt('Manage available subscription tiers and limits')}</CardDescription>
               </div>
-              <Button onClick={() => setIsCreating(true)}><Plus className="w-4 h-4 mr-2" /> New Plan</Button>
+              <Button onClick={() => setIsCreating(true)}><Plus className="w-4 h-4 mr-2" /> {lt('New Plan')}</Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -202,6 +204,7 @@ function PlanEditor({ initialData, onSave, onCancel }: {
   onSave: (data: any) => void, 
   onCancel: () => void 
 }) {
+  const lt = useLiterals()
   const [formData, setFormData] = useState(initialData || {
     name: '',
     description: '',
@@ -301,7 +304,7 @@ function PlanEditor({ initialData, onSave, onCancel }: {
       </div>
 
       <div className="border-t pt-4 mt-2">
-        <Label className="mb-2 block font-semibold">Feature Flags</Label>
+        <Label className="mb-2 block font-semibold">{lt('Feature Flags')}</Label>
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2">
             <input 
@@ -311,7 +314,7 @@ function PlanEditor({ initialData, onSave, onCancel }: {
               onChange={e => updateFeature('ai_access', e.target.checked)}
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <Label htmlFor="feat_ai" className="font-normal">AI Document Processing</Label>
+            <Label htmlFor="feat_ai" className="font-normal">{lt('AI Document Processing')}</Label>
           </div>
           <div className="flex items-center gap-2">
             <input 
@@ -321,7 +324,7 @@ function PlanEditor({ initialData, onSave, onCancel }: {
               onChange={e => updateFeature('ai_agent', e.target.checked)}
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <Label htmlFor="feat_agent" className="font-normal">AI Agent (Voice/Text)</Label>
+            <Label htmlFor="feat_agent" className="font-normal">{lt('AI Agent (Voice/Text)')}</Label>
           </div>
           <div className="flex items-center gap-2">
             <input 
@@ -331,7 +334,7 @@ function PlanEditor({ initialData, onSave, onCancel }: {
               onChange={e => updateFeature('bank_integration', e.target.checked)}
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <Label htmlFor="feat_bank" className="font-normal">Bank Feed Integration</Label>
+            <Label htmlFor="feat_bank" className="font-normal">{lt('Bank Feed Integration')}</Label>
           </div>
           <div className="flex items-center gap-2">
             <input 
@@ -341,7 +344,7 @@ function PlanEditor({ initialData, onSave, onCancel }: {
               onChange={e => updateFeature('tax_automation', e.target.checked)}
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <Label htmlFor="feat_tax" className="font-normal">Tax Automation</Label>
+            <Label htmlFor="feat_tax" className="font-normal">{lt('Tax Automation')}</Label>
           </div>
           <div className="flex items-center gap-2">
             <input 
@@ -351,7 +354,7 @@ function PlanEditor({ initialData, onSave, onCancel }: {
               onChange={e => updateFeature('custom_domain', e.target.checked)}
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <Label htmlFor="feat_domain" className="font-normal">Custom Domain</Label>
+            <Label htmlFor="feat_domain" className="font-normal">{lt('Custom Domain')}</Label>
           </div>
           <div className="flex items-center gap-2">
             <input 
@@ -361,7 +364,7 @@ function PlanEditor({ initialData, onSave, onCancel }: {
               onChange={e => updateFeature('sso', e.target.checked)}
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <Label htmlFor="feat_sso" className="font-normal">SSO / Enterprise Security</Label>
+            <Label htmlFor="feat_sso" className="font-normal">{lt('SSO / Enterprise Security')}</Label>
           </div>
           <div className="flex items-center gap-2">
             <input 
@@ -372,8 +375,8 @@ function PlanEditor({ initialData, onSave, onCancel }: {
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
             <Label htmlFor="feat_batch" className="font-normal flex items-center gap-2">
-              Concurrent Batch Processing
-              <span className="px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">New</span>
+              {lt('Concurrent Batch Processing')}
+              <span className="px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">{lt('New')}</span>
             </Label>
           </div>
           <div className="flex items-center gap-2">

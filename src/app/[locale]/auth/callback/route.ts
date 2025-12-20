@@ -29,38 +29,66 @@ export async function GET(
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (error) throw error
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
     // If signup carried a plan selection, persist it so the dashboard can resume checkout.
-    if (planId) {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+    if (planId && user?.email) {
+      const email = user.email
+      try {
+        const token = crypto.randomBytes(24).toString('hex')
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
 
-      const email = user?.email
-      if (email) {
-        try {
-          const token = crypto.randomBytes(24).toString('hex')
-          const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+        await insertPendingSubscription({
+          tenant_id: null,
+          email,
+          plan_id: planId,
+          interval: interval || 'month',
+          stripe_price_id: null,
+          token,
+          expires_at: expiresAt,
+        })
 
-          await insertPendingSubscription({
-            tenant_id: null,
-            email,
-            plan_id: planId,
-            interval: interval || 'month',
-            stripe_price_id: null,
-            token,
-            expires_at: expiresAt,
-          })
+        // Best-effort: store selection on the user as metadata too.
+        await supabase.auth.updateUser({
+          data: {
+            selected_plan_id: planId,
+            selected_plan_interval: interval || 'month',
+          },
+        })
+      } catch {
+        // Non-fatal: OAuth should still complete.
+      }
+    }
 
-          // Best-effort: store selection on the user as metadata too.
-          await supabase.auth.updateUser({
-            data: {
-              selected_plan_id: planId,
-              selected_plan_interval: interval || 'month',
-            },
-          })
-        } catch {
-          // Non-fatal: OAuth should still complete.
+    // Auto-subscribe to Free plan if no subscription exists (e.g. Google Login without plan selection)
+    if (user && !planId) {
+      try {
+        const { data: subscriptions } = await supabase
+          .from('user_subscriptions')
+          .select('id')
+          .eq('user_id', user.id)
+
+        if (!subscriptions || subscriptions.length === 0) {
+          const { data: plans } = await supabase
+            .from('subscription_plans')
+            .select('id')
+            .ilike('name', '%Free%')
+            .limit(1)
+
+          if (plans && plans.length > 0) {
+            await supabase.from('user_subscriptions').insert({
+              user_id: user.id,
+              plan_id: plans[0].id,
+              status: 'active',
+              current_period_start: new Date().toISOString(),
+              current_period_end: new Date(new Date().setFullYear(new Date().getFullYear() + 100)).toISOString(),
+            })
+          }
         }
+      } catch (e) {
+        console.error('Auto-subscribe error:', e)
       }
     }
 

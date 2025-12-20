@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
+import { useLiterals } from '@/hooks/use-literals'
 
 interface Message {
   id: string
@@ -26,13 +27,16 @@ interface AiAgentWidgetProps {
 }
 
 export function AiAgentWidget({ tenantId, userId }: AiAgentWidgetProps) {
+  const lt = useLiterals()
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       role: 'assistant',
-      content: "Hi! I'm your LedgerAI Assistant. I can help you navigate, create records, or analyze your data. Try saying 'Show me the P&L report' or 'Create a new invoice'.",
+      content: lt(
+        "Hi! I'm your LedgerAI Assistant. I can help you navigate, create records, or analyze your data. Try saying 'Show me the P&L report' or 'Create a new invoice'."
+      ),
       timestamp: new Date()
     }
   ])
@@ -82,11 +86,11 @@ export function AiAgentWidget({ tenantId, userId }: AiAgentWidgetProps) {
       setMessages([{
         id: '1',
         role: 'assistant',
-        content: config.chatbot.welcome_message,
+        content: lt(config.chatbot.welcome_message),
         timestamp: new Date()
       }])
     }
-  }, [storageKey, config])
+  }, [storageKey, config, lt])
 
   // Save chat history to local storage
   useEffect(() => {
@@ -164,14 +168,14 @@ export function AiAgentWidget({ tenantId, userId }: AiAgentWidgetProps) {
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: data.reply || "I've processed your request.",
+        content: data.reply || lt("I've processed your request."),
         timestamp: new Date()
       }
 
       setMessages(prev => [...prev, botMessage])
     } catch (error) {
       console.error('Agent error:', error)
-      toast.error("Sorry, I'm having trouble connecting right now.")
+      toast.error(lt("Sorry, I'm having trouble connecting right now."))
       
       // Update message status to error
       setMessages(prev => prev.map(msg => 
@@ -186,13 +190,17 @@ export function AiAgentWidget({ tenantId, userId }: AiAgentWidgetProps) {
     // Execute navigation or other client-side logic
     if (action.type === 'NAVIGATE') {
       router.push(action.path)
-      toast.info(`Navigating to ${action.label || action.path}`)
+      toast.info(
+        lt('Navigating to {destination}', {
+          destination: action.label || action.path,
+        })
+      )
     }
   }
 
   const toggleListening = () => {
     if (!('webkitSpeechRecognition' in window)) {
-      toast.error('Voice input is not supported in this browser.')
+      toast.error(lt('Voice input is not supported in this browser.'))
       return
     }
 
@@ -227,7 +235,7 @@ export function AiAgentWidget({ tenantId, userId }: AiAgentWidgetProps) {
         setIsListening(false)
         recognitionRef.current = null
         if (event.error === 'not-allowed') {
-          toast.error('Microphone access denied.')
+          toast.error(lt('Microphone access denied.'))
         }
       }
 
@@ -248,12 +256,15 @@ export function AiAgentWidget({ tenantId, userId }: AiAgentWidgetProps) {
     const initialMessage: Message = {
       id: '1',
       role: 'assistant',
-      content: config?.chatbot?.welcome_message || "Hi! I'm your LedgerAI Assistant. I can help you navigate, create records, or analyze your data. Try saying 'Show me the P&L report' or 'Create a new invoice'.",
+      content: lt(
+        config?.chatbot?.welcome_message ||
+          "Hi! I'm your LedgerAI Assistant. I can help you navigate, create records, or analyze your data. Try saying 'Show me the P&L report' or 'Create a new invoice'."
+      ),
       timestamp: new Date()
     }
     setMessages([initialMessage])
     localStorage.removeItem(storageKey)
-    toast.success('Chat history cleared')
+    toast.success(lt('Chat history cleared'))
   }
 
   const positionClass = config?.chatbot?.position === 'bottom-left' ? 'left-6' : 'right-6'
@@ -310,7 +321,7 @@ export function AiAgentWidget({ tenantId, userId }: AiAgentWidgetProps) {
       <Button
         onClick={() => setIsOpen(true)}
         className={cn(
-          "fixed bottom-6 h-14 w-14 rounded-full shadow-xl bg-gradient-to-r hover:opacity-90 transition-all duration-300 z-50",
+          "fixed bottom-6 h-14 w-14 rounded-full shadow-xl bg-gradient-to-r hover:opacity-90 transition-all duration-300 z-40",
           positionClass,
           getGradient()
         )}
@@ -322,7 +333,7 @@ export function AiAgentWidget({ tenantId, userId }: AiAgentWidgetProps) {
 
   return (
     <Card className={cn(
-      "fixed bottom-6 shadow-2xl z-50 transition-all duration-300 flex flex-col border-blue-100",
+      "fixed bottom-6 shadow-2xl z-40 transition-all duration-300 flex flex-col border-blue-100",
       isMinimized ? "w-72 h-14" : "w-[380px] h-[600px]",
       positionClass
     )}>
@@ -331,10 +342,10 @@ export function AiAgentWidget({ tenantId, userId }: AiAgentWidgetProps) {
           <div className="p-1.5 bg-white/20 rounded-lg">
             <Bot className="h-4 w-4 text-white" />
           </div>
-          <CardTitle className="text-sm font-bold text-white">{config?.chatbot?.title || 'LedgerAI Copilot'}</CardTitle>
+          <CardTitle className="text-sm font-bold text-white">{lt(config?.chatbot?.title || 'LedgerAI Copilot')}</CardTitle>
         </div>
         <div className="flex items-center gap-1 text-white">
-          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-white/20 hover:text-white" onClick={handleClearChat} title="Clear Chat">
+          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-white/20 hover:text-white" onClick={handleClearChat} title={lt('Clear Chat')}>
             <Trash2 className="h-3 w-3" />
           </Button>
           <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-white/20 hover:text-white" onClick={() => setIsMinimized(!isMinimized)}>
@@ -391,7 +402,7 @@ export function AiAgentWidget({ tenantId, userId }: AiAgentWidgetProps) {
                           size="icon"
                           className="absolute -left-8 top-1/2 -translate-y-1/2 h-6 w-6 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full"
                           onClick={() => handleSendMessage(msg.content, msg.id)}
-                          title="Retry sending"
+                          title={lt('Retry sending')}
                         >
                           <RefreshCw className="h-3 w-3" />
                         </Button>
@@ -403,7 +414,7 @@ export function AiAgentWidget({ tenantId, userId }: AiAgentWidgetProps) {
                   <div className="flex justify-start">
                     <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-none px-4 py-3 shadow-sm flex items-center gap-2">
                       <Sparkles className="h-4 w-4 text-blue-500 animate-pulse" style={{ animationDuration: '3s' }} />
-                      <span className="text-xs text-gray-500">Thinking...</span>
+                      <span className="text-xs text-gray-500">{lt('Thinking...')}</span>
                     </div>
                   </div>
                 )}
@@ -431,14 +442,14 @@ export function AiAgentWidget({ tenantId, userId }: AiAgentWidgetProps) {
                 )}
                 style={isListening ? { animationDuration: getAnimationDuration() } : {}}
                 onClick={toggleListening}
-                title={isListening ? "Stop Listening" : "Voice Input"}
+                title={isListening ? lt('Stop Listening') : lt('Voice Input')}
               >
                 <Mic className={cn("h-4 w-4", isListening && "scale-110")} />
               </Button>
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Ask me anything..."
+                placeholder={lt('Ask me anything...')}
                 className="flex-1 h-9 bg-gray-50 border-gray-200 focus-visible:ring-blue-500"
                 disabled={isLoading}
               />

@@ -4,6 +4,7 @@ import * as React from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { useLiterals } from "@/hooks/use-literals"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -95,6 +96,7 @@ export function CurrencySelect({
   disabled = false
 }: CurrencySelectProps) {
   const [open, setOpen] = React.useState(false)
+  const lt = useLiterals()
   
   // console.log('DEBUG: CurrencySelect disabled:', disabled)
 
@@ -111,16 +113,16 @@ export function CurrencySelect({
         >
           {value
             ? currencies.find((currency) => currency.value === value)?.label
-            : placeholder}
+            : lt(placeholder)}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0">
         <Command>
-          <CommandInput placeholder="Search currency..." />
+          <CommandInput placeholder={lt('Search currency...')} />
           <CommandList>
-            <CommandEmpty>No currency found.</CommandEmpty>
-            <CommandGroup heading="Fiat Currencies">
+            <CommandEmpty>{lt('No currency found.')}</CommandEmpty>
+            <CommandGroup heading={lt('Fiat Currencies')}>
               {currencies
                 .filter(c => c.type === 'fiat')
                 .map((currency) => (
@@ -143,7 +145,7 @@ export function CurrencySelect({
                   </CommandItem>
                 ))}
             </CommandGroup>
-            <CommandGroup heading="Cryptocurrencies">
+            <CommandGroup heading={lt('Cryptocurrencies')}>
               {currencies
                 .filter(c => c.type === 'crypto')
                 .map((currency) => (

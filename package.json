@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
+    "prebuild": "node scripts/generate-literals-manifest.mjs",
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "next lint",
@@ -11,7 +12,9 @@
     "test": "vitest",
     "test:ci": "vitest --run",
     "test:e2e": "playwright test",
-    "i18n:sync": "node scripts/sync-translations.js"
+    "i18n:sync": "node scripts/sync-translations.js",
+    "i18n:import-literals": "node scripts/i18n-import-literals.mjs",
+    "i18n:sync-entity-translations": "node scripts/sync-entity-translations-from-literals.mjs"
   },
   "dependencies": {
     "@google-cloud/documentai": "^9.5.0",

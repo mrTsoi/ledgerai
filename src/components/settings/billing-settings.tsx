@@ -14,6 +14,7 @@ import { importInvoiceToTransactions } from '@/app/actions/billing-actions'
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { FEATURE_DEFINITIONS, isFeatureEnabled } from '@/lib/subscription/features'
+import { useLiterals } from '@/hooks/use-literals'
 
 type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
 
@@ -23,6 +24,7 @@ interface ContactConfig {
 }
 
 export function BillingSettings() {
+  const lt = useLiterals()
   const { subscription, loading: subLoading, refreshSubscription } = useSubscription()
   const [plans, setPlans] = useState<SubscriptionPlan[]>([])
   const [loadingPlans, setLoadingPlans] = useState(true)
@@ -61,17 +63,17 @@ export function BillingSettings() {
 
   const formatCycle = (cycle: 'month' | 'year' | null | undefined) => {
     if (!cycle) return ''
-    return cycle === 'year' ? 'Yearly' : 'Monthly'
+    return cycle === 'year' ? lt('Yearly') : lt('Monthly')
   }
 
   const formatStorage = (bytes: number) => {
-    if (bytes === -1) return 'Unlimited'
+    if (bytes === -1) return lt('Unlimited')
     const gb = bytes / (1024 * 1024 * 1024)
-    return `${gb} GB`
+    return lt('{gb} GB', { gb })
   }
 
   const formatPrice = (price: number | null) => {
-    if (price === 0 || price === null) return 'Free'
+    if (price === 0 || price === null) return lt('Free')
     return `$${price}`
   }
 
@@ -80,22 +82,27 @@ export function BillingSettings() {
 
     // Limits
     features.push({
-      text: plan.max_tenants === -1 ? 'Unlimited Tenants' : `${plan.max_tenants} Tenant${plan.max_tenants > 1 ? 's' : ''}`,
+      text:
+        plan.max_tenants === -1
+          ? lt('Unlimited Tenants')
+          : plan.max_tenants === 1
+            ? lt('1 Tenant')
+            : lt('{count} Tenants', { count: plan.max_tenants }),
       included: true
     })
     features.push({
-      text: plan.max_documents === -1 ? 'Unlimited Documents' : `${plan.max_documents.toLocaleString()} Documents/mo`,
+      text: plan.max_documents === -1 ? lt('Unlimited Documents') : lt('{count} Documents/mo', { count: plan.max_documents }),
       included: true
     })
     features.push({
-      text: `${formatStorage(plan.max_storage_bytes)} Storage`,
+      text: lt('{storage} Storage', { storage: formatStorage(plan.max_storage_bytes) }),
       included: true
     })
 
     const featureFlags = (plan.features as any) || {}
     for (const def of FEATURE_DEFINITIONS) {
       features.push({
-        text: def.label,
+        text: lt(def.label),
         included: isFeatureEnabled(featureFlags, def.key),
         isNew: def.isNew,
       })
@@ -163,11 +170,11 @@ export function BillingSettings() {
       if (result.error) {
         toast.error(result.error)
       } else {
-        toast.success('Invoice imported successfully as an expense!')
+        toast.success(lt('Invoice imported successfully as an expense!'))
       }
     } catch (error: any) {
       console.error('Import error:', error)
-      toast.error('Failed to import invoice: ' + error.message)
+      toast.error(lt('Failed to import invoice: {message}', { message: error.message }))
     } finally {
       setImporting(null)
     }
@@ -317,11 +324,11 @@ export function BillingSettings() {
       if (url) {
         window.location.href = url
       } else {
-        throw new Error('No checkout URL returned')
+        throw new Error(lt('No checkout URL returned'))
       }
     } catch (error: any) {
       console.error('Upgrade error:', error)
-      toast.error('Failed to start upgrade: ' + error.message)
+      toast.error(lt('Failed to start upgrade: {message}', { message: error.message }))
     } finally {
       setUpgrading(null)
     }
@@ -338,26 +345,26 @@ export function BillingSettings() {
           <DialogHeader>
             <DialogTitle>
               {purchaseModal?.kind === 'scheduled'
-                ? 'Change scheduled'
+                ? lt('Change scheduled')
                 : purchaseModal?.kind === 'updated'
-                  ? 'Subscription updated'
+                  ? lt('Subscription updated')
                   : purchaseModal?.kind === 'canceled'
-                    ? 'Checkout canceled'
-                    : 'Purchase confirmed'}
+                    ? lt('Checkout canceled')
+                    : lt('Purchase confirmed')}
             </DialogTitle>
             <DialogDescription>
               {purchaseModal?.kind === 'scheduled'
-                ? 'Your changes will take effect at the end of your current billing period.'
+                ? lt('Your changes will take effect at the end of your current billing period.')
                 : purchaseModal?.kind === 'canceled'
-                  ? 'No charges were made.'
-                  : 'Your subscription has been updated successfully.'}
+                  ? lt('No charges were made.')
+                  : lt('Your subscription has been updated successfully.')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 text-sm">
             {(purchaseModal?.previousPlanName || purchaseModal?.newPlanName) && (
               <div className="flex justify-between gap-4">
-                <span className="text-muted-foreground">Plan</span>
+                <span className="text-muted-foreground">{lt('Plan')}</span>
                 <span className="text-right font-medium">
                   {(purchaseModal?.previousPlanName || '—')}
                   {'  →  '}
@@ -368,7 +375,7 @@ export function BillingSettings() {
 
             {(purchaseModal?.previousCycle || purchaseModal?.newCycle) && (
               <div className="flex justify-between gap-4">
-                <span className="text-muted-foreground">Billing cycle</span>
+                <span className="text-muted-foreground">{lt('Billing cycle')}</span>
                 <span className="text-right font-medium">
                   {formatCycle(purchaseModal?.previousCycle || null) || '—'}
                   {'  →  '}
@@ -379,16 +386,16 @@ export function BillingSettings() {
 
             {purchaseModal?.kind === 'scheduled' && (
               <div className="flex justify-between gap-4">
-                <span className="text-muted-foreground">Effective</span>
+                <span className="text-muted-foreground">{lt('Effective')}</span>
                 <span className="text-right font-medium">
-                  {purchaseModal?.effectiveDate ? new Date(purchaseModal.effectiveDate).toLocaleDateString() : 'End of current period'}
+                  {purchaseModal?.effectiveDate ? new Date(purchaseModal.effectiveDate).toLocaleDateString() : lt('End of current period')}
                 </span>
               </div>
             )}
 
             {purchaseModal?.nextBillingDate && (
               <div className="flex justify-between gap-4">
-                <span className="text-muted-foreground">Next billing date</span>
+                <span className="text-muted-foreground">{lt('Next billing date')}</span>
                 <span className="text-right font-medium">
                   {new Date(purchaseModal.nextBillingDate).toLocaleDateString()}
                 </span>
@@ -397,7 +404,7 @@ export function BillingSettings() {
           </div>
 
           <DialogFooter>
-            <Button onClick={() => setPurchaseModalOpen(false)}>Close</Button>
+            <Button onClick={() => setPurchaseModalOpen(false)}>{lt('Close')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -405,8 +412,8 @@ export function BillingSettings() {
       {/* Current Usage */}
       <Card>
         <CardHeader>
-          <CardTitle>Current Subscription</CardTitle>
-          <CardDescription>Your plan and usage limits</CardDescription>
+          <CardTitle>{lt('Current Subscription')}</CardTitle>
+          <CardDescription>{lt('Your plan and usage limits')}</CardDescription>
         </CardHeader>
         <CardContent>
           {subscription ? (
@@ -418,31 +425,46 @@ export function BillingSettings() {
                     {subscription.status?.toString().toUpperCase()}
                   </Badge>
                 </div>
-                <p className="text-sm text-blue-700 mb-2">{subscription.status === 'active' ? 'Active' : subscription.status === 'pending' ? 'Pending Confirmation' : 'Inactive'}</p>
-                <p className="text-2xl font-bold text-blue-800">${subscription.price_monthly}/mo</p>
+                <p className="text-sm text-blue-700 mb-2">
+                  {subscription.status === 'active'
+                    ? lt('Active')
+                    : subscription.status === 'pending'
+                      ? lt('Pending Confirmation')
+                      : lt('Inactive')}
+                </p>
+                <p className="text-2xl font-bold text-blue-800">
+                  {formatPrice(subscription.price_monthly)}
+                  <span className="text-base font-semibold">{lt('/mo')}</span>
+                </p>
                 
                 {subscription.current_period_start && subscription.current_period_end && (
                   <div className="mt-4 pt-4 border-t border-blue-200 text-xs text-blue-800">
-                    <p className="font-semibold mb-1">Billing Period</p>
-                    <p>Start: {new Date(subscription.current_period_start).toLocaleDateString()}</p>
-                    <p>End: {new Date(subscription.current_period_end).toLocaleDateString()}</p>
+                    <p className="font-semibold mb-1">{lt('Billing Period')}</p>
+                    <p>{lt('Start:')} {new Date(subscription.current_period_start).toLocaleDateString()}</p>
+                    <p>{lt('End:')} {new Date(subscription.current_period_end).toLocaleDateString()}</p>
                   </div>
                 )}
 
                 {inlineChangeBanner && (
                   <div className="mt-4 pt-4 border-t border-blue-200 text-xs text-amber-800 bg-amber-50 p-2 rounded">
                     <p className="font-semibold mb-1">
-                      {inlineChangeBanner.isScheduled ? 'Change scheduled (effective at period end)' : 'Recent change'}
+                      {inlineChangeBanner.isScheduled
+                        ? lt('Change scheduled (effective at period end)')
+                        : lt('Recent change')}
                     </p>
                     <p>
-                      Plan: <strong>{inlineChangeBanner.previousPlanName || '—'}</strong> → <strong>{inlineChangeBanner.newPlanName || '—'}</strong>
+                      {lt('Plan:')} <strong>{inlineChangeBanner.previousPlanName || '—'}</strong> → <strong>{inlineChangeBanner.newPlanName || '—'}</strong>
                     </p>
                     <p>
-                      Billing cycle: <strong>{formatCycle(inlineChangeBanner.previousCycle || null) || '—'}</strong> → <strong>{formatCycle(inlineChangeBanner.newCycle || null) || '—'}</strong>
+                      {lt('Billing cycle:')} <strong>{formatCycle(inlineChangeBanner.previousCycle || null) || '—'}</strong> → <strong>{formatCycle(inlineChangeBanner.newCycle || null) || '—'}</strong>
                     </p>
                     {inlineChangeBanner.isScheduled && (
                       <p>
-                        After your current billing period ends (on {inlineChangeBanner.effectiveDate ? new Date(inlineChangeBanner.effectiveDate).toLocaleDateString() : new Date(subscription.current_period_end).toLocaleDateString()}), your changes will take effect.
+                        {lt('After your current billing period ends (on {date}), your changes will take effect.', {
+                          date: inlineChangeBanner.effectiveDate
+                            ? new Date(inlineChangeBanner.effectiveDate).toLocaleDateString()
+                            : new Date(subscription.current_period_end).toLocaleDateString(),
+                        })}
                       </p>
                     )}
                   </div>
@@ -451,25 +473,27 @@ export function BillingSettings() {
                 {(subscription.next_plan_start_date || (subscription as any)?.next_billing_interval) && (
                   (() => {
                     const nextInterval = subscription.next_billing_interval || null
-                    const nextBillingLabel = nextInterval === 'year' ? 'Yearly' : nextInterval === 'month' ? 'Monthly' : null
+                    const nextBillingLabel = nextInterval === 'year' ? lt('Yearly') : nextInterval === 'month' ? lt('Monthly') : null
                     const planChange = Boolean(subscription.next_plan_name && subscription.next_plan_name !== subscription.plan_name)
                     const cycleChange = Boolean(nextInterval && nextInterval !== currentInterval)
                     const effectiveDate = subscription.next_plan_start_date || subscription.current_period_end
                     const effectiveDateLabel = effectiveDate ? new Date(effectiveDate).toLocaleDateString() : null
 
                     const parts: string[] = []
-                    if (planChange && subscription.next_plan_name) parts.push(`switch to ${subscription.next_plan_name}`)
-                    if (cycleChange && nextBillingLabel) parts.push(`switch billing cycle to ${nextBillingLabel}`)
+                    if (planChange && subscription.next_plan_name) parts.push(lt('switch to {plan}', { plan: subscription.next_plan_name }))
+                    if (cycleChange && nextBillingLabel) parts.push(lt('switch billing cycle to {cycle}', { cycle: nextBillingLabel }))
 
                     const afterText = effectiveDateLabel
-                      ? `After your current billing period ends (on ${effectiveDateLabel}), `
-                      : 'After your current billing period ends, '
+                      ? lt('After your current billing period ends (on {date}), ', { date: effectiveDateLabel })
+                      : lt('After your current billing period ends, ')
 
-                    const willText = parts.length > 0 ? `your subscription will ${parts.join(' and ')}.` : 'your change will take effect.'
+                    const willText = parts.length > 0
+                      ? lt('your subscription will {actions}.', { actions: parts.join(lt(' and ')) })
+                      : lt('your change will take effect.')
 
                     return (
                       <div className="mt-4 pt-4 border-t border-blue-200 text-xs text-amber-800 bg-amber-50 p-2 rounded">
-                        <p className="font-semibold mb-1">Change scheduled (effective at period end)</p>
+                        <p className="font-semibold mb-1">{lt('Change scheduled (effective at period end)')}</p>
                         <p>{afterText}{willText}</p>
                       </div>
                     )
@@ -489,7 +513,7 @@ export function BillingSettings() {
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ planId: subscription.plan_id, interval: currentInterval, returnUrl: window.location.href })
                           })
-                          if (!response.ok) throw new Error('Failed to start checkout')
+                          if (!response.ok) throw new Error(lt('Failed to start checkout'))
                           const { url } = await response.json()
                           if (url) window.location.href = url
                         } catch (e) {
@@ -500,15 +524,15 @@ export function BillingSettings() {
                       }}
                       disabled={upgrading !== null}
                     >
-                      {upgrading === subscription.plan_id ? <Loader2 className="animate-spin" /> : 'Complete Purchase'}
+                      {upgrading === subscription.plan_id ? <Loader2 className="animate-spin" /> : lt('Complete Purchase')}
                     </Button>
                   )}
 
                   {invoices.length > 0 && (
                     <a href={invoices[0].invoice_pdf || '#'} target="_blank" rel="noreferrer" className="inline-block">
-                      <Button size="sm" variant="outline" title="Download latest invoice">
+                      <Button size="sm" variant="outline" title={lt('Download latest invoice')}>
                         <Download className="w-4 h-4 mr-2" />
-                        <span className="hidden sm:inline">Download Invoice</span>
+                        <span className="hidden sm:inline">{lt('Download Invoice')}</span>
                       </Button>
                     </a>
                   )}
@@ -518,9 +542,9 @@ export function BillingSettings() {
               <div className="space-y-4 col-span-2">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Companies</span>
+                    <span>{lt('Companies')}</span>
                     <span className="font-medium">
-                      {subscription.current_tenants} / {subscription.max_tenants === -1 ? 'Unlimited' : subscription.max_tenants}
+                      {subscription.current_tenants} / {subscription.max_tenants === -1 ? lt('Unlimited') : subscription.max_tenants}
                     </span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -533,9 +557,9 @@ export function BillingSettings() {
 
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Documents</span>
+                    <span>{lt('Documents')}</span>
                     <span className="font-medium">
-                      {subscription.current_documents} / {subscription.max_documents === -1 ? 'Unlimited' : subscription.max_documents.toLocaleString()}
+                      {subscription.current_documents} / {subscription.max_documents === -1 ? lt('Unlimited') : subscription.max_documents.toLocaleString()}
                     </span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -548,7 +572,7 @@ export function BillingSettings() {
 
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Storage</span>
+                    <span>{lt('Storage')}</span>
                     <span className="font-medium">
                       {(subscription.current_storage_bytes / 1024 / 1024).toFixed(1)} MB / {(subscription.max_storage_bytes / 1024 / 1024 / 1024).toFixed(1)} GB
                     </span>
@@ -565,7 +589,7 @@ export function BillingSettings() {
           ) : (
             <div className="text-center py-4 text-gray-500">
               <AlertCircle className="w-8 h-8 mx-auto mb-2" />
-              <p>No active subscription found. Please select a plan below.</p>
+              <p>{lt('No active subscription found. Please select a plan below.')}</p>
             </div>
           )}
         </CardContent>
@@ -574,8 +598,8 @@ export function BillingSettings() {
       {/* Billing History */}
       <Card>
         <CardHeader>
-          <CardTitle>Billing History</CardTitle>
-          <CardDescription>Recent invoices and payments</CardDescription>
+          <CardTitle>{lt('Billing History')}</CardTitle>
+          <CardDescription>{lt('Recent invoices and payments')}</CardDescription>
         </CardHeader>
         <CardContent>
           {invoices.length > 0 ? (
@@ -584,7 +608,7 @@ export function BillingSettings() {
                 <div key={invoice.id} className="flex items-center justify-between py-2 border-b last:border-0">
                   <div>
                     <p className="font-medium">{new Date(invoice.created_at).toLocaleDateString()}</p>
-                    <p className="text-sm font-semibold text-gray-900">{invoice.description || 'Subscription'}</p>
+                    <p className="text-sm font-semibold text-gray-900">{invoice.description || lt('Subscription')}</p>
                     {invoice.period_start && invoice.period_end && (
                       <p className="text-xs text-gray-500">
                         {new Date(invoice.period_start).toLocaleDateString()} - {new Date(invoice.period_end).toLocaleDateString()}
@@ -602,7 +626,7 @@ export function BillingSettings() {
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
-                          title="Download PDF"
+                          title={lt('Download PDF')}
                         >
                           <Download className="w-4 h-4" />
                           <span className="hidden sm:inline">PDF</span>
@@ -615,19 +639,19 @@ export function BillingSettings() {
                         className={`h-8 px-2 ${invoice.is_imported ? 'text-green-600' : 'text-gray-600'}`}
                         onClick={() => handleImport(invoice.id)}
                         disabled={importing === invoice.id}
-                        title={invoice.is_imported ? "Already imported (Click to re-import)" : "Import to Expenses"}
+                        title={invoice.is_imported ? lt('Already imported (Click to re-import)') : lt('Import to Expenses')}
                       >
                         {importing === invoice.id ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : invoice.is_imported ? (
                            <div className="flex items-center gap-1">
                             <Check className="w-4 h-4" />
-                            <span className="hidden sm:inline">Imported</span>
+                            <span className="hidden sm:inline">{lt('Imported')}</span>
                           </div>
                         ) : (
                           <div className="flex items-center gap-1">
                             <FileInput className="w-4 h-4" />
-                            <span className="hidden sm:inline">Import</span>
+                            <span className="hidden sm:inline">{lt('Import')}</span>
                           </div>
                         )}
                       </Button>
@@ -638,8 +662,8 @@ export function BillingSettings() {
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500 border-2 border-dashed rounded-lg">
-              <p>No billing history available yet.</p>
-              <p className="text-sm mt-1">Invoices will appear here after your first payment.</p>
+              <p>{lt('No billing history available yet.')}</p>
+              <p className="text-sm mt-1">{lt('Invoices will appear here after your first payment.')}</p>
             </div>
           )}
         </CardContent>
@@ -648,15 +672,17 @@ export function BillingSettings() {
       {/* Available Plans */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Available Plans</h2>
+          <h2 className="text-xl font-bold">{lt('Available Plans')}</h2>
           <div className="flex items-center space-x-2">
-            <Label htmlFor="billing-cycle" className={billingCycle === 'month' ? 'font-bold' : ''}>Monthly</Label>
+            <Label htmlFor="billing-cycle" className={billingCycle === 'month' ? 'font-bold' : ''}>{lt('Monthly')}</Label>
             <Switch
               id="billing-cycle"
               checked={billingCycle === 'year'}
               onCheckedChange={(checked) => setBillingCycle(checked ? 'year' : 'month')}
             />
-            <Label htmlFor="billing-cycle" className={billingCycle === 'year' ? 'font-bold' : ''}>Yearly <span className="text-green-600 text-xs">(Save ~20%)</span></Label>
+            <Label htmlFor="billing-cycle" className={billingCycle === 'year' ? 'font-bold' : ''}>
+              {lt('Yearly')} <span className="text-green-600 text-xs">{lt('(Save ~20%)')}</span>
+            </Label>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -678,16 +704,16 @@ export function BillingSettings() {
             const isDowngrade = (plan.price_monthly || 0) < currentPrice
             const isEnterprise = plan.name.toLowerCase().includes('enterprise')
             
-            let buttonText = 'Switch Plan'
+            let buttonText = lt('Switch Plan')
             if (isCurrent) {
-              buttonText = 'Current Plan'
+              buttonText = lt('Current Plan')
             } else if (isSamePlan) {
-              if (billingCycle === 'year' && currentInterval === 'month') buttonText = 'Upgrade to Yearly'
-              else if (billingCycle === 'month' && currentInterval === 'year') buttonText = 'Switch to Monthly'
+              if (billingCycle === 'year' && currentInterval === 'month') buttonText = lt('Upgrade to Yearly')
+              else if (billingCycle === 'month' && currentInterval === 'year') buttonText = lt('Switch to Monthly')
             } else if (isUpgrade) {
-              buttonText = 'Upgrade'
+              buttonText = lt('Upgrade')
             } else if (isDowngrade) {
-              buttonText = 'Downgrade'
+              buttonText = lt('Downgrade')
             }
 
             // Calculate estimated proration if upgrading
@@ -723,19 +749,21 @@ export function BillingSettings() {
                 <CardContent className="flex-1">
                   <div className="mb-4">
                     {isEnterprise ? (
-                      <span className="text-3xl font-bold">Contact Sales</span>
+                      <span className="text-3xl font-bold">{lt('Contact Sales')}</span>
                     ) : (
                       <>
                         <span className="text-3xl font-bold">{formatPrice(displayPrice)}</span>
-                        {displayPrice > 0 && <span className="text-gray-500">/{billingCycle}</span>}
+                        {displayPrice > 0 && (
+                          <span className="text-gray-500">/{billingCycle === 'year' ? lt('year') : lt('month')}</span>
+                        )}
                         {billingCycle === 'year' && displayPrice > 0 && (
                           <div className="text-sm text-gray-500 mt-1">
-                            (${price.toFixed(2)}/mo billed yearly)
+                            {lt('(${price}/mo billed yearly)', { price: price.toFixed(2) })}
                           </div>
                         )}
                         {estimatedProration !== null && (
                           <div className="mt-2 text-xs bg-green-50 text-green-700 p-2 rounded border border-green-100">
-                            <strong>Upgrade Offer:</strong> Pay only ~${estimatedProration.toFixed(2)} today (prorated)
+                            <strong>{lt('Upgrade Offer:')}</strong> {lt('Pay only ~${amount} today (prorated)', { amount: estimatedProration.toFixed(2) })}
                           </div>
                         )}
                       </>
@@ -752,7 +780,7 @@ export function BillingSettings() {
                         <span className={feature.included ? 'text-gray-900' : 'text-gray-400'}>
                           {feature.text}
                           {(feature as any).isNew && feature.included && (
-                            <span className="ml-2 px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">New</span>
+                            <span className="ml-2 px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">{lt('New')}</span>
                           )}
                         </span>
                       </li>
@@ -763,13 +791,13 @@ export function BillingSettings() {
                   {isEnterprise ? (
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button className="w-full" variant="outline">Contact Sales</Button>
+                        <Button className="w-full" variant="outline">{lt('Contact Sales')}</Button>
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Contact Enterprise Sales</DialogTitle>
+                          <DialogTitle>{lt('Contact Enterprise Sales')}</DialogTitle>
                           <DialogDescription>
-                            Get in touch with our team to discuss a custom plan for your organization.
+                            {lt('Get in touch with our team to discuss a custom plan for your organization.')}
                           </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
@@ -784,8 +812,8 @@ export function BillingSettings() {
                                 <Phone className="w-5 h-5 text-green-600" />
                               </div>
                               <div>
-                                <div className="font-semibold">WhatsApp</div>
-                                <div className="text-sm text-gray-500">Chat with us instantly</div>
+                                <div className="font-semibold">{lt('WhatsApp')}</div>
+                                <div className="text-sm text-gray-500">{lt('Chat with us instantly')}</div>
                               </div>
                             </a>
                           )}
@@ -799,7 +827,7 @@ export function BillingSettings() {
                                 <Mail className="w-5 h-5 text-blue-600" />
                               </div>
                               <div>
-                                <div className="font-semibold">Email</div>
+                                <div className="font-semibold">{lt('Email')}</div>
                                 <div className="text-sm text-gray-500">{contactConfig.email}</div>
                               </div>
                             </a>

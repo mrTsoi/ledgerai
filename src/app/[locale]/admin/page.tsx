@@ -10,7 +10,6 @@ import { AIProviderManagement } from '@/components/admin/ai-provider-management'
 import { PlatformCustomizer } from '@/components/admin/platform-customizer'
 import { ProcessingSettings } from '@/components/admin/processing-settings'
 import { PendingSubscriptionsAdmin } from '@/components/admin/pending-subscriptions'
-          <TabsTrigger value="pending">Pending Subscriptions</TabsTrigger>
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
@@ -46,6 +45,7 @@ export default function AdminPage() {
           <TabsTrigger value="tenants">{t('tabs.tenants')}</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+          <TabsTrigger value="pending">Pending Subscriptions</TabsTrigger>
           <TabsTrigger value="audit">{t('tabs.audit')}</TabsTrigger>
           <TabsTrigger value="languages">{t('tabs.languages')}</TabsTrigger>
           <TabsTrigger value="translations">Translations</TabsTrigger>
