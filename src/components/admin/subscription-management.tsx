@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Loader2, Plus, Edit, Trash2, Check, X } from 'lucide-react'
+import { Loader2, Plus, Edit, Trash2, Check, X, Wand2 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PromoCodeManagement } from './promo-code-management'
 import { UserSubscriptionList } from './user-subscription-list'
@@ -16,6 +16,7 @@ import { ContactSettings } from './contact-settings'
 import { toast } from "sonner"
 import { FEATURE_DEFINITIONS, isFeatureEnabled } from '@/lib/subscription/features'
 import { useLiterals } from '@/hooks/use-literals'
+import { literalKeyFromText } from '@/lib/i18n/literal-key'
 
 type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
 
@@ -25,7 +26,128 @@ export function SubscriptionManagement() {
   const [loading, setLoading] = useState(true)
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null)
   const [isCreating, setIsCreating] = useState(false)
+  const [aiBusyPlanIds, setAiBusyPlanIds] = useState<Record<string, boolean>>({})
   const supabase = useMemo(() => createClient(), [])
+
+  const normalizeText = (v: unknown) => String(v ?? '').replace(/\s+/g, ' ').trim()
+
+  const aiTranslatePlan = useCallback(
+    async (plan: SubscriptionPlan) => {
+      const planId = String(plan?.id ?? '')
+      if (!planId) return
+
+      const rawName = normalizeText(plan?.name)
+      const rawDesc = normalizeText(plan?.description)
+      const texts = [rawName, rawDesc].filter(Boolean)
+      if (texts.length === 0) {
+        toast.error(lt('This plan has no name/description to translate.'))
+        return
+      }
+
+      setAiBusyPlanIds((prev) => ({ ...prev, [planId]: true }))
+
+      try {
+        const items = texts.map((text) => ({
+          namespace: 'literals',
+          key: literalKeyFromText(text),
+          sourceValue: text,
+        }))
+
+        const keys = Array.from(new Set(items.map((it) => it.key)))
+        const targetLocales: Array<'zh-CN' | 'zh-HK'> = ['zh-CN', 'zh-HK']
+
+        // Only translate missing rows (avoid clobbering manual translations)
+        const { data: existing, error: existingError } = await (supabase
+          .from('app_translations') as any)
+          .select('locale,key,value')
+          .eq('namespace', 'literals')
+          .in('locale', targetLocales)
+          .in('key', keys)
+
+        if (existingError) throw existingError
+
+        const existingMap = new Map<string, string>()
+        for (const row of (existing || []) as Array<{ locale: string; key: string; value: string }>) {
+          const k = `${row.locale}::${row.key}`
+          existingMap.set(k, String(row.value ?? '').trim())
+        }
+
+        const missingByLocale: Record<string, typeof items> = {}
+        for (const loc of targetLocales) {
+          missingByLocale[loc] = items.filter((it) => {
+            const v = existingMap.get(`${loc}::${it.key}`)
+            return !v
+          })
+        }
+
+        const totalMissing = targetLocales.reduce((acc, loc) => acc + (missingByLocale[loc]?.length || 0), 0)
+        if (totalMissing === 0) {
+          toast.message(lt('Plan already has translations for zh-CN and zh-HK.'))
+          return
+        }
+
+        // Ensure English base rows exist (helps future lookups and AI fallback)
+        const enRows = items.map((it) => ({
+          locale: 'en',
+          namespace: 'literals',
+          key: it.key,
+          value: it.sourceValue,
+        }))
+        await (supabase.from('app_translations') as any).upsert(enRows, { onConflict: 'locale,namespace,key' })
+
+        let upserted = 0
+        for (const targetLocale of targetLocales) {
+          const missingItems = missingByLocale[targetLocale]
+          if (!missingItems || missingItems.length === 0) continue
+
+          const res = await fetch('/api/admin/translations/ai-batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sourceLocale: 'en',
+              targetLocale,
+              items: missingItems.map((it) => ({ namespace: it.namespace, key: it.key, sourceValue: it.sourceValue })),
+            }),
+          })
+
+          const json = await res.json().catch(() => ({}))
+          if (!res.ok) throw new Error(json?.error || lt('AI translation failed'))
+
+          const results = (json?.results || {}) as Record<string, string>
+          const rows = missingItems
+            .map((it) => {
+              const id = `${it.namespace}::${it.key}`
+              const translated = normalizeText(results[id])
+              return translated
+                ? {
+                    locale: targetLocale,
+                    namespace: 'literals',
+                    key: it.key,
+                    value: translated,
+                  }
+                : null
+            })
+            .filter(Boolean)
+
+          if (rows.length > 0) {
+            const { error: upsertError } = await (supabase.from('app_translations') as any).upsert(rows, {
+              onConflict: 'locale,namespace,key',
+            })
+            if (upsertError) throw upsertError
+            upserted += rows.length
+          }
+        }
+
+        toast.success(lt('Saved {count} AI translations. Refresh to see updates.', { count: upserted }))
+      } catch (e: any) {
+        console.error('AI translate plan failed', e)
+        toast.error(lt('Failed to AI translate plan: {message}', { message: e?.message || 'Unknown error' }))
+      } finally {
+        setAiBusyPlanIds((prev) => ({ ...prev, [planId]: false }))
+      }
+    },
+    [supabase, lt]
+  )
 
   const fetchPlans = useCallback(async () => {
     try {
@@ -141,16 +263,37 @@ export function SubscriptionManagement() {
                     <div className="flex justify-between items-start">
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-lg">{plan.name}</h3>
-                          {!plan.is_active && <span className="text-xs bg-gray-200 px-2 py-1 rounded">Inactive</span>}
+                          <h3 className="font-bold text-lg">{plan.name ? lt(String(plan.name)) : ''}</h3>
+                          {!plan.is_active && (
+                            <span className="text-xs bg-gray-200 px-2 py-1 rounded">{lt('Inactive')}</span>
+                          )}
                         </div>
-                        <p className="text-sm text-gray-500 mb-2">{plan.description}</p>
+                        <p className="text-sm text-gray-500 mb-2">{plan.description ? lt(String(plan.description)) : ''}</p>
                         <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
-                          <span>Max Tenants: <strong>{plan.max_tenants === -1 ? 'Unlimited' : plan.max_tenants}</strong></span>
-                          <span>Max Docs: <strong>{plan.max_documents === -1 ? 'Unlimited' : plan.max_documents}</strong></span>
-                          <span>Storage: <strong>{plan.max_storage_bytes === -1 ? 'Unlimited' : (plan.max_storage_bytes / 1024 / 1024 / 1024).toFixed(1) + ' GB'}</strong></span>
-                          <span>Price: <strong>${plan.price_monthly}/mo</strong></span>
-                          <span>Yearly Discount: <strong>{plan.yearly_discount_percent || 0}%</strong></span>
+                          <span>
+                            {lt('Max Tenants:')}{' '}
+                            <strong>{plan.max_tenants === -1 ? lt('Unlimited') : plan.max_tenants}</strong>
+                          </span>
+                          <span>
+                            {lt('Max Docs:')}{' '}
+                            <strong>{plan.max_documents === -1 ? lt('Unlimited') : plan.max_documents}</strong>
+                          </span>
+                          <span>
+                            {lt('Storage:')}{' '}
+                            <strong>
+                              {plan.max_storage_bytes === -1
+                                ? lt('Unlimited')
+                                : (plan.max_storage_bytes / 1024 / 1024 / 1024).toFixed(1) + ' GB'}
+                            </strong>
+                          </span>
+                          <span>
+                            {lt('Price:')}{' '}
+                            <strong>${plan.price_monthly}{lt('/mo')}</strong>
+                          </span>
+                          <span>
+                            {lt('Yearly Discount:')}{' '}
+                            <strong>{plan.yearly_discount_percent || 0}%</strong>
+                          </span>
                         </div>
                         <div className="mt-2 flex gap-2 text-xs text-gray-500 flex-wrap">
                           {FEATURE_DEFINITIONS.filter((def) => isFeatureEnabled(plan.features, def.key)).map((def) => (
@@ -158,12 +301,25 @@ export function SubscriptionManagement() {
                               key={def.key}
                               className="bg-gray-50 text-gray-700 px-2 py-0.5 rounded border border-gray-100"
                             >
-                              {def.label}
+                              {lt(def.label)}
                             </span>
                           ))}
                         </div>
                       </div>
                       <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => aiTranslatePlan(plan)}
+                          disabled={Boolean(aiBusyPlanIds[String(plan.id)])}
+                          title={lt('AI translate plan name/description (missing only)')}
+                        >
+                          {aiBusyPlanIds[String(plan.id)] ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Wand2 className="w-4 h-4" />
+                          )}
+                        </Button>
                         <Button variant="outline" size="sm" onClick={() => setEditingPlan(plan)}>
                           <Edit className="w-4 h-4" />
                         </Button>

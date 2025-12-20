@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowRight, CheckCircle2, BarChart3, Shield, Globe2, Zap } from 'lucide-react'
 import { PricingSection } from '@/components/landing/pricing-section'
 import { DashboardPreview } from '@/components/landing/dashboard-preview'
+import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { literalKeyFromText } from '@/lib/i18n/literal-key'
 
@@ -62,6 +63,7 @@ export default async function Home() {
             <a href="#about" className="text-sm font-medium text-gray-600 hover:text-gray-900">{lt('About')}</a>
           </nav>
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             <Link href="/login">
               <Button variant="ghost">{lt('Log in')}</Button>
             </Link>

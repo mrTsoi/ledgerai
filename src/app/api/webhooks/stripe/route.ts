@@ -44,7 +44,9 @@ export async function POST(req: Request) {
       config.webhook_secret
     )
   } catch (error: any) {
-    console.error(`Webhook signature verification failed: ${error.message}`)
+    // Invalid signatures are a normal/expected outcome for bad or replayed requests.
+    // Log to stdout (not stderr) to keep CI/test output clean while still leaving a breadcrumb.
+    console.info(`Webhook signature verification failed: ${error.message}`)
     return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 })
   }
 

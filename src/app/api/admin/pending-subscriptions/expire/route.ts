@@ -1,9 +1,20 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { Database } from '@/types/database.types'
+import { createClient } from '@/lib/supabase/server'
 
 // POST: { id: string } or { ids: string[] }
 export async function POST(req: Request) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { data: isSuperAdmin, error } = await (supabase as any).rpc('is_super_admin')
+  if (error || isSuperAdmin !== true) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const body = await req.json()
   const ids: string[] = body.ids || (body.id ? [body.id] : [])
   if (!ids.length) {

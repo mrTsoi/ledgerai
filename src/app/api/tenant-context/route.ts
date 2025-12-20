@@ -27,7 +27,9 @@ export async function GET(req: Request) {
   }
 
   const activeMemberships = (membershipData || []).filter((m: any) => m?.is_active !== false)
-  const isSuperAdmin = activeMemberships.some((m: any) => m?.role === 'SUPER_ADMIN')
+
+  const { data: isSuperAdminRaw } = await (supabase as any).rpc('is_super_admin')
+  const isSuperAdmin = isSuperAdminRaw === true
 
   let tenants: any[] = []
   if (isSuperAdmin) {

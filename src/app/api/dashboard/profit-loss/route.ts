@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
-import { rpc } from '@/lib/supabase/typed'
+import { createClient } from '@/lib/supabase/server'
+
+export const runtime = 'nodejs'
 
 export async function GET(req: Request) {
   try {
@@ -12,7 +14,25 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 })
     }
 
-    const { data, error } = await rpc('get_profit_loss', {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    // Ensure the caller is a member of the tenant they are requesting.
+    const { data: membership, error: membershipError } = await (supabase.from('memberships') as any)
+      .select('id, role')
+      .eq('tenant_id', p_tenant_id)
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .maybeSingle()
+
+    if (membershipError) return NextResponse.json({ error: membershipError.message }, { status: 400 })
+    if (!membership) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+    const { data, error } = await (supabase as any).rpc('get_profit_loss', {
       p_tenant_id,
       p_start_date,
       p_end_date,

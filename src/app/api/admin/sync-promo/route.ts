@@ -10,14 +10,8 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
-    const { data: membership } = await supabase
-      .from('memberships')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('role', 'SUPER_ADMIN')
-      .single()
-
-    if (!membership) return new NextResponse('Forbidden', { status: 403 })
+    const { data: isSuperAdmin, error } = await (supabase as any).rpc('is_super_admin')
+    if (error || isSuperAdmin !== true) return new NextResponse('Forbidden', { status: 403 })
 
     const stripe = await getStripe()
 

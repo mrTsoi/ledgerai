@@ -12,8 +12,12 @@
     "test": "vitest",
     "test:ci": "vitest --run",
     "test:e2e": "playwright test",
+    "pentest:inventory": "node scripts/pentest/inventory.mjs",
+    "pentest:checklist": "node scripts/pentest/generate-checklist.mjs",
+    "pentest:probe": "node scripts/pentest/probe.mjs",
     "i18n:sync": "node scripts/sync-translations.js",
     "i18n:import-literals": "node scripts/i18n-import-literals.mjs",
+    "i18n:import-subscription-plans": "node scripts/i18n-import-subscription-plans.mjs",
     "i18n:sync-entity-translations": "node scripts/sync-entity-translations-from-literals.mjs"
   },
   "dependencies": {

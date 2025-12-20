@@ -148,6 +148,9 @@ export function PricingSection() {
             const isPopular = plan.name === 'Agency Pro' // Hardcoded for visual pop, or could be a DB flag
             const isEnterprise = plan.name.toLowerCase().includes('enterprise')
 
+            const displayName = plan.name ? lt(String(plan.name)) : ''
+            const displayDescription = plan.description ? lt(String(plan.description)) : ''
+
             return (
               <Card 
                 key={plan.id} 
@@ -159,8 +162,8 @@ export function PricingSection() {
                   </div>
                 )}
                 <CardHeader>
-                  <CardTitle className="text-xl">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
+                  <CardTitle className="text-xl">{displayName}</CardTitle>
+                  <CardDescription>{displayDescription}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow">
                   <div className="mb-6">

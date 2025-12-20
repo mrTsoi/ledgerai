@@ -42,16 +42,17 @@ async function walk(dir, out) {
 }
 
 function parseArgs(argv) {
-  const args = { limit: 5000, dryRun: false }
+  const args = { limit: 5000, dryRun: false, namespace: 'literals' }
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]
     if (a === '--dry-run') args.dryRun = true
     if (a === '--limit') args.limit = Math.max(50, Math.min(20000, Number(argv[i + 1] ?? 5000)))
+    if (a === '--namespace') args.namespace = String(argv[i + 1] ?? 'literals')
   }
   return args
 }
 
-async function scanCodebase({ limit }) {
+async function scanCodebase({ limit, namespace }) {
   const root = path.join(process.cwd(), 'src')
   const files = []
   await walk(root, files)
@@ -80,7 +81,7 @@ async function scanCodebase({ limit }) {
       if (seen.has(sig)) return
       seen.add(sig)
       const line = typeof lineOverride === 'number' && Number.isFinite(lineOverride) ? lineOverride : 1
-      found.push({ text: normalized, key, namespace: 'literals', file: rel, line, kind })
+      found.push({ text: normalized, key, namespace, file: rel, line, kind })
     }
 
     // Multiline-safe scans for lt('...') and ltVars('...', ...)
@@ -173,7 +174,7 @@ async function upsertEnglishBase(supabase, found) {
 }
 
 async function main() {
-  const { limit, dryRun } = parseArgs(process.argv.slice(2))
+  const { limit, dryRun, namespace } = parseArgs(process.argv.slice(2))
 
   const url = process.env.SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -182,7 +183,7 @@ async function main() {
     process.exit(1)
   }
 
-  const { filesScanned, found } = await scanCodebase({ limit })
+  const { filesScanned, found } = await scanCodebase({ limit, namespace })
   console.log(`Scanned ${filesScanned} files; found ${found.length} candidate strings.`)
 
   if (dryRun) {
@@ -197,7 +198,7 @@ async function main() {
 
   const supabase = createClient(url, key, { auth: { persistSession: false } })
   await upsertEnglishBase(supabase, found)
-  console.log(`Upserted ${found.length} English base strings into app_translations (namespace=literals).`)
+  console.log(`Upserted ${found.length} English base strings into app_translations (namespace=${namespace}).`)
 }
 
 main().catch((e) => {

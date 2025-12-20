@@ -168,7 +168,7 @@ export default function DashboardPage() {
         const { data: { user } } = await supabase.auth.getUser()
         const email = user?.email
         if (!email) return
-        const res = await fetch(`/api/subscriptions/pending/lookup?email=${encodeURIComponent(email)}`)
+        const res = await fetch(`/api/subscriptions/pending/lookup`)
         if (!res.ok) return
         const json = await res.json()
         if (json && json.pending) {
