@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { validateUploadBytes } from '@/lib/uploads/validate-upload'
+import { MAX_UPLOAD_BYTES, validateUploadBytes } from '@/lib/uploads/validate-upload'
 
 export const runtime = 'nodejs'
 
@@ -39,6 +39,13 @@ export async function POST(req: NextRequest) {
   const file = form.get('file')
   if (!(file instanceof File)) {
     return NextResponse.json({ error: 'file is required' }, { status: 400 })
+  }
+
+  if (!file.size) {
+    return NextResponse.json({ error: 'Empty file' }, { status: 400 })
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return NextResponse.json({ error: 'File too large' }, { status: 400 })
   }
 
   // Verify user can upload into this tenant
