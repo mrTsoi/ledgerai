@@ -6,14 +6,26 @@ export const runtime = 'nodejs'
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url)
-    const email = url.searchParams.get('email')
-    if (!email) return NextResponse.json({ error: 'email required' }, { status: 400 })
-
     const supabase = await createClient()
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const userEmail = user.email
+    if (!userEmail) return NextResponse.json({ error: 'User email missing' }, { status: 400 })
+
+    // If a client supplies an email param, it must match the authenticated user.
+    const emailParam = url.searchParams.get('email')
+    if (emailParam && emailParam.toLowerCase() !== userEmail.toLowerCase()) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
     const { data, error } = await supabase
       .from('pending_subscriptions')
       .select('*')
-      .eq('email', email)
+      .eq('email', userEmail)
+      .is('consumed_at', null)
       .order('created_at', { ascending: false })
       .limit(1)
 

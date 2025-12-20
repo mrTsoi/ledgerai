@@ -48,14 +48,8 @@ export async function POST(req: NextRequest) {
 
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
-  const { data: membership } = await supabase
-    .from('memberships')
-    .select('role')
-    .eq('user_id', user.id)
-    .eq('role', 'SUPER_ADMIN')
-    .maybeSingle()
-
-  if (!membership) return new NextResponse('Forbidden', { status: 403 })
+  const { data: isSuperAdmin, error: superAdminError } = await (supabase as any).rpc('is_super_admin')
+  if (superAdminError || isSuperAdmin !== true) return new NextResponse('Forbidden', { status: 403 })
 
   let body: Body
   try {

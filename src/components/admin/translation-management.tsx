@@ -41,13 +41,6 @@ interface Language {
   flag_emoji: string
 }
 
-type MissingItem = {
-  namespace: string
-  key: string
-  sourceValue: string
-  currentValue?: string
-}
-
 const NAMESPACES = [
   'all',
   'common',
@@ -60,7 +53,7 @@ const NAMESPACES = [
   'admin',
   'errors',
   'banking',
-  'literals'
+  'literals',
 ]
 
 export function TranslationManagement() {
@@ -116,39 +109,46 @@ export function TranslationManagement() {
     })
   }, [literalsReviewItems, literalsReviewOnlyMissing, literalsReviewDrafts, literalsReviewQuery])
 
+  const literalsReviewStats = useMemo(() => {
+    const rows = literalsReviewDisplayed
+    let missingZhCN = 0
+    let missingZhHK = 0
+    for (const it of rows) {
+      const zhCNKey = `${it.key}::zh-CN`
+      const zhHKKey = `${it.key}::zh-HK`
+      const zhCN = (literalsReviewDrafts[zhCNKey] ?? it.zhCN).trim()
+      const zhHK = (literalsReviewDrafts[zhHKKey] ?? it.zhHK).trim()
+      if (!zhCN) missingZhCN += 1
+      if (!zhHK) missingZhHK += 1
+    }
+    const missingAny = rows.reduce((acc, it) => {
+      const zhCNKey = `${it.key}::zh-CN`
+      const zhHKKey = `${it.key}::zh-HK`
+      const zhCN = (literalsReviewDrafts[zhCNKey] ?? it.zhCN).trim()
+      const zhHK = (literalsReviewDrafts[zhHKKey] ?? it.zhHK).trim()
+      return acc + (!zhCN || !zhHK ? 1 : 0)
+    }, 0)
+    return {
+      displayed: rows.length,
+      loaded: literalsReviewItems.length,
+      missingAny,
+      missingZhCN,
+      missingZhHK,
+    }
+  }, [literalsReviewDisplayed, literalsReviewDrafts, literalsReviewItems.length])
+
   // AI batching (items per provider request)
   const [batchSize, setBatchSize] = useState<number>(20)
 
   // Paging
   const TRANSLATIONS_PAGE_SIZE = 100
-  const MISSING_PAGE_SIZE = 50
   const [translationsOffset, setTranslationsOffset] = useState(0)
   const [translationsHasMore, setTranslationsHasMore] = useState(false)
   const [translationsLoadingMore, setTranslationsLoadingMore] = useState(false)
-  const [missingOffset, setMissingOffset] = useState(0)
-  const [missingHasMore, setMissingHasMore] = useState(false)
-  const [missingLoadingMore, setMissingLoadingMore] = useState(false)
-
-  const missingSentinelRef = useRef<HTMLDivElement | null>(null)
   const translationsSentinelRef = useRef<HTMLDivElement | null>(null)
 
-  // Missing + bulk translate state
-  const [missingLoading, setMissingLoading] = useState(false)
-  const [missingItems, setMissingItems] = useState<MissingItem[]>([])
-  const [missingSourceKeys, setMissingSourceKeys] = useState(0)
-  const [missingCount, setMissingCount] = useState(0)
-  const [missingFilter, setMissingFilter] = useState('')
-  const [bulkRunning, setBulkRunning] = useState(false)
-  const [bulkDone, setBulkDone] = useState(0)
-  const [bulkTotal, setBulkTotal] = useState(0)
-  const [bulkCurrentKey, setBulkCurrentKey] = useState<string | null>(null)
+  // Bulk operations abort controller (used by literals bulk translate)
   const bulkAbortRef = useRef<AbortController | null>(null)
-
-  // Multi-locale bulk
-  const [bulkAllLocalesRunning, setBulkAllLocalesRunning] = useState(false)
-  const [bulkAllLocalesDone, setBulkAllLocalesDone] = useState(0)
-  const [bulkAllLocalesTotal, setBulkAllLocalesTotal] = useState(0)
-  const [bulkAllLocalesCurrent, setBulkAllLocalesCurrent] = useState<string | null>(null)
 
   // Codebase scan
   const [codeScanLoading, setCodeScanLoading] = useState(false)
@@ -162,15 +162,6 @@ export function TranslationManagement() {
     seeded?: number
   } | null>(null)
   const didInitLocaleRef = useRef(false)
-
-  const missingRowId = useCallback((namespace: string, key: string) => `${namespace}::${key}`, [])
-
-  // Per-missing-row edit buffers (keyed by namespace+key)
-  const [missingDrafts, setMissingDrafts] = useState<Record<string, string>>({})
-  const [missingAiBusy, setMissingAiBusy] = useState<Record<string, boolean>>({})
-
-  const MISSING_AUTOSAVE_DEBOUNCE_MS = 800
-  const missingAutosaveTimersRef = useRef<Record<string, ReturnType<typeof setTimeout> | null>>({})
   
   // Edit state
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -183,14 +174,6 @@ export function TranslationManagement() {
   const [newValue, setNewValue] = useState('')
 
   const supabase = useMemo(() => createClient(), [])
-
-  const filteredMissing = useMemo(() => {
-    const q = missingFilter.trim().toLowerCase()
-    if (!q) return missingItems
-    return missingItems.filter(
-      (m) => m.key.toLowerCase().includes(q) || m.sourceValue.toLowerCase().includes(q)
-    )
-  }, [missingItems, missingFilter])
 
   const fetchLanguages = useCallback(async () => {
     const { data } = await supabase
@@ -510,68 +493,6 @@ export function TranslationManagement() {
     [supabase, literalsReviewDrafts]
   )
 
-  const scanMissing = useCallback(async () => {
-    setMissingLoading(true)
-    setMissingOffset(0)
-    try {
-      const res = await fetch(
-        `/api/admin/translations/missing?locale=${encodeURIComponent(selectedLocale)}&sourceLocale=${encodeURIComponent(sourceLocale)}&namespace=${encodeURIComponent(selectedNamespace)}&offset=0&limit=${MISSING_PAGE_SIZE}`,
-        { cache: 'no-store' }
-      )
-      const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to scan missing translations')
-      setMissingItems((json?.missing || []) as MissingItem[])
-      setMissingSourceKeys(Number(json?.totals?.sourceKeys ?? 0))
-      setMissingCount(Number(json?.totals?.missing ?? 0))
-      setMissingHasMore(Number(json?.page?.returned ?? (json?.missing || []).length) + 0 < Number(json?.totals?.missing ?? 0))
-      setMissingDrafts({})
-    } catch (e: any) {
-      console.error(e)
-      toast.error(e?.message || 'Failed to scan missing translations')
-    } finally {
-      setMissingLoading(false)
-    }
-  }, [selectedLocale, selectedNamespace, sourceLocale])
-
-  const loadMoreMissing = useCallback(async () => {
-    if (missingLoadingMore || missingLoading || !missingHasMore) return
-    setMissingLoadingMore(true)
-    try {
-      const nextOffset = missingOffset + MISSING_PAGE_SIZE
-      const res = await fetch(
-        `/api/admin/translations/missing?locale=${encodeURIComponent(selectedLocale)}&sourceLocale=${encodeURIComponent(sourceLocale)}&namespace=${encodeURIComponent(selectedNamespace)}&offset=${nextOffset}&limit=${MISSING_PAGE_SIZE}`,
-        { cache: 'no-store' }
-      )
-      const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to load more missing translations')
-      const pageItems = (json?.missing || []) as MissingItem[]
-      setMissingItems((prev) => [...prev, ...pageItems])
-      setMissingOffset(nextOffset)
-      setMissingHasMore(nextOffset + pageItems.length < Number(json?.totals?.missing ?? 0))
-    } catch (e: any) {
-      console.error(e)
-      toast.error(e?.message || 'Failed to load more missing translations')
-    } finally {
-      setMissingLoadingMore(false)
-    }
-  }, [missingLoadingMore, missingLoading, missingHasMore, missingOffset, selectedLocale, selectedNamespace, sourceLocale])
-
-  // Infinite scroll: missing list
-  useEffect(() => {
-    const el = missingSentinelRef.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((e) => e.isIntersecting)) return
-        if (missingLoading || missingLoadingMore || !missingHasMore) return
-        void loadMoreMissing()
-      },
-      { root: null, rootMargin: '200px', threshold: 0 }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [missingLoading, missingLoadingMore, missingHasMore, loadMoreMissing])
-
   // Infinite scroll: literals review list
   useEffect(() => {
     const el = literalsReviewSentinelRef.current
@@ -788,7 +709,7 @@ export function TranslationManagement() {
 
   const queueLiteralsAutosave = useCallback(
     (key: string, locale: 'zh-CN' | 'zh-HK', nextValue: string, opts?: { immediate?: boolean }) => {
-      if (literalsBulkRunning || bulkRunning || bulkAllLocalesRunning) return
+      if (literalsBulkRunning) return
 
       const timerKey = `${key}::${locale}`
       const trimmed = nextValue.trim()
@@ -813,12 +734,12 @@ export function TranslationManagement() {
 
       literalsAutosaveTimersRef.current[timerKey] = setTimeout(run, LITERALS_AUTOSAVE_DEBOUNCE_MS)
     },
-    [upsertLiteralTranslation, literalsBulkRunning, bulkRunning, bulkAllLocalesRunning]
+    [upsertLiteralTranslation, literalsBulkRunning]
   )
 
   const handleAiForLiteralRow = useCallback(
     async (key: string) => {
-      if (literalsBulkRunning || bulkRunning || bulkAllLocalesRunning) return
+      if (literalsBulkRunning) return
 
       setLiteralsReviewAiBusy((prev) => ({ ...prev, [key]: true }))
       try {
@@ -873,13 +794,11 @@ export function TranslationManagement() {
       literalsReviewItems,
       literalsReviewDrafts,
       literalsBulkRunning,
-      bulkRunning,
-      bulkAllLocalesRunning,
     ]
   )
 
   const startBulkTranslateLiterals = useCallback(async () => {
-    if (literalsBulkRunning || bulkRunning || bulkAllLocalesRunning) return
+    if (literalsBulkRunning) return
 
     const visible = literalsReviewDisplayed
     if (!visible.length) {
@@ -970,165 +889,11 @@ export function TranslationManagement() {
     }
   }, [
     literalsBulkRunning,
-    bulkRunning,
-    bulkAllLocalesRunning,
     literalsReviewDisplayed,
     aiTranslateBatch,
     effectiveBatchSize,
     supabase,
   ])
-
-  const upsertTranslation = useCallback(
-    async (key: string, value: string, namespaceOverride?: string) => {
-      const { error } = await (supabase.from('app_translations') as any).upsert(
-        [{ locale: selectedLocale, namespace: namespaceOverride ?? selectedNamespace, key, value }],
-        { onConflict: 'locale,namespace,key' }
-      )
-      if (error) throw error
-    },
-    [supabase, selectedLocale, selectedNamespace]
-  )
-
-  const upsertMissingTranslationLocal = useCallback(
-    async (namespace: string, key: string, value: string) => {
-      const rowId = missingRowId(namespace, key)
-      const trimmed = value.trim()
-      if (!trimmed) return
-
-      await upsertTranslation(key, trimmed, namespace)
-
-      setMissingDrafts((prev) => {
-        const next = { ...prev }
-        delete next[rowId]
-        return next
-      })
-
-      // Remove it from the missing list locally to avoid redundant rescans while typing.
-      setMissingItems((prev) => prev.filter((m) => !(m.namespace === namespace && m.key === key)))
-      setMissingCount((prev) => (prev > 0 ? prev - 1 : 0))
-    },
-    [missingRowId, upsertTranslation]
-  )
-
-  const queueMissingAutosave = useCallback(
-    (namespace: string, key: string, nextValue: string, opts?: { immediate?: boolean }) => {
-      if (bulkRunning || bulkAllLocalesRunning) return
-
-      const rowId = missingRowId(namespace, key)
-      const trimmed = nextValue.trim()
-
-      const existingTimer = missingAutosaveTimersRef.current[rowId]
-      if (existingTimer) clearTimeout(existingTimer)
-      missingAutosaveTimersRef.current[rowId] = null
-
-      if (!trimmed) return
-
-      const run = () => {
-        void upsertMissingTranslationLocal(namespace, key, trimmed).catch((e: any) => {
-          console.error(e)
-          toast.error(e?.message || 'Auto-save failed')
-        })
-      }
-
-      if (opts?.immediate) {
-        run()
-        return
-      }
-
-      missingAutosaveTimersRef.current[rowId] = setTimeout(run, MISSING_AUTOSAVE_DEBOUNCE_MS)
-    },
-    [bulkRunning, bulkAllLocalesRunning, missingRowId, upsertMissingTranslationLocal]
-  )
-
-  const handleAiForMissing = useCallback(
-    async (namespace: string, key: string) => {
-      const rowId = missingRowId(namespace, key)
-      setMissingAiBusy((prev) => ({ ...prev, [rowId]: true }))
-      try {
-        const translated = await aiTranslateKey(key, namespace)
-        setMissingDrafts((prev) => ({ ...prev, [rowId]: translated }))
-        await upsertMissingTranslationLocal(namespace, key, translated)
-      } catch (e: any) {
-        console.error(e)
-        toast.error(e?.message || 'AI translation failed')
-      } finally {
-        setMissingAiBusy((prev) => ({ ...prev, [rowId]: false }))
-      }
-    },
-    [aiTranslateKey, missingRowId, upsertMissingTranslationLocal]
-  )
-
-  const handleSaveMissing = useCallback(
-    async (namespace: string, key: string) => {
-      try {
-        const rowId = missingRowId(namespace, key)
-        const value = (missingDrafts[rowId] ?? '').trim()
-        if (!value) {
-          toast.error('Translation value is empty')
-          return
-        }
-        await upsertTranslation(key, value, namespace)
-        toast.success('Saved')
-        await fetchTranslations()
-        await scanMissing()
-      } catch (e: any) {
-        console.error(e)
-        toast.error(e?.message || 'Failed to save translation')
-      }
-    },
-    [missingDrafts, upsertTranslation, fetchTranslations, scanMissing, missingRowId]
-  )
-
-  const startBulkTranslateMissing = useCallback(async () => {
-    if (!missingItems.length || bulkRunning) return
-
-    setBulkRunning(true)
-    setBulkDone(0)
-    setBulkTotal(missingItems.length)
-    setBulkCurrentKey(null)
-    bulkAbortRef.current = new AbortController()
-
-    try {
-      for (let i = 0; i < missingItems.length; i += effectiveBatchSize) {
-        if (bulkAbortRef.current?.signal.aborted) break
-
-        const batch = missingItems.slice(i, i + effectiveBatchSize)
-        setBulkCurrentKey(`${batch[0]?.namespace}.${batch[0]?.key}`)
-
-        const payload = batch
-          .map((it) => ({ namespace: it.namespace, key: it.key, sourceValue: it.sourceValue }))
-          .filter((it) => it.namespace && it.key && it.sourceValue)
-
-        const results = await aiTranslateBatch(payload, undefined, bulkAbortRef.current?.signal)
-        if (bulkAbortRef.current?.signal.aborted) break
-
-        const rows = payload.map((it) => ({
-          locale: selectedLocale,
-          namespace: it.namespace,
-          key: it.key,
-          value: String(results[`${it.namespace}::${it.key}`] ?? '').trim(),
-        }))
-
-        const { error } = await (supabase.from('app_translations') as any).upsert(rows, {
-          onConflict: 'locale,namespace,key',
-        })
-        if (error) throw error
-
-        setBulkDone((x) => x + payload.length)
-      }
-
-      toast.success('Bulk translation completed')
-    } catch (e: any) {
-      console.error(e)
-      toast.error(e?.message || 'Bulk translation failed')
-    } finally {
-      setBulkRunning(false)
-      setBulkCurrentKey(null)
-      bulkAbortRef.current = null
-      await fetchTranslations()
-      await scanMissing()
-    }
-  }, [missingItems, bulkRunning, aiTranslateBatch, selectedLocale, supabase, fetchTranslations, scanMissing, effectiveBatchSize])
 
   const cancelBulk = useCallback(() => {
     bulkAbortRef.current?.abort()
@@ -1182,86 +947,6 @@ export function TranslationManagement() {
     }
   }, [codeScanItems, supabase])
 
-  const aiTranslateMissingAllLocales = useCallback(async () => {
-    if (bulkAllLocalesRunning) return
-    const targetLocales = (languages || []).map((l) => l.code).filter((c) => c && c !== sourceLocale)
-    if (targetLocales.length === 0) {
-      toast.error('No target locales configured')
-      return
-    }
-
-    setBulkAllLocalesRunning(true)
-    setBulkAllLocalesDone(0)
-    setBulkAllLocalesTotal(0)
-    setBulkAllLocalesCurrent(null)
-    bulkAbortRef.current = new AbortController()
-
-    try {
-      // Pre-compute total for progress
-      let total = 0
-      const missingByLocale: Record<string, MissingItem[]> = {}
-      for (const locale of targetLocales) {
-        if (bulkAbortRef.current?.signal.aborted) break
-        const res = await fetch(
-          `/api/admin/translations/missing?locale=${encodeURIComponent(locale)}&sourceLocale=en&namespace=all`,
-          { cache: 'no-store' }
-        )
-        const json = await res.json()
-        if (!res.ok) throw new Error(json?.error || `Failed to scan missing for ${locale}`)
-        const items = (json?.missing || []) as MissingItem[]
-        missingByLocale[locale] = items
-        total += items.length
-      }
-      setBulkAllLocalesTotal(total)
-      if (total === 0) {
-        toast.success('No missing translations across all locales')
-        return
-      }
-
-      for (const locale of targetLocales) {
-        const items = missingByLocale[locale] || []
-        for (let i = 0; i < items.length; i += effectiveBatchSize) {
-          if (bulkAbortRef.current?.signal.aborted) break
-
-          const batch = items.slice(i, i + effectiveBatchSize)
-          setBulkAllLocalesCurrent(`${locale}: ${batch[0]?.namespace}.${batch[0]?.key}`)
-
-          const payload = batch
-            .map((it) => ({ namespace: it.namespace, key: it.key, sourceValue: it.sourceValue }))
-            .filter((it) => it.namespace && it.key && it.sourceValue)
-
-          const results = await aiTranslateBatch(payload, locale, bulkAbortRef.current?.signal)
-          if (bulkAbortRef.current?.signal.aborted) break
-
-          const rows = payload.map((it) => ({
-            locale,
-            namespace: it.namespace,
-            key: it.key,
-            value: String(results[`${it.namespace}::${it.key}`] ?? '').trim(),
-          }))
-
-          const { error } = await (supabase.from('app_translations') as any).upsert(rows, {
-            onConflict: 'locale,namespace,key',
-          })
-          if (error) throw error
-
-          setBulkAllLocalesDone((x) => x + payload.length)
-        }
-      }
-
-      toast.success('Bulk translation completed for all locales')
-    } catch (e: any) {
-      console.error(e)
-      toast.error(e?.message || 'Bulk translation failed')
-    } finally {
-      setBulkAllLocalesRunning(false)
-      setBulkAllLocalesCurrent(null)
-      bulkAbortRef.current = null
-      await fetchTranslations()
-      await scanMissing()
-    }
-  }, [bulkAllLocalesRunning, languages, aiTranslateBatch, supabase, fetchTranslations, scanMissing, sourceLocale, effectiveBatchSize])
-
   useEffect(() => {
     fetchLanguages()
   }, [fetchLanguages])
@@ -1280,9 +965,7 @@ export function TranslationManagement() {
   useEffect(() => {
     if (!selectedLocale || !selectedNamespace) return
     fetchTranslations()
-    // Keep missing list in sync when switching
-    scanMissing()
-  }, [selectedLocale, selectedNamespace, fetchTranslations, scanMissing])
+  }, [selectedLocale, selectedNamespace, fetchTranslations])
 
   const handleAdd = async () => {
     if (!newKey || !newValue) return
@@ -1363,13 +1046,28 @@ export function TranslationManagement() {
                 disabled={
                   literalsReviewLoading ||
                   literalsBulkRunning ||
-                  bulkRunning ||
-                  bulkAllLocalesRunning ||
                   literalsReviewDisplayed.length === 0
                 }
               >
                 <Wand2 className="w-4 h-4 mr-2" /> AI translate visible missing
               </Button>
+              <div className="flex items-center gap-2 ml-2">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">Batch size</span>
+                <Input
+                  type="number"
+                  min={1}
+                  max={50}
+                  step={1}
+                  value={batchSize}
+                  onChange={(e) => {
+                    const n = Number(e.target.value)
+                    if (!Number.isFinite(n)) return
+                    setBatchSize(n)
+                  }}
+                  className="h-8 w-24"
+                  disabled={literalsBulkRunning}
+                />
+              </div>
               {literalsBulkRunning ? (
                 <Button variant="outline" onClick={cancelBulk}>
                   Cancel
@@ -1393,6 +1091,15 @@ export function TranslationManagement() {
                 />
                 <span className="text-xs text-muted-foreground whitespace-nowrap">Only missing</span>
               </div>
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                {literalsReviewStats.loaded ? (
+                  <>
+                    {literalsReviewStats.displayed} shown / {literalsReviewStats.loaded} loaded · Missing: {literalsReviewStats.missingAny} (zh-CN {literalsReviewStats.missingZhCN}, zh-HK {literalsReviewStats.missingZhHK})
+                  </>
+                ) : (
+                  '0 loaded'
+                )}
+              </span>
               <Input
                 placeholder="Search literal key or English text…"
                 value={literalsReviewQuery}
@@ -1404,6 +1111,43 @@ export function TranslationManagement() {
               </Button>
             </div>
           </div>
+
+          {selectedNamespace === 'all' ? (
+            <div className="text-xs text-muted-foreground">
+              Tip: Select a specific namespace to manually add/edit rows in the DB table.
+            </div>
+          ) : null}
+
+          {isAdding ? (
+            <div className="border rounded p-4 space-y-3">
+              <div className="text-xs text-muted-foreground">
+                Adds a row to <span className="font-mono">app_translations</span> for locale{' '}
+                <span className="font-mono">{selectedLocale}</span> and namespace{' '}
+                <span className="font-mono">{selectedNamespace}</span>.
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div className="space-y-2">
+                  <Label>Key</Label>
+                  <Input
+                    value={newKey}
+                    onChange={(e) => setNewKey(e.target.value)}
+                    placeholder="e.g. save_button"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Value</Label>
+                  <Input
+                    value={newValue}
+                    onChange={(e) => setNewValue(e.target.value)}
+                    placeholder="Translated text"
+                  />
+                </div>
+                <Button onClick={handleAdd}>
+                  <Save className="w-4 h-4 mr-2" /> {t('save')}
+                </Button>
+              </div>
+            </div>
+          ) : null}
 
           {codeScanLast ? (
             <div className="text-xs text-muted-foreground">
@@ -1417,10 +1161,18 @@ export function TranslationManagement() {
 
           {literalsBulkRunning ? (
             <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">
-                Translating {literalsBulkCurrent ?? '-'} ({literalsBulkDone}/{literalsBulkTotal})
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>
+                  Translating {literalsBulkCurrent ?? '-'} ({literalsBulkDone}/{literalsBulkTotal})
+                </span>
+                <span>
+                  {literalsBulkTotal ? Math.round((literalsBulkDone / literalsBulkTotal) * 100) : 0}%
+                </span>
               </div>
-              <Progress value={literalsBulkTotal ? Math.round((literalsBulkDone / literalsBulkTotal) * 100) : 0} />
+              <Progress
+                className="h-3"
+                value={literalsBulkTotal ? Math.round((literalsBulkDone / literalsBulkTotal) * 100) : 0}
+              />
             </div>
           ) : null}
 
@@ -1500,8 +1252,6 @@ export function TranslationManagement() {
                               disabled={
                                 literalsReviewLoading ||
                                 literalsBulkRunning ||
-                                bulkRunning ||
-                                bulkAllLocalesRunning ||
                                 Boolean(literalsReviewAiBusy[it.key])
                               }
                             >
@@ -1525,262 +1275,6 @@ export function TranslationManagement() {
           </div>
 
           <div ref={literalsReviewSentinelRef} className="h-10" />
-        </CardContent>
-      </Card>
-
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-        <div className="flex gap-4 w-full md:w-auto">
-          <div className="w-40">
-            <Label className="text-xs mb-1 block">Language</Label>
-            <Select value={selectedLocale} onValueChange={setSelectedLocale}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {languages.map((lang) => (
-                  <SelectItem key={lang.code} value={lang.code}>
-                    {lang.flag_emoji} {lang.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="w-40">
-            <Label className="text-xs mb-1 block">Namespace</Label>
-            <Select value={selectedNamespace} onValueChange={setSelectedNamespace}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {NAMESPACES.map((ns) => (
-                  <SelectItem key={ns} value={ns}>
-                    {ns}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        
-        <Button onClick={() => setIsAdding(!isAdding)} disabled={selectedNamespace === 'all'}>
-          {isAdding ? t('cancel') : <><Plus className="w-4 h-4 mr-2" /> Add Translation</>}
-        </Button>
-      </div>
-
-      {selectedNamespace === 'all' ? (
-        <div className="text-xs text-muted-foreground">
-          Tip: Use <span className="font-mono">namespace=all</span> to scan/AI-translate the entire UI.
-          Select a specific namespace to manually add/edit rows in the DB table.
-        </div>
-      ) : null}
-
-      {isAdding && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Add New Translation</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-              <div className="space-y-2">
-                <Label>Key</Label>
-                <Input
-                  value={newKey}
-                  onChange={(e) => setNewKey(e.target.value)}
-                  placeholder="e.g. save_button"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Value</Label>
-                <Input
-                  value={newValue}
-                  onChange={(e) => setNewValue(e.target.value)}
-                  placeholder="Translated text"
-                />
-              </div>
-              <Button onClick={handleAdd}>
-                <Save className="w-4 h-4 mr-2" /> {t('save')}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="flex items-center space-x-2">
-        <Search className="w-4 h-4 text-gray-500" />
-        <Input
-          placeholder="Search keys or values..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="max-w-sm"
-        />
-      </div>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Missing translations (DB-first, includes codebase literals)</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex flex-col md:flex-row gap-2 md:items-center md:justify-between">
-            <div className="flex items-center gap-2">
-              <Button variant="secondary" onClick={scanMissing} disabled={missingLoading || bulkRunning}>
-                {missingLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                Scan missing
-              </Button>
-              <Button onClick={startBulkTranslateMissing} disabled={bulkRunning || missingLoading || missingItems.length === 0}>
-                <Wand2 className="w-4 h-4 mr-2" /> AI translate missing
-              </Button>
-              <Button
-                variant="outline"
-                onClick={aiTranslateMissingAllLocales}
-                disabled={bulkAllLocalesRunning || bulkRunning || missingLoading}
-              >
-                <Wand2 className="w-4 h-4 mr-2" /> AI translate missing (all locales)
-              </Button>
-
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground whitespace-nowrap">Batch size</span>
-                <Input
-                  type="number"
-                  min={1}
-                  max={50}
-                  step={1}
-                  value={batchSize}
-                  onChange={(e) => {
-                    const n = Number(e.target.value)
-                    if (!Number.isFinite(n)) return
-                    setBatchSize(n)
-                  }}
-                  className="h-8 w-24"
-                  disabled={bulkRunning || bulkAllLocalesRunning}
-                />
-              </div>
-
-              {bulkRunning ? (
-                <Button variant="outline" onClick={cancelBulk}>
-                  Cancel
-                </Button>
-              ) : null}
-              {bulkAllLocalesRunning ? (
-                <Button variant="outline" onClick={cancelBulk}>
-                  Cancel
-                </Button>
-              ) : null}
-            </div>
-            <div className="flex items-center gap-2">
-              <Input
-                placeholder="Filter missing..."
-                value={missingFilter}
-                onChange={(e) => setMissingFilter(e.target.value)}
-                className="max-w-sm"
-                disabled={missingLoading}
-              />
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                {missingSourceKeys} source / {missingCount} missing
-              </span>
-            </div>
-          </div>
-
-          {!missingLoading && missingSourceKeys === 0 ? (
-            <div className="text-xs text-muted-foreground">
-              No source keys found for this namespace in <span className="font-mono">en</span>. Try a different namespace.
-            </div>
-          ) : null}
-
-          {bulkRunning ? (
-            <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">
-                Translating <span className="font-mono">{bulkCurrentKey ?? '-'}</span> ({bulkDone}/{bulkTotal})
-              </div>
-              <Progress value={bulkTotal ? Math.round((bulkDone / bulkTotal) * 100) : 0} />
-            </div>
-          ) : null}
-
-          {bulkAllLocalesRunning ? (
-            <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">
-                Translating <span className="font-mono">{bulkAllLocalesCurrent ?? '-'}</span> ({bulkAllLocalesDone}/{bulkAllLocalesTotal})
-              </div>
-              <Progress value={bulkAllLocalesTotal ? Math.round((bulkAllLocalesDone / bulkAllLocalesTotal) * 100) : 0} />
-            </div>
-          ) : null}
-
-          <div className="border rounded">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[140px]">Namespace</TableHead>
-                  <TableHead className="w-[220px]">Key</TableHead>
-                  <TableHead>Source (en)</TableHead>
-                  <TableHead>Translation</TableHead>
-                  <TableHead className="w-[160px] text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {missingLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-6">
-                      <Loader2 className="w-5 h-5 animate-spin mx-auto" />
-                    </TableCell>
-                  </TableRow>
-                ) : filteredMissing.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
-                      No missing keys for this locale/namespace.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredMissing.map((item) => {
-                    const rowId = `${item.namespace}::${item.key}`
-                    return (
-                    <TableRow key={rowId}>
-                      <TableCell className="text-sm">{item.namespace}</TableCell>
-                      <TableCell className="font-mono text-sm">{item.key}</TableCell>
-                      <TableCell className="text-sm">{item.sourceValue}</TableCell>
-                      <TableCell>
-                        <Input
-                          value={missingDrafts[rowId] ?? ''}
-                          onChange={(e) => {
-                            const nextValue = e.target.value
-                            setMissingDrafts((prev) => ({ ...prev, [rowId]: nextValue }))
-                            queueMissingAutosave(item.namespace, item.key, nextValue)
-                          }}
-                          onBlur={(e) => queueMissingAutosave(item.namespace, item.key, e.target.value, { immediate: true })}
-                          placeholder={item.currentValue ? `Current: ${item.currentValue}` : 'Enter translation...'}
-                          className="h-8"
-                        />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => handleAiForMissing(item.namespace, item.key)}
-                            disabled={bulkRunning || Boolean(missingAiBusy[rowId])}
-                          >
-                            {missingAiBusy[rowId] ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Wand2 className="w-4 h-4" />
-                            )}
-                          </Button>
-                          <Button size="sm" onClick={() => handleSaveMissing(item.namespace, item.key)} disabled={bulkRunning}>
-                            <Save className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )})
-                )}
-              </TableBody>
-            </Table>
-          </div>
-
-          <div ref={missingSentinelRef} className="h-10" />
-          {missingLoadingMore ? (
-            <div className="flex justify-center">
-              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-            </div>
-          ) : null}
         </CardContent>
       </Card>
 
@@ -1850,11 +1344,63 @@ export function TranslationManagement() {
       </Card>
 
       <Card>
+        <CardHeader className="pb-3">
+          <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-end">
+            <div className="flex gap-4 w-full md:w-auto">
+              <div className="w-48">
+                <Label className="text-xs mb-1 block">Language</Label>
+                <Select value={selectedLocale} onValueChange={setSelectedLocale}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languages.map((lang) => (
+                      <SelectItem key={lang.code} value={lang.code}>
+                        {lang.flag_emoji} {lang.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-48">
+                <Label className="text-xs mb-1 block">Namespace</Label>
+                <Select value={selectedNamespace} onValueChange={setSelectedNamespace}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NAMESPACES.map((ns) => (
+                      <SelectItem key={ns} value={ns}>
+                        {ns}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 w-full md:w-auto">
+              <Search className="w-4 h-4 text-gray-500" />
+              <Input
+                placeholder="Search keys or values..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full md:w-[360px]"
+              />
+            </div>
+          </div>
+
+          {selectedNamespace === 'all' ? (
+            <div className="text-xs text-muted-foreground">
+              Tip: Use <span className="font-mono">namespace=all</span> to scan/AI-translate the entire UI.
+            </div>
+          ) : null}
+        </CardHeader>
         <CardContent className="p-0">
           {selectedNamespace === 'all' ? (
             <div className="p-4 text-sm text-muted-foreground">
               Select a specific namespace to view/edit DB translations in a single table.
-              For translating the entire UI, use the Missing translations table above.
+              For hashed UI literals, use the Frontend literals review table above.
             </div>
           ) : (
           <Table>

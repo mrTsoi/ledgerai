@@ -17,6 +17,9 @@ import { POST } from '../../src/app/api/webhooks/stripe/route'
 
 describe('Stripe webhook route', () => {
   it('returns 400 on signature verification failure', async () => {
+    const consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
     const req = new Request('https://example.test/webhook', { method: 'POST', body: '' })
     const res = await POST(req)
     // NextResponse status available as .status
@@ -24,5 +27,8 @@ describe('Stripe webhook route', () => {
     expect((res as any).status).toBe(400)
     const text = await (res as any).text()
     expect(text).toContain('Webhook Error')
+
+    consoleInfoSpy.mockRestore()
+    consoleErrorSpy.mockRestore()
   })
 })

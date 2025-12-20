@@ -11,5 +11,5 @@ test('stripe webhook returns 400 on invalid signature', async ({ page }) => {
     data: payload
   })
 
-  expect(res.status()).toBeGreaterThanOrEqual(400)
+  expect(res.status()).toBe(400)
 })

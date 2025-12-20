@@ -273,7 +273,9 @@ export class AIProcessingService {
         .single()
 
       if (docError || !document) {
-        console.error('Document not found:', docError)
+        // A missing document is an expected outcome for invalid IDs.
+        // Log to stdout to avoid noisy stderr in CI for tests that assert a 404.
+        console.info('Document not found:', docError)
         return { success: false, error: 'Document not found', statusCode: 404 }
       }
 

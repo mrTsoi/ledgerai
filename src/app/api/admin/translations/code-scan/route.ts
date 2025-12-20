@@ -20,19 +20,11 @@ async function requireSuperAdmin(supabase: any) {
     return { ok: false as const, response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
   }
 
-  const { data: sa, error: saError } = await supabase
-    .from('memberships')
-    .select('id')
-    .eq('user_id', auth.user.id)
-    .eq('role', 'SUPER_ADMIN')
-    .eq('is_active', true)
-    .limit(1)
-
+  const { data: isSuperAdmin, error: saError } = await supabase.rpc('is_super_admin')
   if (saError) {
     return { ok: false as const, response: NextResponse.json({ error: saError.message }, { status: 500 }) }
   }
-
-  if (!sa || sa.length === 0) {
+  if (isSuperAdmin !== true) {
     return { ok: false as const, response: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
   }
 

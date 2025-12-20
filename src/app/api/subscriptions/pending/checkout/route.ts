@@ -10,15 +10,28 @@ export async function POST(req: Request) {
     if (!token) return NextResponse.json({ error: 'token required' }, { status: 400 })
 
     const supabase = await createClient()
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const userEmail = user.email
+    if (!userEmail) return NextResponse.json({ error: 'User email missing' }, { status: 400 })
+
     const { data, error } = await supabase
       .from('pending_subscriptions')
       .select('*')
       .eq('token', token)
+      .is('consumed_at', null)
       .limit(1)
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     const pending = Array.isArray(data) && data.length > 0 ? data[0] : null
     if (!pending) return NextResponse.json({ error: 'invalid token' }, { status: 404 })
+    if ((pending as any).email && String((pending as any).email).toLowerCase() !== String(userEmail).toLowerCase()) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
     if (new Date(pending.expires_at) < new Date()) return NextResponse.json({ error: 'token expired' }, { status: 410 })
 
     const stripe = await getStripe()

@@ -366,9 +366,9 @@ export function BillingSettings() {
               <div className="flex justify-between gap-4">
                 <span className="text-muted-foreground">{lt('Plan')}</span>
                 <span className="text-right font-medium">
-                  {(purchaseModal?.previousPlanName || '—')}
+                  {(purchaseModal?.previousPlanName ? lt(String(purchaseModal.previousPlanName)) : '—')}
                   {'  →  '}
-                  {(purchaseModal?.newPlanName || '—')}
+                  {(purchaseModal?.newPlanName ? lt(String(purchaseModal.newPlanName)) : '—')}
                 </span>
               </div>
             )}
@@ -420,7 +420,7 @@ export function BillingSettings() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
                 <div className="flex items-center gap-3">
-                  <h3 className="font-semibold text-blue-900">{subscription.plan_name}</h3>
+                  <h3 className="font-semibold text-blue-900">{subscription?.plan_name ? lt(String(subscription.plan_name)) : ''}</h3>
                   <Badge variant={subscription.status === 'active' ? 'default' : subscription.status === 'pending' ? 'secondary' : 'destructive'} className="text-sm">
                     {subscription.status?.toString().toUpperCase()}
                   </Badge>
@@ -453,7 +453,8 @@ export function BillingSettings() {
                         : lt('Recent change')}
                     </p>
                     <p>
-                      {lt('Plan:')} <strong>{inlineChangeBanner.previousPlanName || '—'}</strong> → <strong>{inlineChangeBanner.newPlanName || '—'}</strong>
+                      {lt('Plan:')} <strong>{inlineChangeBanner.previousPlanName ? lt(String(inlineChangeBanner.previousPlanName)) : '—'}</strong> →{' '}
+                      <strong>{inlineChangeBanner.newPlanName ? lt(String(inlineChangeBanner.newPlanName)) : '—'}</strong>
                     </p>
                     <p>
                       {lt('Billing cycle:')} <strong>{formatCycle(inlineChangeBanner.previousCycle || null) || '—'}</strong> → <strong>{formatCycle(inlineChangeBanner.newCycle || null) || '—'}</strong>
@@ -480,7 +481,7 @@ export function BillingSettings() {
                     const effectiveDateLabel = effectiveDate ? new Date(effectiveDate).toLocaleDateString() : null
 
                     const parts: string[] = []
-                    if (planChange && subscription.next_plan_name) parts.push(lt('switch to {plan}', { plan: subscription.next_plan_name }))
+                    if (planChange && subscription.next_plan_name) parts.push(lt('switch to {plan}', { plan: lt(String(subscription.next_plan_name)) }))
                     if (cycleChange && nextBillingLabel) parts.push(lt('switch billing cycle to {cycle}', { cycle: nextBillingLabel }))
 
                     const afterText = effectiveDateLabel
@@ -743,8 +744,8 @@ export function BillingSettings() {
             return (
               <Card key={plan.id} className={`flex flex-col ${isCurrent ? 'border-blue-500 ring-1 ring-blue-500' : ''}`}>
                 <CardHeader>
-                  <CardTitle>{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
+                  <CardTitle>{plan.name ? lt(String(plan.name)) : ''}</CardTitle>
+                  <CardDescription>{plan.description ? lt(String(plan.description)) : ''}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1">
                   <div className="mb-4">
