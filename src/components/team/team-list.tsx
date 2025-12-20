@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Database } from '@/types/database.types'
 import { toast } from "sonner"
 import { useLiterals } from '@/hooks/use-literals'
+import { useLocale } from 'next-intl'
 
 type Membership = Database['public']['Tables']['memberships']['Row'] & {
   profiles: Database['public']['Tables']['profiles']['Row']
@@ -31,6 +32,7 @@ type Membership = Database['public']['Tables']['memberships']['Row'] & {
 
 export function TeamList() {
   const lt = useLiterals()
+  const locale = useLocale()
   const { currentTenant } = useTenant()
   const tenantId = currentTenant?.id
   const [members, setMembers] = useState<Membership[]>([])
@@ -73,6 +75,7 @@ export function TeamList() {
           tenant_id: currentTenant.id,
           email: inviteEmail,
           role: inviteRole,
+          locale,
         }),
       })
       const json = await res.json()
@@ -80,7 +83,7 @@ export function TeamList() {
 
       setInviteEmail('')
       await fetchMembers()
-      toast.success(lt('Member added successfully!'))
+      toast.success(lt('Invite sent successfully'))
 
     } catch (error: any) {
       console.error('Error inviting member:', error)
@@ -169,7 +172,7 @@ export function TeamList() {
             </Button>
           </form>
           <p className="text-xs text-gray-500 mt-2">
-            {lt('Note: The user must already have an account on the platform to be invited.')}
+            {lt('An invite email will be sent. They can create an account if needed.')}
           </p>
         </CardContent>
       </Card>

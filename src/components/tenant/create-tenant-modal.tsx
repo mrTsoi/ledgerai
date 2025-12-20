@@ -10,12 +10,16 @@ import { useSubscription } from '@/hooks/use-subscription'
 import { useTenant } from '@/hooks/use-tenant'
 import { toast } from "sonner"
 import { useLiterals } from '@/hooks/use-literals'
+import { getTenantDefaultsFromBrowser } from '@/lib/i18n/tenant-defaults'
 
 export function CreateTenantModal() {
   const lt = useLiterals()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState({ name: '', slug: '', locale: 'en' })
+  const [formData, setFormData] = useState(() => {
+    const defaults = getTenantDefaultsFromBrowser()
+    return { name: '', slug: '', locale: defaults.locale, currency: defaults.currency }
+  })
   const { subscription, refreshSubscription, loading: subLoading } = useSubscription()
   const { refreshTenants } = useTenant()
 
@@ -30,6 +34,7 @@ export function CreateTenantModal() {
           name: formData.name,
           slug: formData.slug,
           locale: formData.locale,
+          currency: formData.currency,
         }),
       })
       const json = await res.json()
@@ -37,7 +42,8 @@ export function CreateTenantModal() {
 
       toast.success(lt('Company created successfully!'))
       setOpen(false)
-      setFormData({ name: '', slug: '', locale: 'en' })
+      const defaults = getTenantDefaultsFromBrowser()
+      setFormData({ name: '', slug: '', locale: defaults.locale, currency: defaults.currency })
       refreshSubscription() // Update usage counts
       refreshTenants() // Update tenant list
     } catch (error: any) {
@@ -113,7 +119,7 @@ export function CreateTenantModal() {
               id="locale"
               className="w-full p-2 border rounded-md"
               value={formData.locale}
-              onChange={(e) => setFormData({ ...formData, locale: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, locale: e.target.value as typeof formData.locale })}
             >
               <option value="en">{lt('English')}</option>
               <option value="zh-CN">{lt('Chinese (Simplified)')}</option>

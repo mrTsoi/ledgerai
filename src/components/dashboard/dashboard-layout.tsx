@@ -351,9 +351,12 @@ export default function DashboardLayout({
   }
 
   // Filter navigation items based on user role
-  const visibleNavItems = navigationItems.filter((item) =>
-    userRole ? item.roles.includes(userRole) : false
-  )
+  const visibleNavItems = navigationItems.filter((item) => {
+    // New users may not have a tenant yet, so `userRole` can be null.
+    // Keep a minimal nav so the sidebar doesn't appear empty.
+    if (!userRole) return item.href === '/dashboard' || item.href === '/dashboard/settings'
+    return item.roles.includes(userRole)
+  })
 
   if (loading) {
     return (

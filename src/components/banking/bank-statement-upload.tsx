@@ -6,6 +6,8 @@ import { Upload, Loader2 } from 'lucide-react'
 import { useTenant } from '@/hooks/use-tenant'
 import { toast } from "sonner"
 import { useLiterals } from '@/hooks/use-literals'
+import { uploadDocumentViaApi } from '@/lib/uploads/upload-document-client'
+import { CloudImportDialog } from '@/components/documents/cloud-import-dialog'
 
 interface Props {
   accountId: string
@@ -24,22 +26,14 @@ export function BankStatementUpload({ accountId, onUploadComplete }: Props) {
     try {
       setUploading(true)
 
-      // 1) Upload + validate server-side
-      const form = new FormData()
-      form.set('tenantId', currentTenant.id)
-      form.set('documentType', 'bank_statement')
-      form.set('bankAccountId', accountId)
-      form.set('file', file)
-
-      const uploadRes = await fetch('/api/documents/upload', {
-        method: 'POST',
-        body: form,
+      const uploaded = await uploadDocumentViaApi({
+        tenantId: currentTenant.id,
+        file,
+        documentType: 'bank_statement',
+        bankAccountId: accountId,
       })
 
-      const uploadJson = await uploadRes.json().catch(() => null)
-      if (!uploadRes.ok) throw new Error(uploadJson?.error || 'Upload failed')
-
-      const documentId = String(uploadJson?.documentId || '')
+      const documentId = uploaded.documentId
       if (!documentId) throw new Error('Upload failed')
 
       // 3. Trigger AI Processing (via API or Edge Function)
@@ -86,27 +80,53 @@ export function BankStatementUpload({ accountId, onUploadComplete }: Props) {
   }
 
   return (
-    <div className="relative">
-      <input
-        type="file"
-        accept=".pdf,.jpg,.jpeg,.png"
-        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        onChange={handleFileChange}
-        disabled={uploading}
-      />
-      <Button disabled={uploading} className="w-full sm:w-auto">
-        {uploading ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            {lt('Processing...')}
-          </>
-        ) : (
-          <>
-            <Upload className="w-4 h-4 mr-2" />
-            {lt('Upload Statement')}
-          </>
-        )}
-      </Button>
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="relative">
+        <input
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          onChange={handleFileChange}
+          disabled={uploading}
+        />
+        <Button disabled={uploading} className="w-full sm:w-auto">
+          {uploading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              {lt('Processing...')}
+            </>
+          ) : (
+            <>
+              <Upload className="w-4 h-4 mr-2" />
+              {lt('Upload Statement')}
+            </>
+          )}
+        </Button>
+      </div>
+
+      <div className="relative">
+        <input
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          onChange={handleFileChange}
+          disabled={uploading}
+        />
+        <Button disabled={uploading} variant="outline" className="w-full sm:w-auto">
+          {lt('Camera')}
+        </Button>
+      </div>
+
+      {currentTenant ? (
+        <CloudImportDialog
+          tenantId={currentTenant.id}
+          documentType="bank_statement"
+          bankAccountId={accountId}
+          triggerLabel={lt('Cloud Storage')}
+          onImported={onUploadComplete}
+        />
+      ) : null}
     </div>
   )
 }

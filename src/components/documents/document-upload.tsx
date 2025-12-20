@@ -14,6 +14,8 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
 import { useLiterals } from '@/hooks/use-literals'
+import { uploadDocumentViaApi } from '@/lib/uploads/upload-document-client'
+import { CloudImportDialog } from '@/components/documents/cloud-import-dialog'
 
 interface UploadFile {
   file: File
@@ -124,26 +126,14 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
       ))
 
       const isBankStatement = selectedBankAccountId !== 'none'
-      const form = new FormData()
-      form.set('tenantId', currentTenant.id)
-      form.set('file', uploadFile.file)
-      if (isBankStatement) {
-        form.set('documentType', 'bank_statement')
-        form.set('bankAccountId', selectedBankAccountId)
-      }
-
-      const uploadRes = await fetch('/api/documents/upload', {
-        method: 'POST',
-        body: form,
+      const uploaded = await uploadDocumentViaApi({
+        tenantId: currentTenant.id,
+        file: uploadFile.file,
+        documentType: isBankStatement ? 'bank_statement' : null,
+        bankAccountId: isBankStatement ? selectedBankAccountId : null,
       })
 
-      const uploadJson = await uploadRes.json().catch(() => null)
-      if (!uploadRes.ok) {
-        throw new Error(uploadJson?.error || lt('Upload failed'))
-      }
-
-      const documentId = String(uploadJson?.documentId || '')
-      if (!documentId) throw new Error(lt('Upload failed'))
+      const documentId = uploaded.documentId
 
       setFiles(prev => prev.map(f =>
         f.id === uploadFile.id ? { ...f, progress: 60, statusMessage: lt('Saving metadata...'), documentId } : f
@@ -323,11 +313,37 @@ export function DocumentUpload({ onVerify, onUploadComplete }: Props) {
             className="hidden"
             id="file-upload"
           />
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={(e) => handleFiles(e.target.files)}
+            className="hidden"
+            id="camera-upload"
+          />
           <label htmlFor="file-upload">
             <Button type="button" variant="outline" asChild>
               <span>{lt('Choose Files')}</span>
             </Button>
           </label>
+
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
+            <label htmlFor="camera-upload">
+              <Button type="button" variant="outline" asChild>
+                <span>{lt('Camera')}</span>
+              </Button>
+            </label>
+
+            <CloudImportDialog
+              tenantId={currentTenant.id}
+              documentType={selectedBankAccountId !== 'none' ? 'bank_statement' : null}
+              bankAccountId={selectedBankAccountId !== 'none' ? selectedBankAccountId : null}
+              triggerLabel={lt('Cloud Storage')}
+              onImported={() => {
+                if (onUploadComplete) onUploadComplete()
+              }}
+            />
+          </div>
           <p className="text-xs text-gray-500 mt-4">
             {lt('Supported: PDF, Images, Excel/CSV • Max 50MB per file')}
           </p>
