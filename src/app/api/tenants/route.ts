@@ -17,9 +17,9 @@ export async function POST(req: Request) {
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  let body: { name?: string; slug?: string; locale?: string }
+  let body: { name?: string; slug?: string; locale?: string; currency?: string }
   try {
-    body = (await req.json()) as unknown as { name?: string; slug?: string; locale?: string }
+    body = (await req.json()) as unknown as { name?: string; slug?: string; locale?: string; currency?: string }
   } catch {
     return badRequest('Invalid JSON body')
   }
@@ -27,9 +27,12 @@ export async function POST(req: Request) {
   const name = (body?.name || '').trim()
   const slug = (body?.slug || '').trim()
   const locale = (body?.locale || 'en').trim()
+  const currencyRaw = (body?.currency || '').trim()
+  const currency = currencyRaw ? currencyRaw.toUpperCase() : undefined
 
   if (!name) return badRequest('name is required')
   if (!slug) return badRequest('slug is required')
+  if (currency && !/^[A-Z]{3}$/.test(currency)) return badRequest('currency must be a 3-letter ISO code')
 
   const { data: tenant, error: tenantError } = await supabase
     .from('tenants')
@@ -37,6 +40,7 @@ export async function POST(req: Request) {
       name,
       slug,
       locale,
+      ...(currency ? { currency } : {}),
       owner_id: user.id,
       is_active: true,
     })

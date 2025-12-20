@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge'
 import type { Database } from '@/types/database.types'
 import { Label } from '@/components/ui/label'
 import { AvailablePlans, type ContactConfig } from '@/components/subscription/available-plans'
+import { uploadDocumentViaApi } from '@/lib/uploads/upload-document-client'
 
 export function OnboardingView() {
   const lt = useLiterals()
@@ -189,20 +190,8 @@ export function OnboardingView() {
       
       const tenantId = json.id
 
-      // 2. Upload + validate server-side
-      const form = new FormData()
-      form.set('tenantId', tenantId)
-      form.set('file', uploadFile)
-
-      const uploadRes = await fetch('/api/documents/upload', {
-        method: 'POST',
-        body: form,
-      })
-      const uploadJson = await uploadRes.json().catch(() => null)
-      if (!uploadRes.ok) throw new Error(uploadJson?.error || lt('Upload failed'))
-
-      const documentId = String(uploadJson?.documentId || '')
-      if (!documentId) throw new Error(lt('Upload failed'))
+      const uploaded = await uploadDocumentViaApi({ tenantId, file: uploadFile })
+      const documentId = uploaded.documentId
 
       // 3. Trigger processing
       await fetch('/api/documents/process', {
