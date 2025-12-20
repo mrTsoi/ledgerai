@@ -62,8 +62,8 @@ export default function SignupForm() {
       if (!error && data) {
         setPlans(data)
         // Auto-select the first plan (usually Free)
-        if (data.length > 0 && !planId) {
-          setPlanId(data[0].id)
+        if (data.length > 0) {
+          setPlanId((prev) => prev || data[0].id)
         }
       }
     })()

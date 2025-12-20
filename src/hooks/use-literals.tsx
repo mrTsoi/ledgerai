@@ -26,18 +26,31 @@ export function useLiterals() {
     const key = literalKeyFromText(english)
 
     const has = (t as any)?.has
-    if (typeof has === 'function' && !has.call(t, key)) return applyFallbackVars(english, values)
+    const hasKey = (k: string) => (typeof has === 'function' ? !!has.call(t, k) : true)
+
+    // If the exact key is missing, try a case-normalized fallback key.
+    // This is intentionally conservative: it only runs for non-English locales
+    // and only when the exact key isn't present.
+    let lookupKey = key
+    if (!hasKey(lookupKey)) {
+      const lowered = String(english ?? '').toLowerCase()
+      if (lowered !== english) {
+        const altKey = literalKeyFromText(lowered)
+        if (hasKey(altKey)) lookupKey = altKey
+      }
+    }
+    if (!hasKey(lookupKey)) return applyFallbackVars(english, values)
 
     let value = ''
     try {
-      value = String((t as any)(key as any, values as any) ?? '').trim()
+      value = String((t as any)(lookupKey as any, values as any) ?? '').trim()
     } catch {
       return applyFallbackVars(english, values)
     }
     // Some configurations return the key path instead of throwing.
     if (!value) return applyFallbackVars(english, values)
-    if (value === key) return applyFallbackVars(english, values)
-    if (value === `literals.${key}`) return applyFallbackVars(english, values)
+    if (value === lookupKey) return applyFallbackVars(english, values)
+    if (value === `literals.${lookupKey}`) return applyFallbackVars(english, values)
     if (value.startsWith('literals.literal.')) return applyFallbackVars(english, values)
     return value
   }, [locale, t])

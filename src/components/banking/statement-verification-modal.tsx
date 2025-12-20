@@ -113,7 +113,7 @@ export function StatementVerificationModal({ isOpen, onClose, accountId }: Props
     } finally {
       setLoading(false)
     }
-  }, [accountId, supabase])
+  }, [accountId, supabase, lt])
 
   useEffect(() => {
     if (isOpen && accountId) {

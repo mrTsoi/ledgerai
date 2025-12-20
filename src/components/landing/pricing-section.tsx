@@ -51,7 +51,12 @@ export function PricingSection() {
   const formatStorage = (bytes: number) => {
     if (bytes === -1) return lt('Unlimited')
     const gb = bytes / (1024 * 1024 * 1024)
-    return `${gb} GB`
+    const gbDisplay = Number.isFinite(gb)
+      ? Number.isInteger(gb)
+        ? gb.toLocaleString()
+        : gb.toLocaleString(undefined, { maximumFractionDigits: 1 })
+      : String(gb)
+    return lt('{gb} GB', { gb: gbDisplay })
   }
 
   const getFeaturesList = (plan: SubscriptionPlan) => {
@@ -62,9 +67,9 @@ export function PricingSection() {
       text:
         plan.max_tenants === -1
           ? lt('Unlimited Tenants')
-          : plan.max_tenants > 1
-            ? lt('{count} Tenants', { count: plan.max_tenants })
-            : lt('{count} Tenant', { count: plan.max_tenants }),
+          : plan.max_tenants === 1
+            ? lt('1 Tenant')
+            : lt('{count} Tenants', { count: plan.max_tenants }),
       included: true
     })
     features.push({
@@ -75,7 +80,7 @@ export function PricingSection() {
       included: true
     })
     features.push({
-      text: lt('{amount} Storage', { amount: formatStorage(plan.max_storage_bytes) }),
+      text: lt('{storage} Storage', { storage: formatStorage(plan.max_storage_bytes) }),
       included: true
     })
 

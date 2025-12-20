@@ -58,7 +58,7 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
       console.error('Error loading preview:', error)
       toast.error(lt('Failed to load document preview'))
     }
-  }, [supabase])
+  }, [supabase, lt])
 
   useEffect(() => {
     return () => {

@@ -143,7 +143,7 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
     } finally {
       setLoading(false)
     }
-  }, [documentId, supabase])
+  }, [documentId, supabase, lt])
 
   useEffect(() => {
     fetchDetails()

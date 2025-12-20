@@ -14,7 +14,7 @@ function literalKeyFromText(text) {
 function isProbablyHumanString(s) {
   const v = String(s ?? '').trim()
   if (v.length < 3) return false
-  if (v.length > 200) return false
+  if (v.length > 400) return false
   if (!/[A-Za-z]/.test(v)) return false
   if (/^(bg-|text-|px-|py-|mt-|mb-|mx-|my-|grid|flex|items-|justify-)/.test(v)) return false
   if (/^https?:\/\//.test(v)) return false
@@ -72,6 +72,36 @@ async function scanCodebase({ limit }) {
     const rel = path.relative(process.cwd(), filePath).replace(/\\/g, '/')
     const lines = raw.split(/\r?\n/)
 
+    const push = (text, kind, lineOverride) => {
+      const normalized = String(text ?? '').replace(/\s+/g, ' ').trim()
+      if (!isProbablyHumanString(normalized)) return
+      const key = literalKeyFromText(normalized)
+      const sig = `${key}::${normalized}`
+      if (seen.has(sig)) return
+      seen.add(sig)
+      const line = typeof lineOverride === 'number' && Number.isFinite(lineOverride) ? lineOverride : 1
+      found.push({ text: normalized, key, namespace: 'literals', file: rel, line, kind })
+    }
+
+    // Multiline-safe scans for lt('...') and ltVars('...', ...)
+    const ltMultilineRe = /\blt\(\s*(['"`])([\s\S]{2,400}?)\1\s*(?:,|\))/g
+    let mm
+    while ((mm = ltMultilineRe.exec(raw))) {
+      const line = raw.slice(0, mm.index).split(/\r?\n/).length
+      push(mm[2], 'lt-call', line)
+      if (found.length >= limit) break
+    }
+    if (found.length >= limit) break
+
+    const ltVarsMultilineRe = /\bltVars\(\s*(['"`])([\s\S]{2,400}?)\1\s*,/g
+    mm = undefined
+    while ((mm = ltVarsMultilineRe.exec(raw))) {
+      const line = raw.slice(0, mm.index).split(/\r?\n/).length
+      push(mm[2], 'ltvars-call', line)
+      if (found.length >= limit) break
+    }
+    if (found.length >= limit) break
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
 
@@ -80,74 +110,44 @@ async function scanCodebase({ limit }) {
       if (line.includes('useTranslations(') || /\bt\(\s*['"`]/.test(line)) continue
 
       // lt('...') calls (preferred path once components are converted)
-      const ltRe = /\blt\(\s*(['"`])([^'"`]{2,200})\1\s*\)/g
+      const ltRe = /\blt\(\s*(['"`])([^'"`]{2,400})\1\s*\)/g
       let m
       while ((m = ltRe.exec(line))) {
-        const text = String(m[2] ?? '').replace(/\s+/g, ' ').trim()
-        if (!isProbablyHumanString(text)) continue
-        const key = literalKeyFromText(text)
-        const sig = `${key}::${text}`
-        if (seen.has(sig)) continue
-        seen.add(sig)
-        found.push({ text, key, namespace: 'literals', file: rel, line: i + 1, kind: 'lt-call' })
+        push(m[2], 'lt-call', i + 1)
         if (found.length >= limit) break
       }
       if (found.length >= limit) break
 
       // ltVars('...') calls
-      const ltVarsRe = /\bltVars\(\s*(['"`])([^'"`]{2,200})\1\s*,/g
+      const ltVarsRe = /\bltVars\(\s*(['"`])([^'"`]{2,400})\1\s*,/g
       m = undefined
       while ((m = ltVarsRe.exec(line))) {
-        const text = String(m[2] ?? '').replace(/\s+/g, ' ').trim()
-        if (!isProbablyHumanString(text)) continue
-        const key = literalKeyFromText(text)
-        const sig = `${key}::${text}`
-        if (seen.has(sig)) continue
-        seen.add(sig)
-        found.push({ text, key, namespace: 'literals', file: rel, line: i + 1, kind: 'ltvars-call' })
+        push(m[2], 'ltvars-call', i + 1)
         if (found.length >= limit) break
       }
       if (found.length >= limit) break
 
       // JSXText-like: >Something<
-      const jsxRe = />\s*([^<>{}][^<>{}]{1,200}?)\s*</g
+      const jsxRe = />\s*([^<>{}][^<>{}]{1,400}?)\s*</g
       m = undefined
       while ((m = jsxRe.exec(line))) {
-        const text = String(m[1] ?? '').replace(/\s+/g, ' ').trim()
-        if (!isProbablyHumanString(text)) continue
-        const key = literalKeyFromText(text)
-        const sig = `${key}::${text}`
-        if (seen.has(sig)) continue
-        seen.add(sig)
-        found.push({ text, key, namespace: 'literals', file: rel, line: i + 1, kind: 'jsx-text' })
+        push(m[1], 'jsx-text', i + 1)
         if (found.length >= limit) break
       }
       if (found.length >= limit) break
 
       // Attribute strings
-      const attrRe = /(placeholder|title|aria-label|label|alt)=(['"`])([^'"`]{2,200})\2/g
+      const attrRe = /(placeholder|title|aria-label|label|alt)=(['"`])([^'"`]{2,400})\2/g
       while ((m = attrRe.exec(line))) {
-        const text = String(m[3] ?? '').replace(/\s+/g, ' ').trim()
-        if (!isProbablyHumanString(text)) continue
-        const key = literalKeyFromText(text)
-        const sig = `${key}::${text}`
-        if (seen.has(sig)) continue
-        seen.add(sig)
-        found.push({ text, key, namespace: 'literals', file: rel, line: i + 1, kind: 'attr' })
+        push(m[3], 'attr', i + 1)
         if (found.length >= limit) break
       }
       if (found.length >= limit) break
 
       // toast strings
-      const toastRe = /toast\.(success|error|message|warning|info)\(\s*(['"`])([^'"`]{2,200})\2/g
+      const toastRe = /toast\.(success|error|message|warning|info)\(\s*(['"`])([^'"`]{2,400})\2/g
       while ((m = toastRe.exec(line))) {
-        const text = String(m[3] ?? '').replace(/\s+/g, ' ').trim()
-        if (!isProbablyHumanString(text)) continue
-        const key = literalKeyFromText(text)
-        const sig = `${key}::${text}`
-        if (seen.has(sig)) continue
-        seen.add(sig)
-        found.push({ text, key, namespace: 'literals', file: rel, line: i + 1, kind: 'toast' })
+        push(m[3], 'toast', i + 1)
         if (found.length >= limit) break
       }
     }

@@ -11,7 +11,7 @@ function literalKeyFromText(text) {
 function isProbablyHumanString(s) {
   const v = String(s ?? '').trim()
   if (v.length < 3) return false
-  if (v.length > 200) return false
+  if (v.length > 400) return false
   if (!/[A-Za-z]/.test(v)) return false
   if (/^(bg-|text-|px-|py-|mt-|mb-|mx-|my-|grid|flex|items-|justify-)/.test(v)) return false
   if (/^https?:\/\//.test(v)) return false
@@ -69,46 +69,65 @@ async function main() {
     const rel = path.relative(process.cwd(), filePath).replace(/\\/g, '/')
     const lines = raw.split(/\r?\n/)
 
+    const push = (text, kind, lineOverride) => {
+      const normalized = String(text ?? '').replace(/\s+/g, ' ').trim()
+      if (!isProbablyHumanString(normalized)) return
+      const key = literalKeyFromText(normalized)
+      const sig = `${key}::${normalized}`
+      if (seen.has(sig)) return
+      seen.add(sig)
+      const line = typeof lineOverride === 'number' && Number.isFinite(lineOverride) ? lineOverride : 1
+      found.push({ text: normalized, key, namespace: 'literals', file: rel, line, kind })
+    }
+
+    // Multiline-safe scans for lt('...') and ltVars('...', ...)
+    // These are scanned on the full file contents because line-by-line scanning
+    // misses calls formatted across multiple lines (common in page components).
+    const ltMultilineRe = /\blt\(\s*(['"`])([\s\S]{2,400}?)\1\s*(?:,|\))/g
+    let mm
+    while ((mm = ltMultilineRe.exec(raw))) {
+      const line = raw.slice(0, mm.index).split(/\r?\n/).length
+      push(mm[2], 'lt-call', line)
+    }
+    const ltVarsMultilineRe = /\bltVars\(\s*(['"`])([\s\S]{2,400}?)\1\s*,/g
+    mm = undefined
+    while ((mm = ltVarsMultilineRe.exec(raw))) {
+      const line = raw.slice(0, mm.index).split(/\r?\n/).length
+      push(mm[2], 'ltvars-call', line)
+    }
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
       // Skip obvious next-intl translation usage lines.
       // Important: don't do a naive `includes("t('")` because it would also match `lt('...')`.
       if (line.includes('useTranslations(') || /\bt\(\s*['"`]/.test(line)) continue
 
-      const push = (text, kind) => {
-        const normalized = String(text ?? '').replace(/\s+/g, ' ').trim()
-        if (!isProbablyHumanString(normalized)) return
-        const key = literalKeyFromText(normalized)
-        const sig = `${key}::${normalized}`
-        if (seen.has(sig)) return
-        seen.add(sig)
-        found.push({ text: normalized, key, namespace: 'literals', file: rel, line: i + 1, kind })
-      }
+      const pushForLine = (text, kind) => push(text, kind, i + 1)
 
       // lt('...')
-      const ltRe = /\blt\(\s*(['"`])([^'"`]{2,200})\1\s*\)/g
+      const ltRe = /\blt\(\s*(['"`])([^'"`]{2,400})\1\s*\)/g
       let m
-      while ((m = ltRe.exec(line))) push(m[2], 'lt-call')
+      while ((m = ltRe.exec(line))) pushForLine(m[2], 'lt-call')
 
       // ltVars('...',
-      const ltVarsRe = /\bltVars\(\s*(['"`])([^'"`]{2,200})\1\s*,/g
+      const ltVarsRe = /\bltVars\(\s*(['"`])([^'"`]{2,400})\1\s*,/g
       m = undefined
-      while ((m = ltVarsRe.exec(line))) push(m[2], 'ltvars-call')
+      while ((m = ltVarsRe.exec(line))) pushForLine(m[2], 'ltvars-call')
 
       // JSX text >Something<
-      const jsxRe = />\s*([^<>{}][^<>{}]{1,200}?)\s*</g
+      const jsxRe = />\s*([^<>{}][^<>{}]{1,400}?)\s*</g
       m = undefined
-      while ((m = jsxRe.exec(line))) push(m[1], 'jsx-text')
+      while ((m = jsxRe.exec(line))) pushForLine(m[1], 'jsx-text')
 
       // Attributes
-      const attrRe = /(placeholder|title|aria-label|label|alt)=(['"`])([^'"`]{2,200})\2/g
+      const attrRe = /(placeholder|title|aria-label|label|alt)=(['"`])([^'"`]{2,400})\2/g
       m = undefined
-      while ((m = attrRe.exec(line))) push(m[3], 'attr')
+      while ((m = attrRe.exec(line))) pushForLine(m[3], 'attr')
 
       // toast.
-      const toastRe = /toast\.(success|error|message|warning|info)\(\s*(['"`])([^'"`]{2,200})\2/g
+      const toastRe = /toast\.(success|error|message|warning|info)\(\s*(['"`])([^'"`]{2,400})\2/g
       m = undefined
-      while ((m = toastRe.exec(line))) push(m[3], 'toast')
+      while ((m = toastRe.exec(line))) pushForLine(m[3], 'toast')
     }
   }
 

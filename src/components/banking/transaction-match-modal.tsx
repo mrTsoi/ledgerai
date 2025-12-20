@@ -156,7 +156,7 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
     } finally {
       setLoading(false)
     }
-  }, [bankTransaction, dateWindow, searchTerm, supabase])
+  }, [bankTransaction, dateWindow, searchTerm, supabase, lt])
 
   useEffect(() => {
     if (!isOpen || !bankTransaction) return

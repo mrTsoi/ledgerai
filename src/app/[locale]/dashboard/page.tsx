@@ -483,7 +483,8 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, tenantId])
+  }, [supabase, tenantId, lt])
+
 
   useEffect(() => {
     if (tenantId) {
@@ -1245,7 +1246,7 @@ export default function DashboardPage() {
                           {lt('Add widget')}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="z-[60] w-[320px] p-0" align="end">
+                      <PopoverContent className="w-[320px] p-0" align="end">
                         <Command>
                           <CommandInput placeholder={lt('Search widgets…')} />
                           <CommandList>
@@ -1260,11 +1261,8 @@ export default function DashboardPage() {
                                   <CommandItem
                                     key={type}
                                     value={type}
+                                    keywords={[widgetLabels[type]]}
                                     className="cursor-pointer"
-                                    onClick={() => {
-                                      addWidget(type)
-                                      setAddWidgetOpen(false)
-                                    }}
                                     onSelect={() => {
                                       addWidget(type)
                                       setAddWidgetOpen(false)

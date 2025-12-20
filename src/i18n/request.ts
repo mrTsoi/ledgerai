@@ -1,5 +1,5 @@
 import {getRequestConfig} from 'next-intl/server';
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -77,22 +77,42 @@ export default getRequestConfig(async ({requestLocale}) => {
   // 2. Load DB messages
   if (supabaseUrl && supabaseKey) {
     try {
-      // Use the cookie-aware server client when possible so authenticated requests
-      // read translations consistently under RLS.
-      const supabase = await createClient()
+      // Use a plain client to avoid cookie/header issues during i18n loading.
+      // RLS policies on app_translations allow public read, so anon key is sufficient.
+      const supabase = createClient(supabaseUrl, supabaseKey)
 
       // Legacy alias handling:
       // - If DB still contains zh-TW rows, treat them as fallback.
       // - Ensure zh-HK overrides zh-TW (so legacy values never overwrite canonical).
       const localesToFetch = locale === 'zh-HK' ? ['zh-TW', 'zh-HK'] : [locale]
 
-      const { data: dbTranslations, error: dbError } = await supabase
-        .from('app_translations')
-        .select('locale, namespace, key, value')
-        .in('locale', localesToFetch)
+      // Supabase/PostgREST commonly enforces a default max of ~1000 rows per request.
+      // If we only fetch one page, some translations will never be loaded into next-intl,
+      // which shows up as "some literals not translated" even though rows exist in DB.
+      const dbTranslations: any[] = []
+      const pageSize = 1000
+      for (let offset = 0; offset < 100000; offset += pageSize) {
+        const { data, error: dbError } = await supabase
+          .from('app_translations')
+          .select('locale, namespace, key, value')
+          .in('locale', localesToFetch)
+          .order('locale')
+          .order('namespace')
+          .order('key')
+          .range(offset, offset + pageSize - 1)
 
-      if (dbError) {
-        console.error('Error loading translations from DB:', dbError)
+        if (dbError) {
+          console.error('Error loading translations from DB:', dbError)
+          break
+        }
+
+        if (data && data.length > 0) {
+          dbTranslations.push(...data)
+        }
+
+        if (!data || data.length < pageSize) {
+          break
+        }
       }
 
       // 3. Merge
