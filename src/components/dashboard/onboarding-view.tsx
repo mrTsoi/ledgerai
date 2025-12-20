@@ -15,8 +15,8 @@ import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { Badge } from '@/components/ui/badge'
 import type { Database } from '@/types/database.types'
-import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
+import { AvailablePlans, type ContactConfig } from '@/components/subscription/available-plans'
 
 export function OnboardingView() {
   const lt = useLiterals()
@@ -30,7 +30,7 @@ export function OnboardingView() {
   const [plans, setPlans] = useState<Array<Database['public']['Tables']['subscription_plans']['Row']>>([])
   const [plansLoading, setPlansLoading] = useState(true)
   const [upgradingPlanId, setUpgradingPlanId] = useState<string | null>(null)
-  const [billingCycle, setBillingCycle] = useState<'month' | 'year'>('month')
+  const [contactConfig, setContactConfig] = useState<ContactConfig>({ whatsapp: '', email: '' })
 
   const supabase = useMemo(() => createClient(), [])
 
@@ -50,7 +50,7 @@ export function OnboardingView() {
     return 'month'
   }, [subscription])
 
-  const handleSelectPlan = async (plan: Database['public']['Tables']['subscription_plans']['Row']) => {
+  const handleSelectPlan = async (plan: Database['public']['Tables']['subscription_plans']['Row'], interval: 'month' | 'year') => {
     try {
       setUpgradingPlanId(plan.id)
 
@@ -69,7 +69,7 @@ export function OnboardingView() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           planId: plan.id,
-          interval: billingCycle,
+          interval,
           returnUrl: window.location.origin + window.location.pathname,
         }),
       })
@@ -104,6 +104,29 @@ export function OnboardingView() {
         // Ignore: onboarding can still render without plan list.
       } finally {
         if (mounted) setPlansLoading(false)
+      }
+    })()
+    return () => {
+      mounted = false
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const { data } = await (supabase
+          .from('system_settings') as any)
+          .select('setting_value')
+          .eq('setting_key', 'contact_sales_config')
+          .single()
+
+        if (!mounted) return
+        if (data?.setting_value) {
+          setContactConfig(data.setting_value as ContactConfig)
+        }
+      } catch {
+        // Non-fatal
       }
     })()
     return () => {
@@ -165,31 +188,28 @@ export function OnboardingView() {
       if (!res.ok) throw new Error(json?.error || lt('Failed to create company'))
       
       const tenantId = json.id
-      
-      // 2. Upload File
-      const fileExt = uploadFile.name.split('.').pop()
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`
-      const filePath = `${tenantId}/${fileName}`
-      
-      const { error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(filePath, uploadFile)
-        
-      if (uploadError) throw uploadError
 
-      // 3. Create Document Record
-      const { error: docError } = await supabase
-        .from('documents')
-        .insert({
-            tenant_id: tenantId,
-            name: uploadFile.name,
-            file_path: filePath,
-            size: uploadFile.size,
-            mime_type: uploadFile.type,
-            status: 'PENDING'
-        })
+      // 2. Upload + validate server-side
+      const form = new FormData()
+      form.set('tenantId', tenantId)
+      form.set('file', uploadFile)
 
-      if (docError) throw docError
+      const uploadRes = await fetch('/api/documents/upload', {
+        method: 'POST',
+        body: form,
+      })
+      const uploadJson = await uploadRes.json().catch(() => null)
+      if (!uploadRes.ok) throw new Error(uploadJson?.error || lt('Upload failed'))
+
+      const documentId = String(uploadJson?.documentId || '')
+      if (!documentId) throw new Error(lt('Upload failed'))
+
+      // 3. Trigger processing
+      await fetch('/api/documents/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId }),
+      })
 
       toast.success(lt('Company created and document uploaded!'))
       setShowNameDialog(false)
@@ -279,72 +299,14 @@ export function OnboardingView() {
       </div>
 
       <div className="mt-10">
-        <Card>
-          <CardHeader>
-            <CardTitle>{lt('Subscription Plans')}</CardTitle>
-            <CardDescription>
-              {subscription
-                ? lt('Upgrade anytime from Billing & Plans.')
-                : lt('No active subscription found. Please select a plan below.')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-4 flex items-center justify-between gap-4">
-              <div className="text-sm text-muted-foreground">{lt('Billing cycle')}</div>
-              <div className="flex items-center gap-2">
-                <Label className={billingCycle === 'month' ? 'font-medium' : 'text-muted-foreground'}>{lt('Monthly')}</Label>
-                <Switch
-                  checked={billingCycle === 'year'}
-                  onCheckedChange={(v) => setBillingCycle(v ? 'year' : 'month')}
-                  aria-label={lt('Billing cycle')}
-                />
-                <Label className={billingCycle === 'year' ? 'font-medium' : 'text-muted-foreground'}>{lt('Yearly')}</Label>
-              </div>
-            </div>
-
-            {plansLoading ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {lt('Loading…')}
-              </div>
-            ) : plans.length === 0 ? (
-              <div className="text-sm text-muted-foreground">{lt('No subscription plans found.')}</div>
-            ) : (
-              <div className="grid gap-3 md:grid-cols-2">
-                {plans.map((p) => {
-                  const monthly = p.price_monthly ?? 0
-                  const yearly = p.price_yearly ?? null
-                  const selectedPrice = billingCycle === 'year' ? (yearly ?? monthly) : monthly
-                  const cycleLabel = billingCycle === 'year' ? lt('Yearly') : lt('Monthly')
-                  const isCurrent = !!subscription?.plan_name && subscription.plan_name.toLowerCase() === (p.name || '').toLowerCase()
-                  const isBusy = upgradingPlanId === p.id
-                  return (
-                    <div key={p.id} className="flex items-center justify-between rounded-md border p-3">
-                      <div className="min-w-0">
-                        <div className="font-medium truncate">{p.display_name || p.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {selectedPrice === 0 ? lt('Free') : `$${selectedPrice}`} / {cycleLabel}
-                        </div>
-                      </div>
-                      {isCurrent ? (
-                        <Badge variant="secondary">{lt('Current')}</Badge>
-                      ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleSelectPlan(p)}
-                          disabled={upgradingPlanId !== null}
-                        >
-                          {isBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : (monthly === 0 ? lt('Select') : lt('Upgrade'))}
-                        </Button>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <AvailablePlans
+          plans={plans}
+          loading={plansLoading}
+          subscription={subscription}
+          upgradingPlanId={upgradingPlanId}
+          onSelectPlan={handleSelectPlan}
+          contactConfig={contactConfig}
+        />
       </div>
 
       <Dialog open={showNameDialog} onOpenChange={setShowNameDialog}>

@@ -13,8 +13,8 @@ import { useSubscription } from '@/hooks/use-subscription'
 import { importInvoiceToTransactions } from '@/app/actions/billing-actions'
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
-import { FEATURE_DEFINITIONS, isFeatureEnabled } from '@/lib/subscription/features'
 import { useLiterals } from '@/hooks/use-literals'
+import { AvailablePlans } from '@/components/subscription/available-plans'
 
 type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
 
@@ -30,7 +30,6 @@ export function BillingSettings() {
   const [loadingPlans, setLoadingPlans] = useState(true)
   const [upgrading, setUpgrading] = useState<string | null>(null)
   const [importing, setImporting] = useState<string | null>(null)
-  const [billingCycle, setBillingCycle] = useState<'month' | 'year'>('month')
   const [invoices, setInvoices] = useState<any[]>([])
   const [contactConfig, setContactConfig] = useState<ContactConfig>({ whatsapp: '', email: '' })
   const [purchaseModalOpen, setPurchaseModalOpen] = useState(false)
@@ -75,40 +74,6 @@ export function BillingSettings() {
   const formatPrice = (price: number | null) => {
     if (price === 0 || price === null) return lt('Free')
     return `$${price}`
-  }
-
-  const getFeaturesList = (plan: SubscriptionPlan) => {
-    const features: { text: string; included: boolean; isNew?: boolean }[] = []
-
-    // Limits
-    features.push({
-      text:
-        plan.max_tenants === -1
-          ? lt('Unlimited Tenants')
-          : plan.max_tenants === 1
-            ? lt('1 Tenant')
-            : lt('{count} Tenants', { count: plan.max_tenants }),
-      included: true
-    })
-    features.push({
-      text: plan.max_documents === -1 ? lt('Unlimited Documents') : lt('{count} Documents/mo', { count: plan.max_documents }),
-      included: true
-    })
-    features.push({
-      text: lt('{storage} Storage', { storage: formatStorage(plan.max_storage_bytes) }),
-      included: true
-    })
-
-    const featureFlags = (plan.features as any) || {}
-    for (const def of FEATURE_DEFINITIONS) {
-      features.push({
-        text: lt(def.label),
-        included: isFeatureEnabled(featureFlags, def.key),
-        isNew: def.isNew,
-      })
-    }
-
-    return features
   }
 
   // Determine current interval based on period duration (approx > 40 days = year)
@@ -299,19 +264,29 @@ export function BillingSettings() {
     })()
   }, [fetchInvoices, refreshSubscription, subscription])
 
-  const handleUpgrade = async (planId: string) => {
+  const handleSelectPlan = async (plan: SubscriptionPlan, interval: 'month' | 'year') => {
     try {
-      setUpgrading(planId)
-      
+      setUpgrading(plan.id)
+
+      const monthly = plan.price_monthly ?? 0
+      if (monthly === 0) {
+        const res = await fetch('/api/subscription/ensure-free', { method: 'POST' })
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(json?.error || lt('Failed to select Free plan'))
+        await refreshSubscription()
+        toast.success(lt('Subscription plan updated'))
+        return
+      }
+
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          planId,
-          interval: billingCycle,
-          returnUrl: window.location.origin + window.location.pathname
+          planId: plan.id,
+          interval,
+          returnUrl: window.location.origin + window.location.pathname,
         }),
       })
 
@@ -671,187 +646,14 @@ export function BillingSettings() {
       </Card>
 
       {/* Available Plans */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">{lt('Available Plans')}</h2>
-          <div className="flex items-center space-x-2">
-            <Label htmlFor="billing-cycle" className={billingCycle === 'month' ? 'font-bold' : ''}>{lt('Monthly')}</Label>
-            <Switch
-              id="billing-cycle"
-              checked={billingCycle === 'year'}
-              onCheckedChange={(checked) => setBillingCycle(checked ? 'year' : 'month')}
-            />
-            <Label htmlFor="billing-cycle" className={billingCycle === 'year' ? 'font-bold' : ''}>
-              {lt('Yearly')} <span className="text-green-600 text-xs">{lt('(Save ~20%)')}</span>
-            </Label>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {plans.map(plan => {
-            const isSamePlan = subscription?.plan_name === plan.name
-            const isCurrent = isSamePlan && currentInterval === billingCycle
-            const currentPrice = subscription?.price_monthly || 0
-            
-            // Calculate price based on cycle
-            const price = billingCycle === 'year' 
-              ? (plan.price_yearly ? plan.price_yearly / 12 : (plan.price_monthly || 0)) 
-              : (plan.price_monthly || 0)
-              
-            const displayPrice = billingCycle === 'year' 
-              ? (plan.price_yearly || 0)
-              : (plan.price_monthly || 0)
-
-            const isUpgrade = (plan.price_monthly || 0) > currentPrice
-            const isDowngrade = (plan.price_monthly || 0) < currentPrice
-            const isEnterprise = plan.name.toLowerCase().includes('enterprise')
-            
-            let buttonText = lt('Switch Plan')
-            if (isCurrent) {
-              buttonText = lt('Current Plan')
-            } else if (isSamePlan) {
-              if (billingCycle === 'year' && currentInterval === 'month') buttonText = lt('Upgrade to Yearly')
-              else if (billingCycle === 'month' && currentInterval === 'year') buttonText = lt('Switch to Monthly')
-            } else if (isUpgrade) {
-              buttonText = lt('Upgrade')
-            } else if (isDowngrade) {
-              buttonText = lt('Downgrade')
-            }
-
-            // Calculate estimated proration if upgrading
-            let estimatedProration = null
-            if (isUpgrade && subscription?.current_period_end && subscription?.current_period_start) {
-              const now = new Date().getTime()
-              const start = new Date(subscription.current_period_start).getTime()
-              const end = new Date(subscription.current_period_end).getTime()
-              const totalDuration = end - start
-              const remainingDuration = end - now
-              
-              if (remainingDuration > 0 && totalDuration > 0) {
-                const currentPlanPrice = currentInterval === 'year' 
-                  ? (subscription.price_monthly * 12) // Approximation if we don't have yearly price in subscription object
-                  : subscription.price_monthly
-                
-                const unusedValue = (remainingDuration / totalDuration) * currentPlanPrice
-                const newPlanPrice = displayPrice
-                
-                // Only show if there is a significant credit
-                if (unusedValue > 1) {
-                  estimatedProration = Math.max(0, newPlanPrice - unusedValue)
-                }
-              }
-            }
-
-            return (
-              <Card key={plan.id} className={`flex flex-col ${isCurrent ? 'border-blue-500 ring-1 ring-blue-500' : ''}`}>
-                <CardHeader>
-                  <CardTitle>{plan.name ? lt(String(plan.name)) : ''}</CardTitle>
-                  <CardDescription>{plan.description ? lt(String(plan.description)) : ''}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1">
-                  <div className="mb-4">
-                    {isEnterprise ? (
-                      <span className="text-3xl font-bold">{lt('Contact Sales')}</span>
-                    ) : (
-                      <>
-                        <span className="text-3xl font-bold">{formatPrice(displayPrice)}</span>
-                        {displayPrice > 0 && (
-                          <span className="text-gray-500">/{billingCycle === 'year' ? lt('year') : lt('month')}</span>
-                        )}
-                        {billingCycle === 'year' && displayPrice > 0 && (
-                          <div className="text-sm text-gray-500 mt-1">
-                            {lt('(${price}/mo billed yearly)', { price: price.toFixed(2) })}
-                          </div>
-                        )}
-                        {estimatedProration !== null && (
-                          <div className="mt-2 text-xs bg-green-50 text-green-700 p-2 rounded border border-green-100">
-                            <strong>{lt('Upgrade Offer:')}</strong> {lt('Pay only ~${amount} today (prorated)', { amount: estimatedProration.toFixed(2) })}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  <ul className="space-y-2 text-sm">
-                    {getFeaturesList(plan).map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        {feature.included ? (
-                          <Check className="w-4 h-4 text-green-500" />
-                        ) : (
-                          <X className="w-4 h-4 text-gray-300" />
-                        )}
-                        <span className={feature.included ? 'text-gray-900' : 'text-gray-400'}>
-                          {feature.text}
-                          {(feature as any).isNew && feature.included && (
-                            <span className="ml-2 px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">{lt('New')}</span>
-                          )}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  {isEnterprise ? (
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button className="w-full" variant="outline">{lt('Contact Sales')}</Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>{lt('Contact Enterprise Sales')}</DialogTitle>
-                          <DialogDescription>
-                            {lt('Get in touch with our team to discuss a custom plan for your organization.')}
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                          {contactConfig.whatsapp && (
-                            <a 
-                              href={`https://wa.me/${contactConfig.whatsapp}`} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                            >
-                              <div className="bg-green-100 p-2 rounded-full">
-                                <Phone className="w-5 h-5 text-green-600" />
-                              </div>
-                              <div>
-                                <div className="font-semibold">{lt('WhatsApp')}</div>
-                                <div className="text-sm text-gray-500">{lt('Chat with us instantly')}</div>
-                              </div>
-                            </a>
-                          )}
-                          
-                          {contactConfig.email && (
-                            <a 
-                              href={`mailto:${contactConfig.email}`}
-                              className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                            >
-                              <div className="bg-blue-100 p-2 rounded-full">
-                                <Mail className="w-5 h-5 text-blue-600" />
-                              </div>
-                              <div>
-                                <div className="font-semibold">{lt('Email')}</div>
-                                <div className="text-sm text-gray-500">{contactConfig.email}</div>
-                              </div>
-                            </a>
-                          )}
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  ) : (
-                    <Button 
-                      className="w-full" 
-                      variant={isCurrent ? "outline" : "default"}
-                      disabled={isCurrent || upgrading !== null}
-                      onClick={() => handleUpgrade(plan.id)}
-                    >
-                      {upgrading === plan.id ? <Loader2 className="animate-spin" /> : buttonText}
-                    </Button>
-                  )}
-                </CardFooter>
-              </Card>
-            )
-          })}
-        </div>
-      </div>
+      <AvailablePlans
+        plans={plans}
+        loading={loadingPlans}
+        subscription={subscription}
+        upgradingPlanId={upgrading}
+        onSelectPlan={handleSelectPlan}
+        contactConfig={contactConfig}
+      />
     </div>
   )
 }

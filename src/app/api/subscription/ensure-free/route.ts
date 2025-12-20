@@ -22,6 +22,36 @@ export async function POST() {
     )
   }
 
+  // Ensure the user's profile exists.
+  // user_subscriptions.user_id references profiles(id), so older accounts (created before triggers)
+  // or certain edge-cases can fail with FK violations unless we backfill profiles.
+  try {
+    const { data: existingProfile, error: profileErr } = await service
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (profileErr) throw profileErr
+
+    if (!existingProfile?.id) {
+      const fullName =
+        (user.user_metadata as any)?.full_name ||
+        (user.user_metadata as any)?.name ||
+        (user.user_metadata as any)?.display_name ||
+        null
+
+      const { error: insertProfileErr } = await (service.from('profiles') as any).insert({
+        id: user.id,
+        email: user.email || null,
+        full_name: fullName,
+      })
+      if (insertProfileErr) throw insertProfileErr
+    }
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message || 'Failed to ensure profile' }, { status: 400 })
+  }
+
   // Find the Free plan (lowest-priced active plan)
   const { data: planRows, error: planErr } = await service
     .from('subscription_plans')

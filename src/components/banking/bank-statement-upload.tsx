@@ -1,9 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { Upload, Loader2, FileText } from 'lucide-react'
+import { Upload, Loader2 } from 'lucide-react'
 import { useTenant } from '@/hooks/use-tenant'
 import { toast } from "sonner"
 import { useLiterals } from '@/hooks/use-literals'
@@ -17,7 +16,6 @@ export function BankStatementUpload({ accountId, onUploadComplete }: Props) {
   const lt = useLiterals()
   const [uploading, setUploading] = useState(false)
   const { currentTenant } = useTenant()
-  const supabase = createClient()
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -26,33 +24,23 @@ export function BankStatementUpload({ accountId, onUploadComplete }: Props) {
     try {
       setUploading(true)
 
-      // 1. Upload file to storage
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`
-      const filePath = `${currentTenant.id}/${fileName}`
+      // 1) Upload + validate server-side
+      const form = new FormData()
+      form.set('tenantId', currentTenant.id)
+      form.set('documentType', 'bank_statement')
+      form.set('bankAccountId', accountId)
+      form.set('file', file)
 
-      const { error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(filePath, file)
+      const uploadRes = await fetch('/api/documents/upload', {
+        method: 'POST',
+        body: form,
+      })
 
-      if (uploadError) throw uploadError
+      const uploadJson = await uploadRes.json().catch(() => null)
+      if (!uploadRes.ok) throw new Error(uploadJson?.error || 'Upload failed')
 
-      // 2. Create document record
-      const { data: doc, error: docError } = await (supabase
-        .from('documents') as any)
-        .insert({
-          tenant_id: currentTenant.id,
-          file_path: filePath,
-          file_name: file.name,
-          file_size: file.size,
-          file_type: file.type,
-          status: 'UPLOADED',
-          document_type: 'bank_statement' // Explicitly set type
-        })
-        .select()
-        .single()
-
-      if (docError) throw docError
+      const documentId = String(uploadJson?.documentId || '')
+      if (!documentId) throw new Error('Upload failed')
 
       // 3. Trigger AI Processing (via API or Edge Function)
       // For now, we'll call the process endpoint if it exists, or rely on the background trigger
@@ -61,7 +49,7 @@ export function BankStatementUpload({ accountId, onUploadComplete }: Props) {
       await fetch('/api/documents/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId: doc.id })
+        body: JSON.stringify({ documentId })
       })
 
       // 4. Link document to bank account (This might need to happen after processing if we want to verify dates first, 
@@ -84,16 +72,7 @@ export function BankStatementUpload({ accountId, onUploadComplete }: Props) {
       // Let's modify the document schema? No, let's use the metadata field in document_data if possible, but that's created later.
       
       // Alternative: Create a placeholder bank_statement record NOW.
-      const { error: stmtError } = await (supabase
-        .from('bank_statements') as any)
-        .insert({
-          tenant_id: currentTenant.id,
-          bank_account_id: accountId,
-          document_id: (doc as any).id,
-          status: 'IMPORTED' // Will be updated to PROCESSED by AI
-        })
-
-      if (stmtError) console.error('Error linking statement:', stmtError)
+      // bank_statement row is created by /api/documents/upload
 
       onUploadComplete()
       toast.success(lt('Statement uploaded successfully'))
