@@ -14,11 +14,11 @@ The platform currently has a robust foundation for **Multi-tenancy**, **Billing*
   - Tax Amount
   - Line Items
 - **Integration:** Automatically creates a "Draft Transaction" populated with this data.
-- **Tech:** OpenAI GPT-4o with Vision or Google Document AI.
+- **Tech:** OpenRouter, DeepSeek, OpenAI GPT-4o with Vision or Google Document AI.
 
 ### 2. Smart Bank Reconciliation
 **The "Sticky Feature"**
-- **Functionality:** Users upload bank statements (CSV/OFX). The system matches statement lines to existing transactions in LedgerAI.
+- **Functionality:** Users upload bank statements (PDF/CSV/OFX). The system matches statement lines to existing transactions in LedgerAI.
 - **AI Component:** "Smart Match" suggests matches based on fuzzy logic (amount + date + description similarity).
 
 ### 3. Interactive Financial Reports
@@ -32,7 +32,7 @@ The platform currently has a robust foundation for **Multi-tenancy**, **Billing*
 - **Functionality:** Allow Tenant Owners to invite team members.
 - **Roles:**
   - **Viewer:** Read-only access (for investors/auditors).
-  - **Editor:** Can create transactions but not approve.
+  - **Operator:** Can create transactions but not approve.
   - **Accountant:** Full access to financial tools.
   - **Admin:** Full access including billing/users.
 
@@ -47,7 +47,7 @@ We will adjust the plans to monetize based on **Automation (AI)** and **Team Siz
 | Feature | **Free** | **Agency Starter** | **Agency Pro** | **Enterprise** |
 | :--- | :--- | :--- | :--- | :--- |
 | **Price** | $0/mo | $49.99/mo | $199.99/mo | Custom |
-| **Target** | Solopreneurs | Small Firms | Growing Agencies | Large Orgs |
+| **Target** | Solopreneurs | Small Firms | Growing Agencies | Enterprise |
 | **Tenants** | 1 | 10 | 50 | Unlimited |
 | **Team Members** | 1 (Owner only) | 3 per tenant | 10 per tenant | Unlimited |
 | **AI Credits** | 0 | 100 / mo | 1,000 / mo | Unlimited |
