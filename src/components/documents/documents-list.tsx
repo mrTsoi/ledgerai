@@ -707,6 +707,19 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
   }
 
+  const statusLabels: Record<string, string> = {
+    UPLOADED: lt('Uploaded'),
+    PROCESSING: lt('Processing'),
+    PROCESSED: lt('Processed'),
+    FAILED: lt('Failed'),
+  }
+
+  const docTypeLables: Record<string, string> = {
+    bank_statement: lt('Bank Statement'),
+    invoice: lt('Invoice'),
+    receipt: lt('Receipt')
+  }
+
   if (!currentTenant) {
     return (
       <Card>
@@ -840,7 +853,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                       {doc.document_type && (
                         <>
                           <span className="hidden md:inline">•</span>
-                          <span className="capitalize">{doc.document_type}</span>
+                          <span className="capitalize">{docTypeLables[doc.document_type?.toLowerCase()] || doc.document_type}</span>
                         </>
                       )}
                       {(() => {
@@ -883,7 +896,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                 
                 <div className="flex items-center justify-between md:justify-end gap-4 pl-8 md:pl-0">
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${STATUS_COLORS[doc.status]}`}>
-                    {doc.status}
+                    {statusLabels[doc.status] || doc.status}
                   </span>
                   <div className="flex gap-1">
                     <Button
