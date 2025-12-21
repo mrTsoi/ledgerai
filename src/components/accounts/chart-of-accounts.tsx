@@ -258,9 +258,9 @@ export function ChartOfAccounts() {
                     <td className="py-3 px-4 font-mono text-sm">{account.code}</td>
                     <td className="py-3 px-4">
                       <div>
-                        <p className="font-medium">{account.name}</p>
+                        <p className="font-medium">{lt(account.name)}</p>
                         {account.description && (
-                          <p className="text-xs text-gray-500">{account.description}</p>
+                          <p className="text-xs text-gray-500">{lt(account.description)}</p>
                         )}
                       </div>
                     </td>
@@ -269,7 +269,7 @@ export function ChartOfAccounts() {
                         {lt(account.account_type || '')}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-600">{account.account_subtype || '-'}</td>
+                    <td className="py-3 px-4 text-sm text-gray-600">{lt(account.account_subtype || '-')}</td>
                     <td className="py-3 px-4 text-sm font-mono">
                       $0.00
                     </td>
