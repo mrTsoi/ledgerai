@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Check, X, Loader2, Phone, Mail } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
-import { FEATURE_DEFINITIONS, isFeatureEnabled } from '@/lib/subscription/features'
+import { FEATURE_DEFINITIONS, featureKeyToSlug, isFeatureEnabled } from '@/lib/subscription/features'
 import { useLiterals } from '@/hooks/use-literals'
 
 type SubscriptionPlan = Database['public']['Tables']['subscription_plans']['Row']
@@ -60,7 +60,7 @@ export function PricingSection() {
   }
 
   const getFeaturesList = (plan: SubscriptionPlan) => {
-    const features: { text: string; included: boolean; isNew?: boolean }[] = []
+    const features: { text: string; included: boolean; isNew?: boolean; href?: string }[] = []
 
     // Limits
     features.push({
@@ -91,6 +91,7 @@ export function PricingSection() {
         text: lt(def.label),
         included: isFeatureEnabled(featureFlags, def.key),
         isNew: def.isNew,
+        href: `/features/${featureKeyToSlug(def.key)}`,
       })
     }
 
@@ -190,7 +191,16 @@ export function PricingSection() {
                           <X className="w-5 h-5 text-gray-300 flex-shrink-0" />
                         )}
                         <span className={feature.included ? 'text-gray-700' : 'text-gray-400'}>
-                          {feature.text}
+                          {feature.href ? (
+                            <Link
+                              href={feature.href}
+                              className={feature.included ? 'hover:underline' : ''}
+                            >
+                              {feature.text}
+                            </Link>
+                          ) : (
+                            feature.text
+                          )}
                           {feature.isNew && feature.included && (
                             <span className="ml-2 px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">{lt('New')}</span>
                           )}
@@ -262,7 +272,15 @@ export function PricingSection() {
             )
           })}
         </div>
+
+        <div className="mt-10 text-center text-sm text-gray-500">
+          {lt('Want deeper details? Explore all features and what each plan unlocks.')}{' '}
+          <Link href="/features" className="text-blue-600 hover:underline">
+            {lt('Browse features')}
+          </Link>
+        </div>
       </div>
     </section>
   )
 }
+

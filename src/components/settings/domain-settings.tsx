@@ -43,14 +43,14 @@ export function DomainSettings() {
   const { subscription, loading: subLoading } = useSubscription()
   const tenantId = currentTenant?.id
 
-  const hasFeature = subscription?.features?.custom_domain === true
-  if (subLoading || !hasFeature) return null
-
   const [domains, setDomains] = useState<TenantDomainRow[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [domainInput, setDomainInput] = useState('')
   const [schemaMissing, setSchemaMissing] = useState(false)
+
+  const hasFeature = subscription?.features?.custom_domain === true
+  const canRender = !subLoading && hasFeature
 
   const canManage = userRole === 'COMPANY_ADMIN' || userRole === 'SUPER_ADMIN'
 
@@ -85,8 +85,11 @@ export function DomainSettings() {
   }, [tenantId, lt])
 
   useEffect(() => {
+    if (!canRender) return
     fetchDomains()
-  }, [fetchDomains])
+  }, [fetchDomains, canRender])
+
+  if (!canRender) return null
 
   const handleAdd = async () => {
     if (!tenantId) return

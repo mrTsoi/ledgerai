@@ -2,6 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes hero-kenburns {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(1.12) translate3d(-2.5%, -1.8%, 0);
+  }
+}
+
+@keyframes hero-drift {
+  0% {
+    transform: translate3d(-50%, 0, 0) rotate(0deg);
+  }
+  100% {
+    transform: translate3d(-50%, -2%, 0) rotate(1.25deg);
+  }
+}
+
+@keyframes hero-bob {
+  0%,
+  100% {
+    transform: translate3d(var(--tw-translate-x), 0, 0);
+  }
+  50% {
+    transform: translate3d(var(--tw-translate-x), -12px, 0);
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

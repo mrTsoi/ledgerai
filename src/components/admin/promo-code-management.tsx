@@ -162,7 +162,7 @@ export function PromoCodeManagement() {
                     <div className="text-xs text-gray-500 flex gap-4">
                       <span>
                         {ltVars('Uses: {current} / {max}', {
-                          current: code.current_uses,
+                          current: code.current_uses ?? 0,
                           max: code.max_uses || '∞',
                         })}
                       </span>

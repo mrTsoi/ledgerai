@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 export type AiPurpose =
   | 'TRANSLATION'
   | 'CHATBOT'
+  | 'MARKETING'
   | 'DOCUMENT_PROCESSING'
   | 'TRANSACTION_CATEGORIZATION'
   | 'BANK_RECONCILIATION'
