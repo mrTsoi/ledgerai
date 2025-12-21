@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useLiterals } from '@/hooks/use-literals'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
@@ -41,6 +42,7 @@ export function UserSubscriptionList() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [plans, setPlans] = useState<any[]>([])
+  const lt = useLiterals()
   const supabase = useMemo(() => createClient(), [])
 
   const fetchPlans = useCallback(async () => {
@@ -89,9 +91,9 @@ export function UserSubscriptionList() {
 
       if (error) throw error
       fetchSubscriptions()
-      toast.success('Subscription status updated')
+      toast.success(lt('Subscription status updated'))
     } catch (error: any) {
-      toast.error('Error updating status: ' + error.message)
+      toast.error(lt('Error updating status: {message}', { message: error?.message ?? '' }))
     }
   }
 
@@ -104,9 +106,9 @@ export function UserSubscriptionList() {
 
       if (error) throw error
       fetchSubscriptions()
-      toast.success('Subscription plan updated')
+      toast.success(lt('Subscription plan updated'))
     } catch (error: any) {
-      toast.error('Error updating plan: ' + error.message)
+      toast.error(lt('Error updating plan: {message}', { message: error?.message ?? '' }))
     }
   }
 
@@ -118,15 +120,15 @@ export function UserSubscriptionList() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>User Subscriptions</CardTitle>
-        <CardDescription>Manage individual user subscriptions and statuses</CardDescription>
+        <CardTitle>{lt('User Subscriptions')}</CardTitle>
+        <CardDescription>{lt('Manage individual user subscriptions and statuses')}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex items-center gap-4 mb-4">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search users..."
+              placeholder={lt('Search users...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-8"
@@ -140,11 +142,11 @@ export function UserSubscriptionList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Plan</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Renews</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{lt('User')}</TableHead>
+                <TableHead>{lt('Plan')}</TableHead>
+                <TableHead>{lt('Status')}</TableHead>
+                <TableHead>{lt('Renews')}</TableHead>
+                <TableHead className="text-right">{lt('Actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -152,7 +154,7 @@ export function UserSubscriptionList() {
                 <TableRow key={sub.id}>
                   <TableCell>
                     <div>
-                      <div className="font-medium">{sub.profile?.full_name || 'Unknown'}</div>
+                      <div className="font-medium">{sub.profile?.full_name || lt('Unknown')}</div>
                       <div className="text-sm text-muted-foreground">{sub.profile?.email}</div>
                     </div>
                   </TableCell>

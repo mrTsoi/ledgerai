@@ -395,7 +395,7 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
             document?.file_type.startsWith('image/') ? (
               <ImagePreview
                 src={previewUrl}
-                alt="Preview"
+                alt={lt('Preview')}
                 style={{
                   transform: `translate(${position.x}px, ${position.y}px) scale(${zoomLevel / 100})`,
                   transition: isDragging ? 'none' : 'transform 0.2s',
@@ -403,10 +403,10 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
                 className="max-w-full max-h-full object-contain pointer-events-none"
               />
             ) : (
-              <iframe src={previewUrl} className="w-full h-full bg-white" title="PDF Preview" />
+              <iframe src={previewUrl} className="w-full h-full bg-white" title={lt('PDF Preview')} />
             )
           ) : (
-            <div className="text-white opacity-50">No Preview</div>
+            <div className="text-white opacity-50">{lt('No Preview')}</div>
           )}
         </div>
       </div>
@@ -415,7 +415,7 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
       <div className="w-full lg:w-[700px] bg-white h-[60vh] lg:h-full flex flex-col shadow-2xl">
         <div className="p-4 border-b flex items-center justify-between bg-gray-50">
           <div>
-            <h2 className="font-semibold text-lg">Verify Transactions</h2>
+            <h2 className="font-semibold text-lg">{lt('Verify Transactions')}</h2>
             <p className="text-sm text-gray-500">{document?.file_name}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={onClose}>
@@ -427,7 +427,7 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
           <div className="relative flex-1">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
             <Input
-              placeholder="Search transactions..."
+              placeholder={lt('Search transactions...')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8"
@@ -435,7 +435,7 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
           </div>
           <Button variant="outline" onClick={addNewTransaction}>
             <Plus className="w-4 h-4 mr-2" />
-            Add Transaction
+            {lt('Add Transaction')}
           </Button>
         </div>
 
@@ -445,25 +445,25 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
               <TableRow>
                 <TableHead className="w-[130px] cursor-pointer hover:bg-gray-50" onClick={() => handleSort('transaction_date')}>
                   <div className="flex items-center gap-1">
-                    Date
+                    {lt('Date')}
                     <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </TableHead>
                 <TableHead className="cursor-pointer hover:bg-gray-50" onClick={() => handleSort('description')}>
                   <div className="flex items-center gap-1">
-                    Description
+                    {lt('Description')}
                     <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </TableHead>
                 <TableHead className="w-[100px] cursor-pointer hover:bg-gray-50" onClick={() => handleSort('transaction_type')}>
                   <div className="flex items-center gap-1">
-                    Type
+                    {lt('Type')}
                     <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </TableHead>
                 <TableHead className="w-[100px] text-right cursor-pointer hover:bg-gray-50" onClick={() => handleSort('amount')}>
                   <div className="flex items-center gap-1 justify-end">
-                    Amount
+                    {lt('Amount')}
                     <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </TableHead>

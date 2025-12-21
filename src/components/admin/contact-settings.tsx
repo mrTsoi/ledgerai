@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { Loader2, Save, Phone, Mail } from 'lucide-react'
+import { useLiterals } from '@/hooks/use-literals'
 
 interface ContactConfig {
   whatsapp: string
@@ -20,6 +21,7 @@ const DEFAULT_CONFIG: ContactConfig = {
 }
 
 export function ContactSettings() {
+  const lt = useLiterals()
   const [config, setConfig] = useState<ContactConfig>(DEFAULT_CONFIG)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -62,10 +64,10 @@ export function ContactSettings() {
         }, { onConflict: 'setting_key' })
 
       if (error) throw error
-      toast.success('Contact settings saved successfully')
+      toast.success(lt('Contact settings saved successfully'))
     } catch (error: any) {
       console.error('Error saving contact settings:', error)
-      toast.error('Failed to save settings: ' + error.message)
+      toast.error(lt('Failed to save settings: {message}', { message: error?.message ?? '' }))
     } finally {
       setSaving(false)
     }
@@ -78,26 +80,26 @@ export function ContactSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sales Contact Information</CardTitle>
-        <CardDescription>Configure contact details for Enterprise plan inquiries.</CardDescription>
+        <CardTitle>{lt('Sales Contact Information')}</CardTitle>
+        <CardDescription>{lt('Configure contact details for Enterprise plan inquiries.')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-2">
-          <Label htmlFor="whatsapp">WhatsApp Number</Label>
+          <Label htmlFor="whatsapp">{lt('WhatsApp Number')}</Label>
           <div className="flex items-center gap-2">
             <Phone className="w-4 h-4 text-gray-500" />
             <Input
               id="whatsapp"
               value={config.whatsapp}
               onChange={(e) => setConfig({ ...config, whatsapp: e.target.value })}
-              placeholder="e.g. 85251263335"
+              placeholder={lt('e.g. 85251263335')}
             />
           </div>
-          <p className="text-xs text-muted-foreground">Format: Country code + Number (no spaces or symbols)</p>
+          <p className="text-xs text-muted-foreground">{lt('Format: Country code + Number (no spaces or symbols)')}</p>
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="email">Sales Email</Label>
+          <Label htmlFor="email">{lt('Sales Email')}</Label>
           <div className="flex items-center gap-2">
             <Mail className="w-4 h-4 text-gray-500" />
             <Input
@@ -105,7 +107,7 @@ export function ContactSettings() {
               type="email"
               value={config.email}
               onChange={(e) => setConfig({ ...config, email: e.target.value })}
-              placeholder="e.g. sales@example.com"
+              placeholder={lt('e.g. sales@example.com')}
             />
           </div>
         </div>
@@ -114,7 +116,7 @@ export function ContactSettings() {
           <Button onClick={handleSave} disabled={saving}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Save className="mr-2 h-4 w-4" />
-            Save Changes
+            {lt('Save Changes')}
           </Button>
         </div>
       </CardContent>

@@ -143,7 +143,7 @@ export function TeamList() {
                 {/* <UserPlus className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" /> */}
                 <Input
                   type="email"
-                  placeholder="colleague@example.com"
+                  placeholder={lt('colleague@example.com')}
                   className="pl-9"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}

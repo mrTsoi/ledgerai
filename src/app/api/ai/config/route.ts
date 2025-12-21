@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { userHasFeature } from '@/lib/subscription/server'
 
 export const runtime = 'nodejs'
 
@@ -19,6 +20,15 @@ export async function GET(req: Request) {
   const url = new URL(req.url)
   const tenantId = url.searchParams.get('tenant_id')
   if (!tenantId) return badRequest('tenant_id is required')
+
+  try {
+    const ok = await userHasFeature(supabase as any, user.id, 'custom_ai_provider')
+    if (!ok) {
+      return NextResponse.json({ error: 'Custom AI provider configuration is not available on your plan' }, { status: 403 })
+    }
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+  }
 
   const [{ data: providers, error: providersError }, { data: tenantCfg, error: tenantCfgError }] = await Promise.all([
     (supabase.from('ai_providers') as any).select('*').eq('is_active', true).order('display_name'),
@@ -55,6 +65,15 @@ export async function PUT(req: Request) {
 
   const tenantId = body?.tenant_id
   if (!tenantId) return badRequest('tenant_id is required')
+
+  try {
+    const ok = await userHasFeature(supabase as any, user.id, 'custom_ai_provider')
+    if (!ok) {
+      return NextResponse.json({ error: 'Custom AI provider configuration is not available on your plan' }, { status: 403 })
+    }
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+  }
 
   const payload = {
     tenant_id: tenantId,

@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Loader2, Plus, Edit, Trash2, Building2, Users, FileText, DollarSign } from 'lucide-react'
 import { format } from 'date-fns'
 import { toast } from "sonner"
+import { useLiterals } from '@/hooks/use-literals'
 
 type Tenant = Database['public']['Tables']['tenants']['Row'] & {
   is_active?: boolean
@@ -57,6 +58,7 @@ interface TenantDetails {
 }
 
 export function TenantManagement() {
+  const lt = useLiterals()
   const [tenants, setTenants] = useState<Tenant[]>([])
   const [selectedTenant, setSelectedTenant] = useState<TenantDetails | null>(null)
   const [loading, setLoading] = useState(true)
@@ -287,11 +289,14 @@ export function TenantManagement() {
                     <p className="font-semibold truncate">
                       {group.canonical_tenant_name}{' '}
                       <span className="text-sm text-muted-foreground font-normal">
-                        ({group.tenant_ids.length} tenants)
+                        {lt('({count} tenants)', { count: group.tenant_ids.length })}
                       </span>
                     </p>
                     <p className="text-sm text-muted-foreground truncate">
-                      Canonical: {group.canonical_tenant_id} • Normalized: {group.normalized_name}
+                      {lt('Canonical: {canonical} • Normalized: {normalized}', {
+                        canonical: group.canonical_tenant_id,
+                        normalized: group.normalized_name,
+                      })}
                     </p>
                   </div>
                   <Button
@@ -303,12 +308,12 @@ export function TenantManagement() {
                     {mergeRunningForCanonicalId === group.canonical_tenant_id ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Merging...
+                        {lt('Merging...')}
                       </>
                     ) : (
                       <>
                         <Trash2 className="w-4 h-4 mr-2" />
-                        Merge Group
+                        {lt('Merge Group')}
                       </>
                     )}
                   </Button>
@@ -321,7 +326,7 @@ export function TenantManagement() {
         {/* Search */}
         <div className="mb-6">
           <Input
-            placeholder="Search tenants..."
+            placeholder={lt('Search tenants...')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full md:max-w-sm"
@@ -343,7 +348,7 @@ export function TenantManagement() {
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-semibold truncate">{tenant.name}</p>
                     <span className={`px-2 py-1 text-xs rounded-full ${tenant.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                      {tenant.is_active ? 'Active' : 'Inactive'}
+                      {tenant.is_active ? lt('Active') : lt('Inactive')}
                     </span>
                     {tenant.subscription_plan && (
                       <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800 capitalize">
@@ -352,7 +357,10 @@ export function TenantManagement() {
                     )}
                   </div>
                   <p className="text-sm text-gray-500 truncate">
-                    {tenant.slug} • Created {format(new Date(tenant.created_at), 'MMM dd, yyyy')}
+                    {lt('{slug} • Created {date}', {
+                      slug: tenant.slug,
+                      date: format(new Date(tenant.created_at), 'MMM dd, yyyy'),
+                    })}
                   </p>
                 </div>
               </div>
@@ -364,7 +372,7 @@ export function TenantManagement() {
                   className="flex-1 md:flex-none"
                 >
                   <Edit className="w-4 h-4 mr-1" />
-                  Details
+                  {lt('Details')}
                 </Button>
                 <Button
                   variant="outline"
@@ -372,7 +380,7 @@ export function TenantManagement() {
                   onClick={() => toggleTenantStatus(tenant.id, tenant.is_active || false)}
                   className="flex-1 md:flex-none"
                 >
-                  {tenant.is_active ? 'Deactivate' : 'Activate'}
+                  {tenant.is_active ? lt('Deactivate') : lt('Activate')}
                 </Button>
               </div>
             </div>
@@ -382,7 +390,7 @@ export function TenantManagement() {
         {filteredTenants.length === 0 && (
           <div className="text-center py-12 text-gray-500">
             <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>No tenants found</p>
+            <p>{lt('No tenants found')}</p>
           </div>
         )}
       </CardContent>
@@ -391,13 +399,14 @@ export function TenantManagement() {
 }
 
 function CreateTenantForm({ onSubmit, onCancel }: { onSubmit: (data: any) => void; onCancel: () => void }) {
+  const lt = useLiterals()
   const [formData, setFormData] = useState({ name: '', slug: '', locale: 'en', plan: 'free' })
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create New Tenant</CardTitle>
-        <CardDescription>Add a new tenant to the platform</CardDescription>
+        <CardTitle>{lt('Create New Tenant')}</CardTitle>
+        <CardDescription>{lt('Add a new tenant to the platform')}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={(e) => {
@@ -405,57 +414,57 @@ function CreateTenantForm({ onSubmit, onCancel }: { onSubmit: (data: any) => voi
           onSubmit(formData)
         }} className="space-y-4">
           <div>
-            <Label htmlFor="name">Tenant Name *</Label>
+            <Label htmlFor="name">{lt('Tenant Name')} *</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="e.g., Acme Corporation"
+              placeholder={lt('e.g., Acme Corporation')}
               required
             />
           </div>
           <div>
-            <Label htmlFor="slug">Slug (URL-friendly) *</Label>
+            <Label htmlFor="slug">{lt('Slug (URL-friendly)')} *</Label>
             <Input
               id="slug"
               value={formData.slug}
               onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') })}
-              placeholder="e.g., acme-corp"
+              placeholder={lt('e.g., acme-corp')}
               required
             />
-            <p className="text-xs text-gray-500 mt-1">Only lowercase letters, numbers, and hyphens</p>
+            <p className="text-xs text-gray-500 mt-1">{lt('Only lowercase letters, numbers, and hyphens')}</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="locale">Default Locale</Label>
+              <Label htmlFor="locale">{lt('Default Locale')}</Label>
               <select
                 id="locale"
                 value={formData.locale}
                 onChange={(e) => setFormData({ ...formData, locale: e.target.value })}
                 className="w-full px-3 py-2 border rounded-md"
               >
-                <option value="en">English</option>
-                <option value="zh-CN">Chinese (Simplified)</option>
-                <option value="zh-HK">Chinese (Traditional)</option>
+                <option value="en">{lt('English')}</option>
+                <option value="zh-CN">{lt('Chinese (Simplified)')}</option>
+                <option value="zh-HK">{lt('Chinese (Traditional)')}</option>
               </select>
             </div>
             <div>
-              <Label htmlFor="plan">Subscription Plan</Label>
+              <Label htmlFor="plan">{lt('Subscription Plan')}</Label>
               <select
                 id="plan"
                 value={formData.plan}
                 onChange={(e) => setFormData({ ...formData, plan: e.target.value })}
                 className="w-full px-3 py-2 border rounded-md"
               >
-                <option value="free">Free Tier</option>
-                <option value="pro">Professional</option>
-                <option value="enterprise">Enterprise</option>
+                <option value="free">{lt('Free Tier')}</option>
+                <option value="pro">{lt('Professional')}</option>
+                <option value="enterprise">{lt('Enterprise')}</option>
               </select>
             </div>
           </div>
           <div className="flex gap-2 pt-4">
-            <Button type="submit">Create Tenant</Button>
-            <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+            <Button type="submit">{lt('Create Tenant')}</Button>
+            <Button type="button" variant="outline" onClick={onCancel}>{lt('Cancel')}</Button>
           </div>
         </form>
       </CardContent>
@@ -464,6 +473,7 @@ function CreateTenantForm({ onSubmit, onCancel }: { onSubmit: (data: any) => voi
 }
 
 function TenantDetailsView({ tenant, onClose }: { tenant: TenantDetails; onClose: () => void }) {
+  const lt = useLiterals()
   return (
     <Card>
       <CardHeader>
@@ -472,7 +482,7 @@ function TenantDetailsView({ tenant, onClose }: { tenant: TenantDetails; onClose
             <CardTitle>{tenant.tenant_name}</CardTitle>
             <CardDescription>{tenant.tenant_slug}</CardDescription>
           </div>
-          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button variant="outline" onClick={onClose}>{lt('Close')}</Button>
         </div>
       </CardHeader>
       <CardContent>

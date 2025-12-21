@@ -25,6 +25,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, Plus, Save, Trash2, Search, X, Wand2 } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
+import { useLiterals } from '@/hooks/use-literals'
 import { toast } from "sonner"
 
 interface Translation {
@@ -58,6 +59,7 @@ const NAMESPACES = [
 
 export function TranslationManagement() {
   const t = useTranslations('common') // Use common for UI labels
+  const lt = useLiterals()
   const currentLocale = useLocale()
   const sourceLocale = 'en'
   const [languages, setLanguages] = useState<Language[]>([])
@@ -1039,7 +1041,7 @@ export function TranslationManagement() {
             <div className="flex items-center gap-2">
               <Button variant="secondary" onClick={refreshLiteralsReview} disabled={literalsReviewLoading}>
                 {literalsReviewLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                Refresh
+                {lt('Refresh')}
               </Button>
               <Button
                 onClick={startBulkTranslateLiterals}
@@ -1070,7 +1072,7 @@ export function TranslationManagement() {
               </div>
               {literalsBulkRunning ? (
                 <Button variant="outline" onClick={cancelBulk}>
-                  Cancel
+                  {lt('Cancel')}
                 </Button>
               ) : null}
               <Button
@@ -1079,7 +1081,7 @@ export function TranslationManagement() {
                 disabled={literalsReviewLoadingMore || literalsReviewLoading || !literalsReviewHasMore}
               >
                 {literalsReviewLoadingMore ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                Load more
+                {lt('Load more')}
               </Button>
             </div>
             <div className="flex items-center gap-2">
@@ -1089,7 +1091,7 @@ export function TranslationManagement() {
                   onCheckedChange={(v) => setLiteralsReviewOnlyMissing(Boolean(v))}
                   disabled={literalsReviewLoading}
                 />
-                <span className="text-xs text-muted-foreground whitespace-nowrap">Only missing</span>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">{lt('Only missing')}</span>
               </div>
               <span className="text-xs text-muted-foreground whitespace-nowrap">
                 {literalsReviewStats.loaded ? (
@@ -1097,24 +1099,24 @@ export function TranslationManagement() {
                     {literalsReviewStats.displayed} shown / {literalsReviewStats.loaded} loaded · Missing: {literalsReviewStats.missingAny} (zh-CN {literalsReviewStats.missingZhCN}, zh-HK {literalsReviewStats.missingZhHK})
                   </>
                 ) : (
-                  '0 loaded'
+                  lt('0 loaded')
                 )}
               </span>
               <Input
-                placeholder="Search literal key or English text…"
+                placeholder={lt('Search literal key or English text…')}
                 value={literalsReviewQuery}
                 onChange={(e) => setLiteralsReviewQuery(e.target.value)}
                 className="max-w-sm"
               />
               <Button variant="outline" onClick={runLiteralsReviewSearch} disabled={literalsReviewLoading}>
-                Search
+                {lt('Search')}
               </Button>
             </div>
           </div>
 
           {selectedNamespace === 'all' ? (
             <div className="text-xs text-muted-foreground">
-              Tip: Select a specific namespace to manually add/edit rows in the DB table.
+              {lt('Tip: Select a specific namespace to manually add/edit rows in the DB table.')}
             </div>
           ) : null}
 
@@ -1127,19 +1129,19 @@ export function TranslationManagement() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                 <div className="space-y-2">
-                  <Label>Key</Label>
+                  <Label>{lt('Key')}</Label>
                   <Input
                     value={newKey}
                     onChange={(e) => setNewKey(e.target.value)}
-                    placeholder="e.g. save_button"
+                    placeholder={lt('e.g. save_button')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Value</Label>
+                  <Label>{lt('Value')}</Label>
                   <Input
                     value={newValue}
                     onChange={(e) => setNewValue(e.target.value)}
-                    placeholder="Translated text"
+                    placeholder={lt('Translated text')}
                   />
                 </div>
                 <Button onClick={handleAdd}>
@@ -1382,7 +1384,7 @@ export function TranslationManagement() {
             <div className="flex items-center space-x-2 w-full md:w-auto">
               <Search className="w-4 h-4 text-gray-500" />
               <Input
-                placeholder="Search keys or values..."
+                placeholder={lt('Search keys or values...')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full md:w-[360px]"
@@ -1392,7 +1394,9 @@ export function TranslationManagement() {
 
           {selectedNamespace === 'all' ? (
             <div className="text-xs text-muted-foreground">
-              Tip: Use <span className="font-mono">namespace=all</span> to scan/AI-translate the entire UI.
+              {lt('Tip: Use')}{' '}
+              <span className="font-mono">namespace=all</span>{' '}
+              {lt('to scan/AI-translate the entire UI.')}
             </div>
           ) : null}
         </CardHeader>

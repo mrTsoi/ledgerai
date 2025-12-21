@@ -398,15 +398,15 @@ function PlanEditor({ initialData, onSave, onCancel }: {
     <div className="space-y-4 bg-gray-50 p-4 rounded-lg border border-blue-200">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label>Plan Name</Label>
+          <Label>{lt('Plan Name')}</Label>
           <Input 
             value={formData.name} 
             onChange={e => setFormData({...formData, name: e.target.value})} 
-            placeholder="e.g. Pro Plan"
+            placeholder={lt('e.g. Pro Plan')}
           />
         </div>
         <div>
-          <Label>Monthly Price ($)</Label>
+          <Label>{lt('Monthly Price ($)')}</Label>
           <Input 
             type="number" 
             value={formData.price_monthly || 0} 
@@ -416,7 +416,7 @@ function PlanEditor({ initialData, onSave, onCancel }: {
       </div>
       
       <div>
-        <Label>Description</Label>
+        <Label>{lt('Description')}</Label>
         <Input 
           value={formData.description || ''} 
           onChange={e => setFormData({...formData, description: e.target.value})} 
@@ -483,6 +483,16 @@ function PlanEditor({ initialData, onSave, onCancel }: {
             <Label htmlFor="feat_agent" className="font-normal">{lt('AI Agent (Voice/Text)')}</Label>
           </div>
           <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="feat_custom_ai_provider"
+              checked={(formData.features as any)?.custom_ai_provider}
+              onChange={e => updateFeature('custom_ai_provider', e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <Label htmlFor="feat_custom_ai_provider" className="font-normal">{lt('Custom AI Provider')}</Label>
+          </div>
+          <div className="flex items-center gap-2">
             <input 
               type="checkbox" 
               id="feat_bank" 
@@ -543,14 +553,14 @@ function PlanEditor({ initialData, onSave, onCancel }: {
               onChange={e => updateFeature('custom_features', e.target.checked)}
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <Label htmlFor="feat_custom_features" className="font-normal">custom features and more</Label>
+            <Label htmlFor="feat_custom_features" className="font-normal">{lt('Custom features and more')}</Label>
           </div>
         </div>
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-        <Button onClick={() => onSave(formData)}>Save Plan</Button>
+        <Button variant="ghost" onClick={onCancel}>{lt('Cancel')}</Button>
+        <Button onClick={() => onSave(formData)}>{lt('Save Plan')}</Button>
       </div>
     </div>
   )

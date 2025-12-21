@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useTenant, useUserRole } from '@/hooks/use-tenant'
+import { useSubscription } from '@/hooks/use-subscription'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -39,7 +40,11 @@ export function DomainSettings() {
   const lt = useLiterals()
   const { currentTenant } = useTenant()
   const userRole = useUserRole()
+  const { subscription, loading: subLoading } = useSubscription()
   const tenantId = currentTenant?.id
+
+  const hasFeature = subscription?.features?.custom_domain === true
+  if (subLoading || !hasFeature) return null
 
   const [domains, setDomains] = useState<TenantDomainRow[]>([])
   const [loading, setLoading] = useState(true)

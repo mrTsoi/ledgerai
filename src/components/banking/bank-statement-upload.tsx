@@ -34,7 +34,7 @@ export function BankStatementUpload({ accountId, onUploadComplete }: Props) {
       })
 
       const documentId = uploaded.documentId
-      if (!documentId) throw new Error('Upload failed')
+      if (!documentId) throw new Error(lt('Upload failed'))
 
       // 3. Trigger AI Processing (via API or Edge Function)
       // For now, we'll call the process endpoint if it exists, or rely on the background trigger

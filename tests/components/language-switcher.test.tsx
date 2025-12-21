@@ -2,8 +2,6 @@ import React from 'react'
 import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi } from 'vitest'
-
-vi.mock('next-intl', () => ({ useLocale: () => 'en' }))
 const replaceMock = vi.fn()
 vi.mock('@/i18n/navigation', () => ({ usePathname: () => '/', useRouter: () => ({ replace: replaceMock }) }))
 // Use test mock for Select (configured via vitest alias)

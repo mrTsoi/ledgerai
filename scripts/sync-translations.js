@@ -35,14 +35,28 @@ function setNested(target, pathStr, value) {
 async function syncTranslations() {
   console.log('🔄 Fetching translations from database...');
   
-  // 1. Fetch all translations
-  const { data: translations, error } = await supabase
-    .from('app_translations')
-    .select('*');
+  // 1. Fetch all translations (paginate; PostgREST commonly caps at ~1000 rows per request)
+  const translations = []
+  const pageSize = 1000
+  for (let offset = 0; offset < 1000000; offset += pageSize) {
+    const { data, error } = await supabase
+      .from('app_translations')
+      .select('*')
+      .order('id')
+      .range(offset, offset + pageSize - 1)
 
-  if (error) {
-    console.error('Error fetching translations:', error);
-    return;
+    if (error) {
+      console.error('Error fetching translations:', error)
+      return
+    }
+
+    if (data && data.length > 0) {
+      translations.push(...data)
+    }
+
+    if (!data || data.length < pageSize) {
+      break
+    }
   }
 
   if (!translations || translations.length === 0) {
@@ -98,16 +112,34 @@ async function syncTranslations() {
   }
 
   // 4. Clear database
+  // NOTE: Deleting with a single `.in('id', [...])` can exceed URL/query limits and return “Bad Request”.
   console.log('🗑️ Clearing synced translations from database...');
-  const { error: deleteError } = await supabase
-    .from('app_translations')
-    .delete()
-    .in('id', translations.map(t => t.id));
+  const ids = translations.map(t => t.id).filter(Boolean)
+  const deleteBatchSize = 200
+  let deleted = 0
+  let hadDeleteError = false
 
-  if (deleteError) {
-    console.error('Error clearing database:', deleteError);
+  for (let i = 0; i < ids.length; i += deleteBatchSize) {
+    const batchIds = ids.slice(i, i + deleteBatchSize)
+    const { error: deleteError } = await supabase
+      .from('app_translations')
+      .delete()
+      .in('id', batchIds)
+
+    if (deleteError) {
+      hadDeleteError = true
+      console.error(`Error clearing database (batch ${i}–${Math.min(i + deleteBatchSize, ids.length)}):`, deleteError)
+      // Continue attempting remaining batches.
+      continue
+    }
+
+    deleted += batchIds.length
+  }
+
+  if (hadDeleteError) {
+    console.error('⚠️ Some translations could not be deleted. The JSON files were updated, but the DB may still contain rows.')
   } else {
-    console.log('✅ Database cleared. Changes are now permanent in JSON files.');
+    console.log(`✅ Database cleared (${deleted} rows). Changes are now permanent in JSON files.`);
   }
 }
 

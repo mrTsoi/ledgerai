@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Loader2, Filter, Download, RefreshCw, Copy } from 'lucide-react'
 import { format } from 'date-fns'
 import { toast } from "sonner"
+import { useLiterals } from '@/hooks/use-literals'
 
 type AuditLog = Database['public']['Tables']['audit_logs']['Row']
 
@@ -19,6 +20,7 @@ interface AuditLogWithUser extends AuditLog {
 }
 
 export function AuditLogViewer() {
+  const lt = useLiterals()
   const [logs, setLogs] = useState<AuditLogWithUser[]>([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({
@@ -126,19 +128,19 @@ export function AuditLogViewer() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Audit Logs</CardTitle>
+            <CardTitle>{lt('Audit Logs')}</CardTitle>
             <CardDescription>
-              Track all system changes and user actions
+              {lt('Track all system changes and user actions')}
             </CardDescription>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => fetchLogs(filters)}>
               <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
+              {lt('Refresh')}
             </Button>
             <Button variant="outline" size="sm" onClick={exportToCSV}>
               <Download className="w-4 h-4 mr-2" />
-              Export CSV
+              {lt('Export CSV')}
             </Button>
           </div>
         </div>
@@ -148,35 +150,35 @@ export function AuditLogViewer() {
         <div className="mb-6 p-4 bg-gray-50 rounded-lg space-y-4">
           <div className="flex items-center gap-2 mb-3">
             <Filter className="w-4 h-4 text-gray-600" />
-            <span className="font-medium text-sm">Filters</span>
+            <span className="font-medium text-sm">{lt('Filters')}</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
-              <Label htmlFor="search" className="text-xs">Search</Label>
+              <Label htmlFor="search" className="text-xs">{lt('Search')}</Label>
               <Input
                 id="search"
-                placeholder="Search logs..."
+                placeholder={lt('Search logs...')}
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                 className="h-9"
               />
             </div>
             <div>
-              <Label htmlFor="action" className="text-xs">Action</Label>
+              <Label htmlFor="action" className="text-xs">{lt('Action')}</Label>
               <select
                 id="action"
                 value={filters.action}
                 onChange={(e) => setFilters({ ...filters, action: e.target.value })}
                 className="w-full h-9 px-3 border rounded-md text-sm"
               >
-                <option value="">All Actions</option>
+                <option value="">{lt('All Actions')}</option>
                 {actionTypes.map(action => (
                   <option key={action} value={action}>{action}</option>
                 ))}
               </select>
             </div>
             <div>
-              <Label htmlFor="startDate" className="text-xs">Start Date</Label>
+              <Label htmlFor="startDate" className="text-xs">{lt('Start Date')}</Label>
               <Input
                 id="startDate"
                 type="date"
@@ -186,7 +188,7 @@ export function AuditLogViewer() {
               />
             </div>
             <div>
-              <Label htmlFor="endDate" className="text-xs">End Date</Label>
+              <Label htmlFor="endDate" className="text-xs">{lt('End Date')}</Label>
               <Input
                 id="endDate"
                 type="date"

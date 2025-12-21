@@ -66,7 +66,7 @@ export function CloudImportDialog(props: Props) {
   const [parentId, setParentId] = useState<string>('root')
   const [folders, setFolders] = useState<FolderItem[]>([])
   const [loadingFolders, setLoadingFolders] = useState(false)
-  const [trail, setTrail] = useState<Array<{ id: string; name: string }>>([{ id: 'root', name: 'Root' }])
+  const [trail, setTrail] = useState<Array<{ id: string; name: string }>>([{ id: 'root', name: lt('Root') }])
 
   const [folderId, setFolderId] = useState<string | null>(null)
   const [folderName, setFolderName] = useState<string | null>(null)
@@ -158,7 +158,7 @@ export function CloudImportDialog(props: Props) {
     setFolderName(cfgFolderName)
 
     setParentId('root')
-    setTrail([{ id: 'root', name: 'Root' }])
+    setTrail([{ id: 'root', name: lt('Root') }])
     setFolders([])
     void loadWhoami(selectedSource.id)
   }, [selectedSource, loadWhoami])
@@ -189,7 +189,7 @@ export function CloudImportDialog(props: Props) {
 
   const goRoot = () => {
     setParentId('root')
-    setTrail([{ id: 'root', name: 'Root' }])
+    setTrail([{ id: 'root', name: lt('Root') }])
   }
 
   const goInto = (f: FolderItem) => {
@@ -201,7 +201,7 @@ export function CloudImportDialog(props: Props) {
     setTrail((prev) => {
       if (prev.length <= 1) {
         setParentId('root')
-        return [{ id: 'root', name: 'Root' }]
+        return [{ id: 'root', name: lt('Root') }]
       }
       const next = prev.slice(0, -1)
       setParentId(next[next.length - 1].id)

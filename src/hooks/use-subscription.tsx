@@ -20,8 +20,13 @@ export type SubscriptionDetails = {
   next_billing_interval?: 'month' | 'year' | null
   features?: {
     ai_agent?: boolean
+    ai_access?: boolean
+    custom_ai_provider?: boolean
     bank_integration?: boolean
     tax_automation?: boolean
+    custom_domain?: boolean
+    sso?: boolean
+    concurrent_batch_processing?: boolean
     [key: string]: any
   }
 }

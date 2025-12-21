@@ -5,6 +5,7 @@ import { usePathname, useRouter } from '@/i18n/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Globe } from 'lucide-react';
 import { useTransition, useEffect, useState } from 'react';
+import { useLiterals } from '@/hooks/use-literals';
 
 interface Language {
   code: string;
@@ -13,6 +14,7 @@ interface Language {
 }
 
 export function LanguageSwitcher() {
+  const lt = useLiterals();
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -62,7 +64,7 @@ export function LanguageSwitcher() {
         <SelectTrigger className="w-[140px] h-9 border-none bg-transparent focus:ring-0 hover:bg-gray-100">
           <div className="flex items-center gap-2">
             <Globe className="w-4 h-4 text-gray-500" />
-            <SelectValue placeholder="Language" />
+            <SelectValue placeholder={lt('Language')} />
           </div>
         </SelectTrigger>
         <SelectContent align="end">

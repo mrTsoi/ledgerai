@@ -217,6 +217,38 @@ type TenantCorrectionInfo = {
  * Current implementation returns mock data for demonstration purposes.
  */
 export class AIProcessingService {
+  private static async applyTenantTaxDefaults(supabase: any, tenantId: string, extractedData: ExtractedData) {
+    try {
+      // Only apply defaults if tax_amount is missing (0 is a valid tax amount).
+      const hasTaxAmount = typeof extractedData.tax_amount === 'number' && Number.isFinite(extractedData.tax_amount)
+      if (hasTaxAmount) return extractedData
+
+      const total = extractedData.total_amount
+      if (typeof total !== 'number' || !Number.isFinite(total) || total <= 0) return extractedData
+
+      const { data, error } = await (supabase.from('tenant_tax_settings') as any)
+        .select('default_tax_rate')
+        .eq('tenant_id', tenantId)
+        .maybeSingle()
+
+      // If schema isn't present yet or RLS blocks, fail quietly.
+      if (error) return extractedData
+
+      const rate = data?.default_tax_rate
+      if (typeof rate !== 'number' || !Number.isFinite(rate) || rate <= 0 || rate > 1) return extractedData
+
+      // Round to 2 decimals for currency-like values.
+      const computed = Math.round(total * rate * 100) / 100
+      if (!Number.isFinite(computed) || computed < 0) return extractedData
+
+      return {
+        ...extractedData,
+        tax_amount: computed,
+      }
+    } catch {
+      return extractedData
+    }
+  }
   private static resolveMergedProviderConfig(config: any): Record<string, any> {
     const providerCfg = (config?.ai_providers?.config ?? {}) as Record<string, any>
     const tenantCfg = (config?.custom_config ?? {}) as Record<string, any>
@@ -394,6 +426,9 @@ export class AIProcessingService {
 
       // Normalize common provider-specific key variants into our canonical fields
       extractedData = this.sanitizeExtractedData(extractedData) as ExtractedData
+
+      // Tax automation: if AI didn't extract tax_amount, apply tenant default rate
+      extractedData = (await this.applyTenantTaxDefaults(supabase, docRow.tenant_id, extractedData)) as ExtractedData
 
       // --- LOG USAGE START ---
       try {
@@ -1345,6 +1380,20 @@ export class AIProcessingService {
     if (data.opening_balance !== undefined) data.opening_balance = cleanNumber(data.opening_balance)
     if (data.closing_balance !== undefined) data.closing_balance = cleanNumber(data.closing_balance)
     if (data.total_amount !== undefined) data.total_amount = cleanNumber(data.total_amount)
+    if (!data.tax_amount) {
+      data.tax_amount =
+        data.vat_amount ||
+        data.vat ||
+        data.tax_total ||
+        data.total_tax ||
+        data.tax ||
+        data.sales_tax ||
+        data.gst_amount ||
+        data.gst ||
+        data.vat_total ||
+        undefined
+    }
+    if (data.tax_amount !== undefined) data.tax_amount = cleanNumber(data.tax_amount)
     
     if (data.statement_period_start) data.statement_period_start = cleanDate(data.statement_period_start)
     if (data.statement_period_end) data.statement_period_end = cleanDate(data.statement_period_end)

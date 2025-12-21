@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { userHasFeature } from '@/lib/subscription/server'
 
 export const runtime = 'nodejs'
 
@@ -15,6 +16,13 @@ export async function GET(req: Request) {
   } = await supabase.auth.getUser()
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  try {
+    const ok = await userHasFeature(supabase as any, user.id, 'custom_domain')
+    if (!ok) return NextResponse.json({ error: 'Custom domains are not available on your plan' }, { status: 403 })
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+  }
 
   const url = new URL(req.url)
   const tenantId = url.searchParams.get('tenant_id')
@@ -42,6 +50,13 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser()
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  try {
+    const ok = await userHasFeature(supabase as any, user.id, 'custom_domain')
+    if (!ok) return NextResponse.json({ error: 'Custom domains are not available on your plan' }, { status: 403 })
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+  }
 
   let body: { tenant_id?: string; domain?: string }
   try {
@@ -94,6 +109,13 @@ export async function DELETE(req: Request) {
   } = await supabase.auth.getUser()
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  try {
+    const ok = await userHasFeature(supabase as any, user.id, 'custom_domain')
+    if (!ok) return NextResponse.json({ error: 'Custom domains are not available on your plan' }, { status: 403 })
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+  }
 
   const url = new URL(req.url)
   const id = url.searchParams.get('id')

@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState, useEffect } from 'react'
 import { useTenant } from '@/hooks/use-tenant'
+import { useSubscription } from '@/hooks/use-subscription'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,6 +17,7 @@ type AIProvider = Database['public']['Tables']['ai_providers']['Row']
 export function AISettings() {
   const lt = useLiterals()
   const { currentTenant } = useTenant()
+  const { subscription, loading: subLoading } = useSubscription()
   const [loading, setLoading] = useState(false)
   const [testing, setTesting] = useState(false)
   const [testStatus, setTestStatus] = useState<'idle' | 'success' | 'error'>('idle')
@@ -33,6 +35,8 @@ export function AISettings() {
   })
 
   const [isFetchingModels, setIsFetchingModels] = useState(false)
+
+  const hasFeature = subscription?.features?.custom_ai_provider === true
 
   const fetchProviders = useCallback(async () => {
     if (!currentTenant) return
@@ -226,6 +230,7 @@ export function AISettings() {
   }
 
   const handleTestConnection = async () => {
+    if (!currentTenant) return
     if (!config.providerId || !config.apiKey) {
       toast.error(lt('Please select a provider and enter an API key'))
       return
@@ -239,10 +244,11 @@ export function AISettings() {
       const provider = providers.find(p => p.id === config.providerId)
       const checkVision = isVisionSupported()
       
-      const response = await fetch('/api/admin/ai-test', {
+      const response = await fetch('/api/ai/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          tenant_id: currentTenant.id,
           providerName: provider?.name,
           apiKey: config.apiKey,
           modelName: config.modelName,
@@ -307,6 +313,7 @@ export function AISettings() {
     }
   }
 
+  if (subLoading || !hasFeature) return null
   if (!currentTenant) return null
 
   return (
