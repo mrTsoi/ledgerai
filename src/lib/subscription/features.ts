@@ -9,6 +9,18 @@ export type FeatureKey =
   | 'concurrent_batch_processing'
   | 'custom_features'
 
+export const FEATURE_SLUGS: Record<FeatureKey, string> = {
+  ai_access: 'ai-automation',
+  ai_agent: 'ai-agent',
+  custom_ai_provider: 'custom-ai-provider',
+  bank_integration: 'bank-feed-integration',
+  tax_automation: 'tax-automation',
+  custom_domain: 'custom-domain',
+  sso: 'sso',
+  concurrent_batch_processing: 'concurrent-batch-processing',
+  custom_features: 'custom-features',
+}
+
 export type FeatureDefinition = {
   key: FeatureKey
   label: string
@@ -39,6 +51,18 @@ export function isFeatureEnabled(features: unknown, featureKey: FeatureKey): boo
   if (!features || typeof features !== 'object') return false
   const obj = features as Record<string, unknown>
   return obj[featureKey] === true
+}
+
+export function featureKeyToSlug(featureKey: FeatureKey): string {
+  return FEATURE_SLUGS[featureKey]
+}
+
+export function featureSlugToKey(slug: string): FeatureKey | null {
+  const normalized = String(slug || '').trim().toLowerCase()
+  for (const [key, value] of Object.entries(FEATURE_SLUGS) as Array<[FeatureKey, string]>) {
+    if (value === normalized) return key
+  }
+  return null
 }
 
 export function getFeatureLabel(featureKey: FeatureKey): string {

@@ -12,6 +12,22 @@ export type LiteralManifestItem = {
 
 export const literalsManifest: LiteralManifestItem[] = [
   {
+    "text": "Enable core functionality such as login, session management, and security protections.",
+    "key": "literal.0013b404d95f",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 34,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Tenant/workspace information (company name, locale, settings).",
+    "key": "literal.004765d15023",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 38,
+    kind: 'lt-call'
+  },
+  {
     "text": "Last synced: {date}",
     "key": "literal.00abb06b6088",
     namespace: 'literals',
@@ -56,7 +72,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0123506e5a2d",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 170,
+    "line": 173,
     kind: 'lt-call'
   },
   {
@@ -65,6 +81,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 1251,
+    kind: 'lt-call'
+  },
+  {
+    "text": "2. How we use cookies",
+    "key": "literal.017a54b9c506",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 31,
     kind: 'lt-call'
   },
   {
@@ -92,6 +116,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Depending on how the platform is configured, we may collect:",
+    "key": "literal.01d09358bd52",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 35,
+    kind: 'lt-call'
+  },
+  {
     "text": "No active subscription found. Please select a plan below.",
     "key": "literal.01e8f2cb2453",
     namespace: 'literals',
@@ -112,7 +144,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0216649c7f3c",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 395,
+    "line": 397,
     kind: 'toast'
   },
   {
@@ -160,7 +192,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.034d7c5a4339",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 279,
+    "line": 280,
     kind: 'lt-call'
   },
   {
@@ -172,11 +204,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "6. Customer data and content",
+    "key": "literal.03ad00af635f",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 69,
+    kind: 'lt-call'
+  },
+  {
     "text": "No documents match your search.",
     "key": "literal.0403eda77442",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
     "line": 796,
+    kind: 'lt-call'
+  },
+  {
+    "text": "We may update this Privacy Policy from time to time. If changes are material, we will provide reasonable notice through the platform or other channels.",
+    "key": "literal.04150de5769c",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 109,
     kind: 'lt-call'
   },
   {
@@ -192,7 +240,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0449e1003dd0",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1366,
+    "line": 1368,
     kind: 'jsx-text'
   },
   {
@@ -248,15 +296,23 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.05d577e1138d",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 984,
+    "line": 986,
     kind: 'toast'
+  },
+  {
+    "text": "8. Your choices and rights",
+    "key": "literal.0602a7acd5a6",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 93,
+    kind: 'lt-call'
   },
   {
     "text": "Domain verified",
     "key": "literal.0633c7171cc6",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 145,
+    "line": 148,
     kind: 'lt-call'
   },
   {
@@ -265,6 +321,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
     "line": 492,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Your administrator may configure third-party AI providers. Use of those providers may be subject to separate terms.",
+    "key": "literal.0652485e6df6",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 81,
+    kind: 'lt-call'
+  },
+  {
+    "text": "We may use cookies and similar technologies to:",
+    "key": "literal.068f7dea228c",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 32,
     kind: 'lt-call'
   },
   {
@@ -296,7 +368,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.07259fb2f37e",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 577,
+    "line": 578,
     kind: 'lt-call'
   },
   {
@@ -380,6 +452,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Depending on your location and role (end-user vs. tenant admin), you may have rights to access, correct, export, or delete your information. Some requests may need to be handled by your organization’s administrator if they are the controller.",
+    "key": "literal.0982d31b6dcf",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 95,
+    kind: 'lt-call'
+  },
+  {
     "text": "Triggering AI processing...",
     "key": "literal.09875eba5779",
     namespace: 'literals',
@@ -452,6 +532,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'jsx-text'
   },
   {
+    "text": "Send an enquiry to the sales team using the contact methods configured by the platform admin.",
+    "key": "literal.0a4a5e519042",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 129,
+    kind: 'lt-call'
+  },
+  {
     "text": "Failed to download document",
     "key": "literal.0a6722dbeb82",
     namespace: 'literals',
@@ -476,11 +564,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Please enter your message.",
+    "key": "literal.0a9cf34ff112",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 101,
+    kind: 'lt-call'
+  },
+  {
     "text": "from",
     "key": "literal.0b1e95cfd977",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 489,
+    "line": 490,
     kind: 'lt-call'
   },
   {
@@ -503,8 +599,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Blog",
     "key": "literal.0b9d2b2362bc",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 196,
+    "file": "src/app/[locale]/blog/page.tsx",
+    "line": 12,
     kind: 'lt-call'
   },
   {
@@ -575,8 +671,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Terms of Service",
     "key": "literal.0c8a9a95e21a",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 204,
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 12,
     kind: 'lt-call'
   },
   {
@@ -592,7 +688,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0caaf24ab1a0",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 202,
+    "line": 205,
     kind: 'lt-call'
   },
   {
@@ -617,6 +713,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
     "line": 427,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Subject (optional)",
+    "key": "literal.0d675638196a",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 148,
     kind: 'lt-call'
   },
   {
@@ -724,11 +828,35 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Access to tenants and features is controlled by roles, permissions, and subscription plans. Your administrator may provision, suspend, or remove accounts within their tenant(s).",
+    "key": "literal.0f9e0b3e41b2",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 40,
+    kind: 'lt-call'
+  },
+  {
     "text": "Enable/disable providers and control how many AI calls each provider can receive per month.",
     "key": "literal.0fe2ac82f9fe",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 376,
+    "line": 377,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Trials: trial availability and duration may vary by plan or promotion.",
+    "key": "literal.1058e173c6e9",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 51,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Usage and device data (log events, IP address, browser/device identifiers).",
+    "key": "literal.10694b309e36",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 41,
     kind: 'lt-call'
   },
   {
@@ -812,11 +940,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "See features",
+    "key": "literal.1301686c3af4",
+    namespace: 'literals',
+    "file": "src/app/[locale]/demo/page.tsx",
+    "line": 24,
+    kind: 'lt-call'
+  },
+  {
     "text": "Enter your password",
     "key": "literal.1378167d5266",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
     "line": 173,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Extract invoices and receipts, propose categorization, and keep an auditable trail of decisions.",
+    "key": "literal.137a6842c07e",
+    namespace: 'literals',
+    "file": "src/app/[locale]/page.tsx",
+    "line": 94,
     kind: 'lt-call'
   },
   {
@@ -852,6 +996,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "About LedgerAI",
+    "key": "literal.143506c6aa68",
+    namespace: 'literals',
+    "file": "src/app/[locale]/about/page.tsx",
+    "line": 12,
+    kind: 'lt-call'
+  },
+  {
     "text": "Reprocess with AI",
     "key": "literal.146dc0324537",
     namespace: 'literals',
@@ -864,7 +1016,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.148902b903ec",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 561,
+    "line": 562,
     kind: 'lt-call'
   },
   {
@@ -928,7 +1080,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.15830e3b0e7c",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 160,
+    "line": 163,
     kind: 'lt-call'
   },
   {
@@ -944,7 +1096,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.15c0821e1525",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1104,
+    "line": 1106,
     kind: 'lt-call'
   },
   {
@@ -988,6 +1140,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Advanced features for paid subscriptions",
+    "key": "literal.172d82d06b11",
+    namespace: 'literals',
+    "file": "src/app/[locale]/page.tsx",
+    "line": 135,
+    kind: 'lt-call'
+  },
+  {
     "text": "External sources and next runs",
     "key": "literal.176671fa9d04",
     namespace: 'literals',
@@ -1020,6 +1180,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Access the Service in a way intended to avoid plan limits or bypass security controls.",
+    "key": "literal.17a2ab1f4b9e",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 63,
+    kind: 'lt-call'
+  },
+  {
     "text": "Will Keep",
     "key": "literal.17b002751673",
     namespace: 'literals',
@@ -1040,7 +1208,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.184f6b1259e5",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 568,
+    "line": 569,
     kind: 'lt-call'
   },
   {
@@ -1092,11 +1260,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "In connection with a corporate transaction (e.g., merger, acquisition), subject to appropriate safeguards.",
+    "key": "literal.194b2a34deac",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 74,
+    kind: 'lt-call'
+  },
+  {
     "text": "Only Company Admins can change this setting",
     "key": "literal.1967b1c51ca3",
     namespace: 'literals',
     "file": "src/components/settings/tenant-mismatch-policy-settings.tsx",
     "line": 114,
+    kind: 'lt-call'
+  },
+  {
+    "text": "7. AI features",
+    "key": "literal.1979dc1d3025",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 76,
     kind: 'lt-call'
   },
   {
@@ -1160,7 +1344,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1a991e5e5291",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 358,
+    "line": 359,
     kind: 'lt-call'
   },
   {
@@ -1200,7 +1384,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1bc64e73f436",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 378,
+    "line": 422,
     kind: 'lt-call'
   },
   {
@@ -1208,7 +1392,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1bc9e586752f",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1308,
+    "line": 1310,
     kind: 'jsx-text'
   },
   {
@@ -1217,6 +1401,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/reconciliation-feed.tsx",
     "line": 617,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Manage multiple companies or clients from a single workspace with strict data isolation.",
+    "key": "literal.1c297befeca8",
+    namespace: 'literals',
+    "file": "src/app/[locale]/page.tsx",
+    "line": 99,
     kind: 'lt-call'
   },
   {
@@ -1284,19 +1476,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "These Terms are governed by the laws of the Hong Kong Special Administrative Region, without regard to conflict of laws principles. You agree to submit to the exclusive jurisdiction of the courts of Hong Kong SAR for disputes arising out of or relating to these Terms or the Service, except where applicable law requires otherwise.",
+    "key": "literal.1d7da41d9870",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 120,
+    kind: 'lt-call'
+  },
+  {
     "text": "Irreversible actions for this account.",
     "key": "literal.1dec4399ba85",
     namespace: 'literals',
     "file": "src/components/banking/bank-account-settings.tsx",
     "line": 157,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Manage multiple companies or clients from a single dashboard with strict data isolation.",
-    "key": "literal.1df7ef76f955",
-    namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 140,
     kind: 'lt-call'
   },
   {
@@ -1377,6 +1569,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/transactions/transaction-editor.tsx",
     "line": 73,
+    kind: 'lt-call'
+  },
+  {
+    "text": "If enabled by your administrator, analytics cookies help us understand usage patterns and improve performance. Deployments may vary in whether analytics is enabled and which provider is used.",
+    "key": "literal.1f9ab14692b4",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 59,
     kind: 'lt-call'
   },
   {
@@ -1476,11 +1676,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "LedgerAI (“we”, “us”, “our”) is operated by SophieSoft Company Limited and provides a multi-tenant accounting platform that helps users manage financial workflows, documents, and reporting.",
+    "key": "literal.21329a9e9f5a",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 26,
+    kind: 'lt-call'
+  },
+  {
     "text": "Chatbot Appearance",
     "key": "literal.2167d62a155b",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 304,
+    "line": 348,
     kind: 'lt-call'
   },
   {
@@ -1532,6 +1740,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Monitor performance, debug issues, and improve reliability and security.",
+    "key": "literal.22500e25a2fa",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 52,
+    kind: 'lt-call'
+  },
+  {
     "text": "Manage your account hierarchy",
     "key": "literal.22545fec8587",
     namespace: 'literals',
@@ -1545,6 +1761,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 1202,
+    kind: 'lt-call'
+  },
+  {
+    "text": "These cookies remember choices such as language or region so the Service can provide a more consistent experience.",
+    "key": "literal.22a309a35707",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 53,
     kind: 'lt-call'
   },
   {
@@ -1567,8 +1791,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Start Free Trial",
     "key": "literal.22c637aa3f53",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 92,
+    "file": "src/app/[locale]/features/page.tsx",
+    "line": 48,
     kind: 'lt-call'
   },
   {
@@ -1585,6 +1809,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
     "line": 390,
+    kind: 'lt-call'
+  },
+  {
+    "text": "This feature is not currently enabled in any active plan.",
+    "key": "literal.230dfe7ed026",
+    namespace: 'literals',
+    "file": "src/app/[locale]/features/[slug]/page.tsx",
+    "line": 138,
     kind: 'lt-call'
   },
   {
@@ -1644,14 +1876,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "© {year} LedgerAI Inc. All rights reserved.",
-    "key": "literal.242a2503895f",
-    namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 210,
-    kind: 'lt-call'
-  },
-  {
     "text": "Sync complete! Created: {created}, Exists: {exists}",
     "key": "literal.248ab7e9a2b0",
     namespace: 'literals',
@@ -1676,6 +1900,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'jsx-text'
   },
   {
+    "text": "© {year} SophieSoft Company Limited. All rights reserved.",
+    "key": "literal.24ae35ccec77",
+    namespace: 'literals',
+    "file": "src/components/landing/marketing-shell.tsx",
+    "line": 106,
+    kind: 'lt-call'
+  },
+  {
     "text": "No tenant assignments",
     "key": "literal.24cc68bc0bc3",
     namespace: 'literals',
@@ -1697,6 +1929,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 1222,
+    kind: 'lt-call'
+  },
+  {
+    "text": "3. How we use information",
+    "key": "literal.251aafaddf32",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 46,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Add Video",
+    "key": "literal.25221bac3ba0",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 600,
     kind: 'lt-call'
   },
   {
@@ -1728,7 +1976,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.257eb9ec860e",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 248,
+    "line": 250,
     kind: 'toast'
   },
   {
@@ -1760,7 +2008,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.263a937af9d5",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 299,
+    "line": 300,
     kind: 'lt-call'
   },
   {
@@ -1776,7 +2024,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.268c2f0facbb",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1035,
+    "line": 1037,
     kind: 'jsx-text'
   },
   {
@@ -1792,7 +2040,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.26d7b218c9b5",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 330,
+    "line": 374,
     kind: 'lt-call'
   },
   {
@@ -1884,14 +2132,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Accounting Reimagined with",
-    "key": "literal.28beea42ffc2",
-    namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 82,
-    kind: 'lt-call'
-  },
-  {
     "text": "Custom Configuration (JSON)",
     "key": "literal.28c7df667a5a",
     namespace: 'literals',
@@ -1913,6 +2153,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
     "line": 374,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Reverse engineer, decompile, or attempt to discover source code except where permitted by law.",
+    "key": "literal.29473fa45dcb",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 61,
     kind: 'lt-call'
   },
   {
@@ -1970,14 +2218,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/lib/uploads/validate-upload.ts",
     "line": 99,
     kind: 'jsx-text'
-  },
-  {
-    "text": "Handle transactions in any currency with real-time exchange rates and automatic gain/loss calculation.",
-    "key": "literal.2a5126bca3f6",
-    namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 125,
-    kind: 'lt-call'
   },
   {
     "text": "AI Integration",
@@ -2040,7 +2280,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2bb22b1a1b8e",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 396,
+    "line": 440,
     kind: 'lt-call'
   },
   {
@@ -2097,6 +2337,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/tenant-mismatch-policy-settings.tsx",
     "line": 163,
+    kind: 'lt-call'
+  },
+  {
+    "text": "We retain information for as long as needed to provide the service, meet contractual obligations, and comply with legal requirements. Retention periods may be configured by your administrator depending on tenant and compliance needs.",
+    "key": "literal.2c37d5726034",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 81,
     kind: 'lt-call'
   },
   {
@@ -2167,8 +2415,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "LedgerAI",
     "key": "literal.2d6a9f52bc7e",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 58,
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 182,
     kind: 'jsx-text'
   },
   {
@@ -2212,6 +2460,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "1. Who we are",
+    "key": "literal.2e8946558ffa",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 24,
+    kind: 'lt-call'
+  },
+  {
     "text": "Secret copied to clipboard",
     "key": "literal.2e9300f79007",
     namespace: 'literals',
@@ -2248,7 +2504,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2fe10316b780",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 117,
+    "line": 120,
     kind: 'lt-call'
   },
   {
@@ -2276,6 +2532,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Taxes: you are responsible for any applicable taxes unless stated otherwise.",
+    "key": "literal.30563b7fd6a1",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 53,
+    kind: 'lt-call'
+  },
+  {
+    "text": "These cookies are required for the Service to function (e.g., authentication, security, load balancing). Disabling them may prevent the Service from working properly.",
+    "key": "literal.30a34eddb60f",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 47,
+    kind: 'lt-call'
+  },
+  {
     "text": "Folder",
     "key": "literal.30baa24967e0",
     namespace: 'literals',
@@ -2296,7 +2568,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.30e18d050614",
     namespace: 'literals',
     "file": "src/components/landing/pricing-section.tsx",
-    "line": 210,
+    "line": 220,
     kind: 'lt-call'
   },
   {
@@ -2340,6 +2612,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Sales contact",
+    "key": "literal.325acd4992b4",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 166,
+    kind: 'lt-call'
+  },
+  {
     "text": "Subscription limit reached",
     "key": "literal.3269f940a36d",
     namespace: 'literals',
@@ -2353,6 +2633,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/tenant-mismatch-policy-settings.tsx",
     "line": 189,
+    kind: 'lt-call'
+  },
+  {
+    "text": "AI suggestion applied (review and save).",
+    "key": "literal.33355b1a25c9",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 656,
     kind: 'lt-call'
   },
   {
@@ -2424,7 +2712,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.33dcec9ce454",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 405,
+    "line": 449,
     kind: 'lt-call'
   },
   {
@@ -2432,7 +2720,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.33fff61d0a17",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1341,
+    "line": 1343,
     kind: 'jsx-text'
   },
   {
@@ -2504,7 +2792,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.34c421c55257",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1186,
+    "line": 1188,
     kind: 'jsx-text'
   },
   {
@@ -2584,7 +2872,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.35dd6a8a9215",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 546,
+    "line": 547,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Learn about SSO",
+    "key": "literal.3611f1eb9256",
+    namespace: 'literals',
+    "file": "src/app/[locale]/security/page.tsx",
+    "line": 21,
     kind: 'lt-call'
   },
   {
@@ -2608,7 +2904,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.365a510c95b6",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 197,
+    "line": 198,
     kind: 'lt-call'
   },
   {
@@ -2641,6 +2937,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/reconciliation-feed.tsx",
     "line": 329,
+    kind: 'lt-call'
+  },
+  {
+    "text": "10. Disclaimers",
+    "key": "literal.36a86974847b",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 100,
     kind: 'lt-call'
   },
   {
@@ -2680,7 +2984,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.378cbbf54cbb",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 191,
+    "line": 201,
     kind: 'lt-call'
   },
   {
@@ -2696,7 +3000,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.385b4b232f2a",
     namespace: 'literals',
     "file": "src/components/landing/pricing-section.tsx",
-    "line": 161,
+    "line": 162,
     kind: 'lt-call'
   },
   {
@@ -2705,6 +3009,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/subscription/available-plans.tsx",
     "line": 108,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Accounting Workflows",
+    "key": "literal.387a38892a35",
+    namespace: 'literals',
+    "file": "src/app/[locale]/page.tsx",
+    "line": 113,
     kind: 'lt-call'
   },
   {
@@ -2785,6 +3097,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
     "line": 945,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Video (mp4)",
+    "key": "literal.3949324018da",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 563,
     kind: 'lt-call'
   },
   {
@@ -2904,7 +3224,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3acdcbf37a50",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 421,
+    "line": 422,
     kind: 'lt-call'
   },
   {
@@ -2952,7 +3272,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3b4e29469356",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 327,
+    "line": 371,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Product Demo",
+    "key": "literal.3b6ba9ce3594",
+    namespace: 'literals',
+    "file": "src/app/[locale]/demo/page.tsx",
+    "line": 15,
     kind: 'lt-call'
   },
   {
@@ -2968,7 +3296,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3b9ba1a25151",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 504,
+    "line": 505,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Send via Email",
+    "key": "literal.3baa1426342f",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 182,
     kind: 'lt-call'
   },
   {
@@ -3000,7 +3336,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3c387a643700",
     namespace: 'literals',
     "file": "src/app/[locale]/page.tsx",
-    "line": 113,
+    "line": 87,
     kind: 'lt-call'
   },
   {
@@ -3084,6 +3420,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "With service providers that support platform functionality (hosting, storage, email delivery, analytics) as configured.",
+    "key": "literal.3e1f4455df4f",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 71,
+    kind: 'lt-call'
+  },
+  {
     "text": "Used when cron calls omit a limit (1–50).",
     "key": "literal.3e29c4990f9e",
     namespace: 'literals',
@@ -3097,6 +3441,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/bank-account-settings.tsx",
     "line": 163,
+    kind: 'lt-call'
+  },
+  {
+    "text": "AI provider governance",
+    "key": "literal.3e66dff0d0dc",
+    namespace: 'literals',
+    "file": "src/app/[locale]/roadmap/page.tsx",
+    "line": 24,
     kind: 'lt-call'
   },
   {
@@ -3145,6 +3497,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/transactions/transaction-editor.tsx",
     "line": 70,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Your email",
+    "key": "literal.3fa6f5fb505a",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 140,
     kind: 'lt-call'
   },
   {
@@ -3208,7 +3568,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.40b54b30fb28",
     namespace: 'literals',
     "file": "src/app/[locale]/page.tsx",
-    "line": 134,
+    "line": 108,
     kind: 'lt-call'
   },
   {
@@ -3240,7 +3600,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.43020c2a0bc6",
     namespace: 'literals',
     "file": "src/app/[locale]/page.tsx",
-    "line": 114,
+    "line": 88,
     kind: 'lt-call'
   },
   {
@@ -3249,6 +3609,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/tenant-settings.tsx",
     "line": 75,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Hero Badge",
+    "key": "literal.434d40e2c2a4",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 475,
     kind: 'lt-call'
   },
   {
@@ -3312,7 +3680,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.44a4d6d942f2",
     namespace: 'literals',
     "file": "src/components/landing/pricing-section.tsx",
-    "line": 131,
+    "line": 132,
     kind: 'lt-call'
   },
   {
@@ -3372,11 +3740,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "This Cookie Policy is a general template. Your actual cookie usage depends on your deployment, analytics settings, and authentication configuration. Review and adapt as needed.",
+    "key": "literal.4591d9a2e4be",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 18,
+    kind: 'lt-call'
+  },
+  {
+    "text": "AI Assist",
+    "key": "literal.45a2370a0026",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 622,
+    kind: 'lt-call'
+  },
+  {
     "text": "Bottom Right",
     "key": "literal.45c0e2551b03",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 356,
+    "line": 400,
     kind: 'lt-call'
   },
   {
@@ -3392,7 +3776,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.45e118d0563e",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 406,
+    "line": 450,
     kind: 'lt-call'
   },
   {
@@ -3552,7 +3936,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.47bc32f5cd23",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 273,
+    "line": 276,
     kind: 'lt-call'
   },
   {
@@ -3616,7 +4000,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.499a3c9706dd",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 258,
+    "line": 261,
     kind: 'lt-call'
   },
   {
@@ -3656,7 +4040,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4a6c11ab8104",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 389,
+    "line": 433,
     kind: 'lt-call'
   },
   {
@@ -3674,6 +4058,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/documents/documents-list.tsx",
     "line": 265,
     kind: 'ltvars-call'
+  },
+  {
+    "text": "Security & Auditability",
+    "key": "literal.4acfd983c127",
+    namespace: 'literals',
+    "file": "src/app/[locale]/page.tsx",
+    "line": 103,
+    kind: 'lt-call'
   },
   {
     "text": "Failed to add language",
@@ -3700,11 +4092,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Important",
+    "key": "literal.4b6d6a30150a",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 16,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Marketing / Website Copy",
+    "key": "literal.4b8030a889e8",
+    namespace: 'literals',
+    "file": "src/components/admin/ai-provider-management.tsx",
+    "line": 197,
+    kind: 'lt-call'
+  },
+  {
     "text": "Default AI Provider",
     "key": "literal.4b83c1177f70",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 543,
+    "line": 544,
     kind: 'lt-call'
   },
   {
@@ -3756,14 +4164,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Built-in support for international accounting standards and tax regulations across multiple regions.",
-    "key": "literal.4c779a1fa783",
-    namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 145,
-    kind: 'lt-call'
-  },
-  {
     "text": "Failed to load folders: {message}",
     "key": "literal.4d088fd39b82",
     namespace: 'literals',
@@ -3812,6 +4212,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Rotation Seconds",
+    "key": "literal.4decdfc809ee",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 528,
+    kind: 'lt-call'
+  },
+  {
     "text": "Draft transactions",
     "key": "literal.4df8900f25ab",
     namespace: 'literals',
@@ -3820,11 +4228,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "You are responsible for all activity that occurs under your account credentials.",
+    "key": "literal.4e060ba708c3",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 42,
+    kind: 'lt-call'
+  },
+  {
     "text": "Open Bank Feed Settings",
     "key": "literal.4e0984a32833",
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/banking/page.tsx",
     "line": 28,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Renewals: paid subscriptions may renew automatically unless cancelled, depending on configuration.",
+    "key": "literal.4e17939a59ae",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 52,
     kind: 'lt-call'
   },
   {
@@ -3849,6 +4273,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
     "line": 560,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Build reliable accounting foundations first, then layer AI responsibly: configurable, reviewable, and secured.",
+    "key": "literal.4e43020c917f",
+    namespace: 'literals',
+    "file": "src/app/[locale]/about/page.tsx",
+    "line": 20,
     kind: 'lt-call'
   },
   {
@@ -3936,7 +4368,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4f1f862fe31c",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 215,
+    "line": 218,
     kind: 'lt-call'
   },
   {
@@ -3985,6 +4417,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
     "line": 831,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Role-based access control, row-level security, and comprehensive audit logs keep your data safe.",
+    "key": "literal.4fe0c832f516",
+    namespace: 'literals',
+    "file": "src/app/[locale]/page.tsx",
+    "line": 104,
     kind: 'lt-call'
   },
   {
@@ -4044,6 +4484,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Image",
+    "key": "literal.50e19fda0d5b",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 564,
+    kind: 'lt-call'
+  },
+  {
     "text": "you@example.com",
     "key": "literal.50e2b46ef877",
     namespace: 'literals',
@@ -4081,6 +4529,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/tax-settings.tsx",
     "line": 180,
+    kind: 'lt-call'
+  },
+  {
+    "text": "5. Your choices",
+    "key": "literal.516cc592972f",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 73,
     kind: 'lt-call'
   },
   {
@@ -4128,7 +4584,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.527a11223495",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 453,
+    "line": 682,
     kind: 'lt-call'
   },
   {
@@ -4145,6 +4601,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/accounts/chart-of-accounts.tsx",
     "line": 145,
+    kind: 'lt-call'
+  },
+  {
+    "text": "To the maximum extent permitted by law, we will not be liable for indirect, incidental, special, consequential, or punitive damages, or for any loss of profits, revenue, data, or goodwill.",
+    "key": "literal.52d8a2f0202f",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 110,
     kind: 'lt-call'
   },
   {
@@ -4168,7 +4632,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5301648dcf6b",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 472,
+    "line": 473,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Strictly necessary cookies",
+    "key": "literal.531a89c68a22",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 45,
     kind: 'lt-call'
   },
   {
@@ -4252,6 +4724,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "e.g., Pricing and onboarding",
+    "key": "literal.543f13eb512b",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 149,
+    kind: 'lt-call'
+  },
+  {
+    "text": "11. Contact",
+    "key": "literal.545e24b0244b",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 114,
+    kind: 'lt-call'
+  },
+  {
     "text": "No issues match your search.",
     "key": "literal.54772283339a",
     namespace: 'literals',
@@ -4316,6 +4804,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'jsx-text'
   },
   {
+    "text": "Add Image",
+    "key": "literal.5655ec9958fc",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 610,
+    kind: 'lt-call'
+  },
+  {
     "text": "Publish",
     "key": "literal.5656400564f2",
     namespace: 'literals',
@@ -4352,7 +4848,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.56b5adf9364c",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 152,
+    "line": 155,
     kind: 'lt-call'
   },
   {
@@ -4361,14 +4857,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
     "line": 139,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Bank-grade encryption, role-based access control, and comprehensive audit logs keep your data safe.",
-    "key": "literal.56fed09a2a72",
-    namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 130,
     kind: 'lt-call'
   },
   {
@@ -4420,6 +4908,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Title Highlight (optional)",
+    "key": "literal.582ddcec60d2",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 492,
+    kind: 'lt-call'
+  },
+  {
     "text": "Duplicate Document",
     "key": "literal.587eb7aadf7e",
     namespace: 'literals',
@@ -4433,6 +4929,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
     "line": 41,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Explore the dashboard experience and see how LedgerAI brings documents, transactions, and reporting into one workflow.",
+    "key": "literal.58d69e738624",
+    namespace: 'literals',
+    "file": "src/app/[locale]/demo/page.tsx",
+    "line": 17,
     kind: 'lt-call'
   },
   {
@@ -4472,7 +4976,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.59cc9735e60a",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 986,
+    "line": 988,
     kind: 'toast'
   },
   {
@@ -4488,7 +4992,23 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.59fa116ce6a0",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 534,
+    "line": 535,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Company (optional)",
+    "key": "literal.5a10c539e0d4",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 144,
+    kind: 'lt-call'
+  },
+  {
+    "text": "These Terms are a general template. They may not reflect your legal obligations or business model. Review and adapt them with qualified counsel before relying on them.",
+    "key": "literal.5a300a941467",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 18,
     kind: 'lt-call'
   },
   {
@@ -4564,6 +5084,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Platform admin",
+    "key": "literal.5b821542fce4",
+    namespace: 'literals',
+    "file": "src/app/[locale]/roadmap/page.tsx",
+    "line": 20,
+    kind: 'lt-call'
+  },
+  {
     "text": "AI Matching...",
     "key": "literal.5b95fe071751",
     namespace: 'literals',
@@ -4576,7 +5104,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5b96f016ab6c",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 434,
+    "line": 435,
     kind: 'lt-call'
   },
   {
@@ -4584,15 +5112,23 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5ba2688dffd7",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 563,
+    "line": 564,
     kind: 'jsx-text'
+  },
+  {
+    "text": "10. Changes to this policy",
+    "key": "literal.5bb5da9bb663",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 107,
+    kind: 'lt-call'
   },
   {
     "text": "Widget Title",
     "key": "literal.5c0d5a0565bd",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 310,
+    "line": 354,
     kind: 'lt-call'
   },
   {
@@ -4631,8 +5167,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Enter your full name",
     "key": "literal.5c4c2f16ad70",
     namespace: 'literals',
-    "file": "src/components/settings/profile-settings.tsx",
-    "line": 84,
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 137,
     kind: 'lt-call'
   },
   {
@@ -4744,7 +5280,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5da7f04ce2e1",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 296,
+    "line": 340,
     kind: 'lt-call'
   },
   {
@@ -4785,6 +5321,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
     "line": 966,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Analytics cookies (optional)",
+    "key": "literal.5e2025bf5278",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 57,
     kind: 'lt-call'
   },
   {
@@ -4916,6 +5460,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Explore all features",
+    "key": "literal.60952919943a",
+    namespace: 'literals',
+    "file": "src/app/[locale]/page.tsx",
+    "line": 125,
+    kind: 'lt-call'
+  },
+  {
     "text": "Recent invoices and payments",
     "key": "literal.60a20af78919",
     namespace: 'literals',
@@ -4945,6 +5497,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/reports/financial-charts.tsx",
     "line": 165,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Multi-Tenant Operations",
+    "key": "literal.611f8a0505a9",
+    namespace: 'literals',
+    "file": "src/app/[locale]/page.tsx",
+    "line": 98,
     kind: 'lt-call'
   },
   {
@@ -4980,11 +5540,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'jsx-text'
   },
   {
+    "text": "Advanced subscription features",
+    "key": "literal.61c0a842a594",
+    namespace: 'literals',
+    "file": "src/app/[locale]/features/page.tsx",
+    "line": 54,
+    kind: 'lt-call'
+  },
+  {
     "text": "Add",
     "key": "literal.61cc55aa0453",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 205,
+    "line": 208,
     kind: 'lt-call'
   },
   {
@@ -5087,8 +5655,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "New",
     "key": "literal.6403f2b7eb2a",
     namespace: 'literals',
-    "file": "src/components/admin/subscription-management.tsx",
-    "line": 545,
+    "file": "src/app/[locale]/features/page.tsx",
+    "line": 79,
     kind: 'lt-call'
   },
   {
@@ -5104,7 +5672,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6415532ead29",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 387,
+    "line": 388,
     kind: 'lt-call'
   },
   {
@@ -5176,7 +5744,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.65b0291f3073",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 372,
+    "line": 416,
     kind: 'lt-call'
   },
   {
@@ -5248,7 +5816,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.669c7f7682c5",
     namespace: 'literals',
     "file": "src/components/landing/pricing-section.tsx",
-    "line": 228,
+    "line": 238,
     kind: 'lt-call'
   },
   {
@@ -5272,7 +5840,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.672f784922db",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1055,
+    "line": 1057,
     kind: 'jsx-text'
   },
   {
@@ -5284,11 +5852,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Audit logs",
+    "key": "literal.676e58012308",
+    namespace: 'literals',
+    "file": "src/app/[locale]/security/page.tsx",
+    "line": 43,
+    kind: 'lt-call'
+  },
+  {
     "text": "per_hour_limit_default",
     "key": "literal.678486f56fb9",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 488,
+    "line": 489,
     kind: 'jsx-text'
   },
   {
@@ -5296,7 +5872,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.67998c5b1485",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 553,
+    "line": 554,
+    kind: 'lt-call'
+  },
+  {
+    "text": "3. Accounts, roles, and tenant access",
+    "key": "literal.67e9d91b99bf",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 38,
     kind: 'lt-call'
   },
   {
@@ -5327,8 +5911,16 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Careers",
     "key": "literal.68d70e596c65",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 195,
+    "file": "src/app/[locale]/careers/page.tsx",
+    "line": 12,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Message",
+    "key": "literal.68f4145fee7d",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 155,
     kind: 'lt-call'
   },
   {
@@ -5372,6 +5964,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "LedgerAI is a multi-tenant accounting platform designed to automate bookkeeping workflows while preserving control, auditability, and tenant isolation.",
+    "key": "literal.698cef37e204",
+    namespace: 'literals',
+    "file": "src/app/[locale]/about/page.tsx",
+    "line": 14,
+    kind: 'lt-call'
+  },
+  {
     "text": "View",
     "key": "literal.69bd4ef9fbd0",
     namespace: 'literals',
@@ -5412,6 +6012,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "You can control cookies through your browser settings (block, delete, or limit cookies). If you disable cookies, some features may not work as intended.",
+    "key": "literal.6a7f64640cfe",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 75,
+    kind: 'lt-call'
+  },
+  {
     "text": "Source created",
     "key": "literal.6a8e668426c3",
     namespace: 'literals',
@@ -5428,6 +6036,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Security review, monitoring, backups, and performance optimizations for large tenants.",
+    "key": "literal.6aabc7def3c6",
+    namespace: 'literals',
+    "file": "src/app/[locale]/roadmap/page.tsx",
+    "line": 29,
+    kind: 'lt-call'
+  },
+  {
     "text": "Authentication Code",
     "key": "literal.6aeef13cce47",
     namespace: 'literals',
@@ -5439,8 +6055,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "About",
     "key": "literal.6b21fb791ac0",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 63,
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 186,
     kind: 'lt-call'
   },
   {
@@ -5464,7 +6080,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6b68e9797399",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 390,
+    "line": 434,
     kind: 'lt-call'
   },
   {
@@ -5472,7 +6088,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6b6e1c99daf7",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 154,
+    "line": 164,
     kind: 'lt-call'
   },
   {
@@ -5489,6 +6105,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 979,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Use the Service to transmit malware or to interfere with the integrity or performance of the Service.",
+    "key": "literal.6bac2ef17741",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 62,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Use the Service in violation of law or third-party rights.",
+    "key": "literal.6bbf455937af",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 64,
     kind: 'lt-call'
   },
   {
@@ -5564,6 +6196,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "7. Contact",
+    "key": "literal.6cbd1b504633",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 87,
+    kind: 'lt-call'
+  },
+  {
     "text": "Failed to save settings: {message}",
     "key": "literal.6d05fda8fd99",
     namespace: 'literals',
@@ -5593,6 +6233,30 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
     "line": 590,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Best for",
+    "key": "literal.6d7ae87f78a7",
+    namespace: 'literals',
+    "file": "src/app/[locale]/features/[slug]/page.tsx",
+    "line": 127,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Row-level security ensures tenant data is isolated even when multiple entities are managed in the same workspace.",
+    "key": "literal.6d8281e01b5d",
+    namespace: 'literals',
+    "file": "src/app/[locale]/security/page.tsx",
+    "line": 33,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Provide, operate, and maintain the platform and its features.",
+    "key": "literal.6d966b1c527b",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 49,
     kind: 'lt-call'
   },
   {
@@ -5664,7 +6328,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6eea373711fd",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 212,
+    "line": 215,
     kind: 'lt-call'
   },
   {
@@ -5680,7 +6344,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6eef6648406c",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 391,
+    "line": 435,
     kind: 'lt-call'
   },
   {
@@ -5764,6 +6428,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Notes",
+    "key": "literal.70440046a3dc",
+    namespace: 'literals',
+    "file": "src/app/[locale]/features/[slug]/page.tsx",
+    "line": 148,
+    kind: 'lt-call'
+  },
+  {
     "text": "Current month snapshot",
     "key": "literal.7073d7e29fbc",
     namespace: 'literals',
@@ -5824,7 +6496,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.718eee2c4b9c",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 232,
+    "line": 233,
     kind: 'lt-call'
   },
   {
@@ -5833,6 +6505,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/user-subscription-list.tsx",
     "line": 111,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Included in 1 active plan",
+    "key": "literal.71ed16384e75",
+    namespace: 'literals',
+    "file": "src/app/[locale]/features/page.tsx",
+    "line": 65,
     kind: 'lt-call'
   },
   {
@@ -5848,7 +6528,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.721eaf3273a4",
     namespace: 'literals',
     "file": "src/app/[locale]/page.tsx",
-    "line": 119,
+    "line": 93,
     kind: 'lt-call'
   },
   {
@@ -5857,6 +6537,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/reports/profit-loss-report.tsx",
     "line": 241,
+    kind: 'lt-call'
+  },
+  {
+    "text": "This Privacy Policy is a general template provided for convenience. It may not reflect your legal obligations. You should review and adapt it for your organization, jurisdiction, and data practices.",
+    "key": "literal.73166f708f37",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 18,
     kind: 'lt-call'
   },
   {
@@ -5928,7 +6616,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.74cd95ac6cbd",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 373,
+    "line": 417,
     kind: 'lt-call'
   },
   {
@@ -5936,7 +6624,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.74cf7aad5b23",
     namespace: 'literals',
     "file": "src/components/landing/pricing-section.tsx",
-    "line": 256,
+    "line": 266,
     kind: 'lt-call'
   },
   {
@@ -6032,7 +6720,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7703a0d7aff5",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 285,
+    "line": 329,
     kind: 'lt-call'
   },
   {
@@ -6049,6 +6737,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
     "line": 666,
+    kind: 'lt-call'
+  },
+  {
+    "text": "14. Contact",
+    "key": "literal.771f72468bed",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 132,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Multi-tenant by design",
+    "key": "literal.7729625fc144",
+    namespace: 'literals',
+    "file": "src/app/[locale]/about/page.tsx",
+    "line": 24,
     kind: 'lt-call'
   },
   {
@@ -6081,6 +6785,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/accounts/chart-of-accounts.tsx",
     "line": 447,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Tell us what you’re trying to achieve and any key requirements.",
+    "key": "literal.7808494dd394",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 160,
     kind: 'lt-call'
   },
   {
@@ -6167,16 +6879,16 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Contact Sales",
     "key": "literal.7a0a9bd139f8",
     namespace: 'literals',
-    "file": "src/components/landing/pricing-section.tsx",
-    "line": 171,
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 127,
     kind: 'lt-call'
   },
   {
     "text": "Company",
     "key": "literal.7a1994999d18",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 192,
+    "file": "src/components/dashboard/dashboard-layout.tsx",
+    "line": 481,
     kind: 'lt-call'
   },
   {
@@ -6192,7 +6904,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7a879c933724",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1385,
+    "line": 1387,
     kind: 'lt-call'
   },
   {
@@ -6217,6 +6929,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/statement-verification-modal.tsx",
     "line": 145,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Account information (name, email address, authentication identifiers).",
+    "key": "literal.7b0e122d817c",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 37,
     kind: 'lt-call'
   },
   {
@@ -6272,7 +6992,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7bf726ceaa9f",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 426,
+    "line": 470,
     kind: 'lt-call'
   },
   {
@@ -6312,7 +7032,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7cd45b9c3aba",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 371,
+    "line": 415,
     kind: 'lt-call'
   },
   {
@@ -6321,6 +7041,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/bank-statement-list.tsx",
     "line": 147,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Prevent fraud and abuse and protect user accounts.",
+    "key": "literal.7ce5da3c2d85",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 37,
     kind: 'lt-call'
   },
   {
@@ -6336,7 +7064,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7ced9caccbc7",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 805,
+    "line": 807,
     kind: 'toast'
   },
   {
@@ -6376,7 +7104,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7d44bc449c2a",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 326,
+    "line": 370,
     kind: 'lt-call'
   },
   {
@@ -6384,7 +7112,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7d588115b7be",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 305,
+    "line": 349,
     kind: 'lt-call'
   },
   {
@@ -6393,6 +7121,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
     "line": 283,
+    kind: 'lt-call'
+  },
+  {
+    "text": "4. Subscriptions, billing, and payments",
+    "key": "literal.7da0517a3f6d",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 46,
     kind: 'lt-call'
   },
   {
@@ -6409,6 +7145,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
     "line": 107,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Communicate with you about service updates and support.",
+    "key": "literal.7e205fb8bdcf",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 53,
     kind: 'lt-call'
   },
   {
@@ -6456,7 +7200,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7ebf8a01b732",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 427,
+    "line": 471,
     kind: 'lt-call'
   },
   {
@@ -6472,7 +7216,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7ffd65f0a2d9",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 525,
+    "line": 526,
     kind: 'lt-call'
   },
   {
@@ -6488,7 +7232,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8042432166b8",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 362,
+    "line": 406,
     kind: 'lt-call'
   },
   {
@@ -6504,7 +7248,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.808d7dca8a74",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 306,
+    "line": 307,
     kind: 'lt-call'
   },
   {
@@ -6513,6 +7257,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/tax-settings.tsx",
     "line": 84,
+    kind: 'lt-call'
+  },
+  {
+    "text": "1. Agreement to terms",
+    "key": "literal.80be0012099b",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 24,
     kind: 'lt-call'
   },
   {
@@ -6540,11 +7292,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Not configured",
+    "key": "literal.811931bba8d1",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 169,
+    kind: 'lt-call'
+  },
+  {
     "text": "Roadmap",
     "key": "literal.8119e7f319c9",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 188,
+    "file": "src/app/[locale]/roadmap/page.tsx",
+    "line": 12,
     kind: 'lt-call'
   },
   {
@@ -6568,7 +7328,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.817582da3166",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1134,
+    "line": 1136,
     kind: 'lt-call'
   },
   {
@@ -6604,11 +7364,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "LedgerAI is built around tenant isolation, role-based access, and auditable changes so teams can operate confidently across multiple entities.",
+    "key": "literal.82d7982fec8e",
+    namespace: 'literals',
+    "file": "src/app/[locale]/security/page.tsx",
+    "line": 16,
+    kind: 'lt-call'
+  },
+  {
     "text": "Auto (use provider marked default, else first active)",
     "key": "literal.82e6ae0baba4",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 318,
+    "line": 319,
     kind: 'lt-call'
   },
   {
@@ -6616,7 +7384,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.82eb358612b7",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 489,
+    "line": 490,
     kind: 'jsx-text'
   },
   {
@@ -6680,7 +7448,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.840f31842ac1",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 301,
+    "line": 302,
     kind: 'lt-call'
   },
   {
@@ -6804,6 +7572,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Tip: Provide publicly accessible URLs (CDN). Videos loop automatically; multiple items rotate in order.",
+    "key": "literal.86dc610c18a0",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 614,
+    kind: 'lt-call'
+  },
+  {
     "text": "Tax Registration ID",
     "key": "literal.8767947e9da3",
     namespace: 'literals',
@@ -6840,7 +7616,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8851142da56f",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 388,
+    "line": 389,
     kind: 'lt-call'
   },
   {
@@ -6876,6 +7652,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Sales email is not configured by the platform admin.",
+    "key": "literal.88e80a0f7a54",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 97,
+    kind: 'lt-call'
+  },
+  {
     "text": "Generate Cron Secret",
     "key": "literal.89411c6bff9d",
     namespace: 'literals',
@@ -6908,11 +7692,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Cookies are small text files stored on your device when you visit a website. Similar technologies include local storage and pixels. They help websites function, remember preferences, and provide analytics.",
+    "key": "literal.8984ce4bf70b",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 26,
+    kind: 'lt-call'
+  },
+  {
     "text": "Language",
     "key": "literal.89b86ab0e66f",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1351,
+    "line": 1353,
     kind: 'jsx-text'
   },
   {
@@ -6936,7 +7728,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.89fb9b02f240",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 535,
+    "line": 536,
     kind: 'jsx-text'
   },
   {
@@ -6976,7 +7768,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8a9222792eec",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1020,
+    "line": 1022,
     kind: 'toast'
   },
   {
@@ -6986,6 +7778,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/app/[locale]/admin/page.tsx",
     "line": 48,
     kind: 'jsx-text'
+  },
+  {
+    "text": "Continue expanding cross-tenant administration, analytics, and policy controls.",
+    "key": "literal.8aa55829ebe7",
+    namespace: 'literals',
+    "file": "src/app/[locale]/roadmap/page.tsx",
+    "line": 21,
+    kind: 'lt-call'
   },
   {
     "text": "Changes",
@@ -7016,7 +7816,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8b014ac160d4",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 268,
+    "line": 312,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Add more controls for models, prompts, rate limits, and audit trails for AI-driven workflows.",
+    "key": "literal.8b022e66b945",
+    namespace: 'literals',
+    "file": "src/app/[locale]/roadmap/page.tsx",
+    "line": 25,
     kind: 'lt-call'
   },
   {
@@ -7040,7 +7848,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8b474fd58e30",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1283,
+    "line": 1285,
     kind: 'jsx-text'
   },
   {
@@ -7049,6 +7857,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/user-subscription-list.tsx",
     "line": 109,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Critical actions can be tracked and reviewed with metadata and change context to support compliance workflows.",
+    "key": "literal.8b94ef46d59c",
+    namespace: 'literals',
+    "file": "src/app/[locale]/security/page.tsx",
+    "line": 45,
     kind: 'lt-call'
   },
   {
@@ -7176,7 +7992,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8d01cc3f408f",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1100,
+    "line": 1102,
     kind: 'lt-call'
   },
   {
@@ -7208,7 +8024,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8db6a2f1d3b7",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 407,
+    "line": 451,
     kind: 'lt-call'
   },
   {
@@ -7228,19 +8044,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Generate balance sheets, P&L, and cash flow statements instantly. Export to PDF, Excel, or CSV.",
-    "key": "literal.8de6ddd794bc",
-    namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 135,
-    kind: 'lt-call'
-  },
-  {
     "text": "Landing Page",
     "key": "literal.8dec5d0b0683",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 297,
+    "line": 341,
     kind: 'lt-call'
   },
   {
@@ -7249,14 +8057,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/reconciliation-feed.tsx",
     "line": 113,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Global Compliance",
-    "key": "literal.8e0a236cd7a3",
-    namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 144,
     kind: 'lt-call'
   },
   {
@@ -7304,7 +8104,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8f2443b34f53",
     namespace: 'literals',
     "file": "src/app/[locale]/page.tsx",
-    "line": 157,
+    "line": 165,
     kind: 'lt-call'
   },
   {
@@ -7391,8 +8191,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Legal",
     "key": "literal.902c91d94e0f",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 201,
+    "file": "src/components/landing/marketing-shell.tsx",
+    "line": 90,
     kind: 'lt-call'
   },
   {
@@ -7409,6 +8209,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
     "line": 982,
+    kind: 'lt-call'
+  },
+  {
+    "text": "The Service is provided “as is” and “as available.” We do not warrant that the Service will be uninterrupted, error-free, or that outputs (including AI outputs) will be accurate or complete.",
+    "key": "literal.906c9326c585",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 102,
     kind: 'lt-call'
   },
   {
@@ -7468,11 +8276,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "5. How we share information",
+    "key": "literal.912090fc550b",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 68,
+    kind: 'lt-call'
+  },
+  {
     "text": "to scan/AI-translate the entire UI.",
     "key": "literal.912aa9f53185",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1397,
+    "line": 1399,
     kind: 'lt-call'
   },
   {
@@ -7512,7 +8328,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.91bfc0c4195b",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 576,
+    "line": 577,
     kind: 'lt-call'
   },
   {
@@ -7532,11 +8348,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "You (or your organization) retain ownership of data you upload or generate in the Service (“Customer Data”). You grant us the rights necessary to host, process, and display Customer Data solely to provide and improve the Service.",
+    "key": "literal.91fe60abcc72",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 71,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Authenticate users and enforce access controls (including tenant isolation).",
+    "key": "literal.9205ef7bae77",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 50,
+    kind: 'lt-call'
+  },
+  {
     "text": "Rate Limits (Default)",
     "key": "literal.92060c9c18bc",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 386,
+    "line": 387,
     kind: 'lt-call'
   },
   {
@@ -7552,7 +8384,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.922e100333b0",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 357,
+    "line": 401,
     kind: 'lt-call'
   },
   {
@@ -7568,7 +8400,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.92ec6350888f",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 384,
+    "line": 385,
     kind: 'lt-call'
   },
   {
@@ -7584,7 +8416,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.933bf21afdd5",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 329,
+    "line": 373,
     kind: 'lt-call'
   },
   {
@@ -7628,11 +8460,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Automatically categorize transactions and reconcile accounts with 99% accuracy using our advanced AI models.",
-    "key": "literal.9478926b03da",
+    "text": "9. International transfers",
+    "key": "literal.944a47c006ac",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 120,
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 100,
     kind: 'lt-call'
   },
   {
@@ -7664,7 +8496,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.95666bb3929d",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 562,
+    "line": 563,
     kind: 'lt-call'
   },
   {
@@ -7672,8 +8504,16 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.957fb154f7a2",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 941,
+    "line": 943,
     kind: 'toast'
+  },
+  {
+    "text": "Where you’ll find it",
+    "key": "literal.95c4d1150b2e",
+    namespace: 'literals',
+    "file": "src/app/[locale]/features/[slug]/page.tsx",
+    "line": 118,
+    kind: 'lt-call'
   },
   {
     "text": "Transaction Feed",
@@ -7682,14 +8522,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/app/[locale]/dashboard/banking/[accountId]/page.tsx",
     "line": 156,
     kind: 'jsx-text'
-  },
-  {
-    "text": "Multi-Tenant Support",
-    "key": "literal.95e1e4020c1d",
-    namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 139,
-    kind: 'lt-call'
   },
   {
     "text": "Uses: {current} / {max}",
@@ -7856,7 +8688,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.991984af065f",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 431,
+    "line": 484,
     kind: 'lt-call'
   },
   {
@@ -7912,7 +8744,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.99df9752b0b4",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 337,
+    "line": 381,
     kind: 'lt-call'
   },
   {
@@ -7944,7 +8776,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9a99b7e4ec5d",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 501,
+    "line": 502,
     kind: 'lt-call'
   },
   {
@@ -7976,7 +8808,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9b10914d8b0a",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 196,
+    "line": 199,
     kind: 'lt-call'
   },
   {
@@ -8008,7 +8840,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9b94c2fdc3f3",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 563,
+    "line": 564,
+    kind: 'lt-call'
+  },
+  {
+    "text": "We may share information:",
+    "key": "literal.9b97e8f6280e",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 69,
     kind: 'lt-call'
   },
   {
@@ -8080,7 +8920,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9cf604589e71",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 245,
+    "line": 286,
     kind: 'lt-call'
   },
   {
@@ -8135,8 +8975,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Privacy Policy",
     "key": "literal.9db108ba6b7f",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 203,
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 12,
     kind: 'lt-call'
   },
   {
@@ -8256,7 +9096,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9f0c5d94d5fb",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1003,
+    "line": 1005,
     kind: 'toast'
   },
   {
@@ -8280,7 +9120,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9f74c38dee10",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 218,
+    "line": 221,
     kind: 'lt-call'
   },
   {
@@ -8312,7 +9152,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a060a3b0d53a",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1001,
+    "line": 1003,
     kind: 'toast'
   },
   {
@@ -8343,8 +9183,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Pricing",
     "key": "literal.a0d9bbad5f93",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 62,
+    "file": "src/app/[locale]/pricing/page.tsx",
+    "line": 25,
     kind: 'lt-call'
   },
   {
@@ -8420,6 +9260,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "9. Termination",
+    "key": "literal.a1d764bfe3e2",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 93,
+    kind: 'lt-call'
+  },
+  {
     "text": "Search tenants...",
     "key": "literal.a216d26f5b44",
     namespace: 'literals',
@@ -8468,11 +9316,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "e.g., Acme Corp",
+    "key": "literal.a28709e12165",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 145,
+    kind: 'lt-call'
+  },
+  {
     "text": "Delete Selected ({count})",
     "key": "literal.a2d51c4599fc",
     namespace: 'literals',
     "file": "src/components/banking/duplicate-resolution-modal.tsx",
     "line": 144,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Overlay Opacity (0 - 0.9)",
+    "key": "literal.a30ab5673e62",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 511,
     kind: 'lt-call'
   },
   {
@@ -8548,6 +9412,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Effective date: December 21, 2025",
+    "key": "literal.a3ec3c160440",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 13,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Browse features",
+    "key": "literal.a45c5c49e498",
+    namespace: 'literals',
+    "file": "src/app/[locale]/pricing/page.tsx",
+    "line": 34,
+    kind: 'lt-call'
+  },
+  {
     "text": "Download",
     "key": "literal.a479c9c34e87",
     namespace: 'literals',
@@ -8561,6 +9441,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/bank-account-form.tsx",
     "line": 158,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Compare plans",
+    "key": "literal.a4c41c6ef844",
+    namespace: 'literals',
+    "file": "src/app/[locale]/features/page.tsx",
+    "line": 45,
+    kind: 'lt-call'
+  },
+  {
+    "text": "In many deployments, LedgerAI is operated by an organization (for example, an accounting firm or a company) that invites users and configures tenants. That organization may act as the data controller for your account and tenant data.",
+    "key": "literal.a4cd459734c6",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 29,
     kind: 'lt-call'
   },
   {
@@ -8608,7 +9504,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a5dbc60df6b4",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 463,
+    "line": 465,
     kind: 'toast'
   },
   {
@@ -8624,7 +9520,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a62da9010119",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 416,
+    "line": 460,
     kind: 'lt-call'
   },
   {
@@ -8640,8 +9536,16 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a67d9beb9864",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1018,
+    "line": 1020,
     kind: 'toast'
+  },
+  {
+    "text": "Some features require a paid subscription. Pricing, plan limits, and included features are described in the pricing page and may be updated from time to time.",
+    "key": "literal.a6d1a1841284",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 48,
+    kind: 'lt-call'
   },
   {
     "text": "Only Company Admins can change these settings.",
@@ -8756,6 +9660,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "You must comply with applicable laws and any additional rules set by your organization’s administrator. You are responsible for ensuring your account information remains accurate.",
+    "key": "literal.a82ec0d5115c",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 33,
+    kind: 'lt-call'
+  },
+  {
     "text": "Batch Processing",
     "key": "literal.a8319e4751c6",
     namespace: 'literals',
@@ -8772,20 +9684,20 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "If enabled, the platform may use automated processing to extract or classify data from uploaded documents. Outputs are intended to assist workflows and may require human review. Administrators may configure AI providers and models.",
+    "key": "literal.a85a2aa96c46",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 60,
+    kind: 'lt-call'
+  },
+  {
     "text": "Language added successfully",
     "key": "literal.a86438850e8a",
     namespace: 'literals',
     "file": "src/components/admin/language-management.tsx",
     "line": 79,
     kind: 'toast'
-  },
-  {
-    "text": "Multi-Currency",
-    "key": "literal.a89125c826fe",
-    namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 124,
-    kind: 'lt-call'
   },
   {
     "text": "File type not supported. Please upload PDF, images, or spreadsheets.",
@@ -8904,7 +9816,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.aa86e0fae841",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 558,
+    "line": 559,
     kind: 'lt-call'
   },
   {
@@ -8924,6 +9836,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Your name",
+    "key": "literal.ab42293e29e1",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 136,
+    kind: 'lt-call'
+  },
+  {
     "text": "Discount Type",
     "key": "literal.ab547ca1cd7c",
     namespace: 'literals',
@@ -8936,7 +9856,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ab8413be6991",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 198,
+    "line": 199,
     kind: 'lt-call'
   },
   {
@@ -8992,7 +9912,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ac5f6ef30720",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 439,
+    "line": 501,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Your information may be processed in locations different from where you live, depending on your deployment and service providers. Where required, appropriate safeguards should be used.",
+    "key": "literal.acc9beafac60",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 102,
     kind: 'lt-call'
   },
   {
@@ -9025,6 +9953,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 472,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Feature",
+    "key": "literal.ad565d9d01d0",
+    namespace: 'literals',
+    "file": "src/app/[locale]/features/[slug]/page.tsx",
+    "line": 102,
     kind: 'lt-call'
   },
   {
@@ -9076,11 +10012,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Team Collaboration",
+    "key": "literal.aee94383eea8",
+    namespace: 'literals',
+    "file": "src/app/[locale]/page.tsx",
+    "line": 118,
+    kind: 'lt-call'
+  },
+  {
     "text": "Bounce",
     "key": "literal.af7ed27586b5",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 388,
+    "line": 432,
     kind: 'lt-call'
   },
   {
@@ -9089,6 +10033,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/tenant-mismatch-policy-settings.tsx",
     "line": 131,
+    kind: 'lt-call'
+  },
+  {
+    "text": "The Service may contain confidential information (including non-public product features). You agree to protect confidential information and use it only as needed to use the Service.",
+    "key": "literal.afd9577d109d",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 88,
     kind: 'lt-call'
   },
   {
@@ -9138,6 +10090,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/app/[locale]/dashboard/banking/[accountId]/page.tsx",
     "line": 86,
     kind: 'jsx-text'
+  },
+  {
+    "text": "Measure usage and performance to improve reliability (if analytics is enabled).",
+    "key": "literal.b0573654d2dd",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 36,
+    kind: 'lt-call'
   },
   {
     "text": "Tenant mismatch: multiple companies detected ({count} matches)",
@@ -9224,7 +10184,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b2348e42420e",
     namespace: 'literals',
     "file": "src/components/landing/pricing-section.tsx",
-    "line": 112,
+    "line": 113,
     kind: 'lt-call'
   },
   {
@@ -9264,7 +10224,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b2ec93e8c62d",
     namespace: 'literals',
     "file": "src/app/[locale]/page.tsx",
-    "line": 97,
+    "line": 70,
     kind: 'lt-call'
   },
   {
@@ -9296,15 +10256,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b30b6eb73538",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 139,
+    "line": 149,
     kind: 'lt-call'
   },
   {
     "text": "WhatsApp",
     "key": "literal.b336fc558722",
     namespace: 'literals',
-    "file": "src/components/landing/pricing-section.tsx",
-    "line": 227,
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 172,
     kind: 'lt-call'
   },
   {
@@ -9327,8 +10287,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Contact",
     "key": "literal.b37456c4530b",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 197,
+    "file": "src/app/[locale]/contact/page.tsx",
+    "line": 13,
     kind: 'lt-call'
   },
   {
@@ -9352,7 +10312,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b3cc660b9187",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 387,
+    "line": 431,
     kind: 'lt-call'
   },
   {
@@ -9360,7 +10320,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b3cc6cc8bb3e",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 271,
+    "line": 315,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Access control",
+    "key": "literal.b3e3bbc9103b",
+    namespace: 'literals',
+    "file": "src/app/[locale]/security/page.tsx",
+    "line": 37,
     kind: 'lt-call'
   },
   {
@@ -9369,6 +10337,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/subscription-management.tsx",
     "line": 228,
+    kind: 'lt-call'
+  },
+  {
+    "text": "1. What cookies are",
+    "key": "literal.b425aebca6b5",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 24,
     kind: 'lt-call'
   },
   {
@@ -9424,7 +10400,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b4e843b9503f",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 462,
+    "line": 463,
     kind: 'lt-call'
   },
   {
@@ -9432,7 +10408,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b4efe5b9dc9d",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 486,
+    "line": 487,
     kind: 'lt-call'
   },
   {
@@ -9449,6 +10425,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/accounts/chart-of-accounts.tsx",
     "line": 158,
+    kind: 'lt-call'
+  },
+  {
+    "text": "We use information to:",
+    "key": "literal.b524dd884f2c",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 47,
     kind: 'lt-call'
   },
   {
@@ -9473,6 +10457,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/promo-code-management.tsx",
     "line": 295,
+    kind: 'lt-call'
+  },
+  {
+    "text": "If you have questions about cookies, contact support@sophiesofts.com or use the Contact page to reach the configured support or sales channels.",
+    "key": "literal.b55b6a71e7dc",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 89,
     kind: 'lt-call'
   },
   {
@@ -9552,7 +10544,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b5ed25593231",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1395,
+    "line": 1397,
     kind: 'lt-call'
   },
   {
@@ -9560,7 +10552,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b60fba97eace",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 286,
+    "line": 330,
     kind: 'lt-call'
   },
   {
@@ -9640,7 +10632,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b7337eeaed55",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 148,
+    "line": 151,
     kind: 'lt-call'
   },
   {
@@ -9764,6 +10756,38 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Invite teammates, assign roles, and standardize processes across clients and entities.",
+    "key": "literal.b92bf1e54346",
+    namespace: 'literals',
+    "file": "src/app/[locale]/page.tsx",
+    "line": 119,
+    kind: 'lt-call'
+  },
+  {
+    "text": "If enabled, AI features may produce outputs based on provided inputs. Outputs may be inaccurate and should be reviewed by qualified personnel. You are responsible for decisions made using the Service.",
+    "key": "literal.b9547078c552",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 78,
+    kind: 'lt-call'
+  },
+  {
+    "text": "We may suspend or terminate access if you violate these Terms, if your subscription lapses, or if required to protect the Service or other users. Your administrator may also terminate your access to their tenant(s).",
+    "key": "literal.b9e728002003",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 95,
+    kind: 'lt-call'
+  },
+  {
+    "text": "3. Types of cookies",
+    "key": "literal.b9e741192c1f",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 42,
+    kind: 'lt-call'
+  },
+  {
     "text": "Bank Feeds",
     "key": "literal.b9efb9769f35",
     namespace: 'literals',
@@ -9792,7 +10816,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.baef0b0645a8",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1092,
+    "line": 1094,
     kind: 'lt-call'
   },
   {
@@ -9895,8 +10919,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Get Started",
     "key": "literal.bd2cb051773a",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 71,
+    "file": "src/app/[locale]/demo/page.tsx",
+    "line": 21,
     kind: 'lt-call'
   },
   {
@@ -9932,6 +10956,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "If you have questions about privacy, contact us at support@sophiesofts.com or use the Contact page to reach the configured support or sales channels.",
+    "key": "literal.bdad308ed512",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 116,
+    kind: 'lt-call'
+  },
+  {
     "text": "Change scheduled (effective at period end)",
     "key": "literal.bde2ec10faf8",
     namespace: 'literals',
@@ -9960,7 +10992,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.be719ea39257",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 535,
+    "line": 536,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Tenants are isolated using row-level security policies so teams can manage multiple entities safely from a single workspace.",
+    "key": "literal.be999019e951",
+    namespace: 'literals',
+    "file": "src/app/[locale]/about/page.tsx",
+    "line": 26,
     kind: 'lt-call'
   },
   {
@@ -10000,7 +11040,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.bf6a9967f8b8",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 97,
+    "line": 100,
     kind: 'lt-call'
   },
   {
@@ -10028,6 +11068,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Uploaded files and metadata (invoices, receipts, statements).",
+    "key": "literal.c012a99bcc1f",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 40,
+    kind: 'lt-call'
+  },
+  {
     "text": "Password must be at least 6 characters",
     "key": "literal.c017527b229f",
     namespace: 'literals',
@@ -10052,12 +11100,28 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "We may update this Cookie Policy from time to time. If changes are material, we will provide reasonable notice through the platform or other channels.",
+    "key": "literal.c0a79f8456e0",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 82,
+    kind: 'lt-call'
+  },
+  {
     "text": "Saved",
     "key": "literal.c0ae8f6ea841",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 491,
+    "line": 493,
     kind: 'toast'
+  },
+  {
+    "text": "Charts of accounts, transactions, documents, approvals, and review-ready trails in one place.",
+    "key": "literal.c0b892536c37",
+    namespace: 'literals',
+    "file": "src/app/[locale]/page.tsx",
+    "line": 114,
+    kind: 'lt-call'
   },
   {
     "text": "e.g. gpt-4-vision-preview, qwen-vl-max",
@@ -10121,6 +11185,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/landing/pricing-section.tsx",
     "line": 83,
+    kind: 'lt-call'
+  },
+  {
+    "text": "12. Governing law and venue",
+    "key": "literal.c26d50c753a9",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 118,
+    kind: 'lt-call'
+  },
+  {
+    "text": "See what each plan unlocks and how it works inside LedgerAI.",
+    "key": "literal.c2711ec113bd",
+    namespace: 'literals',
+    "file": "src/app/[locale]/page.tsx",
+    "line": 136,
     kind: 'lt-call'
   },
   {
@@ -10204,6 +11284,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Some deployments may use third-party services (such as payment providers or analytics) that set their own cookies. Their cookies are governed by their privacy/cookie policies.",
+    "key": "literal.c404e82c1dac",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 68,
+    kind: 'lt-call'
+  },
+  {
     "text": "Quick Actions",
     "key": "literal.c40810f5c31d",
     namespace: 'literals',
@@ -10217,6 +11305,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
     "line": 133,
+    kind: 'lt-call'
+  },
+  {
+    "text": "4. AI and automated processing",
+    "key": "literal.c476d6dac8e3",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 58,
     kind: 'lt-call'
   },
   {
@@ -10268,11 +11364,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Automate your financial workflows, gain real-time insights, and manage multiple entities with the world's most advanced multi-tenant accounting platform.",
-    "key": "literal.c60ef29f564b",
+    "text": "Production hardening",
+    "key": "literal.c60d93ab022d",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 85,
+    "file": "src/app/[locale]/roadmap/page.tsx",
+    "line": 28,
     kind: 'lt-call'
   },
   {
@@ -10284,11 +11380,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'toast'
   },
   {
+    "text": "Sales WhatsApp is not configured by the platform admin.",
+    "key": "literal.c63515b79d69",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 112,
+    kind: 'lt-call'
+  },
+  {
     "text": "Join thousands of businesses that trust LedgerAI for their financial management.",
     "key": "literal.c63922ab3623",
     namespace: 'literals',
     "file": "src/app/[locale]/page.tsx",
-    "line": 159,
+    "line": 167,
     kind: 'lt-call'
   },
   {
@@ -10296,7 +11400,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c6606cd51cd1",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 635,
+    "line": 636,
     kind: 'lt-call'
   },
   {
@@ -10304,7 +11408,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c67dd20ee842",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1130,
+    "line": 1132,
     kind: 'lt-call'
   },
   {
@@ -10320,7 +11424,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c70dfc9132b8",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 487,
+    "line": 488,
     kind: 'lt-call'
   },
   {
@@ -10328,7 +11432,23 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c73dbbeb923e",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 334,
+    "line": 335,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Remember preferences such as language and UI settings.",
+    "key": "literal.c74017fca486",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 35,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Background Media (looping)",
+    "key": "literal.c74759aced22",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 547,
     kind: 'lt-call'
   },
   {
@@ -10360,7 +11480,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c7a9e8ea6a4e",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 314,
+    "line": 315,
     kind: 'lt-call'
   },
   {
@@ -10407,8 +11527,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "About Us",
     "key": "literal.c887b9d3b390",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 194,
+    "file": "src/components/landing/marketing-shell.tsx",
+    "line": 75,
     kind: 'lt-call'
   },
   {
@@ -10425,6 +11545,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/reconciliation-feed.tsx",
     "line": 401,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Included in",
+    "key": "literal.c8d7324cce3d",
+    namespace: 'literals',
+    "file": "src/app/[locale]/features/[slug]/page.tsx",
+    "line": 136,
     kind: 'lt-call'
   },
   {
@@ -10572,11 +11700,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "2. Who can use the service",
+    "key": "literal.cb9cd98a1174",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 31,
+    kind: 'lt-call'
+  },
+  {
     "text": "Configure OAuth connections and webhook ingestion in Settings.",
     "key": "literal.cb9e080f1a48",
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/banking/page.tsx",
     "line": 24,
+    kind: 'lt-call'
+  },
+  {
+    "text": "To the maximum extent permitted by law, our total liability for any claim related to the Service will not exceed the amounts paid for the Service by you (or your organization) during the twelve (12) months immediately preceding the event giving rise to the claim (or such other cap as required by applicable law).",
+    "key": "literal.cc10bbec30f6",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 113,
     kind: 'lt-call'
   },
   {
@@ -10656,7 +11800,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.cd40f0a97584",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 484,
+    "line": 485,
     kind: 'lt-call'
   },
   {
@@ -10688,7 +11832,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ce35e8ba308c",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 125,
+    "line": 128,
     kind: 'lt-call'
   },
   {
@@ -10696,7 +11840,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ce4d56c8ac53",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 447,
+    "line": 448,
     kind: 'lt-call'
   },
   {
@@ -10720,7 +11864,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.cf1c85adba54",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 347,
+    "line": 391,
     kind: 'lt-call'
   },
   {
@@ -10729,6 +11873,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/team/team-list.tsx",
     "line": 104,
+    kind: 'lt-call'
+  },
+  {
+    "text": "You agree not to:",
+    "key": "literal.cf3600de277a",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 59,
     kind: 'lt-call'
   },
   {
@@ -10812,11 +11964,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Add a message to enable sending.",
+    "key": "literal.cfeaa355d274",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 188,
+    kind: 'lt-call'
+  },
+  {
     "text": "and",
     "key": "literal.cffa50a32cb1",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 488,
+    "line": 489,
     kind: 'lt-call'
   },
   {
@@ -10828,11 +11988,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "6. Updates to this policy",
+    "key": "literal.d0451d6affb7",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 80,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Accounting data you enter or import (transactions, accounts, reports).",
+    "key": "literal.d0493b9d4d77",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 39,
+    kind: 'lt-call'
+  },
+  {
     "text": "Translated text",
     "key": "literal.d057722facad",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1142,
+    "line": 1144,
     kind: 'lt-call'
   },
   {
@@ -10912,7 +12088,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d1e89b2ca633",
     namespace: 'literals',
     "file": "src/components/landing/pricing-section.tsx",
-    "line": 113,
+    "line": 114,
     kind: 'lt-call'
   },
   {
@@ -10928,7 +12104,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d219c68101f5",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1309,
+    "line": 1311,
     kind: 'jsx-text'
   },
   {
@@ -10972,6 +12148,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Substring to highlight, e.g. AI",
+    "key": "literal.d297068e09e4",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 496,
+    kind: 'lt-call'
+  },
+  {
     "text": "Tenant mismatch detected ({count} possible matches)",
     "key": "literal.d29d3c138fd3",
     namespace: 'literals',
@@ -10980,11 +12164,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'ltvars-call'
   },
   {
+    "text": "Not enabled in active plans",
+    "key": "literal.d2cf8231f06d",
+    namespace: 'literals',
+    "file": "src/app/[locale]/features/page.tsx",
+    "line": 63,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Choose a plan that matches your workflow. Every plan is multi-tenant and secured with row-level isolation.",
+    "key": "literal.d2fc93ae6b71",
+    namespace: 'literals',
+    "file": "src/app/[locale]/pricing/page.tsx",
+    "line": 27,
+    kind: 'lt-call'
+  },
+  {
     "text": "Provider Configuration",
     "key": "literal.d31ae5331579",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 374,
+    "line": 375,
     kind: 'lt-call'
   },
   {
@@ -11032,7 +12232,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d3dcce7d1024",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 317,
+    "line": 361,
     kind: 'lt-call'
   },
   {
@@ -11148,6 +12348,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Example: Target SMEs in Hong Kong. Emphasize multi-tenant, automation, compliance, and real-time reporting.",
+    "key": "literal.d594e91fa43e",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 672,
+    kind: 'lt-call'
+  },
+  {
     "text": "No transactions found",
     "key": "literal.d60c045dd2f9",
     namespace: 'literals',
@@ -11176,7 +12384,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d66a8e13a5de",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 192,
+    "line": 195,
     kind: 'lt-call'
   },
   {
@@ -11188,11 +12396,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "11. Limitation of liability",
+    "key": "literal.d6c2ef29fd20",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 108,
+    kind: 'lt-call'
+  },
+  {
     "text": "Tenant-level API keys in",
     "key": "literal.d6c333716287",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 535,
+    "line": 536,
     kind: 'lt-call'
   },
   {
@@ -11216,7 +12432,23 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d7153c8d6844",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1117,
+    "line": 1119,
+    kind: 'lt-call'
+  },
+  {
+    "text": "We prioritize security, reliability, and tenant-safe automation. This page summarizes upcoming focus areas.",
+    "key": "literal.d7517edc9dd6",
+    namespace: 'literals',
+    "file": "src/app/[locale]/roadmap/page.tsx",
+    "line": 14,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Blog content is not configured yet for this deployment.",
+    "key": "literal.d762bd813eb4",
+    namespace: 'literals',
+    "file": "src/app/[locale]/blog/page.tsx",
+    "line": 14,
     kind: 'lt-call'
   },
   {
@@ -11288,7 +12520,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d89bd178d934",
     namespace: 'literals',
     "file": "src/app/[locale]/page.tsx",
-    "line": 163,
+    "line": 171,
     kind: 'lt-call'
   },
   {
@@ -11296,7 +12528,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d8b586bf1b6b",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 577,
+    "line": 578,
     kind: 'jsx-text'
   },
   {
@@ -11316,11 +12548,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'jsx-text'
   },
   {
+    "text": "We use administrative, technical, and organizational safeguards designed to protect information. However, no system can be guaranteed 100% secure.",
+    "key": "literal.d90957a30c96",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 88,
+    kind: 'lt-call'
+  },
+  {
     "text": "Vendor",
     "key": "literal.d96159ff30af",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
     "line": 387,
+    kind: 'lt-call'
+  },
+  {
+    "text": "8. Confidentiality",
+    "key": "literal.d96b61f5045f",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 86,
     kind: 'lt-call'
   },
   {
@@ -11388,6 +12636,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "LedgerAI combines multi-tenant accounting workflows with subscription-based advanced automation. Explore what each capability does and where it lives in the product.",
+    "key": "literal.dad409b51b38",
+    namespace: 'literals',
+    "file": "src/app/[locale]/features/page.tsx",
+    "line": 41,
+    kind: 'lt-call'
+  },
+  {
     "text": "Valid Until (Empty for never)",
     "key": "literal.db17703bb9f3",
     namespace: 'literals',
@@ -11420,6 +12676,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Back to features",
+    "key": "literal.db66c7a7f780",
+    namespace: 'literals',
+    "file": "src/app/[locale]/features/[slug]/page.tsx",
+    "line": 111,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Included in {count} active plans",
+    "key": "literal.db7ae4f1a5e6",
+    namespace: 'literals',
+    "file": "src/app/[locale]/features/page.tsx",
+    "line": 66,
+    kind: 'lt-call'
+  },
+  {
     "text": "All time",
     "key": "literal.dbad49d89123",
     namespace: 'literals',
@@ -11448,7 +12720,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.dc040df0542a",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 199,
+    "line": 200,
     kind: 'lt-call'
   },
   {
@@ -11484,11 +12756,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Send a sales enquiry using the contact methods configured by the platform admin.",
+    "key": "literal.dd1cd310dcec",
+    namespace: 'literals',
+    "file": "src/app/[locale]/contact/page.tsx",
+    "line": 15,
+    kind: 'lt-call'
+  },
+  {
     "text": "Product",
     "key": "literal.dd3b86d1ef21",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 183,
+    "file": "src/components/landing/marketing-shell.tsx",
+    "line": 54,
     kind: 'lt-call'
   },
   {
@@ -11536,7 +12816,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ddcd2f2e783a",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 328,
+    "line": 372,
     kind: 'lt-call'
   },
   {
@@ -11600,7 +12880,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.df8b27e22dc0",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 489,
+    "line": 490,
     kind: 'jsx-text'
   },
   {
@@ -11608,7 +12888,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.dfe60ca92e8c",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1082,
+    "line": 1084,
     kind: 'lt-call'
   },
   {
@@ -11644,6 +12924,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Where AI features are enabled, data sent to third-party AI providers depends on configuration. Your administrator controls which providers are used and what data is submitted for processing.",
+    "key": "literal.e04fa5ebb130",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 63,
+    kind: 'lt-call'
+  },
+  {
     "text": "Currency",
     "key": "literal.e070de224434",
     namespace: 'literals',
@@ -11660,11 +12948,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "5. Acceptable use",
+    "key": "literal.e0ff79abfd60",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 58,
+    kind: 'lt-call'
+  },
+  {
+    "text": "7. Security",
+    "key": "literal.e1088f4f8ff4",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 86,
+    kind: 'lt-call'
+  },
+  {
     "text": "Verification failed",
     "key": "literal.e10d7e514c36",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 142,
+    "line": 145,
     kind: 'lt-call'
   },
   {
@@ -11700,12 +13004,36 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "These are plan-gated capabilities designed for teams that need more power and control.",
+    "key": "literal.e1caff890301",
+    namespace: 'literals',
+    "file": "src/app/[locale]/features/page.tsx",
+    "line": 55,
+    kind: 'lt-call'
+  },
+  {
     "text": "Created: {created}",
     "key": "literal.e1d01b7764bf",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
     "line": 1014,
     kind: 'ltvars-call'
+  },
+  {
+    "text": "Our focus",
+    "key": "literal.e1dd659fcb4f",
+    namespace: 'literals',
+    "file": "src/app/[locale]/about/page.tsx",
+    "line": 18,
+    kind: 'lt-call'
+  },
+  {
+    "text": "2. Information we collect",
+    "key": "literal.e20538a96fd6",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 34,
+    kind: 'lt-call'
   },
   {
     "text": "Connect Plaid to automatically fetch bank transactions.",
@@ -11744,7 +13072,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e3e6918e65a9",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 186,
+    "line": 189,
     kind: 'lt-call'
   },
   {
@@ -11792,7 +13120,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e49c76c06afb",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1184,
+    "line": 1186,
     kind: 'jsx-text'
   },
   {
@@ -11800,7 +13128,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e4c109a84316",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 512,
+    "line": 513,
     kind: 'lt-call'
   },
   {
@@ -11809,6 +13137,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/contact-settings.tsx",
     "line": 83,
+    kind: 'lt-call'
+  },
+  {
+    "text": "6. Data retention",
+    "key": "literal.e4f6d3f2c88d",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 79,
     kind: 'lt-call'
   },
   {
@@ -11880,7 +13216,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e58fe8e3d2b2",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 814,
+    "line": 816,
     kind: 'toast'
   },
   {
@@ -11888,7 +13224,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e62d95e25938",
     namespace: 'literals',
     "file": "src/components/landing/pricing-section.tsx",
-    "line": 212,
+    "line": 222,
     kind: 'lt-call'
   },
   {
@@ -11940,11 +13276,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Generate a hero title/subtitle from a short brief.",
+    "key": "literal.e6ce8c62b634",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 623,
+    kind: 'lt-call'
+  },
+  {
     "text": "Cookie Policy",
     "key": "literal.e6e178ccc822",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 205,
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 12,
     kind: 'lt-call'
   },
   {
@@ -11964,11 +13308,35 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Send via WhatsApp",
+    "key": "literal.e755eaf902bc",
+    namespace: 'literals',
+    "file": "src/components/landing/contact-us.tsx",
+    "line": 186,
+    kind: 'lt-call'
+  },
+  {
+    "text": "We may update these Terms from time to time. If changes are material, we will provide reasonable notice. Continued use of the Service after the effective date means you accept the updated Terms.",
+    "key": "literal.e76b4b2cd64d",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 127,
+    kind: 'lt-call'
+  },
+  {
+    "text": "The Service does not provide legal, tax, or accounting advice.",
+    "key": "literal.e7c400a380ac",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 104,
+    kind: 'lt-call'
+  },
+  {
     "text": "Bulk literals translation completed",
     "key": "literal.e7c62d8daa97",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 881,
+    "line": 883,
     kind: 'toast'
   },
   {
@@ -12015,8 +13383,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Remove",
     "key": "literal.e963907dac5c",
     namespace: 'literals',
-    "file": "src/components/admin/user-management.tsx",
-    "line": 301,
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 586,
     kind: 'lt-call'
   },
   {
@@ -12048,7 +13416,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e9e6911ad625",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 488,
+    "line": 489,
     kind: 'jsx-text'
   },
   {
@@ -12096,7 +13464,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ead8e8ebac85",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1185,
+    "line": 1187,
     kind: 'jsx-text'
   },
   {
@@ -12164,14 +13532,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "AI Intelligence",
-    "key": "literal.ebbd99ccece4",
-    namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 82,
-    kind: 'lt-call'
-  },
-  {
     "text": "Loading preview...",
     "key": "literal.ebd86225628b",
     namespace: 'literals',
@@ -12208,7 +13568,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ec3810e10fb7",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 531,
+    "line": 532,
     kind: 'lt-call'
   },
   {
@@ -12256,7 +13616,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ecb8f3b94244",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1396,
+    "line": 1398,
     kind: 'jsx-text'
   },
   {
@@ -12272,7 +13632,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ece9de32ee73",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 578,
+    "line": 579,
     kind: 'lt-call'
   },
   {
@@ -12300,6 +13660,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Within your tenant/workspace, according to user roles and permissions.",
+    "key": "literal.ed9f6c8848c8",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 72,
+    kind: 'lt-call'
+  },
+  {
     "text": "Highest spending by vendor",
     "key": "literal.edee5c2ced00",
     namespace: 'literals',
@@ -12321,6 +13689,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/security-settings.tsx",
     "line": 97,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Process documents and data to deliver requested functionality (e.g., extraction, categorization, reports).",
+    "key": "literal.ee00d806fd99",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 51,
     kind: 'lt-call'
   },
   {
@@ -12368,7 +13744,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ef30c21f24d2",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 771,
+    "line": 773,
     kind: 'toast'
   },
   {
@@ -12444,6 +13820,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Want deeper details? Explore all features and what each plan unlocks.",
+    "key": "literal.f02f4bedfae2",
+    namespace: 'literals',
+    "file": "src/components/landing/pricing-section.tsx",
+    "line": 277,
+    kind: 'lt-call'
+  },
+  {
     "text": "Synced. Inserted {count} transactions.",
     "key": "literal.f0881d4c42ea",
     namespace: 'literals',
@@ -12460,19 +13844,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Preference cookies",
+    "key": "literal.f1416d72569e",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 51,
+    kind: 'lt-call'
+  },
+  {
     "text": "Failed to save AI config: {message}",
     "key": "literal.f14db6f833ac",
     namespace: 'literals',
     "file": "src/components/settings/ai-settings.tsx",
     "line": 310,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Enterprise Security",
-    "key": "literal.f1bc9e2543fb",
-    namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 129,
     kind: 'lt-call'
   },
   {
@@ -12488,7 +13872,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f1fbb2b43dca",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 106,
+    "line": 116,
     kind: 'lt-call'
   },
   {
@@ -12504,7 +13888,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f24612bb4e48",
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
-    "line": 1124,
+    "line": 1126,
     kind: 'jsx-text'
   },
   {
@@ -12545,6 +13929,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/landing/dashboard-preview.tsx",
     "line": 126,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Role-based permissions help teams delegate tasks while maintaining least-privilege access.",
+    "key": "literal.f31617dbd165",
+    namespace: 'literals',
+    "file": "src/app/[locale]/security/page.tsx",
+    "line": 39,
     kind: 'lt-call'
   },
   {
@@ -12600,7 +13992,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f39de8dfed72",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 336,
+    "line": 337,
     kind: 'lt-call'
   },
   {
@@ -12620,6 +14012,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Short tagline above the hero title",
+    "key": "literal.f3cfe045fed8",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 479,
+    kind: 'lt-call'
+  },
+  {
     "text": "Error: {message}",
     "key": "literal.f3d310b8c299",
     namespace: 'literals',
@@ -12628,11 +14028,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Learn how this feature works, where to configure it, and which plans include it.",
+    "key": "literal.f3e5b3cac143",
+    namespace: 'literals',
+    "file": "src/app/[locale]/page.tsx",
+    "line": 146,
+    kind: 'lt-call'
+  },
+  {
     "text": "Keep this URL secret.",
     "key": "literal.f427fe091d1b",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
     "line": 152,
+    kind: 'lt-call'
+  },
+  {
+    "text": "By accessing or using LedgerAI (the “Service”), you agree to these Terms of Service (the “Terms”). The Service is operated by SophieSoft Company Limited. If you are using the Service on behalf of an organization, you represent that you have authority to bind that organization.",
+    "key": "literal.f43a195fffbd",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 26,
     kind: 'lt-call'
   },
   {
@@ -12688,7 +14104,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f67d30a448ef",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 506,
+    "line": 507,
     kind: 'lt-call'
   },
   {
@@ -12740,6 +14156,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'jsx-text'
   },
   {
+    "text": "13. Changes to terms",
+    "key": "literal.f78474e1a0dd",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 125,
+    kind: 'lt-call'
+  },
+  {
     "text": "Selected tenants",
     "key": "literal.f78b124502de",
     namespace: 'literals',
@@ -12751,8 +14175,24 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Log in",
     "key": "literal.f7c400ed695f",
     namespace: 'literals',
+    "file": "src/components/landing/marketing-shell.tsx",
+    "line": 31,
+    kind: 'lt-call'
+  },
+  {
+    "text": "For questions about these Terms, contact support@sophiesofts.com or use the Contact page to reach the configured support or sales channels.",
+    "key": "literal.f82f66701e0a",
+    namespace: 'literals',
+    "file": "src/app/[locale]/terms/page.tsx",
+    "line": 134,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Generate balance sheets, P&L, and cash flow statements instantly with export-friendly outputs.",
+    "key": "literal.f838b04b7832",
+    namespace: 'literals',
     "file": "src/app/[locale]/page.tsx",
-    "line": 68,
+    "line": 109,
     kind: 'lt-call'
   },
   {
@@ -12788,6 +14228,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "To comply with applicable law, lawful requests, or to protect rights and safety.",
+    "key": "literal.f8e70136b12f",
+    namespace: 'literals',
+    "file": "src/app/[locale]/privacy/page.tsx",
+    "line": 73,
+    kind: 'lt-call'
+  },
+  {
     "text": "Loading activity...",
     "key": "literal.f8fd180b8d2f",
     namespace: 'literals',
@@ -12820,6 +14268,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'jsx-text'
   },
   {
+    "text": "Availability depends on your subscription plan.",
+    "key": "literal.f92716f514c6",
+    namespace: 'literals',
+    "file": "src/app/[locale]/features/[slug]/page.tsx",
+    "line": 150,
+    kind: 'lt-call'
+  },
+  {
     "text": "User assigned successfully",
     "key": "literal.f9407c2e9e53",
     namespace: 'literals',
@@ -12844,6 +14300,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'jsx-text'
   },
   {
+    "text": "Tenant isolation",
+    "key": "literal.f9d078cc8d34",
+    namespace: 'literals',
+    "file": "src/app/[locale]/security/page.tsx",
+    "line": 31,
+    kind: 'lt-call'
+  },
+  {
     "text": "Range: 0.50 – 1.00",
     "key": "literal.f9de17c111b7",
     namespace: 'literals',
@@ -12855,8 +14319,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "The next generation of accounting software powered by artificial intelligence.",
     "key": "literal.f9f1f0a51870",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 179,
+    "file": "src/components/landing/marketing-shell.tsx",
+    "line": 50,
     kind: 'lt-call'
   },
   {
@@ -12880,7 +14344,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fa2984b367b8",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 284,
+    "line": 285,
     kind: 'lt-call'
   },
   {
@@ -12932,6 +14396,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "4. Third-party cookies",
+    "key": "literal.fb61c0475ca9",
+    namespace: 'literals',
+    "file": "src/app/[locale]/cookies/page.tsx",
+    "line": 66,
+    kind: 'lt-call'
+  },
+  {
     "text": "Documents and associated records deleted",
     "key": "literal.fb6cd61c9d1a",
     namespace: 'literals',
@@ -12976,7 +14448,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fbc0fa8650f1",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 231,
+    "line": 234,
     kind: 'lt-call'
   },
   {
@@ -12999,8 +14471,16 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Features",
     "key": "literal.fc338f87a058",
     namespace: 'literals',
-    "file": "src/app/[locale]/page.tsx",
-    "line": 61,
+    "file": "src/app/[locale]/features/page.tsx",
+    "line": 39,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Generate",
+    "key": "literal.fc45f9b7a9a6",
+    namespace: 'literals',
+    "file": "src/components/admin/platform-customizer.tsx",
+    "line": 665,
     kind: 'lt-call'
   },
   {
@@ -13008,7 +14488,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fc723ce5aeee",
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
-    "line": 168,
+    "line": 171,
     kind: 'lt-call'
   },
   {
@@ -13048,7 +14528,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fd860217ad3a",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
-    "line": 259,
+    "line": 260,
     kind: 'lt-call'
   },
   {
@@ -13113,6 +14593,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/statement-detail-modal.tsx",
     "line": 409,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Career listings are not configured yet for this deployment.",
+    "key": "literal.fee53af91d15",
+    namespace: 'literals',
+    "file": "src/app/[locale]/careers/page.tsx",
+    "line": 14,
     kind: 'lt-call'
   },
   {

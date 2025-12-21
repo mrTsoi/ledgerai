@@ -26,9 +26,14 @@ interface PlatformConfig {
     mic_speed: 'slow' | 'normal' | 'fast'
   }
   landing_page: {
+    hero_badge?: string
     hero_title: string
+    hero_title_highlight?: string
     hero_subtitle: string
     show_features: boolean
+    hero_overlay_opacity?: number
+    hero_rotation_seconds?: number
+    hero_media?: Array<{ type: 'video' | 'image'; url: string; duration_seconds?: number }>
   }
 }
 
@@ -43,9 +48,14 @@ const DEFAULT_CONFIG: PlatformConfig = {
     mic_speed: "slow"
   },
   landing_page: {
+    hero_badge: 'AI-powered multi-tenant accounting',
     hero_title: "AI-Powered Accounting for Modern Business",
+    hero_title_highlight: 'AI',
     hero_subtitle: "Automate your bookkeeping, invoices, and financial reporting with the power of AI.",
-    show_features: true
+    show_features: true,
+    hero_overlay_opacity: 0.45,
+    hero_rotation_seconds: 12,
+    hero_media: []
   }
 }
 
@@ -208,7 +218,36 @@ export function PlatformCustomizer() {
   const [config, setConfig] = useState<PlatformConfig>(DEFAULT_CONFIG)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [aiBrief, setAiBrief] = useState('')
+  const [aiGenerating, setAiGenerating] = useState(false)
   const supabase = useMemo(() => createClient(), [])
+
+  const normalizeLanding = useCallback((lp: PlatformConfig['landing_page']) => {
+    const overlay = typeof lp.hero_overlay_opacity === 'number' && Number.isFinite(lp.hero_overlay_opacity) ? lp.hero_overlay_opacity : 0.45
+    const rotation = typeof lp.hero_rotation_seconds === 'number' && Number.isFinite(lp.hero_rotation_seconds) ? lp.hero_rotation_seconds : 12
+    const hero_media = Array.isArray(lp.hero_media)
+      ? lp.hero_media
+          .map((m) => {
+            const type: 'image' | 'video' = m?.type === 'image' ? 'image' : 'video'
+            return {
+              type,
+              url: String((m as any)?.url ?? '').trim(),
+              duration_seconds:
+                typeof (m as any)?.duration_seconds === 'number' && Number.isFinite((m as any).duration_seconds)
+                  ? (m as any).duration_seconds
+                  : undefined,
+            }
+          })
+          .filter((m) => m.url)
+      : []
+
+    return {
+      ...lp,
+      hero_overlay_opacity: Math.min(0.9, Math.max(0, overlay)),
+      hero_rotation_seconds: Math.max(4, rotation),
+      hero_media,
+    }
+  }, [])
 
   const loadSettings = useCallback(async () => {
     try {
@@ -235,8 +274,10 @@ export function PlatformCustomizer() {
             ...((loadedConfig && loadedConfig.chatbot) || {})
           },
           landing_page: {
-            ...DEFAULT_CONFIG.landing_page,
-            ...((loadedConfig && loadedConfig.landing_page) || {})
+            ...normalizeLanding({
+              ...DEFAULT_CONFIG.landing_page,
+              ...((loadedConfig && loadedConfig.landing_page) || {}),
+            })
           }
         })
       }
@@ -259,7 +300,10 @@ export function PlatformCustomizer() {
         .from('system_settings') as any)
         .upsert({
           setting_key: 'platform_appearance',
-          setting_value: config as any,
+          setting_value: {
+            ...config,
+            landing_page: normalizeLanding(config.landing_page),
+          } as any,
           description: 'Configuration for platform appearance including chatbot and landing page',
           is_public: true
         }, { onConflict: 'setting_key' })
@@ -428,10 +472,28 @@ export function PlatformCustomizer() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
+                  <Label>{lt('Hero Badge')}</Label>
+                  <Input
+                    value={config.landing_page.hero_badge || ''}
+                    onChange={(e) => setConfig({ ...config, landing_page: { ...config.landing_page, hero_badge: e.target.value } })}
+                    placeholder={lt('Short tagline above the hero title')}
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label>{lt('Hero Title')}</Label>
                   <Input 
                     value={config.landing_page.hero_title} 
                     onChange={(e) => setConfig({...config, landing_page: {...config.landing_page, hero_title: e.target.value}})}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{lt('Title Highlight (optional)')}</Label>
+                  <Input
+                    value={config.landing_page.hero_title_highlight || ''}
+                    onChange={(e) => setConfig({ ...config, landing_page: { ...config.landing_page, hero_title_highlight: e.target.value } })}
+                    placeholder={lt('Substring to highlight, e.g. AI')}
                   />
                 </div>
                 
@@ -441,6 +503,173 @@ export function PlatformCustomizer() {
                     value={config.landing_page.hero_subtitle} 
                     onChange={(e) => setConfig({...config, landing_page: {...config.landing_page, hero_subtitle: e.target.value}})}
                     rows={2}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{lt('Overlay Opacity (0 - 0.9)')}</Label>
+                    <Input
+                      type="number"
+                      step="0.05"
+                      value={String(config.landing_page.hero_overlay_opacity ?? 0.45)}
+                      onChange={(e) =>
+                        setConfig({
+                          ...config,
+                          landing_page: {
+                            ...config.landing_page,
+                            hero_overlay_opacity: Number(e.target.value),
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{lt('Rotation Seconds')}</Label>
+                    <Input
+                      type="number"
+                      step="1"
+                      value={String(config.landing_page.hero_rotation_seconds ?? 12)}
+                      onChange={(e) =>
+                        setConfig({
+                          ...config,
+                          landing_page: {
+                            ...config.landing_page,
+                            hero_rotation_seconds: Number(e.target.value),
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{lt('Background Media (looping)')}</Label>
+                  <div className="space-y-2">
+                    {(config.landing_page.hero_media || []).map((m, idx) => (
+                      <div key={idx} className="grid grid-cols-1 md:grid-cols-[140px_1fr_120px] gap-2 items-center">
+                        <Select
+                          value={m.type}
+                          onValueChange={(val: any) => {
+                            const next = [...(config.landing_page.hero_media || [])]
+                            next[idx] = { ...next[idx], type: val }
+                            setConfig({ ...config, landing_page: { ...config.landing_page, hero_media: next } })
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="video">{lt('Video (mp4)')}</SelectItem>
+                            <SelectItem value="image">{lt('Image')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+
+                        <Input
+                          value={m.url}
+                          onChange={(e) => {
+                            const next = [...(config.landing_page.hero_media || [])]
+                            next[idx] = { ...next[idx], url: e.target.value }
+                            setConfig({ ...config, landing_page: { ...config.landing_page, hero_media: next } })
+                          }}
+                          placeholder={lt('https://...')}
+                        />
+
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            const next = [...(config.landing_page.hero_media || [])]
+                            next.splice(idx, 1)
+                            setConfig({ ...config, landing_page: { ...config.landing_page, hero_media: next } })
+                          }}
+                        >
+                          {lt('Remove')}
+                        </Button>
+                      </div>
+                    ))}
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          const next = [...(config.landing_page.hero_media || [])]
+                          next.push({ type: 'video', url: '' })
+                          setConfig({ ...config, landing_page: { ...config.landing_page, hero_media: next } })
+                        }}
+                      >
+                        {lt('Add Video')}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          const next = [...(config.landing_page.hero_media || [])]
+                          next.push({ type: 'image', url: '' })
+                          setConfig({ ...config, landing_page: { ...config.landing_page, hero_media: next } })
+                        }}
+                      >
+                        {lt('Add Image')}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {lt('Tip: Provide publicly accessible URLs (CDN). Videos loop automatically; multiple items rotate in order.')}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 rounded-md border p-3">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div>
+                      <div className="font-medium">{lt('AI Assist')}</div>
+                      <div className="text-sm text-muted-foreground">{lt('Generate a hero title/subtitle from a short brief.')}</div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      disabled={aiGenerating}
+                      onClick={async () => {
+                        try {
+                          setAiGenerating(true)
+                          const res = await fetch('/api/admin/marketing/ai-suggest', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              prompt: aiBrief,
+                              current: config.landing_page,
+                            }),
+                          })
+                          const json = await res.json()
+                          if (!res.ok) throw new Error(json?.error || 'AI request failed')
+                          const s = json?.suggestion || {}
+                          setConfig({
+                            ...config,
+                            landing_page: {
+                              ...config.landing_page,
+                              hero_badge: typeof s.hero_badge === 'string' ? s.hero_badge : config.landing_page.hero_badge,
+                              hero_title: typeof s.hero_title === 'string' ? s.hero_title : config.landing_page.hero_title,
+                              hero_title_highlight:
+                                typeof s.hero_title_highlight === 'string'
+                                  ? s.hero_title_highlight
+                                  : config.landing_page.hero_title_highlight,
+                              hero_subtitle:
+                                typeof s.hero_subtitle === 'string' ? s.hero_subtitle : config.landing_page.hero_subtitle,
+                            },
+                          })
+                          toast.success(lt('AI suggestion applied (review and save).'))
+                        } catch (e: any) {
+                          toast.error(lt(e?.message || 'Failed to generate copy'))
+                        } finally {
+                          setAiGenerating(false)
+                        }
+                      }}
+                    >
+                      {aiGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                      {lt('Generate')}
+                    </Button>
+                  </div>
+                  <Textarea
+                    value={aiBrief}
+                    onChange={(e) => setAiBrief(e.target.value)}
+                    rows={3}
+                    placeholder={lt('Example: Target SMEs in Hong Kong. Emphasize multi-tenant, automation, compliance, and real-time reporting.')}
                   />
                 </div>
 

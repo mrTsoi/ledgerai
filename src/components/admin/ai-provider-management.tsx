@@ -194,6 +194,7 @@ export function AIProviderManagement() {
       [
         { id: 'TRANSLATION', label: lt('Translation') },
         { id: 'CHATBOT', label: lt('Chatbot / AI Agent') },
+        { id: 'MARKETING', label: lt('Marketing / Website Copy') },
         { id: 'DOCUMENT_PROCESSING', label: lt('Document Processing') },
         { id: 'TRANSACTION_CATEGORIZATION', label: lt('Transaction Categorization') },
         { id: 'BANK_RECONCILIATION', label: lt('Bank Statement Reconciliation') },
