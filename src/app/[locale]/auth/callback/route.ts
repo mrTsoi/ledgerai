@@ -134,8 +134,16 @@ export async function GET(
       }
     }
 
-    return NextResponse.redirect(new URL(next, request.url))
+    // Always redirect to absolute URL on the public domain
+    const PUBLIC_DOMAIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://ledgerai.sophiesofts.com';
+    const redirectUrl = next.startsWith('http')
+      ? next
+      : `${PUBLIC_DOMAIN.replace(/\/$/, '')}${next.startsWith('/') ? '' : '/'}${next}`;
+    return NextResponse.redirect(redirectUrl);
   } catch {
-    return NextResponse.redirect(new URL(`/${locale}/login?error=oauth_failed`, request.url))
+    // Always redirect to absolute URL on the public domain for error as well
+    const PUBLIC_DOMAIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://ledgerai.sophiesofts.com';
+    const errorRedirect = `${PUBLIC_DOMAIN.replace(/\/$/, '')}/${locale}/login?error=oauth_failed`;
+    return NextResponse.redirect(errorRedirect);
   }
 }

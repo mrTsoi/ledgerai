@@ -872,9 +872,9 @@ export function TransactionsList({ status }: Props) {
                                           ) : (
                                             <ShieldAlert className="w-3 h-3 text-yellow-500" />
                                           )}
-                                          <span className="font-medium text-gray-900">{issue.description}</span>
+                                          <span className="font-medium text-gray-900">{lt(issue.description)}</span>
                                         </div>
-                                        <p className="text-gray-500 pl-5">{issue.details}</p>
+                                        <p className="text-gray-500 pl-5">{lt(issue.details?? '')}</p>
                                       </div>
                                     ))}
                                   </div>
@@ -891,8 +891,8 @@ export function TransactionsList({ status }: Props) {
 
                       {/* Category */}
                       <div className="flex-1 hidden md:block">
-                        <p className="text-sm font-medium">{category}</p>
-                        <p className="text-xs text-gray-500">{typeLabel}</p>
+                        <p className="text-sm font-medium">{lt(category)}</p>
+                        <p className="text-xs text-gray-500">{lt(typeLabel)}</p>
                       </div>
 
                       {/* Amount */}
@@ -941,7 +941,7 @@ export function TransactionsList({ status }: Props) {
                             <div className="md:hidden grid grid-cols-2 gap-4 mb-4">
                                 <div>
                                 <p className="text-xs text-gray-500">{lt('Category')}</p>
-                                    <p className="text-sm font-medium">{category}</p>
+                                    <p className="text-sm font-medium">{lt(category)}</p>
                                 </div>
                                 <div>
                                 <p className="text-xs text-gray-500">{lt('Amount')}</p>
@@ -963,9 +963,9 @@ export function TransactionsList({ status }: Props) {
                                                 ) : (
                                                     <ShieldAlert className="w-4 h-4 text-yellow-500" />
                                                 )}
-                                                <span className="font-medium text-gray-900">{issue.description}</span>
+                                                <span className="font-medium text-gray-900">{lt(issue.description)}</span>
                                             </div>
-                                            <p className="text-gray-600 ml-6">{issue.details}</p>
+                                            <p className="text-gray-600 ml-6">{lt(issue.details ?? '')}</p>
                                         </div>
                                     ))}
                                 </div>
