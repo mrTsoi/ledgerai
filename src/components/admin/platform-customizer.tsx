@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,8 +10,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { toast } from 'sonner'
-import { Loader2, Save, Bot, Sparkles, MessageSquare, Mic, Send, X, Minimize2, Maximize2, Trash2 } from 'lucide-react'
+import { Check, ChevronsUpDown, Loader2, Save, Bot, Sparkles, MessageSquare, Mic, Send, X, Minimize2, Maximize2, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useLiterals } from '@/hooks/use-literals'
 
@@ -24,6 +26,14 @@ interface PlatformConfig {
     title: string
     mic_animation: 'pulse' | 'bounce' | 'spin' | 'ping' | 'none'
     mic_speed: 'slow' | 'normal' | 'fast'
+    voice_output?: {
+      enabled?: boolean
+      auto_speak?: boolean
+      voice_uri?: string
+      rate?: number
+      pitch?: number
+      volume?: number
+    }
   }
   landing_page: {
     hero_badge?: string
@@ -45,7 +55,15 @@ const DEFAULT_CONFIG: PlatformConfig = {
     icon: "bot",
     title: "LedgerAI Copilot",
     mic_animation: "pulse",
-    mic_speed: "slow"
+    mic_speed: "slow",
+    voice_output: {
+      enabled: false,
+      auto_speak: true,
+      voice_uri: '',
+      rate: 1,
+      pitch: 1,
+      volume: 1,
+    },
   },
   landing_page: {
     hero_badge: 'AI-powered multi-tenant accounting',
@@ -61,6 +79,157 @@ const DEFAULT_CONFIG: PlatformConfig = {
 
 function ChatbotPreview({ config }: { config: PlatformConfig }) {
   const lt = useLiterals()
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
+  const [isSpeaking, setIsSpeaking] = useState(false)
+  const speechQueueRef = useRef<string[]>([])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!('speechSynthesis' in window)) return
+
+    const load = () => {
+      try {
+        const v = window.speechSynthesis.getVoices()
+        setVoices(Array.isArray(v) ? v : [])
+      } catch {
+        setVoices([])
+      }
+    }
+
+    load()
+    window.speechSynthesis.onvoiceschanged = load
+    return () => {
+      if (window.speechSynthesis.onvoiceschanged === load) {
+        window.speechSynthesis.onvoiceschanged = null
+      }
+    }
+  }, [])
+
+  const voiceCfg = config.chatbot.voice_output || {}
+  const voiceEnabled = !!voiceCfg.enabled
+  const voiceUri = typeof voiceCfg.voice_uri === 'string' ? voiceCfg.voice_uri : ''
+
+  const resolveVoice = useCallback((): SpeechSynthesisVoice | null => {
+    if (!('speechSynthesis' in window)) return null
+    const available = voices
+    if (!available || available.length === 0) return null
+    if (voiceUri) {
+      const exact = available.find((v) => v.voiceURI === voiceUri)
+      if (exact) return exact
+    }
+
+    const targetLang = (typeof navigator !== 'undefined' && navigator.language) ? navigator.language.toLowerCase() : ''
+    const base = targetLang.split('-')[0]
+    const candidates = targetLang
+      ? (available.filter((v) => String(v.lang || '').toLowerCase().startsWith(targetLang))
+          .concat(available.filter((v) => String(v.lang || '').toLowerCase().startsWith(base))))
+      : available
+
+    const uniq = Array.from(new Set(candidates.length ? candidates : available))
+    const scoreVoice = (v: SpeechSynthesisVoice) => {
+      let score = 0
+      const name = String(v.name || '')
+      const uri = String(v.voiceURI || '')
+      const blob = (name + ' ' + uri)
+      const lang = String(v.lang || '').toLowerCase()
+      if ((v as any).default) score += 20
+      if ((v as any).localService === false) score += 8
+      if (targetLang && lang.startsWith(targetLang)) score += 12
+      if (base && lang.startsWith(base)) score += 6
+      if (/neural|natural|online/i.test(blob)) score += 18
+      if (/microsoft|google|siri|apple/i.test(blob)) score += 10
+      if (/espeak|robot|compact/i.test(blob)) score -= 20
+      return score
+    }
+
+    return [...uniq].sort((a, b) => scoreVoice(b) - scoreVoice(a))[0] || null
+  }, [voices, voiceUri])
+
+  const stop = useCallback(() => {
+    if (typeof window === 'undefined') return
+    if (!('speechSynthesis' in window)) return
+    speechQueueRef.current = []
+    window.speechSynthesis.cancel()
+    setIsSpeaking(false)
+  }, [])
+
+  const splitTextForSpeech = useCallback((text: string, maxLen = 220) => {
+    const cleaned = String(text || '').replace(/\s+/g, ' ').trim()
+    if (!cleaned) return [] as string[]
+    if (cleaned.length <= maxLen) return [cleaned]
+    const parts: string[] = []
+    let remaining = cleaned
+    while (remaining.length > maxLen) {
+      const slice = remaining.slice(0, maxLen + 1)
+      const preferredBreak = Math.max(
+        slice.lastIndexOf('. '),
+        slice.lastIndexOf('。'),
+        slice.lastIndexOf('！'),
+        slice.lastIndexOf('？'),
+        slice.lastIndexOf('! '),
+        slice.lastIndexOf('? '),
+        slice.lastIndexOf('; '),
+        slice.lastIndexOf('；'),
+        slice.lastIndexOf(': '),
+        slice.lastIndexOf('：'),
+        slice.lastIndexOf(', '),
+        slice.lastIndexOf('，'),
+        slice.lastIndexOf('、'),
+        slice.lastIndexOf(' ')
+      )
+      const cut = preferredBreak > 40 ? preferredBreak + 1 : maxLen
+      const chunk = remaining.slice(0, cut).trim()
+      if (chunk) parts.push(chunk)
+      remaining = remaining.slice(cut).trim()
+    }
+    if (remaining) parts.push(remaining)
+    return parts
+  }, [])
+
+  const play = useCallback(() => {
+    if (!voiceEnabled) return
+    if (typeof window === 'undefined') return
+    if (!('speechSynthesis' in window)) return
+
+    const msg = lt(config.chatbot.welcome_message)
+    if (!msg.trim()) return
+
+    try {
+      try {
+        window.speechSynthesis.resume()
+      } catch {
+        // ignore
+      }
+      window.speechSynthesis.cancel()
+      const v = resolveVoice()
+      speechQueueRef.current = splitTextForSpeech(msg, 220)
+      setIsSpeaking(true)
+
+      const speakNext = () => {
+        const next = speechQueueRef.current.shift()
+        if (!next) {
+          setIsSpeaking(false)
+          return
+        }
+
+        const utter = new SpeechSynthesisUtterance(next)
+        if (v) {
+          utter.voice = v
+          utter.lang = v.lang
+        }
+        utter.rate = typeof voiceCfg.rate === 'number' && Number.isFinite(voiceCfg.rate) ? voiceCfg.rate : 1
+        utter.pitch = typeof voiceCfg.pitch === 'number' && Number.isFinite(voiceCfg.pitch) ? voiceCfg.pitch : 1
+        utter.volume = typeof voiceCfg.volume === 'number' && Number.isFinite(voiceCfg.volume) ? voiceCfg.volume : 1
+        utter.onend = () => speakNext()
+        utter.onerror = () => setIsSpeaking(false)
+        window.speechSynthesis.speak(utter)
+      }
+
+      speakNext()
+    } catch {
+      setIsSpeaking(false)
+    }
+  }, [splitTextForSpeech, voiceEnabled, config.chatbot.welcome_message, lt, resolveVoice, voiceCfg.pitch, voiceCfg.rate, voiceCfg.volume])
 
   const getBgColor = (shade = 600) => {
     const color = config.chatbot.primary_color || 'blue'
@@ -115,6 +284,14 @@ function ChatbotPreview({ config }: { config: PlatformConfig }) {
       <div className="absolute inset-0 flex items-center justify-center text-gray-300 font-bold text-4xl select-none pointer-events-none">
         {lt('Preview')}
       </div>
+
+      {voiceEnabled ? (
+        <div className="absolute top-4 right-4 z-20">
+          <Button type="button" variant="outline" size="sm" onClick={isSpeaking ? stop : play}>
+            {isSpeaking ? lt('Stop Voice') : lt('Play Voice')}
+          </Button>
+        </div>
+      ) : null}
       
       {/* Mock Widget */}
       <div className={cn(
@@ -220,7 +397,43 @@ export function PlatformCustomizer() {
   const [saving, setSaving] = useState(false)
   const [aiBrief, setAiBrief] = useState('')
   const [aiGenerating, setAiGenerating] = useState(false)
+  const [chatbotTranslating, setChatbotTranslating] = useState(false)
+  const [heroUploadFile, setHeroUploadFile] = useState<File | null>(null)
+  const [heroUploading, setHeroUploading] = useState(false)
   const supabase = useMemo(() => createClient(), [])
+
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([])
+  const [voicePickerOpen, setVoicePickerOpen] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!('speechSynthesis' in window)) return
+
+    const load = () => {
+      try {
+        const v = window.speechSynthesis.getVoices()
+        setAvailableVoices(Array.isArray(v) ? v : [])
+      } catch {
+        setAvailableVoices([])
+      }
+    }
+
+    load()
+    window.speechSynthesis.onvoiceschanged = load
+    return () => {
+      if (window.speechSynthesis.onvoiceschanged === load) {
+        window.speechSynthesis.onvoiceschanged = null
+      }
+    }
+  }, [])
+
+  const currentVoiceValue = String(config.chatbot.voice_output?.voice_uri ? config.chatbot.voice_output.voice_uri : '__auto__')
+
+  const currentVoiceLabel = useMemo(() => {
+    if (currentVoiceValue === '__auto__') return lt('Auto (best available)')
+    const match = availableVoices.find((v) => String(v.voiceURI) === currentVoiceValue)
+    return match ? `${match.name} (${match.lang})` : lt('Selected voice')
+  }, [availableVoices, currentVoiceValue, lt])
 
   const normalizeLanding = useCallback((lp: PlatformConfig['landing_page']) => {
     const overlay = typeof lp.hero_overlay_opacity === 'number' && Number.isFinite(lp.hero_overlay_opacity) ? lp.hero_overlay_opacity : 0.45
@@ -287,7 +500,7 @@ export function PlatformCustomizer() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, lt])
+  }, [supabase, lt, normalizeLanding])
 
   useEffect(() => {
     loadSettings()
@@ -315,6 +528,102 @@ export function PlatformCustomizer() {
       toast.error(lt('Failed to save settings'))
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleUploadHeroMp4 = async () => {
+    if (!heroUploadFile) {
+      toast.error(lt('Please choose an MP4 file'))
+      return
+    }
+
+    try {
+      setHeroUploading(true)
+      const form = new FormData()
+      form.append('file', heroUploadFile)
+
+      const res = await fetch('/api/admin/marketing/upload-hero-media', {
+        method: 'POST',
+        body: form,
+      })
+
+      const json = await res.json().catch(() => null)
+      if (!res.ok) {
+        const msg = (json && typeof json.error === 'string' ? json.error : null) || lt('Upload failed')
+        throw new Error(msg)
+      }
+
+      const url = String(json?.publicUrl ?? '').trim()
+      if (!url) throw new Error(lt('Upload failed'))
+
+      const next = [...(config.landing_page.hero_media || [])]
+      next.push({ type: 'video', url })
+      setConfig({ ...config, landing_page: { ...config.landing_page, hero_media: next } })
+      setHeroUploadFile(null)
+      toast.success(lt('Uploaded and added to hero media'))
+    } catch (e: any) {
+      toast.error(String(e?.message || lt('Upload failed')))
+    } finally {
+      setHeroUploading(false)
+    }
+  }
+
+  const handleTranslateChatbotCopy = async () => {
+    const title = String(config.chatbot.title ?? '').trim()
+    const welcome = String(config.chatbot.welcome_message ?? '').trim()
+
+    const items = [
+      ...(title ? [{ id: 'chatbot.title', text: title }] : []),
+      ...(welcome ? [{ id: 'chatbot.welcome_message', text: welcome }] : []),
+    ]
+
+    if (items.length === 0) {
+      toast.error(lt('Please enter a title or welcome message first.'))
+      return
+    }
+
+    setChatbotTranslating(true)
+    try {
+      // Use active platform languages as the target set (excluding English).
+      const { data: langRows } = await (supabase as any)
+        .from('system_languages')
+        .select('code')
+        .eq('is_active', true)
+
+      const targetLocales = Array.from(
+        new Set(
+          (Array.isArray(langRows) ? langRows : [])
+            .map((r: any) => String(r?.code ?? '').trim())
+            .filter((c: string) => !!c)
+            .map((c: string) => (c === 'zh-TW' ? 'zh-HK' : c))
+            .filter((c: string) => c !== 'en')
+        )
+      )
+
+      const fallbackTargets = ['zh-CN', 'zh-HK']
+
+      const res = await fetch('/api/admin/chatbot/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sourceLocale: 'en',
+          targetLocales: targetLocales.length > 0 ? targetLocales : fallbackTargets,
+          items,
+          persist: true,
+        }),
+      })
+
+      const json = await res.json().catch(() => null)
+      if (!res.ok) {
+        const msg = (json && typeof json.error === 'string' ? json.error : null) || lt('AI translation failed')
+        throw new Error(msg)
+      }
+
+      toast.success(lt('Chatbot translations generated and saved.'))
+    } catch (e: any) {
+      toast.error(String(e?.message || lt('AI translation failed')))
+    } finally {
+      setChatbotTranslating(false)
     }
   }
 
@@ -384,6 +693,18 @@ export function PlatformCustomizer() {
                     onChange={(e) => setConfig({...config, chatbot: {...config.chatbot, welcome_message: e.target.value}})}
                     rows={3}
                   />
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleTranslateChatbotCopy}
+                      disabled={chatbotTranslating}
+                    >
+                      {chatbotTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                      {lt('Translate with AI')}
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
@@ -451,6 +772,241 @@ export function PlatformCustomizer() {
                         <SelectItem value="fast">{lt('Fast')}</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t space-y-4">
+                  <div className="text-sm font-medium text-muted-foreground">{lt('Voice Output')}</div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center justify-between rounded-md border p-3">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm">{lt('Enable Voice Output')}</Label>
+                        <div className="text-xs text-muted-foreground">{lt('Speak assistant replies using browser text-to-speech.')}</div>
+                      </div>
+                      <Switch
+                        checked={!!config.chatbot.voice_output?.enabled}
+                        onCheckedChange={(checked) =>
+                          setConfig({
+                            ...config,
+                            chatbot: {
+                              ...config.chatbot,
+                              voice_output: {
+                                ...config.chatbot.voice_output,
+                                enabled: checked,
+                                auto_speak:
+                                  typeof config.chatbot.voice_output?.auto_speak === 'boolean'
+                                    ? config.chatbot.voice_output?.auto_speak
+                                    : true,
+                              },
+                            },
+                          })
+                        }
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-md border p-3">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm">{lt('Auto Speak')}</Label>
+                        <div className="text-xs text-muted-foreground">{lt('Automatically read assistant messages aloud.')}</div>
+                      </div>
+                      <Switch
+                        checked={!!config.chatbot.voice_output?.auto_speak}
+                        onCheckedChange={(checked) =>
+                          setConfig({
+                            ...config,
+                            chatbot: {
+                              ...config.chatbot,
+                              voice_output: {
+                                ...config.chatbot.voice_output,
+                                auto_speak: checked,
+                              },
+                            },
+                          })
+                        }
+                        disabled={!config.chatbot.voice_output?.enabled}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>{lt('Voice')}</Label>
+                        <Popover open={voicePickerOpen} onOpenChange={setVoicePickerOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={voicePickerOpen}
+                              className="w-full justify-between"
+                              title={currentVoiceLabel}
+                              disabled={!config.chatbot.voice_output?.enabled}
+                            >
+                              <span className="truncate">{currentVoiceLabel}</span>
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent align="start" className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                              <CommandInput placeholder={lt('Search voice...')} />
+                              <CommandList className="max-h-[320px]">
+                                <CommandEmpty>{lt('No voice found.')}</CommandEmpty>
+                                <CommandGroup>
+                                  <CommandItem
+                                    value="__auto__"
+                                    onSelect={() => {
+                                      setConfig({
+                                        ...config,
+                                        chatbot: {
+                                          ...config.chatbot,
+                                          voice_output: {
+                                            ...config.chatbot.voice_output,
+                                            voice_uri: '',
+                                          },
+                                        },
+                                      })
+                                      setVoicePickerOpen(false)
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        'mr-2 h-4 w-4',
+                                        currentVoiceValue === '__auto__' ? 'opacity-100' : 'opacity-0'
+                                      )}
+                                    />
+                                    {lt('Auto (best available)')}
+                                  </CommandItem>
+
+                                  {availableVoices.map((v) => {
+                                    const value = String(v.voiceURI)
+                                    const label = `${v.name} (${v.lang})`
+                                    return (
+                                      <CommandItem
+                                        key={value}
+                                        value={`${label} ${value}`}
+                                        title={label}
+                                        onSelect={() => {
+                                          setConfig({
+                                            ...config,
+                                            chatbot: {
+                                              ...config.chatbot,
+                                              voice_output: {
+                                                ...config.chatbot.voice_output,
+                                                voice_uri: value,
+                                              },
+                                            },
+                                          })
+                                          setVoicePickerOpen(false)
+                                        }}
+                                      >
+                                        <Check
+                                          className={cn(
+                                            'mr-2 h-4 w-4',
+                                            currentVoiceValue === value ? 'opacity-100' : 'opacity-0'
+                                          )}
+                                        />
+                                        <span className="truncate" title={label}>
+                                          {label}
+                                        </span>
+                                      </CommandItem>
+                                    )
+                                  })}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>{lt('Speech Rate')}</Label>
+                      <Select
+                        value={String(config.chatbot.voice_output?.rate ?? 1)}
+                        onValueChange={(val) =>
+                          setConfig({
+                            ...config,
+                            chatbot: {
+                              ...config.chatbot,
+                              voice_output: {
+                                ...config.chatbot.voice_output,
+                                rate: Number(val),
+                              },
+                            },
+                          })
+                        }
+                        disabled={!config.chatbot.voice_output?.enabled}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0.9">{lt('Slow')}</SelectItem>
+                          <SelectItem value="1">{lt('Normal')}</SelectItem>
+                          <SelectItem value="1.1">{lt('Fast')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>{lt('Pitch')}</Label>
+                      <Select
+                        value={String(config.chatbot.voice_output?.pitch ?? 1)}
+                        onValueChange={(val) =>
+                          setConfig({
+                            ...config,
+                            chatbot: {
+                              ...config.chatbot,
+                              voice_output: {
+                                ...config.chatbot.voice_output,
+                                pitch: Number(val),
+                              },
+                            },
+                          })
+                        }
+                        disabled={!config.chatbot.voice_output?.enabled}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0.9">{lt('Low')}</SelectItem>
+                          <SelectItem value="1">{lt('Normal')}</SelectItem>
+                          <SelectItem value="1.1">{lt('High')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>{lt('Volume')}</Label>
+                      <Select
+                        value={String(config.chatbot.voice_output?.volume ?? 1)}
+                        onValueChange={(val) =>
+                          setConfig({
+                            ...config,
+                            chatbot: {
+                              ...config.chatbot,
+                              voice_output: {
+                                ...config.chatbot.voice_output,
+                                volume: Number(val),
+                              },
+                            },
+                          })
+                        }
+                        disabled={!config.chatbot.voice_output?.enabled}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0.7">{lt('Quiet')}</SelectItem>
+                          <SelectItem value="1">{lt('Normal')}</SelectItem>
+                          <SelectItem value="1">{lt('Loud')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -546,6 +1102,21 @@ export function PlatformCustomizer() {
                 <div className="space-y-2">
                   <Label>{lt('Background Media (looping)')}</Label>
                   <div className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_140px] gap-2 items-center rounded-md border p-3 bg-muted/20">
+                      <Input
+                        type="file"
+                        accept="video/mp4"
+                        onChange={(e) => setHeroUploadFile(e.target.files?.[0] || null)}
+                      />
+                      <Button
+                        onClick={handleUploadHeroMp4}
+                        disabled={heroUploading || !heroUploadFile}
+                      >
+                        {heroUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        {lt('Upload MP4')}
+                      </Button>
+                    </div>
+
                     {(config.landing_page.hero_media || []).map((m, idx) => (
                       <div key={idx} className="grid grid-cols-1 md:grid-cols-[140px_1fr_120px] gap-2 items-center">
                         <Select

@@ -88,7 +88,7 @@ export function TaxSettings() {
     }
 
     void run()
-  }, [currentTenant?.id, allowed])
+  }, [currentTenant?.id, allowed, lt])
 
   if (subscriptionLoading) return null
   if (!allowed) return null

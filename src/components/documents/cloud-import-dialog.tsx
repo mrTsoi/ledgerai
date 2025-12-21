@@ -161,7 +161,7 @@ export function CloudImportDialog(props: Props) {
     setTrail([{ id: 'root', name: lt('Root') }])
     setFolders([])
     void loadWhoami(selectedSource.id)
-  }, [selectedSource, loadWhoami])
+  }, [selectedSource, loadWhoami, lt])
 
   useEffect(() => {
     if (!open) return

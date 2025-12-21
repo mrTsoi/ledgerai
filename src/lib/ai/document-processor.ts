@@ -99,6 +99,108 @@ function nameIncludes(a: string, b: string): boolean {
   return aa.includes(bb) || bb.includes(aa)
 }
 
+function normalizeTenantLocaleTag(tag?: string): 'en' | 'zh-CN' | 'zh-HK' {
+  const raw = String(tag || '').trim()
+  if (!raw) return 'en'
+
+  const lower = raw.toLowerCase().replace('_', '-')
+  if (lower === 'en' || lower.startsWith('en-')) return 'en'
+
+  if (lower.startsWith('zh')) {
+    if (/(^zh-?(cn|hans|sg))/.test(lower)) return 'zh-CN'
+    if (/(^zh-?(hk|hant|tw|mo))/.test(lower)) return 'zh-HK'
+    return 'zh-CN'
+  }
+
+  return 'en'
+}
+
+function resolveTenantLanguageLabel(normalizedLocale: 'en' | 'zh-CN' | 'zh-HK'): string {
+  switch (normalizedLocale) {
+    case 'zh-CN':
+      return 'Simplified Chinese'
+    case 'zh-HK':
+      return 'Traditional Chinese (Hong Kong)'
+    case 'en':
+    default:
+      return 'English'
+  }
+}
+
+function splitBilingualCandidates(value: string): string[] {
+  const raw = String(value || '').trim()
+  if (!raw) return []
+
+  // Replace common bracket forms with separators, but keep inside text as candidates.
+  // Example: "ABC Ltd (ABC有限公司)" => ["ABC Ltd", "ABC有限公司"].
+  const normalized = raw
+    .replace(/[（(]/g, ' | ')
+    .replace(/[）)]/g, ' | ')
+    .replace(/[\r\n]+/g, ' | ')
+    .replace(/\s{2,}/g, ' ')
+
+  const parts = normalized
+    .split(/\s*[\/|｜、,;·•]+\s*|\s+-\s+|\s+—\s+|\s+–\s+/g)
+    .map(s => s.trim())
+    .filter(Boolean)
+
+  const uniq: string[] = []
+  for (const p of parts) {
+    if (p.length < 2) continue
+    if (!uniq.includes(p)) uniq.push(p)
+  }
+
+  // Always include the original raw value as a fallback candidate.
+  if (!uniq.includes(raw)) uniq.unshift(raw)
+  return uniq
+}
+
+function chooseLocalePreferredName(value: unknown, tenantLocale: 'en' | 'zh-CN' | 'zh-HK'): string | undefined {
+  const raw = cleanText(value)
+  if (!raw) return undefined
+
+  const candidates = splitBilingualCandidates(raw)
+  if (candidates.length <= 1) return raw
+
+  const hanRe = /[\p{Script=Han}]/gu
+  const latinRe = /[A-Za-z]/g
+
+  const score = (s: string) => {
+    const t = s.trim()
+    const han = (t.match(hanRe) || []).length
+    const latin = (t.match(latinRe) || []).length
+    const len = Math.max(1, t.length)
+    return {
+      han,
+      latin,
+      hanRatio: han / len,
+      latinRatio: latin / len,
+      len,
+    }
+  }
+
+  const scored = candidates.map(c => ({ c, ...score(c) }))
+
+  if (tenantLocale === 'zh-CN' || tenantLocale === 'zh-HK') {
+    // Prefer strings that actually contain Chinese characters.
+    const withHan = scored.filter(x => x.han > 0)
+    if (withHan.length > 0) {
+      withHan.sort((a, b) => (b.hanRatio - a.hanRatio) || (b.han - a.han) || (b.len - a.len))
+      return withHan[0].c
+    }
+    return raw
+  }
+
+  // English: prefer Latin-heavy candidates.
+  const withLatin = scored.filter(x => x.latin > 0)
+  if (withLatin.length > 0) {
+    withLatin.sort((a, b) => (b.latinRatio - a.latinRatio) || (b.latin - a.latin) || (b.len - a.len))
+    return withLatin[0].c
+  }
+
+  return raw
+}
+
 const TENANT_DEBUG_ENABLED = (() => {
   const raw = process.env.AI_TENANT_DEBUG || process.env.NEXT_PUBLIC_AI_TENANT_DEBUG
   if (!raw) return false
@@ -217,6 +319,22 @@ type TenantCorrectionInfo = {
  * Current implementation returns mock data for demonstration purposes.
  */
 export class AIProcessingService {
+  private static applyTenantLocalePreferences(extractedData: ExtractedData, tenantLocale?: string): ExtractedData {
+    const locale = normalizeTenantLocaleTag(tenantLocale)
+
+    const vendor = chooseLocalePreferredName(extractedData.vendor_name, locale)
+    const customer = chooseLocalePreferredName(extractedData.customer_name, locale)
+    const bank = chooseLocalePreferredName(extractedData.bank_name, locale)
+    const holder = chooseLocalePreferredName(extractedData.account_holder_name, locale)
+
+    return {
+      ...extractedData,
+      vendor_name: vendor ?? extractedData.vendor_name,
+      customer_name: customer ?? extractedData.customer_name,
+      bank_name: bank ?? extractedData.bank_name,
+      account_holder_name: holder ?? extractedData.account_holder_name,
+    }
+  }
   private static async applyTenantTaxDefaults(supabase: any, tenantId: string, extractedData: ExtractedData) {
     try {
       // Only apply defaults if tax_amount is missing (0 is a valid tax amount).
@@ -314,6 +432,7 @@ export class AIProcessingService {
       const docRow = document as unknown as Document & { tenants?: { name?: string; currency?: string } }
       const tenantName = docRow.tenants?.name || 'the company'
       const tenantCurrency = docRow.tenants?.currency || 'USD'
+      const tenantLocale = (docRow.tenants as any)?.locale as string | undefined
 
       // 2. Update status to PROCESSING
       await updateDocumentById(documentId, { status: 'PROCESSING' })
@@ -410,22 +529,25 @@ export class AIProcessingService {
         extractedData = await this.processWithGoogleDocumentAI(document, aiConfig, supabase, buffer)
       } else if (aiConfig && aiConfig.ai_providers?.name === 'qwen-vision') {
         console.log('Processing with Qwen Vision...')
-        extractedData = await this.processWithQwenVision(document, aiConfig, supabase, buffer, tenantName)
+        extractedData = await this.processWithQwenVision(document, aiConfig, supabase, buffer, tenantName, tenantLocale)
       } else if (aiConfig && aiConfig.ai_providers?.name === 'openai-vision') {
         console.log('Processing with OpenAI Vision...')
-        extractedData = await this.processWithOpenAIVision(document, aiConfig, supabase, buffer, tenantName)
+        extractedData = await this.processWithOpenAIVision(document, aiConfig, supabase, buffer, tenantName, tenantLocale)
       } else if (aiConfig && aiConfig.ai_providers?.name === 'openrouter') {
         console.log('Processing with OpenRouter...')
-        extractedData = await this.processWithOpenRouter(document, aiConfig, supabase, buffer, tenantName)
+        extractedData = await this.processWithOpenRouter(document, aiConfig, supabase, buffer, tenantName, tenantLocale)
       } else if (aiConfig && aiConfig.ai_providers?.name === 'deepseek-ocr') {
         console.log('Processing with DeepSeek OCR...')
-        extractedData = await this.processWithDeepSeek(document, aiConfig, supabase, buffer, tenantName)
+        extractedData = await this.processWithDeepSeek(document, aiConfig, supabase, buffer, tenantName, tenantLocale)
       } else {
         throw new Error('No active AI provider configured for this tenant or platform')
       }
 
       // Normalize common provider-specific key variants into our canonical fields
       extractedData = this.sanitizeExtractedData(extractedData) as ExtractedData
+
+      // Prefer locale-appropriate variants when bilingual names are present.
+      extractedData = this.applyTenantLocalePreferences(extractedData, tenantLocale)
 
       // Tax automation: if AI didn't extract tax_amount, apply tenant default rate
       extractedData = (await this.applyTenantTaxDefaults(supabase, docRow.tenant_id, extractedData)) as ExtractedData
@@ -1044,7 +1166,8 @@ export class AIProcessingService {
     config: any,
     supabase: any,
     fileBuffer?: Buffer,
-    tenantName?: string
+    tenantName?: string,
+    tenantLocale?: string
   ): Promise<ExtractedData> {
     const customConfig = this.resolveMergedProviderConfig(config)
     const apiKey = this.resolveApiKey(config)
@@ -1053,7 +1176,7 @@ export class AIProcessingService {
     const baseURL = customConfig.baseUrl || 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1'
     const model = this.resolveModelName(config, 'qwen-vl-max')
 
-    return this.processWithOpenAICompatibleVision(document, apiKey, baseURL, model, supabase, fileBuffer, tenantName)
+    return this.processWithOpenAICompatibleVision(document, apiKey, baseURL, model, supabase, fileBuffer, tenantName, tenantLocale)
   }
 
   /**
@@ -1064,7 +1187,8 @@ export class AIProcessingService {
     config: any,
     supabase: any,
     fileBuffer?: Buffer,
-    tenantName?: string
+    tenantName?: string,
+    tenantLocale?: string
   ): Promise<ExtractedData> {
     const customConfig = this.resolveMergedProviderConfig(config)
     const apiKey = this.resolveApiKey(config)
@@ -1075,7 +1199,7 @@ export class AIProcessingService {
     const baseURL = customConfig.baseUrl 
     const model = this.resolveModelName(config, 'gpt-4-vision-preview')
 
-    return this.processWithOpenAICompatibleVision(document, apiKey, baseURL, model, supabase, fileBuffer, tenantName)
+    return this.processWithOpenAICompatibleVision(document, apiKey, baseURL, model, supabase, fileBuffer, tenantName, tenantLocale)
   }
 
   /**
@@ -1086,7 +1210,8 @@ export class AIProcessingService {
     config: any,
     supabase: any,
     fileBuffer?: Buffer,
-    tenantName?: string
+    tenantName?: string,
+    tenantLocale?: string
   ): Promise<ExtractedData> {
     const customConfig = this.resolveMergedProviderConfig(config)
     const apiKey = this.resolveApiKey(config)
@@ -1101,7 +1226,7 @@ export class AIProcessingService {
       "X-Title": "LedgerAI"
     }
     
-    return this.processWithOpenAICompatibleVision(document, apiKey, baseURL, model, supabase, fileBuffer, tenantName, extraHeaders)
+    return this.processWithOpenAICompatibleVision(document, apiKey, baseURL, model, supabase, fileBuffer, tenantName, tenantLocale, extraHeaders)
   }
 
   /**
@@ -1112,7 +1237,8 @@ export class AIProcessingService {
     config: any,
     supabase: any,
     fileBuffer?: Buffer,
-    tenantName?: string
+    tenantName?: string,
+    tenantLocale?: string
   ): Promise<ExtractedData> {
     const customConfig = this.resolveMergedProviderConfig(config)
     const apiKey = this.resolveApiKey(config)
@@ -1124,7 +1250,7 @@ export class AIProcessingService {
     // Warning: DeepSeek's main models (deepseek-chat) do not support Vision yet.
     // This will likely fail unless the user provides a custom model that supports it.
     
-    return this.processWithOpenAICompatibleVision(document, apiKey, baseURL, model, supabase, fileBuffer, tenantName)
+    return this.processWithOpenAICompatibleVision(document, apiKey, baseURL, model, supabase, fileBuffer, tenantName, tenantLocale)
   }
 
   /**
@@ -1139,6 +1265,7 @@ export class AIProcessingService {
     supabase: any,
     fileBuffer?: Buffer,
     tenantName?: string,
+    tenantLocale?: string,
     defaultHeaders?: Record<string, string>
   ): Promise<ExtractedData> {
     try {
@@ -1169,11 +1296,26 @@ export class AIProcessingService {
         defaultHeaders: defaultHeaders
       })
 
+      const normalizedTenantLocale = normalizeTenantLocaleTag(tenantLocale)
+      const outputLanguage = resolveTenantLanguageLabel(normalizedTenantLocale)
+
       // 4. Construct Prompt
       const systemPrompt = `You are an expert accounting AI. Extract data from this ${document.document_type || 'document'} into JSON format.
       Return ONLY valid JSON with no markdown formatting.
       
       The name of the company/tenant that owns this document is: "${tenantName || 'Unknown'}".
+
+      OUTPUT LANGUAGE (TENANT LOCALE):
+      - The tenant locale is "${normalizedTenantLocale}". Write all natural-language descriptive fields in ${outputLanguage}.
+      - For proper nouns or legal names, do NOT translate. However, if the document shows multiple-language variants of the same name (e.g. English + Chinese), choose the variant that matches the tenant locale:
+        - For zh locales, prefer the Chinese name variant.
+        - For en locale, prefer the English name variant.
+        - Keep the chosen variant exactly as printed (no translation). Fields: "vendor_name", "customer_name", "bank_name", "account_holder_name".
+      - Do NOT translate enum-like fields or constrained values. Keep:
+        - "document_type" as one of: "invoice" | "receipt" | "credit_note" | "bank_statement"
+        - "transaction_type" as: "income" | "expense" | "transfer" (use "income"/"expense" per rules below)
+        - Bank transaction "type" as: "DEBIT" | "CREDIT"
+      - Keep numbers as numbers (no locale separators) and dates as YYYY-MM-DD.
       
       CRITICAL - TENANT VALIDATION:
       - Check if the document belongs to "${tenantName || 'Unknown'}". Look for the company name in the "Bill To", "Ship To", or "Receiver" fields.
