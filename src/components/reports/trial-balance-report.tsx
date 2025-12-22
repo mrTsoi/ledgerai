@@ -178,13 +178,13 @@ export function TrialBalanceReport() {
                       <td className="py-3 px-4 font-mono text-sm">{row.account_code}</td>
                       <td className="py-3 px-4">
                         <div>
-                          <p className="font-medium">{row.account_name}</p>
+                          <p className="font-medium">{lt(row.account_name)}</p>
                           {row.account_subtype && (
-                            <p className="text-xs text-gray-500">{row.account_subtype}</p>
+                            <p className="text-xs text-gray-500">{lt(row.account_subtype)}</p>
                           )}
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-sm">{row.account_type}</td>
+                      <td className="py-3 px-4 text-sm">{lt(row.account_type)}</td>
                       <td className="py-3 px-4 text-right font-mono">
                         ${row.debit_amount.toFixed(2)}
                       </td>

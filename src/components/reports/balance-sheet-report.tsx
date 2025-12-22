@@ -183,7 +183,7 @@ export function BalanceSheetReport() {
                       {assets.map((row) => (
                         <tr key={row.account_id} className="border-b hover:bg-gray-50">
                           <td className="py-2 px-2 font-mono text-xs">{row.account_code}</td>
-                          <td className="py-2 px-2 text-sm">{row.account_name}</td>
+                          <td className="py-2 px-2 text-sm">{lt(row.account_name)}</td>
                           <td className="py-2 px-2 text-right font-mono text-sm">${row.amount.toFixed(2)}</td>
                         </tr>
                       ))}
@@ -219,7 +219,7 @@ export function BalanceSheetReport() {
                       {liabilities.map((row) => (
                         <tr key={row.account_id} className="border-b hover:bg-gray-50">
                           <td className="py-2 px-2 font-mono text-xs">{row.account_code}</td>
-                          <td className="py-2 px-2 text-sm">{row.account_name}</td>
+                          <td className="py-2 px-2 text-sm">{lt(row.account_name)}</td>
                           <td className="py-2 px-2 text-right font-mono text-sm">${row.amount.toFixed(2)}</td>
                         </tr>
                       ))}
@@ -252,7 +252,7 @@ export function BalanceSheetReport() {
                       {equity.map((row) => (
                         <tr key={row.account_id} className="border-b hover:bg-gray-50">
                           <td className="py-2 px-2 font-mono text-xs">{row.account_code}</td>
-                          <td className="py-2 px-2 text-sm">{row.account_name}</td>
+                          <td className="py-2 px-2 text-sm">{lt(row.account_name)}</td>
                           <td className="py-2 px-2 text-right font-mono text-sm">${row.amount.toFixed(2)}</td>
                         </tr>
                       ))}

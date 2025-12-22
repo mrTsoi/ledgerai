@@ -70,9 +70,9 @@ export function FinancialCharts() {
     // Format Trend Data
     const trendArray = Object.entries(trends).map(([name, val]) => ({
       name,
-      Income: val.income,
-      Expense: val.expense,
-      Profit: val.income - val.expense
+      [lt('Income')]: val.income,
+      [lt('Expense')]: val.expense,
+      [lt('Profit')]: val.income - val.expense
     }))
     setTrendData(trendArray)
 
@@ -185,8 +185,9 @@ export function FinancialCharts() {
                 formatter={(value: number) => [`$${value.toFixed(2)}`, '']}
               />
               <Legend />
-              <Bar dataKey="Income" fill="#10b981" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Expense" fill="#ef4444" radius={[4, 4, 0, 0]} />
+              <Bar dataKey={lt("Income")} fill="#10b981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey={lt("Expense")} fill="#ef4444" radius={[4, 4, 0, 0]} />
+              <Bar dataKey={lt("Profit")} fill="#cfe015ff" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>

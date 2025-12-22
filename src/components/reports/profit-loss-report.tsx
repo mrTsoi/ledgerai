@@ -182,7 +182,7 @@ export function ProfitLossReport() {
                     {revenues.map((row) => (
                       <tr key={row.account_id} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-4 font-mono text-sm">{row.account_code}</td>
-                        <td className="py-2 px-4">{row.account_name}</td>
+                        <td className="py-2 px-4">{lt(row.account_name)}</td>
                         <td className="py-2 px-4 text-right font-mono">${row.amount.toFixed(2)}</td>
                       </tr>
                     ))}
@@ -215,7 +215,7 @@ export function ProfitLossReport() {
                     {expenses.map((row) => (
                       <tr key={row.account_id} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-4 font-mono text-sm">{row.account_code}</td>
-                        <td className="py-2 px-4">{row.account_name}</td>
+                        <td className="py-2 px-4">{lt(row.account_name)}</td>
                         <td className="py-2 px-4 text-right font-mono">${row.amount.toFixed(2)}</td>
                       </tr>
                     ))}

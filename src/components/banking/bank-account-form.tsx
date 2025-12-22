@@ -173,7 +173,7 @@ export function BankAccountForm({ onClose, onSaved, initialData }: Props) {
               <Label>{lt('Currency')}</Label>
               <CurrencySelect 
                 value={formData.currency}
-                onChange={value => setFormData({...formData, currency: value})}
+                onChange={value => setFormData({...formData, currency: lt(value)})}
               />
             </div>
           </div>
@@ -188,7 +188,7 @@ export function BankAccountForm({ onClose, onSaved, initialData }: Props) {
               <option value="">{lt('-- Select Account --')}</option>
               {accounts.map(acc => (
                 <option key={acc.id} value={acc.id}>
-                  {acc.code} - {acc.name}
+                  {acc.code} - {lt(acc.name)}
                 </option>
               ))}
             </select>

@@ -116,29 +116,29 @@ export function BankAccountSettings({ accountId }: Props) {
             <div className="space-y-2">
               <Label>{lt('Account Name')}</Label>
               <Input 
-                value={formData.account_name}
+                value={lt(formData.account_name)}
                 onChange={e => setFormData({...formData, account_name: e.target.value})}
               />
             </div>
             <div className="space-y-2">
               <Label>{lt('Bank Name')}</Label>
               <Input 
-                value={formData.bank_name}
+                value={lt(formData.bank_name)}
                 onChange={e => setFormData({...formData, bank_name: e.target.value})}
               />
             </div>
             <div className="space-y-2">
               <Label>{lt('Account Number (Last 4)')}</Label>
               <Input 
-                value={formData.account_number}
+                value={lt(formData.account_number)}
                 onChange={e => setFormData({...formData, account_number: e.target.value})}
               />
             </div>
             <div className="space-y-2">
               <Label>{lt('Currency')}</Label>
               <CurrencySelect 
-                value={formData.currency}
-                onChange={value => setFormData({...formData, currency: value})}
+                value={lt(formData.currency)}
+                onChange={value => setFormData({...formData, currency: lt(value)})}
               />
             </div>
           </div>
