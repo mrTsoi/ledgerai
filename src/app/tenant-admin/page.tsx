@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Download, Upload, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-
-import { TenantManagement } from '@/components/admin/tenant-management';
+import { useLiterals } from '@/hooks/use-literals'
 
 export default function TenantAdminDashboard() {
   const { tenants, refreshTenants } = useTenant();
   const userRole = useUserRole();
+  const lt = useLiterals();
 
   const [loading, setLoading] = useState(false);
   const [expandedTenantId, setExpandedTenantId] = useState<string | null>(null);
@@ -33,10 +33,10 @@ export default function TenantAdminDashboard() {
         body: JSON.stringify({ tenantId }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Failed to fetch documents");
+      if (!res.ok) throw new Error(json?.error || lt("Failed to fetch documents"));
       setDocumentsByTenant(prev => ({ ...prev, [tenantId]: json.documents || [] }));
     } catch (e: any) {
-      toast.error(e.message || "Failed to fetch documents");
+      toast.error(lt(e.message) || lt("Failed to fetch documents"));
       setDocumentsByTenant(prev => ({ ...prev, [tenantId]: [] }));
     } finally {
       setDocLoading(null);
@@ -51,7 +51,7 @@ export default function TenantAdminDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tenantId }),
       });
-      if (!res.ok) throw new Error('Failed to backup tenant');
+      if (!res.ok) throw new Error(lt('Failed to backup tenant'));
       const json = await res.json();
       const dataStr = JSON.stringify(json.data, null, 2);
       const blob = new Blob([dataStr], { type: 'application/json' });
@@ -63,9 +63,9 @@ export default function TenantAdminDashboard() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success('Backup downloaded!');
+      toast.success(lt('Backup downloaded!'));
     } catch (e: any) {
-      toast.error(e.message || 'Backup failed');
+      toast.error(e.message || lt('Backup failed'));
     }
   };
 
@@ -91,19 +91,19 @@ export default function TenantAdminDashboard() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ tenantId, data: json }),
         });
-        if (!res.ok) throw new Error('Restore failed');
-        toast.success('Restore completed!');
+        if (!res.ok) throw new Error(lt('Restore failed'));
+        toast.success(lt('Restore completed!'));
         refreshTenants();
       };
       input.click();
     } catch (e: any) {
-      toast.error(e.message || 'Restore failed');
+      toast.error(e.message || lt('Restore failed'));
     }
   };
 
   // Delete a document
   const handleDeleteDocument = async (tenantId: string, documentId: string) => {
-    if (!window.confirm("Are you sure you want to delete this document? This cannot be undone.")) return;
+    if (!window.confirm(lt("Are you sure you want to delete this document? This cannot be undone."))) return;
     try {
       const res = await fetch("/api/tenant-admin/delete-document", {
         method: "POST",
@@ -111,18 +111,18 @@ export default function TenantAdminDashboard() {
         body: JSON.stringify({ documentId }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Delete failed");
-      toast.success("Document deleted successfully");
+      if (!res.ok) throw new Error(json?.error || lt("Delete failed"));
+      toast.success(lt("Document deleted successfully"));
       // Refresh document list
       await fetchDocuments(tenantId);
     } catch (e: any) {
-      toast.error(e.message || "Delete failed");
+      toast.error(e.message || lt("Delete failed"));
     }
   };
 
   // Delete a tenant
   const handleDeleteTenant = async (tenantId: string) => {
-    if (!window.confirm("Are you sure you want to delete this tenant? This cannot be undone.")) return;
+    if (!window.confirm(lt("Are you sure you want to delete this tenant? This cannot be undone."))) return;
     try {
       const res = await fetch("/api/tenant-admin/delete-tenant", {
         method: "POST",
@@ -131,7 +131,7 @@ export default function TenantAdminDashboard() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "Delete failed");
-      toast.success("Tenant deleted successfully");
+      toast.success(lt("Tenant deleted successfully"));
       refreshTenants();
     } catch (e: any) {
       toast.error(e.message || "Delete failed");
@@ -145,7 +145,7 @@ export default function TenantAdminDashboard() {
       <Card className="mt-8">
         <CardContent className="flex items-center justify-center p-12">
           <Loader2 className="w-8 h-8 animate-spin" />
-          <span className="ml-4">Loading tenants...</span>
+          <span className="ml-4">{lt("Loading tenants...")}</span>
         </CardContent>
       </Card>
     );
@@ -154,14 +154,14 @@ export default function TenantAdminDashboard() {
   return (
     <Card className="mt-8">
       <CardHeader>
-        <CardTitle>Central Tenant Management</CardTitle>
+        <CardTitle>{lt("Central Tenant Management")}</CardTitle>
         <CardDescription>
-          Manage all your tenants, documents, and perform backup/restore operations.
+          {lt('Manage all your tenants, documents, and perform backup/restore operations.')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-4">
-          <Input placeholder="Search tenants..." value={search} onChange={e => setSearch(e.target.value)} className="w-full md:max-w-sm" />
+          <Input placeholder={lt("Search tenants...")} value={search} onChange={e => setSearch(e.target.value)} className="w-full md:max-w-sm" />
         </div>
         <div className="space-y-6">
           {filteredTenants.map((tenant) => (
@@ -169,8 +169,8 @@ export default function TenantAdminDashboard() {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                   <div className="font-semibold text-lg">{tenant.name}</div>
-                  <div className="text-sm text-gray-500">Slug: {tenant.slug}</div>
-                  <div className="text-xs text-gray-400">Created: {tenant.created_at}</div>
+                  <div className="text-sm text-gray-500">{lt("Slug")}: {tenant.slug}</div>
+                  <div className="text-xs text-gray-400">{lt("Created")}: {lt(tenant.created_at)}</div>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   <Button variant="outline" size="sm" onClick={() => {
@@ -181,16 +181,16 @@ export default function TenantAdminDashboard() {
                       if (!documentsByTenant[tenant.id]) fetchDocuments(tenant.id);
                     }
                   }}>
-                    {expandedTenantId === tenant.id ? "Hide Documents" : "Show Documents"}
+                    {expandedTenantId === tenant.id ? lt("Hide Documents") : lt("Show Documents")}
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => handleBackup(tenant.id)} disabled={backupLoading}>
-                    {backupLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Download className="w-4 h-4 mr-1" />} Backup
+                    {backupLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Download className="w-4 h-4 mr-1" />} {lt("Backup")}
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => handleRestore(tenant.id)} disabled={restoreLoading}>
-                    {restoreLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />} Restore
+                    {restoreLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />} {lt("Restore")}
                   </Button>
                   <Button variant="destructive" size="sm" onClick={() => handleDeleteTenant(tenant.id)} disabled={deleteLoading}>
-                    {deleteLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Trash2 className="w-4 h-4 mr-1" />} Delete Tenant
+                    {deleteLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Trash2 className="w-4 h-4 mr-1" />} {lt("Delete Tenant")}
                   </Button>
                 </div>
               </div>
@@ -198,8 +198,8 @@ export default function TenantAdminDashboard() {
                 <div className="mt-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Documents for Tenant</CardTitle>
-                      <CardDescription>All documents for this tenant.</CardDescription>
+                      <CardTitle>{lt("Documents for Tenant")}</CardTitle>
+                      <CardDescription>{lt("All documents for this tenant.")}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       {docLoading === tenant.id ? (
@@ -209,29 +209,29 @@ export default function TenantAdminDashboard() {
                       ) : (
                         <>
                           {(!documentsByTenant[tenant.id] || documentsByTenant[tenant.id].length === 0) ? (
-                            <div className="text-gray-500">No documents found for this tenant.</div>
+                            <div className="text-gray-500">{lt("No documents found for this tenant.")}</div>
                           ) : (
                             <div className="overflow-x-auto">
                               <table className="min-w-full text-sm border">
                                 <thead>
                                   <tr className="bg-gray-100">
-                                    <th className="p-2 text-left">File Name</th>
-                                    <th className="p-2 text-left">Type</th>
-                                    <th className="p-2 text-left">Status</th>
-                                    <th className="p-2 text-left">Uploaded</th>
-                                    <th className="p-2 text-left">Actions</th>
+                                    <th className="p-2 text-left">{lt("File Name")}</th>
+                                    <th className="p-2 text-left">{lt("Type")}</th>
+                                    <th className="p-2 text-left">{lt("Status")}</th>
+                                    <th className="p-2 text-left">{lt("Uploaded")}</th>
+                                    <th className="p-2 text-left">{lt("Actions")}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {documentsByTenant[tenant.id].map((doc) => (
                                     <tr key={doc.id} className="border-b">
                                       <td className="p-2">{doc.file_name}</td>
-                                      <td className="p-2">{doc.file_type}</td>
-                                      <td className="p-2">{doc.status}</td>
-                                      <td className="p-2">{doc.created_at}</td>
+                                      <td className="p-2">{lt(doc.file_type)}</td>
+                                      <td className="p-2">{lt(doc.status)}</td>
+                                      <td className="p-2">{lt(doc.created_at)}</td>
                                       <td className="p-2">
                                         <Button variant="destructive" size="sm" onClick={() => handleDeleteDocument(tenant.id, doc.id)}>
-                                          <Trash2 className="w-4 h-4 mr-1" /> Delete
+                                          <Trash2 className="w-4 h-4 mr-1" /> {lt("Delete")}
                                         </Button>
                                       </td>
                                     </tr>

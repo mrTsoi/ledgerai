@@ -11,7 +11,6 @@ import { Loader2,  Download, Upload, Plus, Edit, Trash2, Building2, Users, FileT
 import { format } from 'date-fns'
 import { toast } from "sonner"
 import { useLiterals } from '@/hooks/use-literals'
-import { useUserRole } from "@/hooks/use-tenant";
 
 type Tenant = Database['public']['Tables']['tenants']['Row'] & {
   is_active?: boolean
