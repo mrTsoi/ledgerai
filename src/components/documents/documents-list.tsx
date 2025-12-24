@@ -761,6 +761,11 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
     receipt: lt('Receipt')
   }
 
+  const transTypeLabels: Record<string, string> = {
+    expense: lt('Expense'),
+    income: lt('Income')
+  }
+
   if (!currentTenant) {
     return (
       <Card>
@@ -849,8 +854,14 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
             {filteredDocuments.map(doc => {
               const expanded = expandedIds.has(doc.id)
               const showCheckbox = !isMobile || mobileSelectionMode
+              // Extract transaction type and currency from document_data.extracted_data if available
+              const docData = getDocData(doc)
+              const transactionType = docData?.extracted_data?.transaction_type || ''
+              // Default currency to tenant's currency if not found in extraction
+              const currency = docData?.extracted_data?.currency_code || currentTenant?.currency || ''
               return (
                 <div key={doc.id} className="group">
+                  
                   {/* Main row: grid for desktop, flex for mobile */}
                   <div
                     className={
@@ -897,6 +908,22 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                               </span>
                             </div>
                           )}
+                          {((doc.validation_status === 'NEEDS_REVIEW') || (Array.isArray(doc.validation_flags) && doc.validation_flags.length > 0)) && (
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full" title={doc.validation_flags?.join(', ')}>
+                              <AlertTriangle className="w-3 h-3" />
+                              <span>
+                                {doc.validation_flags?.includes('WRONG_TENANT') ? ltVars('Wrong Tenant ') : ''} 
+                              </span>
+                            </div>
+                          )}
+                          {((doc.validation_status === 'NEEDS_REVIEW') || (Array.isArray(doc.validation_flags) && doc.validation_flags.length > 0)) && (
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full" title={doc.validation_flags?.join(', ')}>
+                              <AlertTriangle className="w-3 h-3" />
+                              <span>
+                                {doc.validation_flags?.includes('Review Needed') ? ltVars('Review Needed') : ''} 
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs text-gray-500 mt-1">
                           <span>{formatFileSize(doc.file_size)}</span>
@@ -906,6 +933,18 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                           <span className="capitalize">
                             {doc.document_type
                               ? docTypeLables[doc.document_type.toLowerCase()] || doc.document_type
+                              : ''}
+                          </span>
+                          <span className="hidden md:inline">•</span>
+                          <span className="capitalize">
+                            {transactionType
+                              ? transTypeLabels[transactionType.toLowerCase()] || transactionType
+                              : ''}
+                          </span>
+                          <span className="hidden md:inline">•</span>
+                          <span className="capitalize">
+                            {docData.extracted_data
+                              ? '$' + docData.extracted_data.total_amount + ' ' + lt(currency)
                               : ''}
                           </span>
                         </div>
@@ -978,7 +1017,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                             )}
                             {data.extracted_data?.total_amount && (
                               <div>
-                                <span className="font-semibold text-gray-900">{lt('Total')}:</span> <span>{data.extracted_data.total_amount} {data.extracted_data?.currency_code || ''}</span>
+                                <span className="font-semibold text-gray-900">{lt('Total')}:</span> <span>{data.extracted_data.total_amount} {data.extracted_data?.currency_code || currency}</span>
                               </div>
                             )}
                             {data.extracted_data?.bank_transactions?.length > 0 && (

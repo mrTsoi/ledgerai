@@ -39,6 +39,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
   const [zoomLevel, setZoomLevel] = useState(100)
   const [formData, setFormData] = useState({
     vendor_name: '',
+    customer_name: '',
     document_date: '',
     total_amount: '',
     currency: 'USD',
@@ -128,6 +129,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
 
         setFormData({
           vendor_name: dData.vendor_name ?? extracted.vendor_name ?? '',
+          customer_name: dData.customer_name ?? extracted.customer_name ?? '',
           document_date: formatDate(rawDate),
           total_amount: dData.total_amount?.toString() ?? extracted.total_amount?.toString() ?? '',
           currency: dData.currency ?? extracted.currency ?? 'USD',
@@ -755,6 +757,15 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
                   <Input 
                     value={formData.vendor_name}
                     onChange={e => setFormData({...formData, vendor_name: e.target.value})}
+                    placeholder={lt('e.g. Amazon Web Services')}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{lt('Customer') + ' / ' + lt('Payer')}</Label>
+                  <Input 
+                    value={formData.customer_name}
+                    onChange={e => setFormData({...formData, customer_name: e.target.value})}
                     placeholder={lt('e.g. Amazon Web Services')}
                   />
                 </div>
