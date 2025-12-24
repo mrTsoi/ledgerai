@@ -294,6 +294,12 @@ export default function DashboardLayout({
   }
 
   const navigationItems: NavItem[] = [
+        {
+          name: lt('Tenant Admin'),
+          href: '/tenant-admin',
+          icon: <Building2 className="w-5 h-5" />,
+          roles: ['SUPER_ADMIN', 'TENANT_ADMIN'],
+        },
     {
       name: lt('Dashboard'),
       href: '/dashboard',
