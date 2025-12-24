@@ -61,8 +61,9 @@ export function ProfitLossReport() {
   const revenues = data.filter(row => row.account_type === 'REVENUE')
   const expenses = data.filter(row => row.account_type === 'EXPENSE')
 
+  // Always treat expenses as positive for calculation and display
   const totalRevenue = revenues.reduce((sum, row) => sum + row.amount, 0)
-  const totalExpense = expenses.reduce((sum, row) => sum + row.amount, 0)
+  const totalExpense = expenses.reduce((sum, row) => sum + Math.abs(row.amount), 0)
   const netIncome = totalRevenue - totalExpense
 
   const exportToCSV = () => {
@@ -216,7 +217,7 @@ export function ProfitLossReport() {
                       <tr key={row.account_id} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-4 font-mono text-sm">{row.account_code}</td>
                         <td className="py-2 px-4">{lt(row.account_name)}</td>
-                        <td className="py-2 px-4 text-right font-mono">${row.amount.toFixed(2)}</td>
+                        <td className="py-2 px-4 text-right font-mono">${Math.abs(row.amount).toFixed(2)}</td>
                       </tr>
                     ))}
                   </tbody>
