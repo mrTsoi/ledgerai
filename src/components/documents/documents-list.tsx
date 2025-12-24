@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { useTenant } from '@/hooks/use-tenant'
 import { useBatchConfig, chunkArray } from '@/hooks/use-batch-config'
 import { createClient } from '@/lib/supabase/client'
@@ -40,11 +40,10 @@ interface Props {
   refreshKey?: number
 }
 
+
 export function DocumentsList({ onVerify, refreshKey }: Props) {
   const lt = useLiterals()
-  const ltVars = (english: string, vars?: Record<string, string | number>) => {
-    return lt(english, vars)
-  }
+  const ltVars = (english: string, vars?: Record<string, string | number>) => lt(english, vars)
 
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
@@ -52,10 +51,51 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [previewDoc, setPreviewDoc] = useState<Document | null>(null)
+
   const [reprocessingIds, setReprocessingIds] = useState<Set<string>>(new Set())
-  // const [verifyingDocId, setVerifyingDocId] = useState<string | null>(null) // Moved to parent
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+
+  // Responsive state
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+
+  // Long-press for mobile selection
+  const longPressTimeout = useRef<NodeJS.Timeout | null>(null)
+  const [mobileSelectionMode, setMobileSelectionMode] = useState(false)
+  const handleRowTouchStart = (id: string) => {
+    if (!isMobile) return
+    longPressTimeout.current = setTimeout(() => {
+      toggleSelection(id)
+      setMobileSelectionMode(true)
+    }, 400)
+  }
+  const handleRowTouchEnd = () => {
+    if (longPressTimeout.current) clearTimeout(longPressTimeout.current)
+  }
+
+  // When selection is cleared, exit mobile selection mode
+  useEffect(() => {
+    if (!isMobile) return
+    if (selectedIds.size === 0 && mobileSelectionMode) setMobileSelectionMode(false)
+  }, [selectedIds, isMobile, mobileSelectionMode])
+
+  // Expand/collapse row
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
   // Check if any selected documents have tenant mismatches
   const hasTenantMismatchesSelected = useMemo(() => {
     return documents.some(d => 
@@ -734,31 +774,14 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
     )
   }
 
+
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle>{ltVars('All Documents ({count})', { count: documents.length })}</CardTitle>
-          {selectedIds.size > 0 && (
-            <div className="flex gap-2">
-              {hasTenantMismatchesSelected && (
-                <Button size="sm" variant="outline" onClick={bulkResolveTenants} className="border-yellow-200 bg-yellow-50 hover:bg-yellow-100 text-yellow-700">
-                  <ArrowRightLeft className="w-4 h-4 mr-2" />
-                  {lt('Resolve Tenants')}
-                </Button>
-              )}
-              <Button size="sm" variant="outline" onClick={bulkReprocess}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                {lt('Reprocess')} ({selectedIds.size})
-              </Button>
-              <Button size="sm" variant="destructive" onClick={bulkDelete}>
-                <Trash2 className="w-4 h-4 mr-2" />
-                {lt('Delete')} ({selectedIds.size})
-              </Button>
-            </div>
-          )}
         </div>
-        <div className="flex flex-col md:flex-row gap-2 mt-4">
+        <div className="flex flex-col gap-2 mt-4 sm:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
@@ -772,7 +795,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary w-full md:w-auto"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-auto"
           >
             <option value="all">{lt('All Status')}</option>
             <option value="UPLOADED">{lt('Uploaded')}</option>
@@ -812,188 +835,199 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
           </div>
         ) : (
           <div className="space-y-2">
-            <div className="hidden md:flex items-center gap-4 p-2 border-b text-sm font-medium text-gray-500">
+            {/* Desktop/tablet header */}
+            <div className="hidden md:grid grid-cols-[40px_1fr_120px_120px] items-center p-2 border-b text-sm font-medium text-gray-500">
               <Checkbox 
                 checked={selectedIds.size === filteredDocuments.length && filteredDocuments.length > 0}
                 onCheckedChange={toggleAll}
               />
-              <span className="flex-1">{lt('Document Name')}</span>
-              <span className="w-24">{lt('Status')}</span>
-              <span className="w-32 text-right">{lt('Actions')}</span>
+              <span>{lt('Document Name')}</span>
+              <span>{lt('Status')}</span>
+              <span className="text-right">{lt('Actions')}</span>
             </div>
-            {filteredDocuments.map(doc => (
-              <div
-                key={doc.id}
-                className={`flex flex-col md:flex-row md:items-center gap-4 p-4 border rounded-lg transition-colors ${
-                  selectedIds.has(doc.id) ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
-                }`}
-              >
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <Checkbox 
-                    checked={selectedIds.has(doc.id)}
-                    onCheckedChange={() => toggleSelection(doc.id)}
-                  />
-                  <FileText className="w-10 h-10 text-blue-500 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
+            {/* Mobile/desktop card layout, expandable details */}
+            {filteredDocuments.map(doc => {
+              const expanded = expandedIds.has(doc.id)
+              const showCheckbox = !isMobile || mobileSelectionMode
+              return (
+                <div key={doc.id} className="group">
+                  {/* Main row: grid for desktop, flex for mobile */}
+                  <div
+                    className={
+                      `p-4 border rounded-lg transition-colors ${
+                        selectedIds.has(doc.id) ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
+                      } ` +
+                      (isMobile ? 'flex flex-row items-center gap-3 md:grid md:grid-cols-[40px_1fr_120px_120px] md:items-center md:gap-4' : 'grid grid-cols-[40px_1fr_120px_120px] items-center gap-4')
+                    }
+                    onClick={e => {
+                      if (isMobile) {
+                        if (mobileSelectionMode && (e.target as HTMLElement).closest('input[type="checkbox"]')) return
+                        toggleExpand(doc.id)
+                      } else {
+                        toggleExpand(doc.id)
+                      }
+                    }}
+                    onTouchStart={() => handleRowTouchStart(doc.id)}
+                    onTouchEnd={handleRowTouchEnd}
+                  >
+                    {/* Checkbox, icon, and name in a row for mobile; icon+name flex for desktop */}
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-medium truncate">{doc.file_name}</h3>
-                      {((doc.validation_status === 'NEEDS_REVIEW') || (Array.isArray(doc.validation_flags) && doc.validation_flags.length > 0)) && (
-                        <div className="flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full" title={doc.validation_flags?.join(', ')}>
-                          <AlertTriangle className="w-3 h-3" />
-                          <span>
-                            {doc.validation_flags?.includes('DUPLICATE_DOCUMENT') ? ltVars('Duplicate  ') : ''}
-                            {doc.validation_flags?.includes('WRONG_TENANT') ? ltVars('Wrong Tenant ') : ''} 
-                            {doc.validation_flags?.includes('Review Needed') ? ltVars('Review Needed') : ''} 
+                      {showCheckbox && (
+                        <Checkbox 
+                          checked={selectedIds.has(doc.id)}
+                          onCheckedChange={() => toggleSelection(doc.id)}
+                          className="scale-125"
+                          onClick={e => e.stopPropagation()}
+                        />
+                      )}
+                    </div>
+                    {/* Document icon and name (desktop: flex row, mobile: handled above) */}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <FileText className="w-10 h-10 text-blue-500 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-medium truncate">{doc.file_name}</h3>
+                          {((doc.validation_status === 'NEEDS_REVIEW') || (Array.isArray(doc.validation_flags) && doc.validation_flags.length > 0)) && (
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full" title={doc.validation_flags?.join(', ')}>
+                              <AlertTriangle className="w-3 h-3" />
+                              <span>
+                                {doc.validation_flags?.includes('DUPLICATE_DOCUMENT') ? ltVars('Duplicate  ') : ''}
+                                {doc.validation_flags?.includes('WRONG_TENANT') ? ltVars('Wrong Tenant ') : ''} 
+                                {doc.validation_flags?.includes('Review Needed') ? ltVars('Review Needed') : ''} 
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs text-gray-500 mt-1">
+                          <span>{formatFileSize(doc.file_size)}</span>
+                          <span className="hidden md:inline">•</span>
+                          <span>{formatDistanceToNow(new Date(doc.created_at), { addSuffix: true })}</span>
+                          <span className="hidden md:inline">•</span>
+                          <span className="capitalize">
+                            {doc.document_type
+                              ? docTypeLables[doc.document_type.toLowerCase()] || doc.document_type
+                              : ''}
                           </span>
                         </div>
-                      )}
+                      </div>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs text-gray-500 mt-1">
-                      <span>{formatFileSize(doc.file_size)}</span>
-                      <span className="hidden md:inline">•</span>
-                      <span>{formatDistanceToNow(new Date(doc.created_at), { addSuffix: true })}</span>
-                      {doc.document_type && (
-                        <>
-                          <span className="hidden md:inline">•</span>
-                          <span className="capitalize">{docTypeLables[doc.document_type?.toLowerCase()] || doc.document_type}</span>
-                        </>
-                      )}
-                      
+                    {/* Status */}
+                    <div className="flex items-center">
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${STATUS_COLORS[doc.status]}`}>{statusLabels[doc.status] || doc.status}</span>
+                    </div>
+                    {/* Actions */}
+                    <div className="flex gap-2 flex-wrap md:flex-nowrap justify-end">
+                      <Button
+                        size={isMobile ? 'icon' : 'sm'}
+                        variant="ghost"
+                        onClick={e => { e.stopPropagation(); onVerify?.(doc.id) }}
+                        title={lt('Verify Data')}
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      >
+                        <CheckSquare className="w-5 h-5" />
+                      </Button>
+                      <Button
+                        size={isMobile ? 'icon' : 'sm'}
+                        variant="ghost"
+                        onClick={e => { e.stopPropagation(); reprocessDocument(doc) }}
+                        disabled={reprocessingIds.has(doc.id) || doc.status === 'PROCESSING'}
+                        title={lt('Reprocess with AI')}
+                      >
+                        {reprocessingIds.has(doc.id) ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                          <RefreshCw className="w-5 h-5" />
+                        )}
+                      </Button>
+                      <Button
+                        size={isMobile ? 'icon' : 'sm'}
+                        variant="ghost"
+                        onClick={e => { e.stopPropagation(); downloadDocument(doc) }}
+                        title={lt('Download')}
+                      >
+                        <Download className="w-5 h-5" />
+                      </Button>
+                      <Button
+                        size={isMobile ? 'icon' : 'sm'}
+                        variant="ghost"
+                        onClick={e => { e.stopPropagation(); deleteDocument(doc) }}
+                        title={lt('Delete')}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </Button>
+                    </div>
+                  </div>
+                  {/* Expandable details: always below the row, full width */}
+                  {expanded && (
+                    <div className="w-full bg-gray-50 border-t px-8 py-4 text-sm text-gray-700 rounded-b-lg">
                       {(() => {
                         const data = getDocData(doc)
-                        if (doc.document_type === 'BANK_STATEMENT' && data?.extracted_data?.bank_transactions?.length > 0) {
-                           return (
-                             <>
-                              <span className="hidden md:inline">•</span>
-                              <span>{ltVars('{count} Txns', { count: data.extracted_data.bank_transactions.length })}</span>
-                             </>
-                           )
-                        }
-                     
-                        if (data?.extracted_data?.vendor_name != null) {
-                          return (
-                            <>
-                              <span className="hidden md:inline">•</span>
-                              <span>{ltVars('Vendor: {vendor}', { vendor: data.extracted_data.vendor_name })}</span>
-                            </>
-                          )
-                        }else if (data?.extracted_data?.customer_name != null) {
-                          return (
-                            <>
-                              <span className="hidden md:inline">•</span>
-                              <span>{ltVars('Customer: {customer}', { customer: data.extracted_data.customer_name })}</span>
-                            </>
-                          )
-                        }
-                        
-                        return null
-                      })()}
-
-                      {(() => {
-                        const data = getDocData(doc)
-                        
-                        if (data?.extracted_data?.total_amount != null) {
-                          return (
-                            <>
-                              <span className="hidden md:inline">•</span>
-                              <span>{ltVars('Total: {amount} {currency}', { amount: data.extracted_data.total_amount, currency: data.extracted_data?.currency_code || '' })}</span>
-                            </>
-                          )
-                        }
-                        
-                        return null
-                      })()}
-
-                      {(() => {
-                        const data = getDocData(doc)
-                        if (data?.confidence_score != null) {
-                          const score = data.confidence_score * 100
-                          return (
-                            <>
-                              <span className="hidden md:inline">•</span>
-                              <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium border ${
-                                score >= 80 
-                                  ? 'bg-green-50 text-green-700 border-green-200' 
-                                  : score >= 50 
-                                    ? 'bg-yellow-50 text-yellow-700 border-yellow-200' 
-                                    : 'bg-red-50 text-red-700 border-red-200'
-                              }`}>
-                                <Sparkles className="w-3 h-3" />
-                                <span>{ltVars('{percent}% AI Confidence', { percent: Math.round(score) })}</span>
+                        if (!data) return null
+                        return (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                            {data.extracted_data?.vendor_name && (
+                              <div>
+                                <span className="font-semibold text-gray-900">{lt('Vendor')}:</span> <span>{data.extracted_data.vendor_name}</span>
                               </div>
-                            </>
-                          )
-                        }
-                        return null
+                            )}
+                            {data.extracted_data?.customer_name && (
+                              <div>
+                                <span className="font-semibold text-gray-900">{lt('Customer')}:</span> <span>{data.extracted_data.customer_name}</span>
+                              </div>
+                            )}
+                            {data.extracted_data?.total_amount && (
+                              <div>
+                                <span className="font-semibold text-gray-900">{lt('Total')}:</span> <span>{data.extracted_data.total_amount} {data.extracted_data?.currency_code || ''}</span>
+                              </div>
+                            )}
+                            {data.extracted_data?.bank_transactions?.length > 0 && (
+                              <div>
+                                <span className="font-semibold text-gray-900">{lt('Bank Transactions')}:</span> <span className="inline-block bg-blue-100 text-blue-800 rounded px-2 py-0.5 ml-1 text-xs font-medium">{data.extracted_data.bank_transactions.length}</span>
+                              </div>
+                            )}
+                            {data.confidence_score != null && (
+                              <div>
+                                <span className="font-semibold text-gray-900">{lt('AI Confidence')}:</span> <span className={
+                                  data.confidence_score >= 0.8
+                                    ? 'inline-block bg-green-100 text-green-800 rounded px-2 py-0.5 ml-1 text-xs font-medium'
+                                    : data.confidence_score >= 0.5
+                                      ? 'inline-block bg-yellow-100 text-yellow-800 rounded px-2 py-0.5 ml-1 text-xs font-medium'
+                                      : 'inline-block bg-red-100 text-red-800 rounded px-2 py-0.5 ml-1 text-xs font-medium'
+                                }>{Math.round(data.confidence_score * 100)}%</span>
+                              </div>
+                            )}
+                          </div>
+                        )
                       })()}
                     </div>
-                  </div>
+                  )}
                 </div>
-                
-                <div className="flex items-center justify-between md:justify-end gap-4 pl-8 md:pl-0">
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${STATUS_COLORS[doc.status]}`}>
-                    {statusLabels[doc.status] || doc.status}
-                  </span>
-                  <div className="flex gap-1">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => onVerify?.(doc.id)}
-                      title={lt('Verify Data')}
-                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                    >
-                      <CheckSquare className="w-4 h-4" />
-                    </Button>
-                    
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => reprocessDocument(doc)}
-                      disabled={reprocessingIds.has(doc.id) || doc.status === 'PROCESSING'}
-                      title={lt('Reprocess with AI')}
-                    >
-                      {reprocessingIds.has(doc.id) ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <RefreshCw className="w-4 h-4" />
-                      )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => downloadDocument(doc)}
-                      title={lt('Download')}
-                    >
-                      <Download className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => deleteDocument(doc)}
-                      title={lt('Delete')}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </CardContent>
 
-      {/* Verification Modal - Moved to parent */}
-      {/* {verifyingDocId && (
-        <DocumentVerificationModal
-          documentId={verifyingDocId}
-          onClose={() => setVerifyingDocId(null)}
-          onSaved={() => {
-            fetchDocuments()
-            setVerifyingDocId(null)
-          }}
-        />
-      )} */}
+      {/* Sticky bottom bulk action bar for all screens */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t shadow-lg flex items-center justify-between px-4 py-3 gap-2 animate-in fade-in slide-in-from-bottom-4">
+          {hasTenantMismatchesSelected && (
+            <Button size="sm" variant="outline" onClick={bulkResolveTenants} className="border-yellow-200 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 flex-1">
+              <ArrowRightLeft className="w-4 h-4 mr-2" />
+              {lt('Resolve Tenants')}
+            </Button>
+          )}
+          <Button size="sm" variant="outline" onClick={bulkReprocess} className="flex-1">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            {lt('Reprocess')} ({selectedIds.size})
+          </Button>
+          <Button size="sm" variant="destructive" onClick={bulkDelete} className="flex-1">
+            <Trash2 className="w-4 h-4 mr-2" />
+            {lt('Delete')} ({selectedIds.size})
+          </Button>
+        </div>
+      )}
 
       {/* Preview Modal */}
       {previewUrl && previewDoc && (

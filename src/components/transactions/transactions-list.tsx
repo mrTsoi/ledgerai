@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTenant } from '@/hooks/use-tenant'
 import { useBatchConfig, chunkArray } from '@/hooks/use-batch-config'
 import { createClient } from '@/lib/supabase/client'
@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { toast } from 'sonner'
 import { useLiterals } from '@/hooks/use-literals'
+import { useTransactionAudit } from '@/hooks/use-transaction-audit'
 
 type Transaction = Database['public']['Tables']['transactions']['Row']
 
@@ -41,18 +42,12 @@ export function TransactionsList({ status }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+  // Mobile selection state
+  const [mobileSelectionMode, setMobileSelectionMode] = useState(false)
+  const [mobileCheckboxVisible, setMobileCheckboxVisible] = useState(false)
+  const longPressTimeout = useRef<NodeJS.Timeout | null>(null)
   
-  // Audit State
-  const [isAuditing, setIsAuditing] = useState(false)
-  const [auditResults, setAuditResults] = useState<AuditIssue[]>([])
-  const [showAuditResults, setShowAuditResults] = useState(false)
-  const [auditIssuesMap, setAuditIssuesMap] = useState<Record<string, AuditIssue[]>>({})
   
-  // Audit Dialog State
-  const [returnToAudit, setReturnToAudit] = useState(false)
-  const [auditSearchTerm, setAuditSearchTerm] = useState('')
-  const [selectedAuditKeys, setSelectedAuditKeys] = useState<Set<string>>(new Set())
-
   // Confirmation Dialog State
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [confirmConfig, setConfirmConfig] = useState<{
@@ -109,6 +104,30 @@ export function TransactionsList({ status }: Props) {
       setLoading(false)
     }
   }, [currentTenant, supabase])
+
+
+  // Audit State
+  const {
+    isAuditing,
+    auditResults,
+    setAuditResults,
+    showAuditResults,
+    setShowAuditResults,
+    auditIssuesMap,
+    auditSearchTerm,
+    setAuditSearchTerm,
+    selectedAuditKeys,
+    setSelectedAuditKeys,
+    runAudit,
+    getAuditKey,
+    filteredAuditResults,
+    toggleAuditSelection,
+    toggleAllAuditSelection,
+    bulkFixAudit,
+    returnToAudit,
+    setReturnToAudit,
+  } = useTransactionAudit(transactions, currentTenant?.id, fetchTransactions, batchSize)
+
 
   useEffect(() => {
     if (currentTenant) {
@@ -179,6 +198,7 @@ export function TransactionsList({ status }: Props) {
     filterTransactions()
   }, [filterTransactions])
 
+
   const voidTransaction = async (id: string) => {
     setConfirmConfig({
       title: lt('Void Transaction'),
@@ -192,7 +212,7 @@ export function TransactionsList({ status }: Props) {
 
           if (error) throw error
           fetchTransactions()
-          setAuditResults(prev => prev.filter(i => i.transactionId !== id))
+          setAuditResults(prev => prev.filter(i => i.transactionId !== id)) // Use hook setter
           setShowConfirmDialog(false)
         } catch (error: any) {
           console.error('Error voiding transaction:', error)
@@ -220,7 +240,7 @@ export function TransactionsList({ status }: Props) {
           
           toast.success(lt('Transaction deleted'))
           fetchTransactions()
-          setAuditResults(prev => prev.filter(i => i.transactionId !== id))
+          setAuditResults(prev => prev.filter(i => i.transactionId !== id)) // Use hook setter
           setShowConfirmDialog(false)
         } catch (error: any) {
           console.error('Error deleting transaction:', error)
@@ -241,6 +261,24 @@ export function TransactionsList({ status }: Props) {
       newSelected.add(id)
     }
     setSelectedIds(newSelected)
+  }
+
+  // Mobile: handle long press to select
+  const handleMobileLongPress = (id: string) => {
+    setMobileSelectionMode(true)
+    setMobileCheckboxVisible(true)
+    if (!selectedIds.has(id)) {
+      setSelectedIds(new Set([id]))
+    }
+  }
+
+  const handleMobileTouchStart = (id: string) => {
+    if (window.innerWidth >= 768) return // Only mobile
+    if (longPressTimeout.current) clearTimeout(longPressTimeout.current)
+    longPressTimeout.current = setTimeout(() => handleMobileLongPress(id), 400)
+  }
+  const handleMobileTouchEnd = () => {
+    if (longPressTimeout.current) clearTimeout(longPressTimeout.current)
   }
 
   const toggleAll = () => {
@@ -413,150 +451,6 @@ export function TransactionsList({ status }: Props) {
     }
     setExpandedIds(newExpanded)
   }
-
-  const runAudit = async () => {
-    if (!currentTenant) return
-    setIsAuditing(true)
-    try {
-      const issues = await auditTransactions(currentTenant.id)
-      setAuditResults(issues)
-      setSelectedAuditKeys(new Set()) // Reset selection
-      setAuditSearchTerm('') // Reset search
-      
-      // Group issues by transaction ID
-      const issuesMap: Record<string, AuditIssue[]> = {}
-      issues.forEach(issue => {
-        if (!issuesMap[issue.transactionId]) {
-          issuesMap[issue.transactionId] = []
-        }
-        issuesMap[issue.transactionId].push(issue)
-      })
-      setAuditIssuesMap(issuesMap)
-
-      setShowAuditResults(true)
-    } catch (e) {
-      console.error(e)
-      toast.error(lt('Audit failed'))
-    } finally {
-      setIsAuditing(false)
-    }
-  }
-
-  // Audit Helper Functions
-  const getAuditKey = (issue: AuditIssue) => `${issue.transactionId}-${issue.issueType}`
-
-  const filteredAuditResults = auditResults.filter(issue => {
-    if (!auditSearchTerm) return true
-    const search = auditSearchTerm.toLowerCase()
-    const tx = transactions.find(t => t.id === issue.transactionId)
-    return (
-      issue.description.toLowerCase().includes(search) ||
-      issue.issueType.toLowerCase().includes(search) ||
-      tx?.description?.toLowerCase().includes(search) ||
-      tx?.reference_number?.toLowerCase().includes(search)
-    )
-  })
-
-  const toggleAuditSelection = (key: string) => {
-    const newSelected = new Set(selectedAuditKeys)
-    if (newSelected.has(key)) {
-      newSelected.delete(key)
-    } else {
-      newSelected.add(key)
-    }
-    setSelectedAuditKeys(newSelected)
-  }
-
-  const toggleAllAuditSelection = () => {
-    const allKeys = new Set(filteredAuditResults.map(issue => getAuditKey(issue)))
-    const allSelected = allKeys.size > 0 && Array.from(allKeys).every(key => selectedAuditKeys.has(key))
-
-    if (allSelected) {
-      setSelectedAuditKeys(new Set())
-    } else {
-      setSelectedAuditKeys(allKeys)
-    }
-  }
-
-  const bulkFixAudit = async () => {
-    if (selectedAuditKeys.size === 0) return
-    
-    // Identify actionable issues (Duplicate/Wrong Tenant)
-    const issuesToFix = auditResults.filter(issue => 
-      selectedAuditKeys.has(getAuditKey(issue)) && 
-      ['DUPLICATE', 'WRONG_TENANT'].includes(issue.issueType)
-    )
-
-    if (issuesToFix.length === 0) {
-      toast.warning(lt('No auto-fixable issues selected (Duplicate or Wrong Tenant).'))
-      return
-    }
-
-    setConfirmConfig({
-      title: lt('Fix Selected Issues'),
-      description: ltVars('Auto-fix {count} selected issues? This will Delete drafts and Void posted transactions.', { count: issuesToFix.length }),
-      action: async () => {
-        try {
-          const txIdsToDelete: string[] = []
-          const txIdsToVoid: string[] = []
-
-          issuesToFix.forEach(issue => {
-            const tx = transactions.find(t => t.id === issue.transactionId)
-            if (!tx) return
-            
-            if (tx.status === 'DRAFT') {
-              txIdsToDelete.push(tx.id)
-            } else {
-              txIdsToVoid.push(tx.id)
-            }
-          })
-
-          // Perform Delete in batches
-          if (txIdsToDelete.length > 0) {
-            const deleteChunks = chunkArray(txIdsToDelete, batchSize)
-            for (const chunk of deleteChunks) {
-              const { error } = await supabase
-                .from('transactions')
-                .delete()
-                .in('id', chunk)
-              if (error) throw error
-            }
-          }
-
-          // Perform Void in batches
-          if (txIdsToVoid.length > 0) {
-            const voidChunks = chunkArray(txIdsToVoid, batchSize)
-            for (const chunk of voidChunks) {
-              const { error } = await supabase
-                .from('transactions')
-                .update({ status: 'VOID' })
-                .in('id', chunk)
-              if (error) throw error
-            }
-          }
-
-          toast.success(ltVars('Fixed {count} issues', { count: issuesToFix.length }))
-          
-          // Refresh and update local state
-          await fetchTransactions()
-          
-          // Remove fixed issues from the list
-          const fixedTxIds = new Set([...txIdsToDelete, ...txIdsToVoid])
-          setAuditResults(prev => prev.filter(i => !fixedTxIds.has(i.transactionId)))
-          setSelectedAuditKeys(new Set())
-          setShowConfirmDialog(false)
-
-        } catch (error: any) {
-          console.error('Bulk fix error:', error)
-          toast.error(`${lt('Failed to fix issues')}: ${error.message}`)
-        }
-      },
-      actionLabel: lt('Fix Issues'),
-      variant: 'destructive'
-    })
-    setShowConfirmDialog(true)
-  }
-
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'DRAFT':
@@ -663,32 +557,6 @@ export function TransactionsList({ status }: Props) {
                 {lt('View and manage accounting transactions')}
               </CardDescription>
             </div>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={runAudit} disabled={isAuditing}>
-                {isAuditing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ShieldAlert className="w-4 h-4 mr-2" />}
-                {lt('AI Audit')}
-              </Button>
-              <Button size="sm" variant="outline" onClick={selectVerified}>
-                <CheckCircle className="w-4 h-4 mr-2" />
-                {lt('Select Verified')}
-              </Button>
-              {selectedIds.size > 0 && (
-                <>
-                  <Button size="sm" variant="default" onClick={bulkPost}>
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    {ltVars('Post ({count})', { count: selectedIds.size })}
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={bulkVoid}>
-                    <XCircle className="w-4 h-4 mr-2" />
-                    {ltVars('Void ({count})', { count: selectedIds.size })}
-                  </Button>
-                  <Button size="sm" variant="destructive" onClick={bulkDeleteDrafts}>
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    {lt('Delete Drafts')}
-                  </Button>
-                </>
-              )}
-            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -783,6 +651,9 @@ export function TransactionsList({ status }: Props) {
                   className={`flex flex-col border rounded-lg transition-colors ${
                     selectedIds.has(tx.id) ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
                   } ${hasIssues ? (hasHighSeverity ? 'border-l-4 border-l-red-500' : 'border-l-4 border-l-yellow-500') : ''}`}
+                  onTouchStart={() => handleMobileTouchStart(tx.id)}
+                  onTouchEnd={handleMobileTouchEnd}
+                  onTouchCancel={handleMobileTouchEnd}
                 >
                   <div 
                     className="flex flex-col md:flex-row md:items-center justify-between p-4 cursor-pointer"
@@ -799,10 +670,19 @@ export function TransactionsList({ status }: Props) {
                     }}
                   >
                     <div className="flex items-center gap-4 flex-1">
-                      <Checkbox 
-                        checked={selectedIds.has(tx.id)}
-                        onCheckedChange={() => toggleSelection(tx.id)}
-                      />
+                      {/* Checkbox: always on desktop, mobile only if selection mode */}
+                      <span className={"hidden md:inline-block"}>
+                        <Checkbox 
+                          checked={selectedIds.has(tx.id)}
+                          onCheckedChange={() => toggleSelection(tx.id)}
+                        />
+                      </span>
+                      <span className={`md:hidden ${mobileCheckboxVisible ? 'inline-block' : 'hidden'}`}>
+                        <Checkbox 
+                          checked={selectedIds.has(tx.id)}
+                          onCheckedChange={() => toggleSelection(tx.id)}
+                        />
+                      </span>
                       {hasIssues ? (
                         <TooltipProvider>
                           <Tooltip>
@@ -989,6 +869,38 @@ export function TransactionsList({ status }: Props) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Sticky action panel at bottom */}
+      <div className="fixed bottom-0 left-0 w-full z-40 pointer-events-none">
+        <div className="max-w-4xl mx-auto px-2 pb-2">
+          <div className="flex overflow-x-auto gap-2 bg-white shadow-lg rounded-lg p-2 border pointer-events-auto sticky-action-panel" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <Button size="sm" variant="outline" onClick={runAudit} disabled={isAuditing} className="min-w-[120px]">
+              {isAuditing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ShieldAlert className="w-4 h-4 mr-2" />}
+              {lt('AI Audit')}
+            </Button>
+            <Button size="sm" variant="outline" onClick={selectVerified} className="min-w-[140px]">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              {lt('Select Verified')}
+            </Button>
+            {selectedIds.size > 0 && (
+              <>
+                <Button size="sm" variant="default" onClick={bulkPost} className="min-w-[110px]">
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  {ltVars('Post ({count})', { count: selectedIds.size })}
+                </Button>
+                <Button size="sm" variant="outline" onClick={bulkVoid} className="min-w-[110px]">
+                  <XCircle className="w-4 h-4 mr-2" />
+                  {ltVars('Void ({count})', { count: selectedIds.size })}
+                </Button>
+                <Button size="sm" variant="destructive" onClick={bulkDeleteDrafts} className="min-w-[140px]">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  {lt('Delete Drafts')}
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
 
       {editingId && (
         <TransactionEditor

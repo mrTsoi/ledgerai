@@ -7,15 +7,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Loader2, Plus, Edit, Trash2, Building2, Users, FileText, DollarSign } from 'lucide-react'
+import { Loader2,  Download, Upload, Plus, Edit, Trash2, Building2, Users, FileText, DollarSign } from 'lucide-react'
 import { format } from 'date-fns'
 import { toast } from "sonner"
 import { useLiterals } from '@/hooks/use-literals'
+import { useUserRole } from "@/hooks/use-tenant";
 
 type Tenant = Database['public']['Tables']['tenants']['Row'] & {
   is_active?: boolean
   subscription_plan?: string
   subscription_status?: string
+  document_count?: number
+  transaction_count?: number
+  line_item_count?: number
+  bank_account_count?: number
 }
 
 type DuplicateTenantGroup = {
@@ -58,6 +63,7 @@ interface TenantDetails {
 }
 
 export function TenantManagement() {
+  console.log('TenantManagement mounted')
   const lt = useLiterals()
   const [tenants, setTenants] = useState<Tenant[]>([])
   const [selectedTenant, setSelectedTenant] = useState<TenantDetails | null>(null)
@@ -70,15 +76,173 @@ export function TenantManagement() {
   const [mergeRunningForCanonicalId, setMergeRunningForCanonicalId] = useState<string | null>(null)
   const supabase = useMemo(() => createClient(), [])
 
+  //const {tenants, refreshTenants } = useTenant();
+  //const userRole = useUserRole();
+
+  const [expandedTenantId, setExpandedTenantId] = useState<string | null>(null);
+  const [documentsByTenant, setDocumentsByTenant] = useState<Record<string, any[]>>({});
+  const [docLoading, setDocLoading] = useState<string | null>(null);
+  const [backupLoading, setBackupLoading] = useState(false);
+  const [restoreLoading, setRestoreLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  
+  // Fetch documents for a tenant
+  const fetchDocuments = async (tenantId: string) => {
+    setDocLoading(tenantId);
+    try {
+      const res = await fetch("/api/tenant-admin/list-documents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenantId }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Failed to fetch documents");
+      setDocumentsByTenant(prev => ({ ...prev, [tenantId]: json.documents || [] }));
+    } catch (e: any) {
+      toast.error(e.message || "Failed to fetch documents");
+      setDocumentsByTenant(prev => ({ ...prev, [tenantId]: [] }));
+    } finally {
+      setDocLoading(null);
+    }
+  };
+
+  // Backup a tenant (JSON download)
+  const handleBackup = async (tenantId: string) => {
+    try {
+      const res = await fetch('/api/tenant-admin/backup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantId }),
+      });
+      if (!res.ok) throw new Error('Failed to backup tenant');
+      const json = await res.json();
+      const dataStr = JSON.stringify(json.data, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tenant-backup-${tenantId}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('Backup downloaded!');
+    } catch (e: any) {
+      toast.error(e.message || 'Backup failed');
+    }
+  };
+
+  // Restore a tenant (JSON upload)
+  const handleRestore = async (tenantId: string) => {
+    try {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'application/json';
+      input.onchange = async (e: any) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const text = await file.text();
+        let json;
+        try {
+          json = JSON.parse(text);
+        } catch {
+          toast.error('Invalid JSON file');
+          return;
+        }
+        const res = await fetch('/api/tenant-admin/restore', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenantId, data: json }),
+        });
+        if (!res.ok) throw new Error('Restore failed');
+        toast.success('Restore completed!');
+        fetchTenants();
+      };
+      input.click();
+    } catch (e: any) {
+      toast.error(e.message || 'Restore failed');
+    }
+  };
+
+  // Delete a document
+  const handleDeleteDocument = async (tenantId: string, documentId: string) => {
+    if (!window.confirm("Are you sure you want to delete this document? This cannot be undone.")) return;
+    try {
+      const res = await fetch("/api/tenant-admin/delete-document", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentId }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Delete failed");
+      toast.success("Document deleted successfully");
+      // Refresh document list
+      await fetchDocuments(tenantId);
+    } catch (e: any) {
+      toast.error(e.message || "Delete failed");
+    }
+  };
+
+  // Delete a tenant
+  const handleDeleteTenant = async (tenantId: string) => {
+    if (!window.confirm("Are you sure you want to delete this tenant? This cannot be undone.")) return;
+    try {
+      const res = await fetch("/api/tenant-admin/delete-tenant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenantId }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Delete failed");
+      toast.success("Tenant deleted successfully");
+      fetchTenants();
+    } catch (e: any) {
+      toast.error(e.message || "Delete failed");
+    }
+  };
+
+  /*const filteredTenants = tenants?.filter(t => t.name.toLowerCase().includes(search.toLowerCase()) || t.slug.toLowerCase().includes(search.toLowerCase()));
+
+  if (!filteredTenants || filteredTenants.length === 0) {
+    return (
+      <Card className="mt-8">
+        <CardContent className="flex items-center justify-center p-12">
+          <Loader2 className="w-8 h-8 animate-spin" />
+          <span className="ml-4">Loading tenants...</span>
+        </CardContent>
+      </Card>
+    );
+  }
+*/
+  const deleteTenant = async (tenantId: string) => {
+    if (!window.confirm('Are you sure you want to permanently delete this tenant? This action cannot be undone.')) return;
+    try {
+      const { error } = await supabase
+        .from('tenants')
+        .delete()
+        .eq('id', tenantId);
+      if (error) throw error;
+      fetchTenants();
+      toast.success('Tenant deleted successfully!');
+    } catch (error: any) {
+      console.error('Error deleting tenant:', error);
+      toast.error('Failed to delete tenant: ' + error.message);
+    }
+  };
+
   const fetchTenants = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('tenants')
-        .select('*')
-        .order('created_at', { ascending: false })
-
+      // Fetch tenant statistics via RPC
+      const { data, error } = await supabase.rpc('admin_list_tenant_statistics', {})
+      console.log('Tenant statistics RPC result:', data)
       if (error) throw error
-      setTenants(data || [])
+      setTenants((data || []).map((t: any) => ({
+        ...t,
+        id: t.tenant_id, // Add this line
+        name: t.tenant_name,
+        slug: t.tenant_slug,
+      })));
     } catch (error) {
       console.error('Error fetching tenants:', error)
     } finally {
@@ -87,6 +251,7 @@ export function TenantManagement() {
   }, [supabase])
 
   useEffect(() => {
+    console.log('Calling fetchTenants')
     fetchTenants()
   }, [fetchTenants])
 
@@ -207,10 +372,14 @@ export function TenantManagement() {
     [fetchTenants, scanDuplicateTenantsImpl, supabase]
   )
 
-  const filteredTenants = tenants.filter(tenant =>
-    tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tenant.slug.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredTenants = tenants?.filter(
+            t => t.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            t.slug.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  /*const filteredTenants = tenants.filter(tenant =>
+    (tenant.name && tenant.name.toLowerCase().includes(searchTerm?.toLowerCase())) ||
+    (tenant.slug && tenant.slug.toLowerCase().includes(searchTerm?.toLowerCase()))
+  )*/
 
   if (loading) {
     return (
@@ -333,56 +502,147 @@ export function TenantManagement() {
           />
         </div>
 
-        {/* Tenants List */}
+        {/* Tenants List with Usage Statistics */}
         <div className="space-y-3">
           {filteredTenants.map((tenant) => (
-            <div
-              key={tenant.id}
-              className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center gap-4 flex-1">
-                <div className="p-3 bg-blue-100 rounded-lg flex-shrink-0">
-                  <Building2 className="w-6 h-6 text-blue-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-semibold truncate">{tenant.name}</p>
-                    <span className={`px-2 py-1 text-xs rounded-full ${tenant.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                      {tenant.is_active ? lt('Active') : lt('Inactive')}
-                    </span>
-                    {tenant.subscription_plan && (
-                      <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800 capitalize">
-                        {tenant.subscription_plan}
-                      </span>
-                    )}
+            <div key={tenant.id}>
+              <div className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="p-3 bg-blue-100 rounded-lg flex-shrink-0">
+                    <Building2 className="w-6 h-6 text-blue-600" />
                   </div>
-                  <p className="text-sm text-gray-500 truncate">
-                    {lt('{slug} • Created {date}', {
-                      slug: tenant.slug,
-                      date: format(new Date(tenant.created_at), 'MMM dd, yyyy'),
-                    })}
-                  </p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-semibold truncate">{tenant.name}</p>
+                      <span className={`px-2 py-1 text-xs rounded-full ${tenant.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                        {tenant.is_active ? lt('Active') : lt('Inactive')}
+                      </span>
+                      {tenant.subscription_plan && (
+                        <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800 capitalize">
+                          {tenant.subscription_plan}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 truncate">
+                      {lt('{slug} • Created {date}', {
+                        slug: tenant.slug,
+                        date: format(new Date(tenant.created_at), 'MMM dd, yyyy'),
+                      })}
+                    </p>
+                    {/* Usage Statistics */}
+                    <div className="flex flex-wrap gap-4 mt-2">
+                      <span className="flex items-center gap-1 text-xs text-gray-700">
+                        <FileText className="w-3 h-3" />
+                        {lt('Docs')}: {tenant.document_count ?? '—'}
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-gray-700">
+                        <Building2 className="w-3 h-3" />
+                        {lt('Txns')}: {tenant.transaction_count ?? '—'}
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-gray-700">
+                        <Users className="w-3 h-3" />
+                        {lt('Line Items')}: {tenant.line_item_count ?? '—'}
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-gray-700">
+                        <DollarSign className="w-3 h-3" />
+                        {lt('Bank Accts')}: {tenant.bank_account_count ?? '—'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-4 md:mt-0 md:ml-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchTenantDetails(tenant.id)}
+                    className="flex-1 md:flex-none"
+                  >
+                    <Edit className="w-4 h-4 mr-1" />
+                    {lt('Details')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toggleTenantStatus(tenant.id, tenant.is_active || false)}
+                    className="flex-1 md:flex-none"
+                  >
+                    {tenant.is_active ? lt('Deactivate') : lt('Activate')}
+                  </Button>
+
+                  <Button variant="outline" size="sm" onClick={() => {
+                      if (expandedTenantId === tenant.id) {
+                        setExpandedTenantId(null);
+                      } else {
+                        setExpandedTenantId(tenant.id);
+                        if (!documentsByTenant[tenant.id]) fetchDocuments(tenant.id);
+                      }
+                    }}>
+                      {expandedTenantId === tenant.id ? "Hide Documents" : "Show Documents"}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleBackup(tenant.id)} disabled={backupLoading}>
+                      {backupLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Download className="w-4 h-4 mr-1" />} Backup
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleRestore(tenant.id)} disabled={restoreLoading}>
+                      {restoreLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />} Restore
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => handleDeleteTenant(tenant.id)} disabled={deleteLoading}>
+                      {deleteLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Trash2 className="w-4 h-4 mr-1" />} Delete Tenant
+                    </Button>
                 </div>
               </div>
-              <div className="flex gap-2 mt-4 md:mt-0 md:ml-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fetchTenantDetails(tenant.id)}
-                  className="flex-1 md:flex-none"
-                >
-                  <Edit className="w-4 h-4 mr-1" />
-                  {lt('Details')}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => toggleTenantStatus(tenant.id, tenant.is_active || false)}
-                  className="flex-1 md:flex-none"
-                >
-                  {tenant.is_active ? lt('Deactivate') : lt('Activate')}
-                </Button>
-              </div>
+              {/* Expanded document list below tenant card */}
+              {expandedTenantId === tenant.id && (
+                <div className="w-full pb-4">
+                  <Card className="border-t-0 rounded-t-none">
+                    <CardHeader>
+                      <CardTitle>Documents for Tenant</CardTitle>
+                      <CardDescription>All documents for this tenant.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {docLoading === tenant.id ? (
+                        <div className="flex items-center justify-center p-8">
+                          <Loader2 className="w-6 h-6 animate-spin" />
+                        </div>
+                      ) : (
+                        <>
+                          {(!documentsByTenant[tenant.id] || documentsByTenant[tenant.id].length === 0) ? (
+                            <div className="text-gray-500">No documents found for this tenant.</div>
+                          ) : (
+                            <div className="overflow-x-auto">
+                              <table className="min-w-full text-sm border">
+                                <thead>
+                                  <tr className="bg-gray-100">
+                                    <th className="p-2 text-left">File Name</th>
+                                    <th className="p-2 text-left">Type</th>
+                                    <th className="p-2 text-left">Status</th>
+                                    <th className="p-2 text-left">Uploaded</th>
+                                    <th className="p-2 text-left">Actions</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {documentsByTenant[tenant.id].map((doc) => (
+                                    <tr key={doc.id} className="border-b">
+                                      <td className="p-2">{doc.file_name}</td>
+                                      <td className="p-2">{doc.file_type}</td>
+                                      <td className="p-2">{doc.status}</td>
+                                      <td className="p-2">{doc.created_at}</td>
+                                      <td className="p-2">
+                                        <Button variant="destructive" size="sm" onClick={() => handleDeleteDocument(tenant.id, doc.id)}>
+                                          <Trash2 className="w-4 h-4 mr-1" /> Delete
+                                        </Button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </div>
           ))}
         </div>

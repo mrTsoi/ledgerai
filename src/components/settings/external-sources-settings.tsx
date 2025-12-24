@@ -1,5 +1,3 @@
-  // Track token error state for each source
-  "use client";
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -291,7 +289,7 @@ export function ExternalSourcesSettings() {
     } catch {
       // ignore
     }
-  }, [sources, canManage])
+  }, [sources, canManage, lt])
 
   useEffect(() => {
     fetchCloudWhoAmI()

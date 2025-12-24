@@ -48,7 +48,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.00c6083763d2",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 513,
+    "line": 553,
     kind: 'ltvars-call'
   },
   {
@@ -57,6 +57,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/tenant/create-tenant-modal.tsx",
     "line": 84,
+    kind: 'lt-call'
+  },
+  {
+    "text": "USD - United States Dollar",
+    "key": "literal.011b5e3e627f",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 48,
     kind: 'lt-call'
   },
   {
@@ -96,7 +104,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.017dac2c04a1",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 267,
+    "line": 307,
     kind: 'ltvars-call'
   },
   {
@@ -104,7 +112,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0197e7bb9c04",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1026,
+    "line": 1024,
     kind: 'lt-call'
   },
   {
@@ -112,7 +120,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.019b8ec15d7c",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1352,
+    "line": 1350,
     kind: 'lt-call'
   },
   {
@@ -216,7 +224,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0403eda77442",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 810,
+    "line": 833,
     kind: 'lt-call'
   },
   {
@@ -272,7 +280,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.04fed9ce8dd8",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 243,
+    "line": 263,
     kind: 'jsx-text'
   },
   {
@@ -376,7 +384,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.07596f183f5e",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1194,
+    "line": 1192,
     kind: 'lt-call'
   },
   {
@@ -424,7 +432,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.07fc205566e1",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 1024,
+    "line": 1058,
     kind: 'lt-call'
   },
   {
@@ -540,19 +548,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Total: {amount} {currency}",
-    "key": "literal.0a62ee0b13d4",
-    namespace: 'literals',
-    "file": "src/components/documents/documents-list.tsx",
-    "line": 899,
-    kind: 'ltvars-call'
-  },
-  {
     "text": "Failed to download document",
     "key": "literal.0a6722dbeb82",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 196,
+    "line": 236,
     kind: 'lt-call'
   },
   {
@@ -600,7 +600,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0b9c7115eb31",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1315,
+    "line": 1313,
     kind: 'lt-call'
   },
   {
@@ -632,7 +632,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0c04320fcc6e",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 961,
+    "line": 959,
     kind: 'lt-call'
   },
   {
@@ -648,7 +648,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0c0f820e3b90",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 768,
+    "line": 766,
     kind: 'lt-call'
   },
   {
@@ -656,7 +656,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0c26087243d7",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 809,
+    "line": 832,
     kind: 'lt-call'
   },
   {
@@ -704,7 +704,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0cd628df4699",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1097,
+    "line": 1095,
     kind: 'lt-call'
   },
   {
@@ -720,7 +720,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0d1ce964078d",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 427,
+    "line": 466,
     kind: 'lt-call'
   },
   {
@@ -796,6 +796,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Customer",
+    "key": "literal.0e85749a6f40",
+    namespace: 'literals',
+    "file": "src/components/documents/documents-list.tsx",
+    "line": 976,
+    kind: 'lt-call'
+  },
+  {
     "text": "Overview",
     "key": "literal.0efc2e6be4c2",
     namespace: 'literals',
@@ -824,7 +832,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0f2ccee263be",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 264,
+    "line": 304,
     kind: 'lt-call'
   },
   {
@@ -832,7 +840,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0f2fad635ed0",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 976,
+    "line": 974,
     kind: 'lt-call'
   },
   {
@@ -884,6 +892,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Txns",
+    "key": "literal.10d03f24b563",
+    namespace: 'literals',
+    "file": "src/components/admin/tenant-management.tsx",
+    "line": 393,
+    kind: 'lt-call'
+  },
+  {
     "text": "No urgent alerts.",
     "key": "literal.115ca32b8141",
     namespace: 'literals',
@@ -904,7 +920,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.119c12c51841",
     namespace: 'literals',
     "file": "src/components/reports/financial-charts.tsx",
-    "line": 162,
+    "line": 171,
     kind: 'lt-call'
   },
   {
@@ -952,7 +968,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.12abc197176e",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 759,
+    "line": 627,
     kind: 'lt-call'
   },
   {
@@ -992,7 +1008,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.13b7bfcac438",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 1082,
+    "line": 1116,
     kind: 'lt-call'
   },
   {
@@ -1024,7 +1040,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.146dc0324537",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 953,
+    "line": 934,
     kind: 'lt-call'
   },
   {
@@ -1049,6 +1065,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
     "line": 544,
+    kind: 'lt-call'
+  },
+  {
+    "text": "CHF - Swiss Franc",
+    "key": "literal.14e33d5fd429",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 54,
     kind: 'lt-call'
   },
   {
@@ -1228,14 +1252,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Customer: {customer}",
-    "key": "literal.17cc64b37f4d",
-    namespace: 'literals',
-    "file": "src/components/documents/documents-list.tsx",
-    "line": 884,
-    kind: 'ltvars-call'
-  },
-  {
     "text": "Provider Config (JSON)",
     "key": "literal.184f6b1259e5",
     namespace: 'literals',
@@ -1264,7 +1280,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.190cb1b08322",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 754,
+    "line": 752,
     kind: 'lt-call'
   },
   {
@@ -1280,7 +1296,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.19342a3def68",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 751,
+    "line": 619,
     kind: 'lt-call'
   },
   {
@@ -1290,6 +1306,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/admin/processing-settings.tsx",
     "line": 150,
     kind: 'lt-call'
+  },
+  {
+    "text": "Tenant deleted successfully",
+    "key": "literal.19491a1d12a0",
+    namespace: 'literals',
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 133,
+    kind: 'toast'
   },
   {
     "text": "In connection with a corporate transaction (e.g., merger, acquisition), subject to appropriate safeguards.",
@@ -1354,6 +1378,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/banking/bank-statement-list.tsx",
     "line": 190,
     kind: 'lt-call'
+  },
+  {
+    "text": "No documents found for this tenant.",
+    "key": "literal.1a26e12a2b0a",
+    namespace: 'literals',
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 211,
+    kind: 'jsx-text'
   },
   {
     "text": "Connect Plaid",
@@ -1524,12 +1556,28 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Central Tenant Management",
+    "key": "literal.1df04de0b022",
+    namespace: 'literals',
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 156,
+    kind: 'jsx-text'
+  },
+  {
     "text": "URL Slug",
     "key": "literal.1e05ce61911f",
     namespace: 'literals',
     "file": "src/components/settings/tenant-settings.tsx",
     "line": 92,
     kind: 'lt-call'
+  },
+  {
+    "text": "Document deleted successfully",
+    "key": "literal.1e20dc3eabed",
+    namespace: 'literals',
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 114,
+    kind: 'toast'
   },
   {
     "text": "Transactions",
@@ -1592,7 +1640,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1f79d6a9715f",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 293,
+    "line": 331,
     kind: 'ltvars-call'
   },
   {
@@ -1616,7 +1664,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1fd63f77edd2",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 859,
+    "line": 857,
     kind: 'lt-call'
   },
   {
@@ -1656,7 +1704,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.208043c39fd8",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 973,
+    "line": 853,
     kind: 'lt-call'
   },
   {
@@ -1664,7 +1712,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.208bc7428650",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 1034,
+    "line": 946,
     kind: 'lt-call'
   },
   {
@@ -1681,6 +1729,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 1157,
+    kind: 'lt-call'
+  },
+  {
+    "text": "SOL - Solana",
+    "key": "literal.20d55d3e0f4f",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 93,
     kind: 'lt-call'
   },
   {
@@ -1728,7 +1784,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.218887269ad5",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 334,
+    "line": 340,
+    kind: 'lt-call'
+  },
+  {
+    "text": "TWD - New Taiwan Dollar",
+    "key": "literal.21d7a48d2392",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 68,
     kind: 'lt-call'
   },
   {
@@ -1752,7 +1816,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.22142c89fcbe",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 464,
+    "line": 462,
     kind: 'lt-call'
   },
   {
@@ -1804,6 +1868,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Restore completed!",
+    "key": "literal.2292b5191ee5",
+    namespace: 'literals',
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 94,
+    kind: 'toast'
+  },
+  {
     "text": "These cookies remember choices such as language or region so the Service can provide a more consistent experience.",
     "key": "literal.22a309a35707",
     namespace: 'literals',
@@ -1824,7 +1896,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.22c59618957a",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 1021,
+    "line": 933,
     kind: 'ltvars-call'
   },
   {
@@ -1880,7 +1952,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.23778b5f7eb2",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 539,
+    "line": 537,
     kind: 'lt-call'
   },
   {
@@ -1888,7 +1960,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.239dce622324",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 611,
+    "line": 617,
     kind: 'lt-call'
   },
   {
@@ -1928,7 +2000,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.249ba3600002",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 936,
+    "line": 934,
     kind: 'attr'
   },
   {
@@ -1960,7 +2032,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.24f3f5de386c",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 443,
+    "line": 483,
     kind: 'lt-call'
   },
   {
@@ -2000,7 +2072,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2556b4985b0d",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 221,
+    "line": 241,
     kind: 'lt-call'
   },
   {
@@ -2008,7 +2080,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.256fc13d0a4f",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 987,
+    "line": 867,
     kind: 'ltvars-call'
   },
   {
@@ -2072,7 +2144,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2692f9b3904a",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 163,
+    "line": 161,
     kind: 'lt-call'
   },
   {
@@ -2127,8 +2199,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "No auto-fixable issues selected (Duplicate or Wrong Tenant).",
     "key": "literal.27b79f9fa38f",
     namespace: 'literals',
-    "file": "src/components/transactions/transactions-list.tsx",
-    "line": 491,
+    "file": "src/hooks/use-transaction-audit.tsx",
+    "line": 82,
     kind: 'lt-call'
   },
   {
@@ -2148,6 +2220,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "All documents for this tenant.",
+    "key": "literal.283d3d8d2478",
+    namespace: 'literals',
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 201,
+    kind: 'jsx-text'
+  },
+  {
     "text": "Promo Codes",
     "key": "literal.2853dfeaf95a",
     namespace: 'literals',
@@ -2160,7 +2240,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.287d61899bc5",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 185,
+    "line": 205,
     kind: 'lt-call'
   },
   {
@@ -2192,7 +2272,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2917a1ec8f7d",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 375,
+    "line": 415,
     kind: 'lt-call'
   },
   {
@@ -2271,9 +2351,9 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "File Name",
     "key": "literal.2aabcfc2668a",
     namespace: 'literals',
-    "file": "src/components/banking/bank-statement-list.tsx",
-    "line": 189,
-    kind: 'lt-call'
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 217,
+    kind: 'jsx-text'
   },
   {
     "text": "Logging in...",
@@ -2308,6 +2388,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Documents for Tenant",
+    "key": "literal.2b771778a6d9",
+    namespace: 'literals',
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 200,
+    kind: 'jsx-text'
+  },
+  {
     "text": "Sign Up",
     "key": "literal.2ba4023df482",
     namespace: 'literals',
@@ -2328,7 +2416,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2bc61859288e",
     namespace: 'literals',
     "file": "src/components/reports/financial-charts.tsx",
-    "line": 228,
+    "line": 238,
     kind: 'lt-call'
   },
   {
@@ -2416,7 +2504,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2cd3c01bb21d",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 160,
+    "line": 158,
     kind: 'lt-call'
   },
   {
@@ -2424,7 +2512,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2cdae05d677c",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 466,
+    "line": 464,
     kind: 'lt-call'
   },
   {
@@ -2432,7 +2520,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2ce1bcc28c91",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 957,
+    "line": 955,
     kind: 'lt-call'
   },
   {
@@ -2440,7 +2528,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2d3314c7c95b",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 674,
+    "line": 714,
     kind: 'ltvars-call'
   },
   {
@@ -2448,7 +2536,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2d4c9fdbbd7b",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 794,
+    "line": 792,
     kind: 'lt-call'
   },
   {
@@ -2464,7 +2552,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2d958a52e805",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1134,
+    "line": 1132,
     kind: 'lt-call'
   },
   {
@@ -2480,7 +2568,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2e19cdeec70d",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 301,
+    "line": 339,
     kind: 'lt-call'
   },
   {
@@ -2496,7 +2584,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2e66273a1b2b",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 734,
+    "line": 732,
     kind: 'lt-call'
   },
   {
@@ -2520,7 +2608,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2eb42faa8629",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 697,
+    "line": 695,
     kind: 'lt-call'
   },
   {
@@ -2552,7 +2640,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.30072c8d4227",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1198,
+    "line": 1196,
     kind: 'lt-call'
   },
   {
@@ -2560,7 +2648,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.300d6327566e",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 317,
+    "line": 315,
     kind: 'lt-call'
   },
   {
@@ -2569,6 +2657,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 895,
+    kind: 'lt-call'
+  },
+  {
+    "text": "ILS - Israeli New Shekel",
+    "key": "literal.3055bd041c82",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 75,
     kind: 'lt-call'
   },
   {
@@ -2640,7 +2736,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3159162fbc51",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 466,
+    "line": 505,
     kind: 'lt-call'
   },
   {
@@ -2648,7 +2744,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.31bf3b3b2099",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1323,
+    "line": 1321,
     kind: 'lt-call'
   },
   {
@@ -2656,7 +2752,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.31dd24b0a61a",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 590,
+    "line": 596,
     kind: 'lt-call'
   },
   {
@@ -2704,7 +2800,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.333aa17a59e4",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 690,
+    "line": 688,
     kind: 'lt-call'
   },
   {
@@ -2728,7 +2824,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.335d3839030b",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 1049,
+    "line": 961,
     kind: 'lt-call'
   },
   {
@@ -2772,6 +2868,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "SHIB - Shiba Inu",
+    "key": "literal.33ef26196c72",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 98,
+    kind: 'lt-call'
+  },
+  {
     "text": "Showing first 40 items.",
     "key": "literal.33fff61d0a17",
     namespace: 'literals',
@@ -2784,7 +2888,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3422cdf696b9",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 527,
+    "line": 566,
     kind: 'jsx-text'
   },
   {
@@ -2816,7 +2920,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.34767b3109dc",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 820,
+    "line": 844,
     kind: 'lt-call'
   },
   {
@@ -2920,7 +3024,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.35d8e5c44502",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 344,
+    "line": 342,
     kind: 'lt-call'
   },
   {
@@ -2944,7 +3048,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.364560145c96",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 836,
+    "line": 834,
     kind: 'jsx-text'
   },
   {
@@ -2976,7 +3080,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3672aeb96a31",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 718,
+    "line": 716,
     kind: 'lt-call'
   },
   {
@@ -2984,7 +3088,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3695a59452ee",
     namespace: 'literals',
     "file": "src/components/ui/currency-select.tsx",
-    "line": 125,
+    "line": 130,
     kind: 'lt-call'
   },
   {
@@ -3016,7 +3120,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.36bae31694f8",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 322,
+    "line": 328,
     kind: 'lt-call'
   },
   {
@@ -3088,7 +3192,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.38bfa647a6a0",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1176,
+    "line": 1174,
     kind: 'lt-call'
   },
   {
@@ -3113,14 +3217,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/documents/document-upload.tsx",
     "line": 175,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Fix Selected Issues",
-    "key": "literal.38f233e907c6",
-    namespace: 'literals',
-    "file": "src/components/transactions/transactions-list.tsx",
-    "line": 496,
     kind: 'lt-call'
   },
   {
@@ -3152,7 +3248,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.393dfa08a123",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 977,
+    "line": 975,
     kind: 'lt-call'
   },
   {
@@ -3168,7 +3264,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.394b08fe417b",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 870,
+    "line": 868,
     kind: 'lt-call'
   },
   {
@@ -3176,7 +3272,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3960ec4ca5fb",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 923,
+    "line": 921,
     kind: 'lt-call'
   },
   {
@@ -3210,6 +3306,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/team/team-list.tsx",
     "line": 86,
     kind: 'lt-call'
+  },
+  {
+    "text": "Tenant deleted successfully!",
+    "key": "literal.3a26ee5c311b",
+    namespace: 'literals',
+    "file": "src/components/admin/tenant-management.tsx",
+    "line": 87,
+    kind: 'toast'
   },
   {
     "text": "Are you sure you want to unmatch this transaction? It will return to the pending list.",
@@ -3248,7 +3352,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3a943802fefa",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 316,
+    "line": 336,
     kind: 'lt-call'
   },
   {
@@ -3288,7 +3392,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3adccfce4072",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 325,
+    "line": 363,
     kind: 'lt-call'
   },
   {
@@ -3376,7 +3480,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3be9f957f29f",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1103,
+    "line": 1101,
     kind: 'lt-call'
   },
   {
@@ -3436,6 +3540,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "CAD - Canadian Dollar",
+    "key": "literal.3d3aeb3b4b9b",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 53,
+    kind: 'lt-call'
+  },
+  {
     "text": "Financial reporting shortcuts",
     "key": "literal.3d52cc90e0d6",
     namespace: 'literals',
@@ -3472,7 +3584,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3dbd4c39b0dd",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1178,
+    "line": 1176,
     kind: 'lt-call'
   },
   {
@@ -3487,9 +3599,9 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Type",
     "key": "literal.3deb74565196",
     namespace: 'literals',
-    "file": "src/components/accounts/chart-of-accounts.tsx",
-    "line": 248,
-    kind: 'lt-call'
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 218,
+    kind: 'jsx-text'
   },
   {
     "text": "With service providers that support platform functionality (hosting, storage, email delivery, analytics) as configured.",
@@ -3504,7 +3616,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3e29c4990f9e",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1125,
+    "line": 1123,
     kind: 'lt-call'
   },
   {
@@ -3528,7 +3640,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3e678a204cbd",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 202,
+    "line": 222,
     kind: 'toast'
   },
   {
@@ -3536,7 +3648,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3ea3f9802acc",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1194,
+    "line": 1192,
     kind: 'lt-call'
   },
   {
@@ -3544,7 +3656,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3ec1ae061c27",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 580,
+    "line": 586,
     kind: 'lt-call'
   },
   {
@@ -3608,7 +3720,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.40185d0911c3",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 574,
+    "line": 614,
     kind: 'lt-call'
   },
   {
@@ -3616,7 +3728,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.408255ed028b",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 939,
+    "line": 937,
     kind: 'lt-call'
   },
   {
@@ -3668,6 +3780,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "DAI - Dai",
+    "key": "literal.41bfcc5e289e",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 100,
+    kind: 'lt-call'
+  },
+  {
     "text": "Using platform default.",
     "key": "literal.4290ebd83cb3",
     namespace: 'literals',
@@ -3680,7 +3800,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.42a17732d2fc",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1151,
+    "line": 1149,
     kind: 'jsx-text'
   },
   {
@@ -3928,7 +4048,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.467f0c7ca296",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 737,
+    "line": 743,
     kind: 'lt-call'
   },
   {
@@ -3960,7 +4080,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.46d3adb34bb0",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 1090,
+    "line": 1002,
     kind: 'lt-call'
   },
   {
@@ -4008,7 +4128,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.47581dadc44f",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 393,
+    "line": 432,
     kind: 'lt-call'
   },
   {
@@ -4016,7 +4136,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.475b6ce898d4",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 821,
+    "line": 819,
     kind: 'lt-call'
   },
   {
@@ -4032,7 +4152,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.478cfcaafd1c",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 747,
+    "line": 1018,
     kind: 'lt-call'
   },
   {
@@ -4095,8 +4215,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Failed to fix issues",
     "key": "literal.494653535def",
     namespace: 'literals',
-    "file": "src/components/transactions/transactions-list.tsx",
-    "line": 551,
+    "file": "src/hooks/use-transaction-audit.tsx",
+    "line": 116,
     kind: 'lt-call'
   },
   {
@@ -4108,11 +4228,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Backup downloaded!",
+    "key": "literal.499e73af7e17",
+    namespace: 'literals',
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 65,
+    kind: 'toast'
+  },
+  {
     "text": "Delete {count} draft transactions?",
     "key": "literal.49ec94152e0f",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 369,
+    "line": 407,
     kind: 'ltvars-call'
   },
   {
@@ -4160,7 +4288,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4acc3f4476c0",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 266,
+    "line": 306,
     kind: 'ltvars-call'
   },
   {
@@ -4232,7 +4360,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4bc21aecb5b8",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 541,
+    "line": 539,
     kind: 'lt-call'
   },
   {
@@ -4248,7 +4376,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4c1c20d8552b",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 741,
+    "line": 782,
     kind: 'ltvars-call'
   },
   {
@@ -4268,11 +4396,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "PHP - Philippine Peso",
+    "key": "literal.4c8621420bdd",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 77,
+    kind: 'lt-call'
+  },
+  {
     "text": "Failed to load folders: {message}",
     "key": "literal.4d088fd39b82",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 394,
+    "line": 392,
     kind: 'lt-call'
   },
   {
@@ -4400,7 +4536,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4e555ca773ac",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 311,
+    "line": 331,
     kind: 'lt-call'
   },
   {
@@ -4424,7 +4560,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4e7afebcfbae",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 723,
+    "line": 729,
     kind: 'lt-call'
   },
   {
@@ -4432,7 +4568,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4e7bcf8d4f2a",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 128,
+    "line": 148,
     kind: 'toast'
   },
   {
@@ -4448,7 +4584,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4ed8fb421312",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 713,
+    "line": 711,
     kind: 'lt-call'
   },
   {
@@ -4464,7 +4600,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4ef7d73c1a83",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 622,
+    "line": 516,
     kind: 'lt-call'
   },
   {
@@ -4480,7 +4616,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4f24c3d1a9dd",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1104,
+    "line": 1102,
     kind: 'lt-call'
   },
   {
@@ -4512,7 +4648,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4f74d63f3035",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1029,
+    "line": 1027,
     kind: 'lt-call'
   },
   {
@@ -4528,7 +4664,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4fe3ebc6c58f",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 982,
+    "line": 980,
     kind: 'attr'
   },
   {
@@ -4564,11 +4700,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "HKD - Hong Kong Dollar",
+    "key": "literal.5040340f35ff",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 56,
+    kind: 'lt-call'
+  },
+  {
     "text": "View and manage accounting transactions",
     "key": "literal.505d123ee2e4",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 663,
+    "line": 557,
     kind: 'lt-call'
   },
   {
@@ -4616,7 +4760,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5138aaba1645",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 757,
+    "line": 755,
     kind: 'lt-call'
   },
   {
@@ -4648,7 +4792,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.51a2608f7337",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1148,
+    "line": 1146,
     kind: 'lt-call'
   },
   {
@@ -4672,7 +4816,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5266327a4125",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 368,
+    "line": 406,
     kind: 'lt-call'
   },
   {
@@ -4712,7 +4856,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.52daeffad30c",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1149,
+    "line": 1147,
     kind: 'jsx-text'
   },
   {
@@ -4792,7 +4936,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.53db5d208c9e",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 199,
+    "line": 219,
     kind: 'lt-call'
   },
   {
@@ -4840,7 +4984,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.54772283339a",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 1052,
+    "line": 964,
     kind: 'lt-call'
   },
   {
@@ -4860,11 +5004,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "DOGE - Dogecoin",
+    "key": "literal.5513668dc9cc",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 92,
+    kind: 'lt-call'
+  },
+  {
     "text": "Current folder:",
     "key": "literal.551d92519439",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 986,
+    "line": 984,
     kind: 'lt-call'
   },
   {
@@ -4896,7 +5048,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.56391b011a75",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 785,
+    "line": 783,
     kind: 'lt-call'
   },
   {
@@ -4920,7 +5072,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5656400564f2",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 642,
+    "line": 648,
     kind: 'lt-call'
   },
   {
@@ -4980,11 +5132,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'jsx-text'
   },
   {
+    "text": "SEK - Swedish Krona",
+    "key": "literal.579fb704a2a3",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 58,
+    kind: 'lt-call'
+  },
+  {
     "text": "Folder:",
     "key": "literal.57cb579c18cf",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1217,
+    "line": 1215,
     kind: 'lt-call'
   },
   {
@@ -5008,7 +5168,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.582b67e1b215",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1047,
+    "line": 1045,
     kind: 'lt-call'
   },
   {
@@ -5020,11 +5180,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "JPY - Japanese Yen",
+    "key": "literal.583a31990a14",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 51,
+    kind: 'lt-call'
+  },
+  {
     "text": "Duplicate Document",
     "key": "literal.587eb7aadf7e",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 748,
+    "line": 616,
     kind: 'lt-call'
   },
   {
@@ -5056,7 +5224,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.591e4e070620",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 1060,
+    "line": 1094,
     kind: 'ltvars-call'
   },
   {
@@ -5160,7 +5328,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5aa4b0edec40",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 487,
+    "line": 527,
     kind: 'lt-call'
   },
   {
@@ -5168,7 +5336,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5b10a127edba",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 358,
+    "line": 356,
     kind: 'lt-call'
   },
   {
@@ -5248,7 +5416,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5c2af3035b35",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 796,
+    "line": 794,
     kind: 'lt-call'
   },
   {
@@ -5392,8 +5560,16 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5db7bb0a235a",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 265,
+    "line": 305,
     kind: 'ltvars-call'
+  },
+  {
+    "text": "USDT - Tether",
+    "key": "literal.5ddd983729d9",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 87,
+    kind: 'lt-call'
   },
   {
     "text": "Auto-matched {count} transactions",
@@ -5416,7 +5592,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5e0e34b3f48d",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 687,
+    "line": 897,
     kind: 'lt-call'
   },
   {
@@ -5424,7 +5600,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5e1b74ba390d",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 998,
+    "line": 996,
     kind: 'lt-call'
   },
   {
@@ -5440,7 +5616,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5e51c67d7d9a",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 337,
+    "line": 375,
     kind: 'ltvars-call'
   },
   {
@@ -5448,7 +5624,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5e69c920d1a6",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 780,
+    "line": 778,
     kind: 'lt-call'
   },
   {
@@ -5588,11 +5764,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "THB - Thai Baht",
+    "key": "literal.60aef9d5ac8a",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 71,
+    kind: 'lt-call'
+  },
+  {
     "text": "Supabase Cron (per-tenant)",
     "key": "literal.60ef96e5b14a",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1095,
+    "line": 1093,
     kind: 'lt-call'
   },
   {
@@ -5600,7 +5784,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6118867f2125",
     namespace: 'literals',
     "file": "src/components/reports/financial-charts.tsx",
-    "line": 165,
+    "line": 174,
     kind: 'lt-call'
   },
   {
@@ -5624,7 +5808,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.617f0258aa44",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 1026,
+    "line": 1060,
     kind: 'lt-call'
   },
   {
@@ -5632,7 +5816,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.617fa53acd94",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 837,
+    "line": 835,
     kind: 'jsx-text'
   },
   {
@@ -5664,7 +5848,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.61d2475ec6eb",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1145,
+    "line": 1143,
     kind: 'lt-call'
   },
   {
@@ -5672,7 +5856,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.61e4c27b1cb8",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 471,
+    "line": 477,
     kind: 'lt-call'
   },
   {
@@ -5728,7 +5912,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.635e1c5f0bdf",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 432,
+    "line": 471,
     kind: 'lt-call'
   },
   {
@@ -5800,7 +5984,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.64513b47d460",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 707,
+    "line": 705,
     kind: 'lt-call'
   },
   {
@@ -5808,7 +5992,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.649df08a448e",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 446,
+    "line": 485,
     kind: 'lt-call'
   },
   {
@@ -5832,7 +6016,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.657e6122eaac",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 853,
+    "line": 851,
     kind: 'lt-call'
   },
   {
@@ -5840,7 +6024,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.65889272a335",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 676,
+    "line": 716,
     kind: 'ltvars-call'
   },
   {
@@ -5856,7 +6040,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.65bfc61521b6",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 1019,
+    "line": 931,
     kind: 'lt-call'
   },
   {
@@ -5948,6 +6132,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "IDR - Indonesian Rupiah",
+    "key": "literal.6713330658af",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 72,
+    kind: 'lt-call'
+  },
+  {
     "text": "Batch size",
     "key": "literal.672f784922db",
     namespace: 'literals',
@@ -6008,7 +6200,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.67f2141f8c48",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1103,
+    "line": 1101,
     kind: 'lt-call'
   },
   {
@@ -6024,8 +6216,32 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.687c82861c95",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 502,
+    "line": 541,
     kind: 'jsx-text'
+  },
+  {
+    "text": "TRY - Turkish Lira",
+    "key": "literal.688e4fc4be48",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 66,
+    kind: 'lt-call'
+  },
+  {
+    "text": "RUB - Russian Ruble",
+    "key": "literal.68a32f3af47f",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 64,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Docs",
+    "key": "literal.68a4194227be",
+    namespace: 'literals',
+    "file": "src/components/admin/tenant-management.tsx",
+    "line": 389,
+    kind: 'lt-call'
   },
   {
     "text": "Careers",
@@ -6048,7 +6264,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.68f51e869a58",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 652,
+    "line": 650,
     kind: 'lt-call'
   },
   {
@@ -6072,7 +6288,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6933c6bbce7b",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 1063,
+    "line": 1097,
     kind: 'ltvars-call'
   },
   {
@@ -6088,7 +6304,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6988b16a8fd2",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 885,
+    "line": 883,
     kind: 'lt-call'
   },
   {
@@ -6112,7 +6328,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.69bd943a67ff",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1355,
+    "line": 1353,
     kind: 'lt-call'
   },
   {
@@ -6128,7 +6344,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6a18913bf704",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1150,
+    "line": 1148,
     kind: 'lt-call'
   },
   {
@@ -6137,6 +6353,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 690,
+    kind: 'lt-call'
+  },
+  {
+    "text": "DOT - Polkadot",
+    "key": "literal.6a54333bda70",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 95,
     kind: 'lt-call'
   },
   {
@@ -6180,6 +6404,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "CNY - Chinese Yuan",
+    "key": "literal.6b1918f5a4ad",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 55,
+    kind: 'lt-call'
+  },
+  {
     "text": "About",
     "key": "literal.6b21fb791ac0",
     namespace: 'literals',
@@ -6192,7 +6424,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6b308de777df",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 777,
+    "line": 800,
     kind: 'lt-call'
   },
   {
@@ -6312,7 +6544,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6c39345942d1",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 981,
+    "line": 979,
     kind: 'lt-call'
   },
   {
@@ -6328,7 +6560,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6c47fc862c3e",
     namespace: 'literals',
     "file": "src/components/ui/currency-select.tsx",
-    "line": 122,
+    "line": 127,
     kind: 'lt-call'
   },
   {
@@ -6360,7 +6592,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6d524f5c2101",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 272,
+    "line": 270,
     kind: 'lt-call'
   },
   {
@@ -6376,7 +6608,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6d6dc053cb7c",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 590,
+    "line": 596,
     kind: 'lt-call'
   },
   {
@@ -6420,6 +6652,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "INR - Indian Rupee",
+    "key": "literal.6dd64870809a",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 63,
+    kind: 'lt-call'
+  },
+  {
     "text": "Create",
     "key": "literal.6e157c5da441",
     namespace: 'literals',
@@ -6432,7 +6672,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6e27a5597770",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 452,
+    "line": 491,
     kind: 'lt-call'
   },
   {
@@ -6448,16 +6688,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6e78c91f5a05",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 545,
+    "line": 551,
     kind: 'lt-call'
-  },
-  {
-    "text": "{percent}% AI Confidence",
-    "key": "literal.6e8fa68667f3",
-    namespace: 'literals',
-    "file": "src/components/documents/documents-list.tsx",
-    "line": 922,
-    kind: 'ltvars-call'
   },
   {
     "text": "System Overview",
@@ -6480,7 +6712,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6eee03ddd282",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 1027,
+    "line": 939,
     kind: 'ltvars-call'
   },
   {
@@ -6504,7 +6736,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6f2a352be845",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 438,
+    "line": 444,
     kind: 'lt-call'
   },
   {
@@ -6528,7 +6760,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6f719fb045c0",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 460,
+    "line": 499,
     kind: 'lt-call'
   },
   {
@@ -6560,7 +6792,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6fb648fb304e",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 163,
+    "line": 161,
     kind: 'lt-call'
   },
   {
@@ -6568,7 +6800,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6fe09c020fab",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 1122,
+    "line": 1034,
     kind: 'lt-call'
   },
   {
@@ -6600,7 +6832,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.70759c21f60e",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 820,
+    "line": 700,
     kind: 'lt-call'
   },
   {
@@ -6732,6 +6964,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "XRP - XRP",
+    "key": "literal.7409ef53b0ea",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 90,
+    kind: 'lt-call'
+  },
+  {
     "text": "-- No Bank Account (General Document) --",
     "key": "literal.740f20a0cafc",
     namespace: 'literals',
@@ -6761,6 +7001,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 819,
+    kind: 'lt-call'
+  },
+  {
+    "text": "PLN - Polish Zloty",
+    "key": "literal.743ca5416033",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 70,
     kind: 'lt-call'
   },
   {
@@ -6796,6 +7044,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "SGD - Singapore Dollar",
+    "key": "literal.753352344887",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 60,
+    kind: 'lt-call'
+  },
+  {
     "text": "Company created and document uploaded!",
     "key": "literal.7544ddb8ff8b",
     namespace: 'literals',
@@ -6816,7 +7072,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7575536fe402",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 788,
+    "line": 786,
     kind: 'lt-call'
   },
   {
@@ -6849,6 +7105,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 509,
+    kind: 'lt-call'
+  },
+  {
+    "text": "MXN - Mexican Peso",
+    "key": "literal.764c7eb4e62d",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 62,
     kind: 'lt-call'
   },
   {
@@ -6888,7 +7152,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.771e05f27b99",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 687,
+    "line": 685,
     kind: 'lt-call'
   },
   {
@@ -6897,6 +7161,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/terms/page.tsx",
     "line": 132,
+    kind: 'lt-call'
+  },
+  {
+    "text": "CZK - Czech Koruna",
+    "key": "literal.77209633d584",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 74,
     kind: 'lt-call'
   },
   {
@@ -7000,7 +7272,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.78bba35bec31",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 447,
+    "line": 486,
     kind: 'lt-call'
   },
   {
@@ -7040,7 +7312,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7a1994999d18",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 481,
+    "line": 487,
     kind: 'lt-call'
   },
   {
@@ -7064,7 +7336,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7aa70806443d",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 916,
+    "line": 914,
     kind: 'lt-call'
   },
   {
@@ -7160,7 +7432,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7c28578c7178",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 336,
+    "line": 374,
     kind: 'lt-call'
   },
   {
@@ -7177,6 +7449,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
     "line": 482,
+    kind: 'lt-call'
+  },
+  {
+    "text": "HUF - Hungarian Forint",
+    "key": "literal.7ca54323c128",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 73,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Tenant Admin",
+    "key": "literal.7cbbc6ca9723",
+    namespace: 'literals',
+    "file": "src/components/dashboard/dashboard-layout.tsx",
+    "line": 298,
     kind: 'lt-call'
   },
   {
@@ -7207,8 +7495,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Line Items",
     "key": "literal.7cea20a1a00e",
     namespace: 'literals',
-    "file": "src/components/transactions/transaction-editor.tsx",
-    "line": 880,
+    "file": "src/components/admin/tenant-management.tsx",
+    "line": 397,
     kind: 'lt-call'
   },
   {
@@ -7376,7 +7664,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.800c3e7b5264",
     namespace: 'literals',
     "file": "src/components/reports/financial-charts.tsx",
-    "line": 175,
+    "line": 184,
     kind: 'lt-call'
   },
   {
@@ -7439,9 +7727,9 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Uploaded",
     "key": "literal.80c494898ac9",
     namespace: 'literals',
-    "file": "src/components/documents/documents-list.tsx",
-    "line": 712,
-    kind: 'lt-call'
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 220,
+    kind: 'jsx-text'
   },
   {
     "text": "Excluded {count} transactions",
@@ -7612,6 +7900,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "NZD - New Zealand Dollar",
+    "key": "literal.83d5399d2471",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 57,
+    kind: 'lt-call'
+  },
+  {
     "text": "Used when a purpose does not have an explicit routing assignment.",
     "key": "literal.840f31842ac1",
     namespace: 'literals',
@@ -7640,7 +7936,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.84c29015de33",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 935,
+    "line": 933,
     kind: 'lt-call'
   },
   {
@@ -7648,7 +7944,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.84c8e614c8ef",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 883,
+    "line": 881,
     kind: 'lt-call'
   },
   {
@@ -7657,6 +7953,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/tenant/create-tenant-modal.tsx",
     "line": 77,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Profit",
+    "key": "literal.8544a4772583",
+    namespace: 'literals',
+    "file": "src/components/reports/financial-charts.tsx",
+    "line": 75,
     kind: 'lt-call'
   },
   {
@@ -7744,7 +8048,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.86a599ef4df2",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 1062,
+    "line": 974,
     kind: 'lt-call'
   },
   {
@@ -7840,7 +8144,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.89411c6bff9d",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1131,
+    "line": 1129,
     kind: 'lt-call'
   },
   {
@@ -7856,7 +8160,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8970f0e691a0",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 531,
+    "line": 570,
     kind: 'jsx-text'
   },
   {
@@ -7873,6 +8177,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/cookies/page.tsx",
     "line": 26,
+    kind: 'lt-call'
+  },
+  {
+    "text": "MYR - Malaysian Ringgit",
+    "key": "literal.899696dd7a4f",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 81,
     kind: 'lt-call'
   },
   {
@@ -7911,9 +8223,9 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Fixed {count} issues",
     "key": "literal.8a0bfa50c8d3",
     namespace: 'literals',
-    "file": "src/components/transactions/transactions-list.tsx",
-    "line": 538,
-    kind: 'ltvars-call'
+    "file": "src/hooks/use-transaction-audit.tsx",
+    "line": 108,
+    kind: 'lt-call'
   },
   {
     "text": "Credit",
@@ -8016,7 +8328,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8b1b98351880",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 826,
+    "line": 824,
     kind: 'lt-call'
   },
   {
@@ -8116,6 +8428,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "COP - Colombian Peso",
+    "key": "literal.8c3f7a4c0d17",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 79,
+    kind: 'lt-call'
+  },
+  {
     "text": "Confirm Match",
     "key": "literal.8c67f9c65781",
     namespace: 'literals',
@@ -8160,7 +8480,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8d019b856de1",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 690,
+    "line": 730,
     kind: 'lt-call'
   },
   {
@@ -8184,7 +8504,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8d53b1b59307",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 313,
+    "line": 353,
     kind: 'lt-call'
   },
   {
@@ -8216,7 +8536,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8dcfe92ac72b",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 736,
+    "line": 734,
     kind: 'lt-call'
   },
   {
@@ -8256,7 +8576,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8e86cf3e8f2d",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 431,
+    "line": 437,
     kind: 'lt-call'
   },
   {
@@ -8304,7 +8624,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8f88686edf6b",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 861,
+    "line": 741,
     kind: 'ltvars-call'
   },
   {
@@ -8336,7 +8656,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8fcd25a39d20",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1152,
+    "line": 1150,
     kind: 'lt-call'
   },
   {
@@ -8368,7 +8688,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8ff19dc85719",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 857,
+    "line": 855,
     kind: 'lt-call'
   },
   {
@@ -8400,7 +8720,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.905d012288da",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1014,
+    "line": 1012,
     kind: 'lt-call'
   },
   {
@@ -8448,7 +8768,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9100745d3f87",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1207,
+    "line": 1205,
     kind: 'lt-call'
   },
   {
@@ -8456,7 +8776,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.91064e2c05a5",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 582,
+    "line": 580,
     kind: 'lt-call'
   },
   {
@@ -8568,7 +8888,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9223060ddfcf",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 578,
+    "line": 576,
     kind: 'lt-call'
   },
   {
@@ -8600,7 +8920,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.92ef08325a48",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 383,
+    "line": 422,
     kind: 'lt-call'
   },
   {
@@ -8620,14 +8940,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Auto-fix {count} selected issues? This will Delete drafts and Void posted transactions.",
-    "key": "literal.9373b29668e4",
-    namespace: 'literals',
-    "file": "src/components/transactions/transactions-list.tsx",
-    "line": 497,
-    kind: 'ltvars-call'
-  },
-  {
     "text": "Statement updated",
     "key": "literal.939da7bfff1a",
     namespace: 'literals',
@@ -8640,7 +8952,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.94300eedc03e",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 287,
+    "line": 325,
     kind: 'ltvars-call'
   },
   {
@@ -8760,7 +9072,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.970ac9ead623",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1138,
+    "line": 1136,
     kind: 'lt-call'
   },
   {
@@ -8832,7 +9144,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.98b4d5df2b92",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 324,
+    "line": 322,
     kind: 'lt-call'
   },
   {
@@ -8952,7 +9264,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9a731f3d6dec",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 753,
+    "line": 751,
     kind: 'lt-call'
   },
   {
@@ -8976,7 +9288,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9aa5c9e51343",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 472,
+    "line": 470,
     kind: 'lt-call'
   },
   {
@@ -9008,7 +9320,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9b230e28d52f",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 1048,
+    "line": 960,
     kind: 'lt-call'
   },
   {
@@ -9024,7 +9336,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9b555fc6febd",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 292,
+    "line": 330,
     kind: 'lt-call'
   },
   {
@@ -9092,6 +9404,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "GBP - British Pound Sterling",
+    "key": "literal.9c9cf64ac00c",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 50,
+    kind: 'lt-call'
+  },
+  {
+    "text": "USDC - USD Coin",
+    "key": "literal.9c9f5b67f94c",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 89,
+    kind: 'lt-call'
+  },
+  {
     "text": "Scheduled Jobs",
     "key": "literal.9ca43b04c3d2",
     namespace: 'literals',
@@ -9148,6 +9476,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "ATOM - Cosmos",
+    "key": "literal.9d995c29f960",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 102,
+    kind: 'lt-call'
+  },
+  {
     "text": "Usage: {current} / {max} companies used.",
     "key": "literal.9da6d9c1c35d",
     namespace: 'literals',
@@ -9184,7 +9520,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9ddd7ed9af5b",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 931,
+    "line": 929,
     kind: 'lt-call'
   },
   {
@@ -9192,7 +9528,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9de45cf2a494",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 683,
+    "line": 893,
     kind: 'ltvars-call'
   },
   {
@@ -9200,7 +9536,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9dfe5e2d8382",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1159,
+    "line": 1157,
     kind: 'lt-call'
   },
   {
@@ -9218,6 +9554,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 635,
     kind: 'jsx-text'
+  },
+  {
+    "text": "AVAX - Avalanche",
+    "key": "literal.9e498ff28680",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 99,
+    kind: 'lt-call'
   },
   {
     "text": "your change will take effect.",
@@ -9240,7 +9584,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9e743c993c2c",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1363,
+    "line": 1361,
     kind: 'lt-call'
   },
   {
@@ -9268,6 +9612,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "SAR - Saudi Riyal",
+    "key": "literal.9ed2c483c3be",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 80,
+    kind: 'lt-call'
+  },
+  {
     "text": "Failed to save policy",
     "key": "literal.9edaa86594f2",
     namespace: 'literals',
@@ -9290,6 +9642,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/admin/translation-management.tsx",
     "line": 1005,
     kind: 'toast'
+  },
+  {
+    "text": "BTC - Bitcoin",
+    "key": "literal.9f1a39311352",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 85,
+    kind: 'lt-call'
   },
   {
     "text": "Schedule folder/SFTP imports",
@@ -9336,7 +9696,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9ff4b90c362b",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 321,
+    "line": 359,
     kind: 'ltvars-call'
   },
   {
@@ -9392,7 +9752,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a1091ccbbd50",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 632,
+    "line": 526,
     kind: 'lt-call'
   },
   {
@@ -9440,7 +9800,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a168a081a3f1",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 510,
+    "line": 516,
     kind: 'lt-call'
   },
   {
@@ -9471,16 +9831,16 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Search tenants...",
     "key": "literal.a216d26f5b44",
     namespace: 'literals',
-    "file": "src/components/admin/tenant-management.tsx",
-    "line": 329,
-    kind: 'lt-call'
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 163,
+    kind: 'attr'
   },
   {
     "text": "Search documents...",
     "key": "literal.a21750f38022",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 766,
+    "line": 789,
     kind: 'lt-call'
   },
   {
@@ -9584,7 +9944,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a39f57435d6c",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1113,
+    "line": 1111,
     kind: 'lt-call'
   },
   {
@@ -9600,7 +9960,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a3c686e711e4",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 729,
+    "line": 597,
     kind: 'lt-call'
   },
   {
@@ -9632,7 +9992,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a479c9c34e87",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 965,
+    "line": 946,
     kind: 'lt-call'
   },
   {
@@ -9748,6 +10108,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'toast'
   },
   {
+    "text": "LTC - Litecoin",
+    "key": "literal.a69520db40f8",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 97,
+    kind: 'lt-call'
+  },
+  {
     "text": "Pitch",
     "key": "literal.a6c2d09a48fe",
     namespace: 'literals',
@@ -9832,7 +10200,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a7407a886341",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 673,
+    "line": 883,
     kind: 'lt-call'
   },
   {
@@ -9936,7 +10304,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a8a5f02733a3",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 184,
+    "line": 204,
     kind: 'lt-call'
   },
   {
@@ -10096,7 +10464,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ab947477b196",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 397,
+    "line": 437,
     kind: 'lt-call'
   },
   {
@@ -10104,7 +10472,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ab9f828234e9",
     namespace: 'literals',
     "file": "src/components/reports/financial-charts.tsx",
-    "line": 167,
+    "line": 176,
+    kind: 'lt-call'
+  },
+  {
+    "text": "AUD - Australian Dollar",
+    "key": "literal.abb4fc601e6d",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 52,
     kind: 'lt-call'
   },
   {
@@ -10160,7 +10536,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.accf40c89baa",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 535,
+    "line": 574,
     kind: 'jsx-text'
   },
   {
@@ -10244,6 +10620,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "RON - Romanian Leu",
+    "key": "literal.af40e1fb5101",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 82,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Loading tenants...",
+    "key": "literal.af74e9b1da77",
+    namespace: 'literals',
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 147,
+    kind: 'jsx-text'
+  },
+  {
     "text": "Bounce",
     "key": "literal.af7ed27586b5",
     namespace: 'literals',
@@ -10272,7 +10664,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.afe6c18654be",
     namespace: 'literals',
     "file": "src/components/reports/financial-charts.tsx",
-    "line": 199,
+    "line": 209,
     kind: 'lt-call'
   },
   {
@@ -10296,7 +10688,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b03c996daff1",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 296,
+    "line": 316,
     kind: 'lt-call'
   },
   {
@@ -10352,7 +10744,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b09467e4e7ec",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1118,
+    "line": 1116,
     kind: 'lt-call'
   },
   {
@@ -10368,7 +10760,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b0d2ef96c8e1",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 815,
+    "line": 813,
     kind: 'lt-call'
   },
   {
@@ -10384,7 +10776,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b124a193fbac",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 845,
+    "line": 843,
     kind: 'lt-call'
   },
   {
@@ -10404,6 +10796,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "BRL - Brazilian Real",
+    "key": "literal.b206d630f010",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 67,
+    kind: 'lt-call'
+  },
+  {
     "text": "Growth Trends (30 Days)",
     "key": "literal.b20e786f81c0",
     namespace: 'literals',
@@ -10417,6 +10817,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/landing/pricing-section.tsx",
     "line": 113,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Total",
+    "key": "literal.b25928c69902",
+    namespace: 'literals',
+    "file": "src/components/documents/documents-list.tsx",
+    "line": 981,
     kind: 'lt-call'
   },
   {
@@ -10472,7 +10880,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b2f60a22d5e8",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 954,
+    "line": 952,
     kind: 'attr'
   },
   {
@@ -10512,7 +10920,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b34fcb84ecc6",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 422,
+    "line": 461,
     kind: 'lt-call'
   },
   {
@@ -10564,6 +10972,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "DKK - Danish Krone",
+    "key": "literal.b3f4f5dff476",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 69,
+    kind: 'lt-call'
+  },
+  {
     "text": "User Subscriptions",
     "key": "literal.b41e0cf59239",
     namespace: 'literals',
@@ -10592,7 +11008,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b4409b9df6ad",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 802,
+    "line": 800,
     kind: 'lt-call'
   },
   {
@@ -10624,7 +11040,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b4afff317fb1",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 461,
+    "line": 500,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Bank Accts",
+    "key": "literal.b4b5d624af6a",
+    namespace: 'literals',
+    "file": "src/components/admin/tenant-management.tsx",
+    "line": 401,
     kind: 'lt-call'
   },
   {
@@ -10658,6 +11082,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/accounts/chart-of-accounts.tsx",
     "line": 158,
     kind: 'lt-call'
+  },
+  {
+    "text": "Failed to delete tenant:",
+    "key": "literal.b51d6ef54773",
+    namespace: 'literals',
+    "file": "src/components/admin/tenant-management.tsx",
+    "line": 90,
+    kind: 'toast'
   },
   {
     "text": "We use information to:",
@@ -10712,7 +11144,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b5639cdd4cb7",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 440,
+    "line": 446,
     kind: 'lt-call'
   },
   {
@@ -10720,7 +11152,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b570037abd4f",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1191,
+    "line": 1189,
     kind: 'lt-call'
   },
   {
@@ -10832,7 +11264,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b6d769e4dd73",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 322,
+    "line": 320,
     kind: 'lt-call'
   },
   {
@@ -10872,7 +11304,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b7450076d76f",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 310,
+    "line": 350,
     kind: 'lt-call'
   },
   {
@@ -10880,7 +11312,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b74bdee9c34f",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1068,
+    "line": 1066,
     kind: 'lt-call'
   },
   {
@@ -10912,7 +11344,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b805926dc020",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 259,
+    "line": 279,
     kind: 'jsx-text'
   },
   {
@@ -10936,7 +11368,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b8796c65b842",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 262,
+    "line": 302,
     kind: 'ltvars-call'
   },
   {
@@ -10960,7 +11392,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b8c8902b653a",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 345,
+    "line": 343,
     kind: 'lt-call'
   },
   {
@@ -10984,7 +11416,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b8db5669f01f",
     namespace: 'literals',
     "file": "src/components/reports/financial-charts.tsx",
-    "line": 176,
+    "line": 185,
     kind: 'lt-call'
   },
   {
@@ -11001,6 +11433,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/terms/page.tsx",
     "line": 78,
+    kind: 'lt-call'
+  },
+  {
+    "text": "MATIC - Polygon",
+    "key": "literal.b96c475fde0d",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 96,
+    kind: 'lt-call'
+  },
+  {
+    "text": "UNI - Uniswap",
+    "key": "literal.b9863fa7ef6d",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 103,
     kind: 'lt-call'
   },
   {
@@ -11039,9 +11487,9 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Status",
     "key": "literal.bae7d5be7082",
     namespace: 'literals',
-    "file": "src/app/[locale]/dashboard/page.tsx",
-    "line": 745,
-    kind: 'lt-call'
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 219,
+    kind: 'jsx-text'
   },
   {
     "text": "Only missing",
@@ -11072,7 +11520,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.bbfa773e5a63",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 485,
+    "line": 524,
     kind: 'lt-call'
   },
   {
@@ -11080,7 +11528,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.bc1686e27a92",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 579,
+    "line": 577,
     kind: 'lt-call'
   },
   {
@@ -11112,7 +11560,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.bc981983e7f5",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1081,
+    "line": 1079,
     kind: 'lt-call'
   },
   {
@@ -11120,7 +11568,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.bc9f31d3a5b5",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 580,
+    "line": 620,
     kind: 'ltvars-call'
   },
   {
@@ -11176,7 +11624,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.bd84acb4415f",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 434,
+    "line": 474,
     kind: 'ltvars-call'
   },
   {
@@ -11256,7 +11704,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.becd0872fa6c",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 459,
+    "line": 498,
     kind: 'lt-call'
   },
   {
@@ -11264,15 +11712,23 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.bf1fdc30e625",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 417,
+    "line": 456,
     kind: 'lt-call'
+  },
+  {
+    "text": "setIsMobile(window.innerWidth",
+    "key": "literal.bf2d84030717",
+    namespace: 'literals',
+    "file": "src/components/documents/documents-list.tsx",
+    "line": 62,
+    kind: 'jsx-text'
   },
   {
     "text": "Cryptocurrencies",
     "key": "literal.bf3173ada602",
     namespace: 'literals',
     "file": "src/components/ui/currency-select.tsx",
-    "line": 148,
+    "line": 153,
     kind: 'lt-call'
   },
   {
@@ -11336,7 +11792,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c07cbb34ef3c",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 584,
+    "line": 624,
     kind: 'lt-call'
   },
   {
@@ -11345,6 +11801,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/transaction-match-modal.tsx",
     "line": 148,
+    kind: 'lt-call'
+  },
+  {
+    "text": "CLP - Chilean Peso",
+    "key": "literal.c0a29864ec1d",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 76,
     kind: 'lt-call'
   },
   {
@@ -11392,7 +11856,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c14a5e04b043",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 693,
+    "line": 733,
     kind: 'lt-call'
   },
   {
@@ -11488,7 +11952,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c2eccb0ddb13",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 679,
+    "line": 889,
     kind: 'ltvars-call'
   },
   {
@@ -11527,9 +11991,9 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Actions",
     "key": "literal.c3cd636a585b",
     namespace: 'literals',
-    "file": "src/components/accounts/chart-of-accounts.tsx",
-    "line": 252,
-    kind: 'lt-call'
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 221,
+    kind: 'jsx-text'
   },
   {
     "text": "Account Name is required",
@@ -11616,7 +12080,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c5b4d0387de5",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 125,
+    "line": 145,
     kind: 'toast'
   },
   {
@@ -11624,7 +12088,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c5e23457aa7c",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 868,
+    "line": 866,
     kind: 'lt-call'
   },
   {
@@ -11665,6 +12129,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/page.tsx",
     "line": 167,
+    kind: 'lt-call'
+  },
+  {
+    "text": "ZAR - South African Rand",
+    "key": "literal.c64db155153f",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 65,
     kind: 'lt-call'
   },
   {
@@ -11728,7 +12200,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c74cc26f181c",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 435,
+    "line": 474,
     kind: 'lt-call'
   },
   {
@@ -11768,7 +12240,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c7b2f4ee4fb4",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 377,
+    "line": 415,
     kind: 'lt-call'
   },
   {
@@ -11808,7 +12280,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c89dd33c646c",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 888,
+    "line": 768,
     kind: 'lt-call'
   },
   {
@@ -11840,7 +12312,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c8f2df3a169c",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1223,
+    "line": 1221,
     kind: 'lt-call'
   },
   {
@@ -11856,7 +12328,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c91c653b28ab",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 408,
+    "line": 447,
     kind: 'lt-call'
   },
   {
@@ -11888,7 +12360,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c96bd5890ea7",
     namespace: 'literals',
     "file": "src/components/reports/financial-charts.tsx",
-    "line": 166,
+    "line": 175,
     kind: 'lt-call'
   },
   {
@@ -11968,7 +12440,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.cb3d3bdae2a4",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1048,
+    "line": 1046,
     kind: 'lt-call'
   },
   {
@@ -12028,14 +12500,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "{count} Txns",
-    "key": "literal.cc733427c90c",
-    namespace: 'literals',
-    "file": "src/components/documents/documents-list.tsx",
-    "line": 868,
-    kind: 'ltvars-call'
-  },
-  {
     "text": "Failed to remove access:",
     "key": "literal.cc769d6d9da7",
     namespace: 'literals',
@@ -12071,8 +12535,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Audit failed",
     "key": "literal.cd0e4b32fbd0",
     namespace: 'literals',
-    "file": "src/components/transactions/transactions-list.tsx",
-    "line": 439,
+    "file": "src/hooks/use-transaction-audit.tsx",
+    "line": 40,
     kind: 'lt-call'
   },
   {
@@ -12084,11 +12548,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "NOK - Norwegian Krone",
+    "key": "literal.cd6fdb089bb3",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 61,
+    kind: 'lt-call'
+  },
+  {
     "text": "Total Revenue (YTD)",
     "key": "literal.cdb83ead30cc",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 542,
+    "line": 581,
     kind: 'jsx-text'
   },
   {
@@ -12106,6 +12578,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/settings/tax-settings.tsx",
     "line": 197,
     kind: 'lt-call'
+  },
+  {
+    "text": "Invalid JSON file",
+    "key": "literal.ce32e7ce73f8",
+    namespace: 'literals',
+    "file": "src/app/tenant-admin/page.tsx",
+    "line": 85,
+    kind: 'toast'
   },
   {
     "text": "Failed to add domain",
@@ -12128,7 +12608,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ce9cb62331c3",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 210,
+    "line": 230,
     kind: 'lt-call'
   },
   {
@@ -12192,7 +12672,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.cf5fc5bc50ed",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 946,
+    "line": 944,
     kind: 'attr'
   },
   {
@@ -12218,14 +12698,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/reports/profit-loss-report.tsx",
     "line": 165,
     kind: 'lt-call'
-  },
-  {
-    "text": "Vendor: {vendor}",
-    "key": "literal.cfa649e58b63",
-    namespace: 'literals',
-    "file": "src/components/documents/documents-list.tsx",
-    "line": 877,
-    kind: 'ltvars-call'
   },
   {
     "text": "Manually add a transaction",
@@ -12300,11 +12772,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "LINK - Chainlink",
+    "key": "literal.d057fdaf4221",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 101,
+    kind: 'lt-call'
+  },
+  {
     "text": "Failed to load preview",
     "key": "literal.d05f1445f50e",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 335,
+    "line": 375,
     kind: 'lt-call'
   },
   {
@@ -12312,7 +12792,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d05f9eb05cfc",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 579,
+    "line": 619,
     kind: 'lt-call'
   },
   {
@@ -12368,8 +12848,16 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d14edf88db70",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 550,
+    "line": 589,
     kind: 'jsx-text'
+  },
+  {
+    "text": "BNB - Binance Coin",
+    "key": "literal.d18ad9fa655a",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 88,
+    kind: 'lt-call'
   },
   {
     "text": "Choose the plan that's right for your business.",
@@ -12400,7 +12888,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d2363790e1d3",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 144,
+    "line": 164,
     kind: 'toast'
   },
   {
@@ -12512,7 +13000,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d39a23d3dd34",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 672,
+    "line": 670,
     kind: 'lt-call'
   },
   {
@@ -12532,6 +13020,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "AED - UAE Dirham",
+    "key": "literal.d3e43a4a2bb5",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 78,
+    kind: 'lt-call'
+  },
+  {
     "text": "Medium",
     "key": "literal.d404968ea90b",
     namespace: 'literals',
@@ -12544,7 +13040,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d4160673e011",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 175,
+    "line": 173,
     kind: 'lt-call'
   },
   {
@@ -12616,7 +13112,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d5268bb38df6",
     namespace: 'literals',
     "file": "src/components/ui/currency-select.tsx",
-    "line": 124,
+    "line": 129,
     kind: 'lt-call'
   },
   {
@@ -12632,7 +13128,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d5662e1f34a3",
     namespace: 'literals',
     "file": "src/components/reports/financial-charts.tsx",
-    "line": 200,
+    "line": 210,
     kind: 'lt-call'
   },
   {
@@ -12648,7 +13144,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d60c045dd2f9",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 719,
+    "line": 587,
     kind: 'lt-call'
   },
   {
@@ -12672,7 +13168,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d65ded94286c",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 383,
+    "line": 422,
     kind: 'lt-call'
   },
   {
@@ -12800,7 +13296,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d87f47b47e4d",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 298,
+    "line": 304,
     kind: 'lt-call'
   },
   {
@@ -12880,7 +13376,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d9f289b5a7c0",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 160,
+    "line": 180,
     kind: 'toast'
   },
   {
@@ -12896,7 +13392,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.da1644fcd7c8",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1017,
+    "line": 1015,
     kind: 'lt-call'
   },
   {
@@ -12928,7 +13424,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.dac6206c2be9",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 292,
+    "line": 312,
     kind: 'lt-call'
   },
   {
@@ -12960,7 +13456,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.db2dff441f0d",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 448,
+    "line": 487,
     kind: 'lt-call'
   },
   {
@@ -12968,7 +13464,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.db335e4331a4",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 357,
+    "line": 395,
     kind: 'lt-call'
   },
   {
@@ -13032,7 +13528,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.dc3decbb9384",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 375,
+    "line": 414,
     kind: 'lt-call'
   },
   {
@@ -13076,6 +13572,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "ETH - Ethereum",
+    "key": "literal.dd24b6545423",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 86,
+    kind: 'lt-call'
+  },
+  {
     "text": "Product",
     "key": "literal.dd3b86d1ef21",
     namespace: 'literals',
@@ -13089,6 +13593,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 1246,
+    kind: 'lt-call'
+  },
+  {
+    "text": "EUR - Euro",
+    "key": "literal.dd8e746b9bcb",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 49,
     kind: 'lt-call'
   },
   {
@@ -13168,7 +13680,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.df3c02fcdc94",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1282,
+    "line": 1280,
     kind: 'lt-call'
   },
   {
@@ -13264,7 +13776,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e0b6d18790e6",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 1131,
+    "line": 1043,
     kind: 'lt-call'
   },
   {
@@ -13344,7 +13856,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e1d01b7764bf",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 1063,
+    "line": 1097,
     kind: 'ltvars-call'
   },
   {
@@ -13384,8 +13896,16 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e2ba60143f65",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 924,
+    "line": 922,
     kind: 'attr'
+  },
+  {
+    "text": "TRX - TRON",
+    "key": "literal.e2eb63d36cad",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 94,
+    kind: 'lt-call'
   },
   {
     "text": "Select at least one tenant",
@@ -13504,7 +14024,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e54ccf6e0322",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 589,
+    "line": 595,
     kind: 'lt-call'
   },
   {
@@ -13512,7 +14032,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e5549d032d78",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 669,
+    "line": 879,
     kind: 'lt-call'
   },
   {
@@ -13592,7 +14112,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e65531eded77",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 211,
+    "line": 231,
     kind: 'lt-call'
   },
   {
@@ -13632,7 +14152,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e70d76d0c89c",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 360,
+    "line": 380,
     kind: 'lt-call'
   },
   {
@@ -13688,7 +14208,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e8776ead0e14",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1272,
+    "line": 1270,
     kind: 'lt-call'
   },
   {
@@ -13760,7 +14280,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ea07380c1ffa",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 418,
+    "line": 424,
     kind: 'lt-call'
   },
   {
@@ -13864,7 +14384,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.eba488372b91",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 439,
+    "line": 478,
     kind: 'lt-call'
   },
   {
@@ -13876,19 +14396,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Fix Issues",
-    "key": "literal.ebdc3688224a",
-    namespace: 'literals',
-    "file": "src/components/transactions/transactions-list.tsx",
-    "line": 554,
-    kind: 'lt-call'
-  },
-  {
     "text": "Rotate Cron Secret",
     "key": "literal.ebddf993d372",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1131,
+    "line": 1129,
     kind: 'lt-call'
   },
   {
@@ -13936,7 +14448,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ec90c449a42c",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 953,
+    "line": 951,
     kind: 'lt-call'
   },
   {
@@ -13992,7 +14504,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ed28e0686e12",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 894,
+    "line": 892,
     kind: 'lt-call'
   },
   {
@@ -14008,7 +14520,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.edee5c2ced00",
     namespace: 'literals',
     "file": "src/components/reports/financial-charts.tsx",
-    "line": 229,
+    "line": 239,
     kind: 'lt-call'
   },
   {
@@ -14100,6 +14612,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "ADA - Cardano",
+    "key": "literal.ef9e3942e7ae",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 91,
+    kind: 'lt-call'
+  },
+  {
     "text": "acme-corp",
     "key": "literal.efafc1f74339",
     namespace: 'literals',
@@ -14120,7 +14640,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.efb576adfecf",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 756,
+    "line": 624,
     kind: 'lt-call'
   },
   {
@@ -14176,7 +14696,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f1201d71e0c2",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 686,
+    "line": 684,
     kind: 'lt-call'
   },
   {
@@ -14248,7 +14768,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f27e986cce1d",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 348,
+    "line": 346,
     kind: 'lt-call'
   },
   {
@@ -14288,7 +14808,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f354c94fcf63",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 845,
+    "line": 725,
     kind: 'lt-call'
   },
   {
@@ -14296,7 +14816,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f35aa228d5bc",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 1063,
+    "line": 1097,
     kind: 'ltvars-call'
   },
   {
@@ -14320,7 +14840,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f39b9a4a59a5",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 733,
+    "line": 731,
     kind: 'lt-call'
   },
   {
@@ -14408,7 +14928,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f46e1df2f851",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
-    "line": 661,
+    "line": 555,
     kind: 'lt-call'
   },
   {
@@ -14417,6 +14937,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/profile-settings.tsx",
     "line": 75,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Bank Transactions",
+    "key": "literal.f4c33f72ddac",
+    namespace: 'literals',
+    "file": "src/components/documents/documents-list.tsx",
+    "line": 986,
     kind: 'lt-call'
   },
   {
@@ -14472,7 +15000,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f6fdbe48dc54",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 316,
+    "line": 356,
     kind: 'lt-call'
   },
   {
@@ -14496,7 +15024,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f768cb2347de",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 546,
+    "line": 585,
     kind: 'jsx-text'
   },
   {
@@ -14580,6 +15108,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "KRW - South Korean Won",
+    "key": "literal.f892da4c56b9",
+    namespace: 'literals',
+    "file": "src/components/ui/currency-select.tsx",
+    "line": 59,
+    kind: 'lt-call'
+  },
+  {
     "text": "To comply with applicable law, lawful requests, or to protect rights and safety.",
     "key": "literal.f8e70136b12f",
     namespace: 'literals',
@@ -14600,7 +15136,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f8fd77daa9db",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 635,
+    "line": 633,
     kind: 'lt-call'
   },
   {
@@ -14608,7 +15144,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f908016d4cb9",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 958,
+    "line": 956,
     kind: 'attr'
   },
   {
@@ -14616,7 +15152,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f91a95108695",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 516,
+    "line": 555,
     kind: 'jsx-text'
   },
   {
@@ -14728,7 +15264,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fad1bcfe963d",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1196,
+    "line": 1194,
     kind: 'lt-call'
   },
   {
@@ -14744,7 +15280,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fb1bf3bed9a8",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
-    "line": 409,
+    "line": 448,
     kind: 'lt-call'
   },
   {
@@ -14760,7 +15296,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fb6cd61c9d1a",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 484,
+    "line": 524,
     kind: 'lt-call'
   },
   {
@@ -14912,7 +15448,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fe035157cda2",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 927,
+    "line": 925,
     kind: 'lt-call'
   },
   {
@@ -14992,7 +15528,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ff420b1aaf83",
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
-    "line": 271,
+    "line": 311,
     kind: 'lt-call'
   },
   {
@@ -15032,7 +15568,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ff9474b09846",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 945,
+    "line": 943,
     kind: 'lt-call'
   },
   {
@@ -15056,7 +15592,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fff5a7e212e9",
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
-    "line": 316,
+    "line": 322,
     kind: 'lt-call'
   }
 ]

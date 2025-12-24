@@ -43,28 +43,28 @@ export function FinancialCharts() {
 
       // Process Line Items
       tx.line_items.forEach((item: any) => {
-        const type = item.chart_of_accounts?.account_type
-        const name = item.chart_of_accounts?.name
-        
+        const type = item.chart_of_accounts?.account_type;
+        const name = item.chart_of_accounts?.name;
+
         if (type === 'REVENUE') {
-          trends[key].income += item.credit
+          trends[key].income += item.credit;
         } else if (type === 'EXPENSE') {
-          trends[key].expense += item.debit
-          
+          // For expenses, sum (debit - credit) to handle COGS and similar cases
+          const expenseAmount = (item.debit || 0) - (item.credit || 0);
+          trends[key].expense += expenseAmount;
+
           // Category Aggregation
           if (name) {
-            categories[name] = (categories[name] || 0) + item.debit
+            categories[name] = (categories[name] || 0) + expenseAmount;
           }
 
           // Vendor Aggregation (from linked document)
-          // Note: This assumes the expense line item is associated with the vendor on the document
-          // which is generally true for the whole transaction.
-          const vendorName = tx.documents?.document_data?.vendor_name || 'Uncategorized'
+          const vendorName = tx.documents?.document_data?.vendor_name || 'Uncategorized';
           if (vendorName) {
-            vendors[vendorName] = (vendors[vendorName] || 0) + item.debit
+            vendors[vendorName] = (vendors[vendorName] || 0) + expenseAmount;
           }
         }
-      })
+      });
     })
 
     // Format Trend Data
@@ -89,7 +89,7 @@ export function FinancialCharts() {
       .sort((a, b) => b.value - a.value)
       .slice(0, 10) // Top 10
     setVendorData(vendorArray)
-  }, [timeRange])
+  }, [timeRange, lt])
 
   const fetchData = useCallback(async () => {
     if (!tenantId) return
@@ -132,6 +132,15 @@ export function FinancialCharts() {
         .order('transaction_date')
 
       if (txError) throw txError
+
+
+      // Debug: Log the structure of fetched transactions and their line_items
+      console.log('Fetched transactions:', JSON.stringify(transactions, null, 2));
+      if (transactions && transactions.length > 0) {
+        transactions.forEach((tx, i) => {
+          console.log(`Transaction[${i}] id:`, tx.id, 'line_items:', tx.line_items);
+        });
+      }
 
       processData(transactions)
 
