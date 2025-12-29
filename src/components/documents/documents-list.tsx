@@ -933,18 +933,22 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                               ? docTypeLables[doc.document_type.toLowerCase()] || doc.document_type
                               : ''}
                           </span>
-                          <span className="hidden md:inline">•</span>
-                          <span className="capitalize">
-                            {transactionType
-                              ? transTypeLabels[transactionType.toLowerCase()] || transactionType
-                              : ''}
-                          </span>
-                          <span className="hidden md:inline">•</span>
-                          <span className="capitalize">
-                            {docData?.extracted_data?.total_amount != null
-                              ? '$' + docData.extracted_data.total_amount + ' ' + lt(currency)
-                              : ''}
-                          </span>
+                          {doc.document_type !== 'bank_statement' && (
+                            <>
+                              <span className="hidden md:inline">•</span>
+                              <span className="capitalize">
+                                {transactionType
+                                  ? transTypeLabels[transactionType.toLowerCase()] || transactionType
+                                  : ''}
+                              </span>
+                              <span className="hidden md:inline">•</span>
+                              <span className="capitalize">
+                                {docData?.extracted_data?.total_amount != null
+                                  ? '$' + docData.extracted_data.total_amount + ' ' + lt(currency)
+                                  : ''}
+                              </span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
