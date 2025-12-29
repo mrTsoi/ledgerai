@@ -898,7 +898,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h3 className="text-base font-medium truncate">{doc.file_name}</h3>
-                          {((doc.validation_status === 'NEEDS_REVIEW') || (Array.isArray(doc.validation_flags) && doc.validation_flags.length > 0)) && (
+                          {((doc.validation_status === 'NEEDS_REVIEW') && (Array.isArray(doc.validation_flags) && doc.validation_flags?.includes('DUPLICATE_DOCUMENT'))) && (
                             <div className="flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full" title={doc.validation_flags?.join(', ')}>
                               <AlertTriangle className="w-3 h-3" />
                               <span>
@@ -906,7 +906,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                               </span>
                             </div>
                           )}
-                          {((doc.validation_status === 'NEEDS_REVIEW') || (Array.isArray(doc.validation_flags) && doc.validation_flags.length > 0)) && (
+                          {((doc.validation_status === 'NEEDS_REVIEW') && (Array.isArray(doc.validation_flags) && doc.validation_flags?.includes('WRONG_TENANT'))) && (
                             <div className="flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full" title={doc.validation_flags?.join(', ')}>
                               <AlertTriangle className="w-3 h-3" />
                               <span>
@@ -914,11 +914,11 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                               </span>
                             </div>
                           )}
-                          {((doc.validation_status === 'NEEDS_REVIEW') || (Array.isArray(doc.validation_flags) && doc.validation_flags.length > 0)) && (
+                          {((doc.validation_status === 'NEEDS_REVIEW') && (Array.isArray(doc.validation_flags) && doc.validation_flags?.includes('REVIEW_NEEDED'))) && (
                             <div className="flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full" title={doc.validation_flags?.join(', ')}>
                               <AlertTriangle className="w-3 h-3" />
                               <span>
-                                {doc.validation_flags?.includes('Review Needed') ? ltVars('Review Needed') : ''} 
+                                {doc.validation_flags?.includes('REVIEW_NEEDED') ? ltVars('Review Needed') : ''} 
                               </span>
                             </div>
                           )}
@@ -941,7 +941,7 @@ export function DocumentsList({ onVerify, refreshKey }: Props) {
                           </span>
                           <span className="hidden md:inline">•</span>
                           <span className="capitalize">
-                            {docData.extracted_data
+                            {docData?.extracted_data?.total_amount != null
                               ? '$' + docData.extracted_data.total_amount + ' ' + lt(currency)
                               : ''}
                           </span>

@@ -1,4 +1,5 @@
 import { Link } from '@/i18n/navigation'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { getLt } from '@/lib/i18n/lt-server'
@@ -17,8 +18,8 @@ export default async function MarketingShell({
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-            {platform?.logo_url ? (
-              <img src={platform.logo_url} alt={platform?.name || 'Logo'} className="w-8 h-8 object-contain rounded-lg" />
+              {platform?.logo_url ? (
+                <Image src={platform.logo_url} alt={platform?.name || 'Logo'} className="w-8 h-8 object-contain rounded-lg" width={32} height={32} />
             ) : (
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">{(platform?.name && platform.name[0]) ? String(platform.name[0]).toUpperCase() : 'L'}</div>
             )}
@@ -51,7 +52,7 @@ export default async function MarketingShell({
             <div>
                 <div className="flex items-center gap-2 mb-4">
                 {platform?.logo_url ? (
-                  <img src={platform.logo_url} alt={platform?.name || 'Logo'} className="w-6 h-6 object-contain rounded" />
+                  <Image src={platform.logo_url} alt={platform?.name || 'Logo'} className="w-6 h-6 object-contain rounded" width={24} height={24} />
                 ) : (
                   <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">{(platform?.name && platform.name[0]) ? String(platform.name[0]).toUpperCase() : 'L'}</div>
                 )}

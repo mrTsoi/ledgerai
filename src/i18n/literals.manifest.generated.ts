@@ -84,6 +84,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Escalate",
+    "key": "literal.012bb11a52bc",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 596,
+    kind: 'lt-call'
+  },
+  {
     "text": "Search widgets…",
     "key": "literal.0158580d7bc2",
     namespace: 'literals',
@@ -145,6 +153,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
     "line": 55,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Resource",
+    "key": "literal.021493f340d3",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 537,
     kind: 'lt-call'
   },
   {
@@ -240,7 +256,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0424f6e7026f",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 231,
+    "line": 431,
     kind: 'jsx-text'
   },
   {
@@ -297,6 +313,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/ui/locale-select.tsx",
     "line": 211,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Failed to save platform settings",
+    "key": "literal.05ced827fa39",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 73,
     kind: 'lt-call'
   },
   {
@@ -416,7 +440,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.07cc8fa5666b",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 451,
+    "line": 492,
     kind: 'lt-call'
   },
   {
@@ -436,6 +460,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Monitor Enabled",
+    "key": "literal.07fd840ce9d0",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 93,
+    kind: 'lt-call'
+  },
+  {
     "text": "Your latest transactions and documents",
     "key": "literal.08566023b782",
     namespace: 'literals',
@@ -449,6 +481,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/reconciliation-feed.tsx",
     "line": 355,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Changes (diff)",
+    "key": "literal.0890622d73e8",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 551,
     kind: 'lt-call'
   },
   {
@@ -601,6 +641,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
     "line": 490,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Mark Reviewed",
+    "key": "literal.0b4134681324",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 588,
     kind: 'lt-call'
   },
   {
@@ -764,11 +812,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'jsx-text'
   },
   {
+    "text": "Open Bank Account",
+    "key": "literal.0dc4cda22846",
+    namespace: 'literals',
+    "file": "src/components/documents/verification-result-modal.tsx",
+    "line": 47,
+    kind: 'lt-call'
+  },
+  {
     "text": "Loading accounts...",
     "key": "literal.0ddf38607435",
     namespace: 'literals',
     "file": "src/components/banking/bank-account-list.tsx",
     "line": 71,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Open Transaction",
+    "key": "literal.0df1edef4a30",
+    namespace: 'literals',
+    "file": "src/components/documents/verification-result-modal.tsx",
+    "line": 59,
     kind: 'lt-call'
   },
   {
@@ -816,7 +880,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0e85749a6f40",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 813,
+    "line": 1080,
     kind: 'lt-call'
   },
   {
@@ -824,7 +888,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0eba875d5f96",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1318,
+    "line": 1319,
     kind: 'lt-call'
   },
   {
@@ -884,6 +948,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "If transactions need manual matching, open the Transactions view.",
+    "key": "literal.0fbbc5aa183b",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1174,
+    kind: 'lt-call'
+  },
+  {
     "text": "Enable/disable providers and control how many AI calls each provider can receive per month.",
     "key": "literal.0fe2ac82f9fe",
     namespace: 'literals',
@@ -912,7 +984,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.107d95fd4184",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1319,
+    "line": 1320,
     kind: 'lt-call'
   },
   {
@@ -968,8 +1040,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.11f51070cecf",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 233,
-    kind: 'jsx-text'
+    "line": 541,
+    kind: 'lt-call'
   },
   {
     "text": "error",
@@ -992,7 +1064,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.126eda8b2162",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 280,
+    "line": 321,
     kind: 'lt-call'
   },
   {
@@ -1001,6 +1073,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
     "line": 627,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Suspend failed",
+    "key": "literal.12ee332d1a53",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 406,
+    kind: 'lt-call'
+  },
+  {
+    "text": "View Statement",
+    "key": "literal.12ff7aa3df13",
+    namespace: 'literals',
+    "file": "src/components/documents/verification-result-modal.tsx",
+    "line": 53,
     kind: 'lt-call'
   },
   {
@@ -1088,7 +1176,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.14d3bca87284",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 575,
+    "line": 839,
     kind: 'lt-call'
   },
   {
@@ -1184,7 +1272,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.16e370aacb0e",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 737,
+    "line": 738,
     kind: 'lt-call'
   },
   {
@@ -1356,6 +1444,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Enable or disable the auto-monitor that can auto-suspend offenders.",
+    "key": "literal.196efbbd6163",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 98,
+    kind: 'lt-call'
+  },
+  {
     "text": "7. AI features",
     "key": "literal.1979dc1d3025",
     namespace: 'literals',
@@ -1369,6 +1465,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/transaction-match-modal.tsx",
     "line": 247,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Audit Log Details",
+    "key": "literal.19aa075cef2d",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 516,
     kind: 'lt-call'
   },
   {
@@ -1392,8 +1496,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.19eabc961735",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 228,
-    kind: 'jsx-text'
+    "line": 525,
+    kind: 'lt-call'
   },
   {
     "text": "Opening Balance",
@@ -1416,7 +1520,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1a3b73c79424",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 832,
+    "line": 833,
     kind: 'lt-call'
   },
   {
@@ -1456,7 +1560,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1b17517ffcc7",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 160,
+    "line": 324,
     kind: 'lt-call'
   },
   {
@@ -1465,6 +1569,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 1167,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Security Alerts",
+    "key": "literal.1b581185300f",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 385,
     kind: 'lt-call'
   },
   {
@@ -1480,7 +1592,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1bc64e73f436",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 993,
+    "line": 994,
     kind: 'lt-call'
   },
   {
@@ -1497,6 +1609,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/reconciliation-feed.tsx",
     "line": 617,
+    kind: 'lt-call'
+  },
+  {
+    "text": "AI Analysis Enabled",
+    "key": "literal.1c0e5259e4c5",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 114,
     kind: 'lt-call'
   },
   {
@@ -1520,7 +1640,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1c89b1f2aaab",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 644,
+    "line": 908,
     kind: 'lt-call'
   },
   {
@@ -1528,7 +1648,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1c9b088685fa",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 296,
+    "line": 337,
     kind: 'lt-call'
   },
   {
@@ -1577,6 +1697,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/terms/page.tsx",
     "line": 123,
+    kind: 'lt-call'
+  },
+  {
+    "text": "AI analysis failed",
+    "key": "literal.1de533aaa456",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 276,
     kind: 'lt-call'
   },
   {
@@ -1664,7 +1792,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1f0d8593ba6c",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 718,
+    "line": 719,
     kind: 'lt-call'
   },
   {
@@ -1724,6 +1852,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Run AI analysis to detect suspicious activity. Results appear below.",
+    "key": "literal.2048f1e13268",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 388,
+    kind: 'lt-call'
+  },
+  {
     "text": "No MFA factor found",
     "key": "literal.20552912034d",
     namespace: 'literals',
@@ -1768,7 +1904,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2090a8e8c5ce",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 804,
+    "line": 1071,
     kind: 'lt-call'
   },
   {
@@ -1824,7 +1960,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2167d62a155b",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 907,
+    "line": 908,
     kind: 'lt-call'
   },
   {
@@ -2000,7 +2136,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.23778b5f7eb2",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 221,
+    "line": 242,
     kind: 'lt-call'
   },
   {
@@ -2056,7 +2192,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.24a6191f274f",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 283,
+    "line": 491,
     kind: 'jsx-text'
   },
   {
@@ -2064,7 +2200,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.24ae35ccec77",
     namespace: 'literals',
     "file": "src/components/landing/marketing-shell.tsx",
-    "line": 116,
+    "line": 117,
     kind: 'lt-call'
   },
   {
@@ -2104,7 +2240,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.25221bac3ba0",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1459,
+    "line": 1460,
     kind: 'lt-call'
   },
   {
@@ -2208,7 +2344,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.26d7b218c9b5",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 933,
+    "line": 934,
     kind: 'lt-call'
   },
   {
@@ -2217,6 +2353,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/tenant-admin/tenant-admin-client.tsx",
     "line": 35,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Monitor Window (minutes)",
+    "key": "literal.2721274189da",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 108,
     kind: 'lt-call'
   },
   {
@@ -2244,6 +2388,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Next steps:",
+    "key": "literal.278174311ba0",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1171,
+    kind: 'lt-call'
+  },
+  {
     "text": "a new company",
     "key": "literal.2783c4577c78",
     namespace: 'literals',
@@ -2256,7 +2408,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.27aff7697af2",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 445,
+    "line": 486,
     kind: 'lt-call'
   },
   {
@@ -2328,7 +2480,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.291211ea65a9",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 774,
+    "line": 775,
     kind: 'lt-call'
   },
   {
@@ -2392,7 +2544,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.29ebc0bfb159",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 144,
+    "line": 145,
     kind: 'lt-call'
   },
   {
@@ -2472,7 +2624,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2b8c22e28dfb",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 806,
+    "line": 807,
     kind: 'lt-call'
   },
   {
@@ -2488,7 +2640,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2bb22b1a1b8e",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1011,
+    "line": 1012,
     kind: 'lt-call'
   },
   {
@@ -2528,7 +2680,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2c21f68832ba",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 622,
+    "line": 886,
     kind: 'lt-call'
   },
   {
@@ -2624,7 +2776,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2d6a9f52bc7e",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 383,
+    "line": 384,
     kind: 'jsx-text'
   },
   {
@@ -2768,7 +2920,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3091c8446f8d",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1084,
+    "line": 1085,
     kind: 'lt-call'
   },
   {
@@ -2792,7 +2944,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.30bda9e8d46d",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 428,
+    "line": 469,
     kind: 'lt-call'
   },
   {
@@ -2800,7 +2952,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.30beeb06ef87",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1034,
+    "line": 1035,
     kind: 'lt-call'
   },
   {
@@ -2832,7 +2984,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.31a42894cf99",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 884,
+    "line": 885,
     kind: 'lt-call'
   },
   {
@@ -2888,7 +3040,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.33355b1a25c9",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1515,
+    "line": 1516,
     kind: 'lt-call'
   },
   {
@@ -2960,7 +3112,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.33dcec9ce454",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1020,
+    "line": 1021,
     kind: 'lt-call'
   },
   {
@@ -3008,7 +3160,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.344c7ffc953f",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 131,
+    "line": 253,
     kind: 'lt-call'
   },
   {
@@ -3024,7 +3176,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.348555007d52",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 831,
+    "line": 1098,
     kind: 'lt-call'
   },
   {
@@ -3057,6 +3209,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 1332,
+    kind: 'lt-call'
+  },
+  {
+    "text": "IPs",
+    "key": "literal.351638d1aa1a",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 398,
     kind: 'lt-call'
   },
   {
@@ -3124,12 +3284,28 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Copy JSON",
+    "key": "literal.35db7b6e0480",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 580,
+    kind: 'lt-call'
+  },
+  {
     "text": "Mark this provider as the default for the platform. Tenants can still override it.",
     "key": "literal.35dd6a8a9215",
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
     "line": 547,
     kind: 'lt-call'
+  },
+  {
+    "text": "; actions: Record",
+    "key": "literal.3608c8ccf1f8",
+    namespace: 'literals',
+    "file": "src/app/api/security/ai-analyze/route.ts",
+    "line": 57,
+    kind: 'jsx-text'
   },
   {
     "text": "Learn about SSO",
@@ -3240,7 +3416,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.378cbbf54cbb",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 402,
+    "line": 403,
     kind: 'lt-call'
   },
   {
@@ -3249,6 +3425,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/security-settings.tsx",
     "line": 150,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Verification Result",
+    "key": "literal.38019a273dd1",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1149,
     kind: 'lt-call'
   },
   {
@@ -3352,7 +3536,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3949324018da",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1422,
+    "line": 1423,
     kind: 'lt-call'
   },
   {
@@ -3512,7 +3696,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3b18e8e33250",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1233,
+    "line": 1234,
     kind: 'lt-call'
   },
   {
@@ -3544,7 +3728,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3b4e29469356",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 930,
+    "line": 931,
     kind: 'lt-call'
   },
   {
@@ -3816,7 +4000,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3fdd49b3a146",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1404,
+    "line": 1405,
     kind: 'lt-call'
   },
   {
@@ -3912,7 +4096,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.419221d5d7ee",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 462,
+    "line": 463,
     kind: 'lt-call'
   },
   {
@@ -3968,7 +4152,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.434d40e2c2a4",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1281,
+    "line": 1282,
     kind: 'lt-call'
   },
   {
@@ -4072,7 +4256,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.44ee5d8f08e9",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 630,
+    "line": 894,
     kind: 'lt-call'
   },
   {
@@ -4088,7 +4272,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.45775f88d571",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 292,
+    "line": 333,
     kind: 'lt-call'
   },
   {
@@ -4112,7 +4296,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.45a2370a0026",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1481,
+    "line": 1482,
     kind: 'lt-call'
   },
   {
@@ -4120,7 +4304,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.45a293979ce2",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1256,
+    "line": 1257,
     kind: 'lt-call'
   },
   {
@@ -4128,7 +4312,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.45c0e2551b03",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 971,
+    "line": 972,
     kind: 'lt-call'
   },
   {
@@ -4140,11 +4324,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Copy IDs",
+    "key": "literal.45dd74f2a1e7",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1186,
+    kind: 'lt-call'
+  },
+  {
     "text": "Normal",
     "key": "literal.45e118d0563e",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1021,
+    "line": 1022,
     kind: 'lt-call'
   },
   {
@@ -4156,11 +4348,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Bank statement created/updated: {id}",
+    "key": "literal.462a549c31fd",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1159,
+    kind: 'ltvars-call'
+  },
+  {
     "text": "Automated sync",
     "key": "literal.4637b6f77d76",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 442,
+    "line": 483,
     kind: 'lt-call'
   },
   {
@@ -4200,7 +4400,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4686c9229a93",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 232,
+    "line": 432,
     kind: 'jsx-text'
   },
   {
@@ -4308,6 +4508,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Monitor Threshold",
+    "key": "literal.4835c01616fe",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 102,
+    kind: 'lt-call'
+  },
+  {
     "text": "AI is analyzing matches...",
     "key": "literal.48815002c07a",
     namespace: 'literals',
@@ -4321,6 +4529,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/subscription-management.tsx",
     "line": 205,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Score",
+    "key": "literal.489f4877244a",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 398,
     kind: 'lt-call'
   },
   {
@@ -4344,7 +4560,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.490aaabf32fb",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 842,
+    "line": 1109,
     kind: 'lt-call'
   },
   {
@@ -4416,7 +4632,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4a6c11ab8104",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1004,
+    "line": 1005,
     kind: 'lt-call'
   },
   {
@@ -4457,6 +4673,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
     "line": 334,
+    kind: 'lt-call'
+  },
+  {
+    "text": "No bank account was found or created; transactions are not linked to a bank account.",
+    "key": "literal.4b13227f2bc9",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1156,
     kind: 'lt-call'
   },
   {
@@ -4568,7 +4792,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4d7395bae54b",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 293,
+    "line": 501,
     kind: 'jsx-text'
   },
   {
@@ -4592,7 +4816,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4dba3be550bc",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 718,
+    "line": 985,
     kind: 'lt-call'
   },
   {
@@ -4600,7 +4824,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4decdfc809ee",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1372,
+    "line": 1373,
     kind: 'lt-call'
   },
   {
@@ -4656,7 +4880,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4e275ec1fcf1",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 591,
+    "line": 855,
     kind: 'lt-call'
   },
   {
@@ -4736,7 +4960,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4ee85a626ff6",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 280,
+    "line": 321,
     kind: 'lt-call'
   },
   {
@@ -4880,7 +5104,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.50e19fda0d5b",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1423,
+    "line": 1424,
     kind: 'lt-call'
   },
   {
@@ -4956,6 +5180,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Unchanged",
+    "key": "literal.51ed65113221",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 568,
+    kind: 'lt-call'
+  },
+  {
     "text": "After confirming, log in to complete your subscription payment if required.",
     "key": "literal.5209f938055a",
     namespace: 'literals',
@@ -4976,7 +5208,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.526752f49c29",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 859,
+    "line": 860,
     kind: 'lt-call'
   },
   {
@@ -4984,7 +5216,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.527a11223495",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1541,
+    "line": 1542,
     kind: 'lt-call'
   },
   {
@@ -5232,7 +5464,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5655ec9958fc",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1469,
+    "line": 1470,
     kind: 'lt-call'
   },
   {
@@ -5256,7 +5488,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5697fd85adbd",
     namespace: 'literals',
     "file": "src/app/[locale]/admin/page.tsx",
-    "line": 47,
+    "line": 48,
     kind: 'jsx-text'
   },
   {
@@ -5280,7 +5512,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.56e3badc4e6c",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 139,
+    "line": 261,
     kind: 'lt-call'
   },
   {
@@ -5288,7 +5520,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5755f9ac0aa1",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 143,
+    "line": 265,
     kind: 'lt-call'
   },
   {
@@ -5320,7 +5552,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.57f2b181d0a5",
     namespace: 'literals',
     "file": "src/app/[locale]/admin/page.tsx",
-    "line": 46,
+    "line": 47,
     kind: 'jsx-text'
   },
   {
@@ -5344,7 +5576,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.582ddcec60d2",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1298,
+    "line": 1299,
     kind: 'lt-call'
   },
   {
@@ -5480,7 +5712,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5a7fa39b49f9",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 835,
+    "line": 1102,
     kind: 'lt-call'
   },
   {
@@ -5568,7 +5800,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5c0d5a0565bd",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 913,
+    "line": 914,
     kind: 'lt-call'
   },
   {
@@ -5600,7 +5832,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5c3ed2ca1ae7",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 116,
+    "line": 117,
     kind: 'lt-call'
   },
   {
@@ -5688,7 +5920,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5d34275a94b6",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 268,
+    "line": 309,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Missing required data",
+    "key": "literal.5d431a30947e",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1209,
     kind: 'lt-call'
   },
   {
@@ -5720,7 +5960,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5da7f04ce2e1",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 899,
+    "line": 900,
     kind: 'lt-call'
   },
   {
@@ -5816,7 +6056,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5ecda73b3839",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 892,
+    "line": 1263,
     kind: 'lt-call'
   },
   {
@@ -5832,7 +6072,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5ee8dd2f7d4b",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 808,
+    "line": 1075,
     kind: 'lt-call'
   },
   {
@@ -5980,6 +6220,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'jsx-text'
   },
   {
+    "text": "How far back (minutes) the AI analysis scans logs by default.",
+    "key": "literal.61425db33734",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 125,
+    kind: 'lt-call'
+  },
+  {
     "text": "Download to View",
     "key": "literal.617f0258aa44",
     namespace: 'literals',
@@ -6100,6 +6348,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Transaction updated/created: {id}",
+    "key": "literal.63d0c668d290",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1165,
+    kind: 'ltvars-call'
+  },
+  {
     "text": "Platform administration",
     "key": "literal.63d28eb7496f",
     namespace: 'literals',
@@ -6208,7 +6464,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.65b0291f3073",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 987,
+    "line": 988,
     kind: 'lt-call'
   },
   {
@@ -6236,11 +6492,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Fill required fields",
+    "key": "literal.65fc4281e711",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1216,
+    kind: 'lt-call'
+  },
+  {
     "text": "No transactions extracted",
     "key": "literal.660ee18d5af7",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 795,
+    "line": 1062,
     kind: 'lt-call'
   },
   {
@@ -6308,6 +6572,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Marked as reviewed",
+    "key": "literal.6707d783bddd",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 584,
+    kind: 'lt-call'
+  },
+  {
     "text": "IDR - Indonesian Rupiah",
     "key": "literal.6713330658af",
     namespace: 'literals',
@@ -6352,7 +6624,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.67d6aeab4f2c",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 464,
+    "line": 465,
     kind: 'lt-call'
   },
   {
@@ -6460,6 +6732,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'ltvars-call'
   },
   {
+    "text": "View structured metadata and changes for this audit log entry.",
+    "key": "literal.6959cc989c0e",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 518,
+    kind: 'lt-call'
+  },
+  {
     "text": "colleague@example.com",
     "key": "literal.69770ce25503",
     namespace: 'literals',
@@ -6556,6 +6836,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Derived from first transaction",
+    "key": "literal.6aab689b0f9c",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 940,
+    kind: 'lt-call'
+  },
+  {
     "text": "Security review, monitoring, backups, and performance optimizations for large tenants.",
     "key": "literal.6aabc7def3c6",
     namespace: 'literals',
@@ -6596,11 +6884,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Force Save",
+    "key": "literal.6b34d3e015a9",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1217,
+    kind: 'lt-call'
+  },
+  {
     "text": "Transaction Type",
     "key": "literal.6b57efc44822",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 637,
+    "line": 901,
     kind: 'lt-call'
   },
   {
@@ -6608,7 +6904,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6b68e9797399",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1005,
+    "line": 1006,
     kind: 'lt-call'
   },
   {
@@ -6616,7 +6912,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6b6e1c99daf7",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 357,
+    "line": 358,
     kind: 'lt-call'
   },
   {
@@ -6680,7 +6976,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6c158ab2b9dc",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 302,
+    "line": 343,
     kind: 'lt-call'
   },
   {
@@ -6848,7 +7144,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6e6a6f2086bb",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 632,
+    "line": 896,
     kind: 'lt-call'
   },
   {
@@ -6857,6 +7153,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/dashboard/dashboard-layout.tsx",
     "line": 604,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Minimum risk score to produce alerts.",
+    "key": "literal.6e82bf87aa24",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 131,
     kind: 'lt-call'
   },
   {
@@ -6888,7 +7192,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6eef6648406c",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1006,
+    "line": 1007,
     kind: 'lt-call'
   },
   {
@@ -7072,7 +7376,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.71edaf7caca4",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 310,
+    "line": 351,
     kind: 'lt-call'
   },
   {
@@ -7184,7 +7488,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.74cd95ac6cbd",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 988,
+    "line": 989,
     kind: 'lt-call'
   },
   {
@@ -7304,7 +7608,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7703a0d7aff5",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 794,
+    "line": 795,
     kind: 'lt-call'
   },
   {
@@ -7352,7 +7656,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.77634af5a340",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 631,
+    "line": 895,
     kind: 'lt-call'
   },
   {
@@ -7360,7 +7664,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.77ab157ba3d4",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 389,
+    "line": 430,
     kind: 'lt-call'
   },
   {
@@ -7584,7 +7888,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7bf726ceaa9f",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1276,
+    "line": 1277,
     kind: 'lt-call'
   },
   {
@@ -7640,7 +7944,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7cd45b9c3aba",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 986,
+    "line": 987,
     kind: 'lt-call'
   },
   {
@@ -7712,7 +8016,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7d44bc449c2a",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 929,
+    "line": 930,
     kind: 'lt-call'
   },
   {
@@ -7720,7 +8024,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7d588115b7be",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 908,
+    "line": 909,
     kind: 'lt-call'
   },
   {
@@ -7752,7 +8056,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7dc4d59d18e1",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 241,
+    "line": 282,
     kind: 'lt-call'
   },
   {
@@ -7808,7 +8112,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7eae163c8e91",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 319,
+    "line": 360,
     kind: 'lt-call'
   },
   {
@@ -7824,7 +8128,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7ebf8a01b732",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1277,
+    "line": 1278,
     kind: 'lt-call'
   },
   {
@@ -7864,7 +8168,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8042432166b8",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 977,
+    "line": 978,
     kind: 'lt-call'
   },
   {
@@ -7968,7 +8272,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8175e3aaa166",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 872,
+    "line": 873,
     kind: 'lt-call'
   },
   {
@@ -8008,7 +8312,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.82b80ff85e22",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 437,
+    "line": 478,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Monitor run failed",
+    "key": "literal.82be69b51be8",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 296,
     kind: 'lt-call'
   },
   {
@@ -8080,7 +8392,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.83b1f1b3673b",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 710,
+    "line": 977,
     kind: 'ltvars-call'
   },
   {
@@ -8104,7 +8416,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.83fce8327410",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 813,
+    "line": 814,
     kind: 'lt-call'
   },
   {
@@ -8128,7 +8440,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.84b147812589",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 191,
+    "line": 355,
     kind: 'lt-call'
   },
   {
@@ -8153,6 +8465,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/tenant/create-tenant-modal.tsx",
     "line": 87,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Configure automated monitoring and AI analysis thresholds for the platform.",
+    "key": "literal.8541585d5cdb",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 88,
     kind: 'lt-call'
   },
   {
@@ -8208,7 +8528,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.85fbaf17cc58",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 665,
+    "line": 929,
     kind: 'lt-call'
   },
   {
@@ -8224,7 +8544,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.861b14cba741",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 590,
+    "line": 854,
     kind: 'lt-call'
   },
   {
@@ -8256,7 +8576,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.86dc610c18a0",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1473,
+    "line": 1474,
     kind: 'lt-call'
   },
   {
@@ -8368,7 +8688,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.89836a870e44",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 309,
+    "line": 350,
     kind: 'lt-call'
   },
   {
@@ -8464,7 +8784,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8a95442757be",
     namespace: 'literals',
     "file": "src/app/[locale]/admin/page.tsx",
-    "line": 48,
+    "line": 49,
     kind: 'jsx-text'
   },
   {
@@ -8480,7 +8800,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8aa57de6dce6",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 234,
+    "line": 434,
     kind: 'jsx-text'
   },
   {
@@ -8488,7 +8808,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8ad8302d110b",
     namespace: 'literals',
     "file": "src/app/[locale]/admin/page.tsx",
-    "line": 51,
+    "line": 52,
     kind: 'jsx-text'
   },
   {
@@ -8504,7 +8824,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8b014ac160d4",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 649,
+    "line": 650,
     kind: 'lt-call'
   },
   {
@@ -8684,6 +9004,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Run Monitor",
+    "key": "literal.8d181588014d",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 307,
+    kind: 'lt-call'
+  },
+  {
     "text": "Expenses",
     "key": "literal.8d437dbf95ab",
     namespace: 'literals',
@@ -8712,7 +9040,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8db6a2f1d3b7",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1022,
+    "line": 1023,
     kind: 'lt-call'
   },
   {
@@ -8736,7 +9064,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8dec5d0b0683",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 900,
+    "line": 901,
     kind: 'lt-call'
   },
   {
@@ -8753,6 +9081,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 1253,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Copied",
+    "key": "literal.8e3df45a49db",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 409,
     kind: 'lt-call'
   },
   {
@@ -8776,7 +9112,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8eae50dc7eba",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 454,
+    "line": 495,
     kind: 'lt-call'
   },
   {
@@ -8808,7 +9144,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8f813e0cd409",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1035,
+    "line": 1036,
     kind: 'lt-call'
   },
   {
@@ -8896,7 +9232,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.901e5b56d888",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 888,
+    "line": 889,
     kind: 'lt-call'
   },
   {
@@ -8904,7 +9240,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.902c91d94e0f",
     namespace: 'literals',
     "file": "src/components/landing/marketing-shell.tsx",
-    "line": 100,
+    "line": 101,
     kind: 'lt-call'
   },
   {
@@ -8912,7 +9248,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.902f1999fb9b",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 174,
+    "line": 338,
     kind: 'lt-call'
   },
   {
@@ -8932,11 +9268,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Bank account created/linked: {id}",
+    "key": "literal.9066a072fc6a",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1154,
+    kind: 'ltvars-call'
+  },
+  {
     "text": "The Service is provided “as is” and “as available.” We do not warrant that the Service will be uninterrupted, error-free, or that outputs (including AI outputs) will be accurate or complete.",
     "key": "literal.906c9326c585",
     namespace: 'literals',
     "file": "src/app/[locale]/terms/page.tsx",
     "line": 105,
+    kind: 'lt-call'
+  },
+  {
+    "text": "View Details",
+    "key": "literal.907b3bee2778",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 477,
     kind: 'lt-call'
   },
   {
@@ -9104,7 +9456,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.922e100333b0",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 972,
+    "line": 973,
     kind: 'lt-call'
   },
   {
@@ -9136,7 +9488,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.933bf21afdd5",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 932,
+    "line": 933,
     kind: 'lt-call'
   },
   {
@@ -9192,7 +9544,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9488c12731a2",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 454,
+    "line": 495,
     kind: 'lt-call'
   },
   {
@@ -9201,6 +9553,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
     "line": 363,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Time window (minutes) for the threshold count.",
+    "key": "literal.9510795642db",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 110,
     kind: 'lt-call'
   },
   {
@@ -9280,7 +9640,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.96e578211aa2",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 153,
+    "line": 317,
     kind: 'lt-call'
   },
   {
@@ -9320,7 +9680,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.97c89a4d6630",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 167,
+    "line": 331,
     kind: 'lt-call'
   },
   {
@@ -9352,7 +9712,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9850bceda64f",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 347,
+    "line": 388,
     kind: 'lt-call'
   },
   {
@@ -9416,7 +9776,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.991984af065f",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1290,
+    "line": 1291,
     kind: 'lt-call'
   },
   {
@@ -9472,7 +9832,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.99df9752b0b4",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 940,
+    "line": 941,
     kind: 'lt-call'
   },
   {
@@ -9488,7 +9848,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9a37ce58d57a",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1060,
+    "line": 1061,
     kind: 'lt-call'
   },
   {
@@ -9536,7 +9896,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9ad0b261fdd1",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 165,
+    "line": 186,
     kind: 'lt-call'
   },
   {
@@ -9576,7 +9936,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9b33e083f7a4",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 813,
+    "line": 1080,
     kind: 'lt-call'
   },
   {
@@ -9640,7 +10000,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9be083d9d123",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 119,
+    "line": 120,
     kind: 'lt-call'
   },
   {
@@ -9688,7 +10048,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9ca43b04c3d2",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 301,
+    "line": 342,
     kind: 'lt-call'
   },
   {
@@ -9704,7 +10064,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9cf604589e71",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 577,
+    "line": 578,
     kind: 'lt-call'
   },
   {
@@ -9736,7 +10096,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9d7ab1a55796",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 181,
+    "line": 345,
     kind: 'lt-call'
   },
   {
@@ -9944,8 +10304,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9f8a2389a20c",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 229,
-    kind: 'jsx-text'
+    "line": 529,
+    kind: 'lt-call'
   },
   {
     "text": "View revenue and expenses for a period",
@@ -10008,7 +10368,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a0db8e68b834",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 643,
+    "line": 907,
     kind: 'lt-call'
   },
   {
@@ -10024,7 +10384,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a124947cbd2d",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1225,
+    "line": 1226,
     kind: 'lt-call'
   },
   {
@@ -10160,7 +10520,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a30ab5673e62",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1355,
+    "line": 1356,
     kind: 'lt-call'
   },
   {
@@ -10168,7 +10528,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a330193e7ec3",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 410,
+    "line": 451,
     kind: 'lt-call'
   },
   {
@@ -10220,6 +10580,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Copied IDs to clipboard",
+    "key": "literal.a3ae416c2c7f",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1182,
+    kind: 'lt-call'
+  },
+  {
     "text": "Category",
     "key": "literal.a3c686e711e4",
     namespace: 'literals',
@@ -10232,7 +10600,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a3c8a3190fa4",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 397,
+    "line": 438,
     kind: 'lt-call'
   },
   {
@@ -10241,6 +10609,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/cookies/page.tsx",
     "line": 13,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Enable or disable periodic AI analysis of audit logs.",
+    "key": "literal.a4225dd8042f",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 119,
     kind: 'lt-call'
   },
   {
@@ -10352,7 +10728,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a62da9010119",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1266,
+    "line": 1267,
     kind: 'lt-call'
   },
   {
@@ -10360,7 +10736,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a645f1d5e0b5",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 140,
+    "line": 141,
     kind: 'lt-call'
   },
   {
@@ -10384,7 +10760,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a6c2d09a48fe",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1204,
+    "line": 1205,
     kind: 'lt-call'
   },
   {
@@ -10608,7 +10984,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a92eeba0b871",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 217,
+    "line": 238,
     kind: 'lt-call'
   },
   {
@@ -10625,6 +11001,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
     "line": 467,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Review the Bank Account and Bank Statement pages to match transactions.",
+    "key": "literal.a996c071cb1f",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1173,
     kind: 'lt-call'
   },
   {
@@ -10688,7 +11072,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ab29c739e487",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 477,
+    "line": 741,
     kind: 'lt-call'
   },
   {
@@ -10720,7 +11104,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ab8ecd3f8fec",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 171,
+    "line": 192,
     kind: 'lt-call'
   },
   {
@@ -10776,7 +11160,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ac5f6ef30720",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1307,
+    "line": 1308,
     kind: 'lt-call'
   },
   {
@@ -10808,7 +11192,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ad0d0603e2aa",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 676,
+    "line": 677,
     kind: 'lt-call'
   },
   {
@@ -10896,7 +11280,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.af1f9dbe697b",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 229,
+    "line": 250,
     kind: 'lt-call'
   },
   {
@@ -10916,11 +11300,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Copy",
+    "key": "literal.af74f7c5362a",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 409,
+    kind: 'lt-call'
+  },
+  {
     "text": "Bounce",
     "key": "literal.af7ed27586b5",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1003,
+    "line": 1004,
     kind: 'lt-call'
   },
   {
@@ -10945,6 +11337,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/reports/financial-charts.tsx",
     "line": 209,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Escalated",
+    "key": "literal.aff666f44e05",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 592,
     kind: 'lt-call'
   },
   {
@@ -11048,7 +11448,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b0f47aaf773c",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 840,
+    "line": 841,
     kind: 'lt-call'
   },
   {
@@ -11080,7 +11480,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b1a5954a483f",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1227,
+    "line": 1228,
     kind: 'lt-call'
   },
   {
@@ -11105,6 +11505,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/landing/pricing-section.tsx",
     "line": 113,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Suspend",
+    "key": "literal.b24247fb5a9d",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 408,
     kind: 'lt-call'
   },
   {
@@ -11176,7 +11584,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b2fbd6294692",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 133,
+    "line": 255,
     kind: 'lt-call'
   },
   {
@@ -11184,7 +11592,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b30b6eb73538",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 342,
+    "line": 343,
     kind: 'lt-call'
   },
   {
@@ -11240,7 +11648,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b3cc660b9187",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1002,
+    "line": 1003,
     kind: 'lt-call'
   },
   {
@@ -11248,7 +11656,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b3cc6cc8bb3e",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 652,
+    "line": 653,
     kind: 'lt-call'
   },
   {
@@ -11448,8 +11856,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b59fc9013be1",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 275,
-    kind: 'toast'
+    "line": 483,
+    kind: 'lt-call'
   },
   {
     "text": "Visible Metrics",
@@ -11484,6 +11892,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Removed",
+    "key": "literal.b5e77c5c02a9",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 560,
+    kind: 'lt-call'
+  },
+  {
     "text": "Tip: Use",
     "key": "literal.b5ed25593231",
     namespace: 'literals',
@@ -11496,7 +11912,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b60fba97eace",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 795,
+    "line": 796,
     kind: 'lt-call'
   },
   {
@@ -11540,11 +11956,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Added",
+    "key": "literal.b68734c25910",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 556,
+    kind: 'lt-call'
+  },
+  {
     "text": "Cron secret rotated",
     "key": "literal.b6d769e4dd73",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
     "line": 320,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Derived from last transaction",
+    "key": "literal.b6db932f8b6e",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 970,
     kind: 'lt-call'
   },
   {
@@ -11592,7 +12024,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b749f7b860b5",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 818,
+    "line": 819,
     kind: 'lt-call'
   },
   {
@@ -11640,7 +12072,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b80ba544702b",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 566,
+    "line": 830,
     kind: 'lt-call'
   },
   {
@@ -11839,8 +12271,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Unknown",
     "key": "literal.bc7819b34ff8",
     namespace: 'literals',
-    "file": "src/components/admin/user-subscription-list.tsx",
-    "line": 157,
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 530,
     kind: 'lt-call'
   },
   {
@@ -11880,7 +12312,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.bce06414177f",
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
-    "line": 157,
+    "line": 321,
     kind: 'lt-call'
   },
   {
@@ -11922,6 +12354,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/documents/documents-list.tsx",
     "line": 474,
     kind: 'ltvars-call'
+  },
+  {
+    "text": "Security Monitoring",
+    "key": "literal.bd86dcc2d5f6",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 86,
+    kind: 'lt-call'
   },
   {
     "text": "Verify All",
@@ -12056,7 +12496,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.bf8af6662772",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1061,
+    "line": 1062,
     kind: 'lt-call'
   },
   {
@@ -12064,7 +12504,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.bfaab6e5bc79",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 529,
+    "line": 530,
     kind: 'toast'
   },
   {
@@ -12208,7 +12648,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c1c17de2fd01",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 876,
+    "line": 877,
     kind: 'lt-call'
   },
   {
@@ -12304,7 +12744,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c3b5bba174e9",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1173,
+    "line": 1174,
     kind: 'lt-call'
   },
   {
@@ -12388,6 +12828,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Events",
+    "key": "literal.c5497bca5846",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 398,
+    kind: 'lt-call'
+  },
+  {
     "text": "Created {company} and moved",
     "key": "literal.c549a15a35e3",
     namespace: 'literals',
@@ -12424,7 +12872,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c61966d0bd57",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1104,
+    "line": 1105,
     kind: 'lt-call'
   },
   {
@@ -12512,7 +12960,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c74759aced22",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1391,
+    "line": 1392,
     kind: 'lt-call'
   },
   {
@@ -12536,7 +12984,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c778b95d258f",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 586,
+    "line": 850,
     kind: 'lt-call'
   },
   {
@@ -12592,7 +13040,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c85112ad5f3b",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 445,
+    "line": 486,
     kind: 'lt-call'
   },
   {
@@ -12600,7 +13048,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c887b9d3b390",
     namespace: 'literals',
     "file": "src/components/landing/marketing-shell.tsx",
-    "line": 85,
+    "line": 86,
     kind: 'lt-call'
   },
   {
@@ -12704,7 +13152,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c99149af4413",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1029,
+    "line": 1030,
     kind: 'lt-call'
   },
   {
@@ -12777,6 +13225,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
     "line": 1046,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Changed",
+    "key": "literal.cb5424f67784",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 564,
     kind: 'lt-call'
   },
   {
@@ -12968,7 +13424,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.cf1c85adba54",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 962,
+    "line": 963,
     kind: 'lt-call'
   },
   {
@@ -12992,7 +13448,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.cf3c61f9f33a",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 448,
+    "line": 489,
     kind: 'lt-call'
   },
   {
@@ -13288,7 +13744,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d297068e09e4",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1302,
+    "line": 1303,
     kind: 'lt-call'
   },
   {
@@ -13305,6 +13761,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/features/page.tsx",
     "line": 64,
+    kind: 'lt-call'
+  },
+  {
+    "text": "AI analysis completed",
+    "key": "literal.d2fa7fa4cf68",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 274,
     kind: 'lt-call'
   },
   {
@@ -13368,7 +13832,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d3dcce7d1024",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 920,
+    "line": 921,
     kind: 'lt-call'
   },
   {
@@ -13472,7 +13936,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d50745fd0bd8",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 381,
+    "line": 422,
     kind: 'lt-call'
   },
   {
@@ -13500,11 +13964,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "AI Since (minutes)",
+    "key": "literal.d566f95cea11",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 123,
+    kind: 'lt-call'
+  },
+  {
     "text": "Example: Target SMEs in Hong Kong. Emphasize multi-tenant, automation, compliance, and real-time reporting.",
     "key": "literal.d594e91fa43e",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1531,
+    "line": 1532,
     kind: 'lt-call'
   },
   {
@@ -13520,7 +13992,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d6212ad6d9d5",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1102,
+    "line": 1103,
     kind: 'lt-call'
   },
   {
@@ -13640,7 +14112,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d7f0ac9e0072",
     namespace: 'literals',
     "file": "src/app/[locale]/admin/page.tsx",
-    "line": 54,
+    "line": 56,
     kind: 'jsx-text'
   },
   {
@@ -13672,7 +14144,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d8858cd5ad6a",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 955,
+    "line": 956,
     kind: 'lt-call'
   },
   {
@@ -13728,7 +14200,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d96159ff30af",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 418,
+    "line": 654,
     kind: 'lt-call'
   },
   {
@@ -13752,7 +14224,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.da14931c098c",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 862,
+    "line": 1129,
     kind: 'lt-call'
   },
   {
@@ -13956,11 +14428,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "{count} transaction(s) inserted",
+    "key": "literal.dd3aed127c5e",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1162,
+    kind: 'ltvars-call'
+  },
+  {
     "text": "Product",
     "key": "literal.dd3b86d1ef21",
     namespace: 'literals',
     "file": "src/components/landing/marketing-shell.tsx",
-    "line": 64,
+    "line": 65,
     kind: 'lt-call'
   },
   {
@@ -14016,7 +14496,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ddb76c42fc17",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 307,
+    "line": 308,
     kind: 'lt-call'
   },
   {
@@ -14032,7 +14512,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ddcd2f2e783a",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 931,
+    "line": 932,
     kind: 'lt-call'
   },
   {
@@ -14044,6 +14524,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Number of cross-tenant attempts in window to consider offending.",
+    "key": "literal.ddefb6c7543e",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 104,
+    kind: 'lt-call'
+  },
+  {
     "text": "Save Policy",
     "key": "literal.de525bf255ed",
     namespace: 'literals',
@@ -14052,11 +14540,27 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "The following required fields are missing:",
+    "key": "literal.df01f82fa1f1",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1231,
+    kind: 'lt-call'
+  },
+  {
     "text": "Enabled",
     "key": "literal.df174a3f2faa",
     namespace: 'literals',
-    "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 476,
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 95,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Run AI Analysis",
+    "key": "literal.df274991e7dd",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 286,
     kind: 'lt-call'
   },
   {
@@ -14200,7 +14704,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e119a95c9e3d",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 307,
+    "line": 308,
     kind: 'lt-call'
   },
   {
@@ -14352,7 +14856,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e41c880e7067",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 361,
+    "line": 402,
     kind: 'lt-call'
   },
   {
@@ -14369,6 +14873,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/ai-provider-management.tsx",
     "line": 513,
+    kind: 'lt-call'
+  },
+  {
+    "text": "AI Score Cutoff",
+    "key": "literal.e4d1da73962f",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 129,
     kind: 'lt-call'
   },
   {
@@ -14448,7 +14960,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e560c48929c7",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 311,
+    "line": 352,
     kind: 'lt-call'
   },
   {
@@ -14456,7 +14968,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e5803fe8a6bf",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 277,
+    "line": 318,
     kind: 'lt-call'
   },
   {
@@ -14466,6 +14978,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/admin/translation-management.tsx",
     "line": 816,
     kind: 'toast'
+  },
+  {
+    "text": "No alerts",
+    "key": "literal.e5d64448e543",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 392,
+    kind: 'lt-call'
   },
   {
     "text": "Get in touch with our team to discuss a custom plan for your organization.",
@@ -14479,9 +14999,9 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Processing",
     "key": "literal.e63451d3cf90",
     namespace: 'literals',
-    "file": "src/app/[locale]/admin/page.tsx",
-    "line": 53,
-    kind: 'jsx-text'
+    "file": "src/app/[locale]/dashboard/page.tsx",
+    "line": 863,
+    kind: 'lt-call'
   },
   {
     "text": "AI Analysis",
@@ -14528,7 +15048,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e6ce8c62b634",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1482,
+    "line": 1483,
     kind: 'lt-call'
   },
   {
@@ -14616,7 +15136,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e8b6b74756c2",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 448,
+    "line": 489,
     kind: 'lt-call'
   },
   {
@@ -14640,7 +15160,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e963907dac5c",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1445,
+    "line": 1446,
     kind: 'lt-call'
   },
   {
@@ -14721,6 +15241,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
     "line": 1187,
+    kind: 'jsx-text'
+  },
+  {
+    "text": ", bankTransactions: Array",
+    "key": "literal.eae4cff6d03e",
+    namespace: 'literals',
+    "file": "src/lib/validation/documentValidation.ts",
+    "line": 7,
     kind: 'jsx-text'
   },
   {
@@ -14920,7 +15448,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.edce5f22ed9e",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 153,
+    "line": 154,
     kind: 'lt-call'
   },
   {
@@ -15024,8 +15552,16 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ef4ca5e4018d",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 270,
+    "line": 311,
     kind: 'lt-call'
+  },
+  {
+    "text": "Transaction status: {status}",
+    "key": "literal.ef80fd21a111",
+    namespace: 'literals',
+    "file": "src/components/documents/document-verification-modal.tsx",
+    "line": 1168,
+    kind: 'ltvars-call'
   },
   {
     "text": "ADA - Cardano",
@@ -15064,7 +15600,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.efc007a393f6",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 417,
+    "line": 458,
     kind: 'lt-call'
   },
   {
@@ -15097,6 +15633,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/landing/pricing-section.tsx",
     "line": 277,
+    kind: 'lt-call'
+  },
+  {
+    "text": "User suspended",
+    "key": "literal.f06dce467529",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 406,
     kind: 'lt-call'
   },
   {
@@ -15144,7 +15688,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f1fbb2b43dca",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 299,
+    "line": 300,
     kind: 'lt-call'
   },
   {
@@ -15248,7 +15792,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f3949318dfd0",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 442,
+    "line": 483,
     kind: 'lt-call'
   },
   {
@@ -15288,7 +15832,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f3cfe045fed8",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1285,
+    "line": 1286,
     kind: 'lt-call'
   },
   {
@@ -15308,11 +15852,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Recorded at",
+    "key": "literal.f3eade06e8f3",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 545,
+    kind: 'lt-call'
+  },
+  {
     "text": "Keep this URL secret.",
     "key": "literal.f427fe091d1b",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 293,
+    "line": 334,
     kind: 'lt-call'
   },
   {
@@ -15328,7 +15880,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f440f18d388d",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 296,
+    "line": 337,
     kind: 'lt-call'
   },
   {
@@ -15361,6 +15913,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
     "line": 1023,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Disabled",
+    "key": "literal.f4f4473df8cb",
+    namespace: 'literals',
+    "file": "src/components/admin/security-settings.tsx",
+    "line": 96,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Monitor run completed",
+    "key": "literal.f502a790409a",
+    namespace: 'literals',
+    "file": "src/components/admin/audit-log-viewer.tsx",
+    "line": 294,
     kind: 'lt-call'
   },
   {
@@ -15408,7 +15976,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f69d037a962c",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 715,
+    "line": 716,
     kind: 'lt-call'
   },
   {
@@ -15416,7 +15984,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f6ce3b6fcfca",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 629,
+    "line": 893,
     kind: 'lt-call'
   },
   {
@@ -15472,7 +16040,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f7c400ed695f",
     namespace: 'literals',
     "file": "src/components/landing/marketing-shell.tsx",
-    "line": 37,
+    "line": 38,
     kind: 'lt-call'
   },
   {
@@ -15480,7 +16048,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f7c509495888",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 778,
+    "line": 779,
     kind: 'lt-call'
   },
   {
@@ -15608,7 +16176,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f9c79cac1618",
     namespace: 'literals',
     "file": "src/app/[locale]/admin/page.tsx",
-    "line": 52,
+    "line": 53,
     kind: 'jsx-text'
   },
   {
@@ -15632,7 +16200,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f9f1f0a51870",
     namespace: 'literals',
     "file": "src/components/landing/marketing-shell.tsx",
-    "line": 60,
+    "line": 61,
     kind: 'lt-call'
   },
   {
@@ -15640,7 +16208,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f9f38818c406",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 628,
+    "line": 892,
     kind: 'lt-call'
   },
   {
@@ -15680,7 +16248,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fa7517b6b6b0",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 284,
+    "line": 325,
     kind: 'lt-call'
   },
   {
@@ -15800,7 +16368,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fc45f9b7a9a6",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1524,
+    "line": 1525,
     kind: 'lt-call'
   },
   {
@@ -15848,7 +16416,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fd81dee7d7e8",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 660,
+    "line": 661,
     kind: 'lt-call'
   },
   {
@@ -15896,7 +16464,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fe26f2daeee6",
     namespace: 'literals',
     "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 602,
+    "line": 866,
     kind: 'lt-call'
   },
   {
@@ -15936,7 +16504,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fe73d79fdc84",
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
-    "line": 1254,
+    "line": 1255,
     kind: 'lt-call'
   },
   {

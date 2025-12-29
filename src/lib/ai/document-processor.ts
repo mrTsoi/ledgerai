@@ -47,6 +47,7 @@ interface ExtractedData {
     date: string
     description: string
     amount: number
+    balance?: number
     type: 'DEBIT' | 'CREDIT'
   }>
   confidence_score?: number // Added for AI confidence
@@ -1449,6 +1450,10 @@ export class AIProcessingService {
         - "date" (YYYY-MM-DD)
         - "description" (string)
         - "amount" (number, absolute value)
+        - Preferably extract the per-line "balance" (number) or "running_balance" if present on the statement.
+          - Provide "balance" as the account running balance after the transaction (number, no separators).
+          - Acceptable keys: "balance", "running_balance", "runningBalance". If multiple exist, return a "balance" field.
+          - If the statement lists only individual amounts and an opening balance, include the per-line running balances computed by the AI when possible (but if not available, the platform will compute them from opening_balance as a fallback).
         - "type" ("DEBIT" for withdrawals/fees, "CREDIT" for deposits/interest)
       - NOTE: For bank statements, "customer_name" and "vendor_name" are usually NOT applicable. Do not hallucinate them.
       
@@ -1660,8 +1665,25 @@ export class AIProcessingService {
       data.bank_transactions = data.bank_transactions.map((tx: any) => ({
         ...tx,
         amount: cleanNumber(tx.amount) || 0,
+        balance: cleanNumber(tx.balance ?? tx.running_balance ?? tx.runningBalance) ?? null,
         date: cleanDate(tx.date)
       }))
+    }
+
+    // If opening_balance is present and transactions lack per-line balances,
+    // compute running balances so downstream logic can use them to derive
+    // statement opening/closing balances. We compute forward using opening_balance.
+    if (data.bank_transactions && Array.isArray(data.bank_transactions) && (typeof data.opening_balance !== 'undefined' && data.opening_balance !== null)) {
+      let running = cleanNumber(data.opening_balance) || 0
+      data.bank_transactions = data.bank_transactions.map((tx: any) => {
+        // If the tx already has a balance, keep it
+        if (typeof tx.balance !== 'undefined' && tx.balance !== null) return tx
+        // Apply transaction: CREDIT increases balance, DEBIT decreases
+        const amt = cleanNumber(tx.amount) || 0
+        if (tx.type === 'CREDIT') running = Number((running + amt).toFixed(2))
+        else running = Number((running - amt).toFixed(2))
+        return { ...tx, balance: running }
+      })
     }
     
     return data
@@ -1821,18 +1843,37 @@ export class AIProcessingService {
         }
       }
 
+      // derive sensible fallbacks for missing statement-level data from
+      // bank transaction line items: first item -> start/opening, last -> end/closing
+      // Derive statement-level values from transactions when missing
+      const { default: deriveStatementFromTransactions } = await import('@/lib/documents/statement-derivation')
+      const txs = extractedData.bank_transactions || []
+      const derived = deriveStatementFromTransactions({
+        statement_period_start: extractedData.statement_period_start,
+        statement_period_end: extractedData.statement_period_end,
+        opening_balance: extractedData.opening_balance,
+        closing_balance: extractedData.closing_balance
+      }, txs)
+
+      const startDateToUse = derived.statement_period_start
+      const endDateToUse = derived.statement_period_end
+      const derivedOpeningBalance = derived.opening_balance
+      const derivedClosingBalance = derived.closing_balance
+
+      // Use derived values when updating/creating statements below
+      
       if (existingStatement) {
         // Update existing statement
         const { error: updateError } = await supabase
           .from('bank_statements')
           .update({
-            bank_account_id: bankAccountId || existingStatement.bank_account_id, // Update link if found
+            bank_account_id: bankAccountId || existingStatement.bank_account_id,
             statement_date: extractedData.statement_period_end || new Date().toISOString().split('T')[0],
-            start_date: extractedData.statement_period_start,
-            end_date: extractedData.statement_period_end,
-            opening_balance: extractedData.opening_balance,
-            closing_balance: extractedData.closing_balance,
-            status: 'PROCESSED' // Update status to PROCESSED
+            start_date: startDateToUse || existingStatement.start_date || null,
+            end_date: endDateToUse || existingStatement.end_date || null,
+            opening_balance: derivedOpeningBalance ?? existingStatement.opening_balance ?? null,
+            closing_balance: derivedClosingBalance ?? existingStatement.closing_balance ?? null,
+            status: 'PROCESSED'
           })
           .eq('id', statementId)
 
@@ -1863,10 +1904,10 @@ export class AIProcessingService {
             document_id: document.id,
             bank_account_id: bankAccountId, // Link if found
             statement_date: extractedData.statement_period_end || new Date().toISOString().split('T')[0],
-            start_date: extractedData.statement_period_start,
-            end_date: extractedData.statement_period_end,
-            opening_balance: extractedData.opening_balance,
-            closing_balance: extractedData.closing_balance,
+            start_date: startDateToUse,
+            end_date: endDateToUse,
+            opening_balance: derivedOpeningBalance ?? null,
+            closing_balance: derivedClosingBalance ?? null,
             status: 'IMPORTED'
           })
           .select()

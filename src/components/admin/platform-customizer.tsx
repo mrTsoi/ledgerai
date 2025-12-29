@@ -15,6 +15,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { toast } from 'sonner'
 import { Check, ChevronsUpDown, Loader2, Save, Bot, Sparkles, MessageSquare, Mic, Send, X, Minimize2, Maximize2, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 import { useLiterals } from '@/hooks/use-literals'
 import { locales as SUPPORTED_LOCALES } from '@/i18n/navigation'
 
@@ -813,7 +814,7 @@ export function PlatformCustomizer() {
           <Label>{lt('Logo')}</Label>
           <div className="flex items-center gap-2">
             {(config as any).platform?.logo_url ? (
-              <img src={(config as any).platform.logo_url} alt={lt('Logo')} className="h-10 w-24 object-contain border" />
+              <Image src={(config as any).platform.logo_url} alt={lt('Logo')} className="h-10 w-24 object-contain border" width={96} height={40} />
             ) : (
               <div className="h-10 w-24 bg-gray-100 flex items-center justify-center text-xs text-gray-400 border">{lt('No logo')}</div>
             )}
@@ -840,7 +841,7 @@ export function PlatformCustomizer() {
             <Label>{lt('Favicon')}</Label>
             <div className="flex items-center gap-2">
               {(config as any).platform?.favicon_url ? (
-                <img src={(config as any).platform?.favicon_url} alt={lt('Favicon')} className="h-6 w-6 object-contain border" />
+                <Image src={(config as any).platform?.favicon_url} alt={lt('Favicon')} className="h-6 w-6 object-contain border" width={24} height={24} />
               ) : (
                 <div className="h-6 w-6 bg-gray-100 flex items-center justify-center text-xs text-gray-400 border">ICO</div>
               )}
@@ -873,7 +874,7 @@ export function PlatformCustomizer() {
           <div className="mt-2">
             {(config as any).platform?.logo_url ? (
               <a href={(config as any).platform.logo_url} target="_blank" rel="noreferrer">
-                <img src={(config as any).platform.logo_url} alt={lt('Logo Preview')} className="h-20 w-48 object-contain border" />
+                <Image src={(config as any).platform.logo_url} alt={lt('Logo Preview')} className="h-20 w-48 object-contain border" width={192} height={80} />
               </a>
             ) : (
               <div className="h-20 w-48 bg-gray-100 flex items-center justify-center text-xs text-gray-400 border">{lt('No logo')}</div>
@@ -885,7 +886,7 @@ export function PlatformCustomizer() {
           <div className="mt-2">
             {(config as any).platform?.favicon_url ? (
               <a href={(config as any).platform.favicon_url} target="_blank" rel="noreferrer">
-                <img src={(config as any).platform.favicon_url} alt={lt('Favicon Preview')} className="h-10 w-10 object-contain border" />
+                <Image src={(config as any).platform.favicon_url} alt={lt('Favicon Preview')} className="h-10 w-10 object-contain border" width={40} height={40} />
               </a>
             ) : (
               <div className="h-10 w-10 bg-gray-100 flex items-center justify-center text-xs text-gray-400 border">ICO</div>

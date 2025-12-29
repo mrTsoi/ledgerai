@@ -25,6 +25,11 @@ Returns JSON with the following fields:
     - Document was flagged as `WRONG_TENANT` and no automatic tenant correction was applied.
   - UI should surface a review flow or an explicit "Create Transaction" override when `recordsCreated:false`.
 
+  Per-line Balances (Bank Statements)
+  - For bank statements the AI extraction should, where possible, include a per-line `balance` for each `bank_transactions` entry.
+  - Preferred field names: `balance`, `running_balance`, or `runningBalance`. The value should be the account running balance after the transaction (number, no locale separators).
+  - If the AI cannot extract per-line balances but the document shows an `opening_balance`, the processor will compute running balances from the opening balance as a fallback. However, extracting per-line balances in AI output improves accuracy and reduces reliance on heuristics.
+
 Notes
 
 - The endpoint requires an authenticated user who is a member of the document's tenant and with AI automation feature access.

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function usePlatform() {
@@ -8,7 +8,7 @@ export default function usePlatform() {
   const [platform, setPlatform] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true)
     try {
       const { data, error } = await supabase
@@ -35,11 +35,11 @@ export default function usePlatform() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
 
   useEffect(() => {
     load()
-  }, [])
+  }, [load])
 
   return { platform, loading, reload: load }
 }
