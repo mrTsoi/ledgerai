@@ -3,9 +3,12 @@ import { DashboardPreview } from '@/components/landing/dashboard-preview'
 import { getLt } from '@/lib/i18n/lt-server'
 import { Link } from '@/i18n/navigation'
 import { Button } from '@/components/ui/button'
+import { getPublicPlatformAppearance } from '@/lib/platform-appearance/public'
 
 export default async function DemoPage() {
   const lt = await getLt()
+  const appearance = await getPublicPlatformAppearance()
+  const name = (appearance as any)?.platform?.name || 'LedgerAI'
 
   return (
     <MarketingShell>
@@ -14,7 +17,7 @@ export default async function DemoPage() {
           <div className="max-w-3xl">
             <h1 className="text-4xl font-bold tracking-tight text-gray-900">{lt('Product Demo')}</h1>
             <p className="mt-4 text-lg text-gray-600">
-              {lt('Explore the dashboard experience and see how LedgerAI brings documents, transactions, and reporting into one workflow.')}
+              {lt('Explore the dashboard experience and see how LedgerAI brings documents, transactions, and reporting into one workflow.').replace(/LedgerAI/g, name)}
             </p>
             <div className="mt-6 flex gap-3">
               <Link href="/signup">

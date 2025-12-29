@@ -21,7 +21,7 @@ import { uploadDocumentViaApi } from '@/lib/uploads/upload-document-client'
 
 export function OnboardingView() {
   const lt = useLiterals()
-  const { refreshTenants } = useTenant()
+  const { refreshTenants, switchTenant } = useTenant()
   const { subscription, loading: subLoading, refreshSubscription } = useSubscription()
   const [isDragging, setIsDragging] = useState(false)
   const [uploadFile, setUploadFile] = useState<File | null>(null)
@@ -205,6 +205,14 @@ export function OnboardingView() {
       setShowNameDialog(false)
       setUploadFile(null)
       
+      // Switch to the newly created tenant immediately so UI updates
+      if (tenantId) {
+        try {
+          switchTenant(tenantId)
+        } catch (e) {
+          // ignore
+        }
+      }
       await refreshSubscription()
       await refreshTenants()
       

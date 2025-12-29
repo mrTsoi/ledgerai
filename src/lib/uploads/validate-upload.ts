@@ -1,4 +1,4 @@
-export type UploadKind = 'pdf' | 'jpeg' | 'png' | 'webp' | 'xls' | 'xlsx' | 'csv'
+export type UploadKind = 'pdf' | 'jpeg' | 'png' | 'webp' | 'xls' | 'xlsx' | 'csv' | 'ico'
 
 export type UploadValidationOk = {
   ok: true
@@ -16,13 +16,15 @@ export type UploadValidationError = {
 
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024 // 50MB
 
-const EXT_ALLOWLIST = new Set<UploadKind>(['pdf', 'jpeg', 'png', 'webp', 'xls', 'xlsx', 'csv'])
+const EXT_ALLOWLIST = new Set<UploadKind>(['pdf', 'jpeg', 'png', 'webp', 'xls', 'xlsx', 'csv', 'ico'])
 
 const MIME_ALLOWLIST = new Set<string>([
   'application/pdf',
   'image/jpeg',
   'image/png',
   'image/webp',
+  'image/x-icon',
+  'image/vnd.microsoft.icon',
   'application/vnd.ms-excel',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'text/csv',
@@ -74,6 +76,11 @@ function sniffKind(bytes: Buffer): { kind: UploadKind; canonicalMime: string; ca
   // WEBP: RIFF....WEBP
   if (bytes.length >= 12 && bytes.toString('ascii', 0, 4) === 'RIFF' && bytes.toString('ascii', 8, 12) === 'WEBP') {
     return { kind: 'webp', canonicalMime: 'image/webp', canonicalExt: 'webp' }
+  }
+
+  // ICO: header 00 00 01 00 (or CUR 00 00 02 00)
+  if (bufStartsWith(bytes, [0x00, 0x00, 0x01, 0x00])) {
+    return { kind: 'ico', canonicalMime: 'image/x-icon', canonicalExt: 'ico' }
   }
 
   // XLS (OLE CF)
@@ -154,6 +161,8 @@ export function validateUploadBytes(input: {
     if (ext && ext !== 'xlsx') return { ok: false, error: 'Only .xlsx is allowed for spreadsheet ZIP files' }
   } else if (sniffed.kind === 'csv') {
     if (ext && ext !== 'csv') return { ok: false, error: 'Only .csv is allowed for CSV uploads' }
+  } else if (sniffed.kind === 'ico') {
+    if (ext && ext !== 'ico') return { ok: false, error: 'File extension does not match ICO content' }
   } else {
     if (ext && ext !== sniffed.canonicalExt) return { ok: false, error: 'File extension does not match file content' }
   }
@@ -164,6 +173,7 @@ export function validateUploadBytes(input: {
       sniffed.canonicalMime,
       // Common browser variants
       sniffed.kind === 'jpeg' ? 'image/jpg' : '',
+      sniffed.kind === 'ico' ? 'image/vnd.microsoft.icon' : '',
       sniffed.kind === 'csv' ? 'text/plain' : '',
       sniffed.kind === 'csv' ? 'application/csv' : '',
     ].filter(Boolean))

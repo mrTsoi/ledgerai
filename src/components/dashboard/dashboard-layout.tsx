@@ -52,6 +52,7 @@ import {
 } from "@/components/ui/popover"
 
 import { CreateTenantModal } from '@/components/tenant/create-tenant-modal'
+import usePlatform from '@/hooks/use-platform'
 
 interface NavItem {
   name: string
@@ -87,6 +88,7 @@ export default function DashboardLayout({
   const [dashboardSelectedTemplateKey, setDashboardSelectedTemplateKey] = useState<string | null>(null)
   const [dashboardLayout, setDashboardLayout] = useState<any>(null)
   const [isCustomizing, setIsCustomizing] = useState(false)
+  const { platform } = usePlatform()
 
   const canPublishTenantDashboard = userRole === 'COMPANY_ADMIN' || userRole === 'SUPER_ADMIN'
 
@@ -427,7 +429,7 @@ export default function DashboardLayout({
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <h1 className="text-xl font-bold text-gray-900">{lt('LedgerAI')}</h1>
+            <h1 className="text-xl font-bold text-gray-900">{platform?.name || lt('LedgerAI')}</h1>
             <button
               onClick={() => setSidebarOpen(false)}
               className="lg:hidden"

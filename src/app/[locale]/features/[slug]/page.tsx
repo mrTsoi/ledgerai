@@ -88,6 +88,8 @@ export default async function FeatureDetailPage({
   if (!featureKey) notFound()
 
   const lt = await getLt()
+  const appearance = await (await import('@/lib/platform-appearance/public')).getPublicPlatformAppearance()
+  const name = (appearance as any)?.platform?.name || 'LedgerAI'
   const content = FEATURE_CONTENT[featureKey]
 
   const plans = await getActiveSubscriptionPlans()
@@ -101,7 +103,7 @@ export default async function FeatureDetailPage({
           <div className="max-w-3xl">
             <div className="text-sm text-gray-500">{lt('Feature')}</div>
             <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-900">{lt(getFeatureLabel(featureKey))}</h1>
-            <p className="mt-4 text-lg text-gray-600">{lt(content.overview)}</p>
+            <p className="mt-4 text-lg text-gray-600">{lt(content.overview).replace(/LedgerAI/g, name)}</p>
 
             <div className="mt-6 flex gap-3">
               <Link href="/pricing">

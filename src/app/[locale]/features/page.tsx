@@ -22,6 +22,7 @@ const FEATURE_SUMMARIES: Record<string, string> = {
 export default async function FeaturesPage() {
   const lt = await getLt()
   const appearance = await getPublicPlatformAppearance()
+  const name = (appearance as any)?.platform?.name || 'LedgerAI'
   const landing = appearance?.landing_page
   const plans = await getActiveSubscriptionPlans()
 
@@ -38,7 +39,7 @@ export default async function FeaturesPage() {
           <div className="max-w-3xl">
             <h1 className="text-4xl font-bold tracking-tight text-gray-900 motion-safe:animate-in motion-safe:fade-in">{lt('Features')}</h1>
             <p className="mt-4 text-lg text-gray-600 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2">
-              {lt('LedgerAI combines multi-tenant accounting workflows with subscription-based advanced automation. Explore what each capability does and where it lives in the product.')}
+              {lt('LedgerAI combines multi-tenant accounting workflows with subscription-based advanced automation. Explore what each capability does and where it lives in the product.').replace(/LedgerAI/g, name)}
             </p>
             <div className="mt-6 flex gap-3">
               <Link href="/pricing">

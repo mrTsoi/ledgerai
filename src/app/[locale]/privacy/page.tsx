@@ -1,8 +1,11 @@
 import MarketingShell from '@/components/landing/marketing-shell'
 import { getLt } from '@/lib/i18n/lt-server'
+import { getPublicPlatformAppearance } from '@/lib/platform-appearance/public'
 
 export default async function PrivacyPage() {
   const lt = await getLt()
+  const appearance = await getPublicPlatformAppearance()
+  const name = (appearance as any)?.platform?.name || 'LedgerAI'
 
   return (
     <MarketingShell>
@@ -23,10 +26,10 @@ export default async function PrivacyPage() {
               <section className="space-y-3">
                 <h2 className="text-xl font-semibold text-gray-900">{lt('1. Who we are')}</h2>
                 <p className="text-gray-600">
-                  {lt('LedgerAI (“we”, “us”, “our”) is operated by SophieSoft Company Limited and provides a multi-tenant accounting platform that helps users manage financial workflows, documents, and reporting.')}
+                  {lt('LedgerAI (“we”, “us”, “our”) is operated by SophieSoft Company Limited and provides a multi-tenant accounting platform that helps users manage financial workflows, documents, and reporting.').replace(/LedgerAI/g, name)}
                 </p>
                 <p className="text-gray-600">
-                  {lt('In many deployments, LedgerAI is operated by an organization (for example, an accounting firm or a company) that invites users and configures tenants. That organization may act as the data controller for your account and tenant data.')}
+                  {lt('In many deployments, LedgerAI is operated by an organization (for example, an accounting firm or a company) that invites users and configures tenants. That organization may act as the data controller for your account and tenant data.').replace(/LedgerAI/g, name)}
                 </p>
               </section>
 

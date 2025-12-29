@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import { Check, ChevronsUpDown, Loader2, Save, Bot, Sparkles, MessageSquare, Mic, Send, X, Minimize2, Maximize2, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useLiterals } from '@/hooks/use-literals'
+import { locales as SUPPORTED_LOCALES } from '@/i18n/navigation'
 
 interface PlatformConfig {
   chatbot: {
@@ -47,6 +48,12 @@ interface PlatformConfig {
   }
 }
 
+interface PlatformMeta {
+  name?: string
+  logo_url?: string
+  favicon_url?: string
+}
+
 const DEFAULT_CONFIG: PlatformConfig = {
   chatbot: {
     welcome_message: "Hi! I'm your LedgerAI Assistant. How can I help you today?",
@@ -75,6 +82,13 @@ const DEFAULT_CONFIG: PlatformConfig = {
     hero_rotation_seconds: 12,
     hero_media: []
   }
+}
+
+// Extend default with platform metadata
+const DEFAULT_PLATFORM: PlatformMeta = {
+  name: 'LedgerAI',
+  logo_url: '',
+  favicon_url: ''
 }
 
 function ChatbotPreview({ config }: { config: PlatformConfig }) {
@@ -285,6 +299,8 @@ function ChatbotPreview({ config }: { config: PlatformConfig }) {
         {lt('Preview')}
       </div>
 
+      
+
       {voiceEnabled ? (
         <div className="absolute top-4 right-4 z-20">
           <Button type="button" variant="outline" size="sm" onClick={isSpeaking ? stop : play}>
@@ -350,6 +366,14 @@ function ChatbotPreview({ config }: { config: PlatformConfig }) {
   )
 }
 
+function formatLocaleLabel(locale: string) {
+  if (locale === 'zh-CN') return 'Simplified Chinese'
+  if (locale === 'zh-HK') return 'Traditional Chinese (Hong Kong)'
+  if (locale === 'zh-TW') return 'Traditional Chinese (Taiwan)'
+  if (locale === 'en') return 'English'
+  return locale
+}
+
 function LandingPagePreview({ config }: { config: PlatformConfig }) {
   const lt = useLiterals()
 
@@ -392,12 +416,17 @@ function LandingPagePreview({ config }: { config: PlatformConfig }) {
 
 export function PlatformCustomizer() {
   const lt = useLiterals()
-  const [config, setConfig] = useState<PlatformConfig>(DEFAULT_CONFIG)
+  const [config, setConfig] = useState<PlatformConfig & { platform?: PlatformMeta }>({
+    ...DEFAULT_CONFIG,
+    platform: DEFAULT_PLATFORM,
+  } as any)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [aiBrief, setAiBrief] = useState('')
   const [aiGenerating, setAiGenerating] = useState(false)
   const [chatbotTranslating, setChatbotTranslating] = useState(false)
+  const [selectedLocales, setSelectedLocales] = useState<string[]>(['zh-CN', 'zh-HK'])
+  const [isTranslating, setIsTranslating] = useState(false)
   const [heroUploadFile, setHeroUploadFile] = useState<File | null>(null)
   const [heroUploading, setHeroUploading] = useState(false)
   const supabase = useMemo(() => createClient(), [])
@@ -462,6 +491,49 @@ export function PlatformCustomizer() {
     }
   }, [])
 
+  const handleAiTranslate = useCallback(async () => {
+    if (!selectedLocales || selectedLocales.length === 0) {
+      toast('Select at least one locale to translate')
+      return
+    }
+
+    const texts: Array<{ id?: string; text: string }> = []
+    if (config.landing_page.hero_badge) texts.push({ id: 'hero_badge', text: config.landing_page.hero_badge })
+    if (config.landing_page.hero_title) texts.push({ id: 'hero_title', text: config.landing_page.hero_title })
+    if (config.landing_page.hero_title_highlight) texts.push({ id: 'hero_title_highlight', text: config.landing_page.hero_title_highlight })
+    if (config.landing_page.hero_subtitle) texts.push({ id: 'hero_subtitle', text: config.landing_page.hero_subtitle })
+
+    if (texts.length === 0) {
+      toast('No landing texts to translate')
+      return
+    }
+
+    try {
+      setIsTranslating(true)
+      toast('Translating with AI...')
+
+      const res = await fetch('/api/admin/chatbot/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sourceLocale: 'en', targetLocales: selectedLocales, items: texts, persist: true }),
+      })
+
+      const json = await res.json()
+      if (!res.ok || json?.error) {
+        const msg = json?.error || 'AI translation failed'
+        toast.error(String(msg))
+        setIsTranslating(false)
+        return
+      }
+
+      toast.success('Translations saved')
+    } catch (e: any) {
+      toast.error(String(e?.message ?? 'Translation failed'))
+    } finally {
+      setIsTranslating(false)
+    }
+  }, [config.landing_page, selectedLocales])
+
   const loadSettings = useCallback(async () => {
     try {
       setLoading(true)
@@ -479,7 +551,7 @@ export function PlatformCustomizer() {
           try { return JSON.parse(raw) as PlatformConfig } catch { return undefined }
         })() : (raw as PlatformConfig | undefined)
         // Deep merge with default config to ensure new fields are present
-        setConfig({
+        const merged = {
           ...DEFAULT_CONFIG,
           ...(loadedConfig || {}),
           chatbot: {
@@ -491,8 +563,14 @@ export function PlatformCustomizer() {
               ...DEFAULT_CONFIG.landing_page,
               ...((loadedConfig && loadedConfig.landing_page) || {}),
             })
+          },
+          platform: {
+            ...DEFAULT_PLATFORM,
+            ...((loadedConfig as any)?.platform || {})
           }
-        })
+        }
+
+        setConfig(merged as any)
       }
     } catch (error) {
       console.error('Error loading settings:', error)
@@ -509,19 +587,65 @@ export function PlatformCustomizer() {
   const handleSave = async () => {
     try {
       setSaving(true)
+      // Read existing value for audit log
+      let oldVal: any = null
+      try {
+        const { data: existing } = await supabase
+          .from('system_settings')
+          .select('setting_value')
+          .eq('setting_key', 'platform_appearance')
+          .single()
+        const rawOld = (existing as any)?.setting_value
+        if (rawOld) {
+          try { oldVal = typeof rawOld === 'string' ? JSON.parse(rawOld) : rawOld } catch { oldVal = rawOld }
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      const cfgPlatform = (config as any).platform || {}
+      const mergedPlatform = {
+        // preserve existing values where user didn't provide new ones (logo/favicon)
+        ...(oldVal?.platform || {}),
+        // always allow name to be set to empty if provided
+        name: cfgPlatform.name !== undefined ? cfgPlatform.name : (oldVal?.platform?.name || DEFAULT_PLATFORM.name),
+        // only override logo/favicon when a non-empty value is present
+        logo_url: cfgPlatform.logo_url && String(cfgPlatform.logo_url).trim() !== '' ? cfgPlatform.logo_url : (oldVal?.platform?.logo_url || ''),
+        favicon_url: cfgPlatform.favicon_url && String(cfgPlatform.favicon_url).trim() !== '' ? cfgPlatform.favicon_url : (oldVal?.platform?.favicon_url || ''),
+      }
+
+      const payload = {
+        setting_key: 'platform_appearance',
+        setting_value: {
+          ...config,
+          landing_page: normalizeLanding(config.landing_page),
+          platform: mergedPlatform,
+        } as any,
+        description: 'Configuration for platform appearance including chatbot, landing page and platform metadata',
+        is_public: true
+      }
+
       const { error } = await (supabase
         .from('system_settings') as any)
-        .upsert({
-          setting_key: 'platform_appearance',
-          setting_value: {
-            ...config,
-            landing_page: normalizeLanding(config.landing_page),
-          } as any,
-          description: 'Configuration for platform appearance including chatbot and landing page',
-          is_public: true
-        }, { onConflict: 'setting_key' })
+        .upsert(payload, { onConflict: 'setting_key' })
 
       if (error) throw error
+
+      // Insert audit log for platform appearance change
+      try {
+        await supabase.rpc('create_audit_log', {
+          p_tenant_id: null,
+          p_action: 'UPDATE',
+          p_resource_type: 'system_settings',
+          p_resource_id: null,
+          p_old_data: oldVal,
+          p_new_data: payload.setting_value,
+        })
+      } catch (e) {
+        // non-fatal
+        console.warn('Failed to create audit log for platform_appearance', e)
+      }
+
       toast.success(lt('Settings saved successfully'))
     } catch (error) {
       console.error('Error saving settings:', error)
@@ -558,9 +682,41 @@ export function PlatformCustomizer() {
 
       const next = [...(config.landing_page.hero_media || [])]
       next.push({ type: 'video', url })
-      setConfig({ ...config, landing_page: { ...config.landing_page, hero_media: next } })
-      setHeroUploadFile(null)
-      toast.success(lt('Uploaded and added to hero media'))
+      const newLanding = normalizeLanding({ ...config.landing_page, hero_media: next })
+      const newConfig = { ...config, landing_page: newLanding }
+      setConfig(newConfig)
+
+      // Persist immediately so public site sees the uploaded hero media without an extra Save click
+      try {
+        const payload = {
+          setting_key: 'platform_appearance',
+          setting_value: newConfig,
+          description: 'Configuration for platform appearance including chatbot, landing page and platform metadata',
+          is_public: true,
+        }
+
+        const { error: upsertError } = await (supabase.from('system_settings') as any).upsert(payload, { onConflict: 'setting_key' })
+        if (upsertError) throw upsertError
+
+        try {
+          await supabase.rpc('create_audit_log', {
+            p_tenant_id: null,
+            p_action: 'UPDATE',
+            p_resource_type: 'system_settings',
+            p_resource_id: null,
+            p_old_data: null,
+            p_new_data: payload.setting_value,
+          })
+        } catch (e) {
+          // non-fatal
+        }
+
+        setHeroUploadFile(null)
+        toast.success(lt('Uploaded, added to hero media and saved'))
+      } catch (err: any) {
+        console.error('Failed to persist hero media after upload', err)
+        toast.error(lt('Uploaded but failed to save. Please click Save Changes.'))
+      }
     } catch (e: any) {
       toast.error(String(e?.message || lt('Upload failed')))
     } finally {
@@ -642,6 +798,100 @@ export function PlatformCustomizer() {
           {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
           {lt('Save Changes')}
         </Button>
+      </div>
+
+      {/* Platform metadata (name, logo, favicon) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="col-span-2 space-y-2">
+          <Label>{lt('Platform Name')}</Label>
+          <Input
+            value={(config as any).platform?.name || ''}
+            onChange={(e) => setConfig({ ...config, platform: { ...(config as any).platform, name: e.target.value } as any })}
+          />
+        </div>
+        <div className="col-span-1 space-y-2">
+          <Label>{lt('Logo')}</Label>
+          <div className="flex items-center gap-2">
+            {(config as any).platform?.logo_url ? (
+              <img src={(config as any).platform.logo_url} alt={lt('Logo')} className="h-10 w-24 object-contain border" />
+            ) : (
+              <div className="h-10 w-24 bg-gray-100 flex items-center justify-center text-xs text-gray-400 border">{lt('No logo')}</div>
+            )}
+            <input type="file" accept="image/*" onChange={async (e) => {
+              const f = e.target.files?.[0]
+              if (!f) return
+              const form = new FormData()
+              form.append('file', f)
+              form.append('assetType', 'logo')
+              try {
+                const res = await fetch('/api/admin/marketing/upload-asset', { method: 'POST', body: form })
+                const j = await res.json().catch(() => null)
+                if (!res.ok) throw new Error(j?.error || 'Upload failed')
+                const url = String(j?.publicUrl || '')
+                setConfig({ ...config, platform: { ...(config as any).platform, logo_url: url } as any })
+                toast.success(lt('Logo uploaded'))
+              } catch (err: any) {
+                toast.error(String(err?.message || lt('Upload failed')))
+              }
+            }} />
+          </div>
+
+          <div className="mt-2">
+            <Label>{lt('Favicon')}</Label>
+            <div className="flex items-center gap-2">
+              {(config as any).platform?.favicon_url ? (
+                <img src={(config as any).platform?.favicon_url} alt={lt('Favicon')} className="h-6 w-6 object-contain border" />
+              ) : (
+                <div className="h-6 w-6 bg-gray-100 flex items-center justify-center text-xs text-gray-400 border">ICO</div>
+              )}
+              <input type="file" accept="image/*" onChange={async (e) => {
+                const f = e.target.files?.[0]
+                if (!f) return
+                const form = new FormData()
+                form.append('file', f)
+                form.append('assetType', 'favicon')
+                try {
+                  const res = await fetch('/api/admin/marketing/upload-asset', { method: 'POST', body: form })
+                  const j = await res.json().catch(() => null)
+                  if (!res.ok) throw new Error(j?.error || 'Upload failed')
+                  const url = String(j?.publicUrl || '')
+                  setConfig({ ...config, platform: { ...(config as any).platform, favicon_url: url } as any })
+                  toast.success(lt('Favicon uploaded'))
+                } catch (err: any) {
+                  toast.error(String(err?.message || lt('Upload failed')))
+                }
+              }} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Current previews */}
+      <div className="flex items-center gap-6">
+        <div>
+          <Label>{lt('Current Logo Preview')}</Label>
+          <div className="mt-2">
+            {(config as any).platform?.logo_url ? (
+              <a href={(config as any).platform.logo_url} target="_blank" rel="noreferrer">
+                <img src={(config as any).platform.logo_url} alt={lt('Logo Preview')} className="h-20 w-48 object-contain border" />
+              </a>
+            ) : (
+              <div className="h-20 w-48 bg-gray-100 flex items-center justify-center text-xs text-gray-400 border">{lt('No logo')}</div>
+            )}
+          </div>
+        </div>
+        <div>
+          <Label>{lt('Current Favicon Preview')}</Label>
+          <div className="mt-2">
+            {(config as any).platform?.favicon_url ? (
+              <a href={(config as any).platform.favicon_url} target="_blank" rel="noreferrer">
+                <img src={(config as any).platform.favicon_url} alt={lt('Favicon Preview')} className="h-10 w-10 object-contain border" />
+              </a>
+            ) : (
+              <div className="h-10 w-10 bg-gray-100 flex items-center justify-center text-xs text-gray-400 border">ICO</div>
+            )}
+          </div>
+        </div>
       </div>
 
       <Tabs defaultValue="chatbot" className="space-y-4">
@@ -1060,6 +1310,44 @@ export function PlatformCustomizer() {
                     onChange={(e) => setConfig({...config, landing_page: {...config.landing_page, hero_subtitle: e.target.value}})}
                     rows={2}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>{lt('AI Translate')}</Label>
+                      <div className="text-sm text-muted-foreground">{lt('Translate the landing content into other locales using the configured AI provider and save translations.')}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {(SUPPORTED_LOCALES as readonly string[]).map((l) => (
+                      <label key={l} className="inline-flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          value={l}
+                          checked={selectedLocales.includes(l)}
+                          onChange={(e) => {
+                            const v = String(e.target.value)
+                            if (e.target.checked) setSelectedLocales((s) => Array.from(new Set([...s, v])))
+                            else setSelectedLocales((s) => s.filter(x => x !== v))
+                          }}
+                        />
+                        <span>{formatLocaleLabel(l)} ({l})</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  <div className="pt-2">
+                    <Button
+                      onClick={handleAiTranslate}
+                      variant="outline"
+                      disabled={isTranslating}
+                    >
+                      {isTranslating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Bot className="w-4 h-4 mr-2" />}
+                      {lt('Translate with AI')}
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

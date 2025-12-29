@@ -30,6 +30,7 @@ export default async function Home() {
   const lt = await getLt()
   const appearance = await getPublicPlatformAppearance()
   const landing = appearance?.landing_page
+  const name = (appearance as any)?.platform?.name || 'LedgerAI'
 
   return (
     <MarketingShell>
@@ -133,7 +134,7 @@ export default async function Home() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">{lt('Advanced features for paid subscriptions')}</h2>
-              <p className="text-lg text-gray-600">{lt('See what each plan unlocks and how it works inside LedgerAI.')}</p>
+              <p className="text-lg text-gray-600">{lt('See what each plan unlocks and how it works inside LedgerAI.').replace(/LedgerAI/g, name)}</p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
@@ -164,7 +165,7 @@ export default async function Home() {
           <div className="container mx-auto px-4 text-center">
 				<h2 className="text-3xl md:text-4xl font-bold mb-6">{lt('Ready to transform your accounting?')}</h2>
             <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-				{lt('Join thousands of businesses that trust LedgerAI for their financial management.')}
+              {lt('Join thousands of businesses that trust LedgerAI for their financial management.').replace(/LedgerAI/g, name)}
             </p>
             <Link href="/signup">
               <Button size="lg" variant="secondary" className="h-12 px-8 text-lg text-blue-600">

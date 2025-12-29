@@ -1,8 +1,11 @@
 import MarketingShell from '@/components/landing/marketing-shell'
 import { getLt } from '@/lib/i18n/lt-server'
+import { getPublicPlatformAppearance } from '@/lib/platform-appearance/public'
 
 export default async function TermsPage() {
   const lt = await getLt()
+  const appearance = await getPublicPlatformAppearance()
+  const name = (appearance as any)?.platform?.name || 'LedgerAI'
 
   return (
     <MarketingShell>
@@ -23,7 +26,7 @@ export default async function TermsPage() {
               <section className="space-y-3">
                 <h2 className="text-xl font-semibold text-gray-900">{lt('1. Agreement to terms')}</h2>
                 <p className="text-gray-600">
-                  {lt('By accessing or using LedgerAI (the “Service”), you agree to these Terms of Service (the “Terms”). The Service is operated by SophieSoft Company Limited. If you are using the Service on behalf of an organization, you represent that you have authority to bind that organization.')}
+                  {lt('By accessing or using LedgerAI (the “Service”), you agree to these Terms of Service (the “Terms”). The Service is operated by SophieSoft Company Limited. If you are using the Service on behalf of an organization, you represent that you have authority to bind that organization.').replace(/LedgerAI/g, name)}
                 </p>
               </section>
 

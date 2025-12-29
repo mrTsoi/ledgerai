@@ -21,7 +21,7 @@ export function CreateTenantModal() {
     return { name: '', slug: '', locale: defaults.locale, currency: defaults.currency }
   })
   const { subscription, refreshSubscription, loading: subLoading } = useSubscription()
-  const { refreshTenants } = useTenant()
+  const { refreshTenants, switchTenant } = useTenant()
 
   const handleCreate = async () => {
     try {
@@ -40,11 +40,21 @@ export function CreateTenantModal() {
       const json = await res.json()
       if (!res.ok) throw new Error(json?.error || lt('Failed to create company'))
 
+      const tenantId = String(json?.tenant?.id || '')
+
       toast.success(lt('Company created successfully!'))
       setOpen(false)
       const defaults = getTenantDefaultsFromBrowser()
       setFormData({ name: '', slug: '', locale: defaults.locale, currency: defaults.currency })
       refreshSubscription() // Update usage counts
+      // If API returns the created tenant id, switch to it immediately
+      if (tenantId) {
+        try {
+          switchTenant(tenantId)
+        } catch (e) {
+          // ignore
+        }
+      }
       refreshTenants() // Update tenant list
     } catch (error: any) {
       console.error('Creation error:', error)

@@ -2,6 +2,7 @@ import { Link } from '@/i18n/navigation'
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { getLt } from '@/lib/i18n/lt-server'
+import { getPlatformAppearance } from '@/lib/platform'
 
 export default async function MarketingShell({
   children,
@@ -9,14 +10,19 @@ export default async function MarketingShell({
   children: React.ReactNode
 }) {
   const lt = await getLt()
+  const platform = await getPlatformAppearance()
 
   return (
     <div className="flex flex-col min-h-screen">
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">L</div>
-            <span className="text-xl font-bold text-gray-900">LedgerAI</span>
+            <Link href="/" className="flex items-center gap-2">
+            {platform?.logo_url ? (
+              <img src={platform.logo_url} alt={platform?.name || 'Logo'} className="w-8 h-8 object-contain rounded-lg" />
+            ) : (
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">{(platform?.name && platform.name[0]) ? String(platform.name[0]).toUpperCase() : 'L'}</div>
+            )}
+            <span className="text-xl font-bold text-gray-900">{platform?.name || 'LedgerAI'}</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -43,9 +49,13 @@ export default async function MarketingShell({
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">L</div>
-                <span className="text-lg font-bold text-white">LedgerAI</span>
+                <div className="flex items-center gap-2 mb-4">
+                {platform?.logo_url ? (
+                  <img src={platform.logo_url} alt={platform?.name || 'Logo'} className="w-6 h-6 object-contain rounded" />
+                ) : (
+                  <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">{(platform?.name && platform.name[0]) ? String(platform.name[0]).toUpperCase() : 'L'}</div>
+                )}
+                <span className="text-lg font-bold text-white">{platform?.name || 'LedgerAI'}</span>
               </div>
               <p className="text-sm">{lt('The next generation of accounting software powered by artificial intelligence.')}</p>
             </div>
