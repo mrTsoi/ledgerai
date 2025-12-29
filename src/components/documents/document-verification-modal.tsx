@@ -1111,8 +1111,8 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="col-span-2 space-y-2">
+                <div className="grid gap-4">
+                  <div className="grid col-span-2 space-y-2">
                     <Label>{lt('Total Amount')}</Label>
                     <Input 
                       type="number"
@@ -1121,7 +1121,7 @@ export function DocumentVerificationModal({ documentId, onClose, onSaved }: Prop
                       onChange={e => setFormData({...formData, total_amount: e.target.value})}
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="grid col-span-2 space-y-2">
                     <Label>{lt('Currency')}</Label>
                     <CurrencySelect 
                       value={formData.currency}
