@@ -57,6 +57,7 @@ interface NavItem {
   href: string
   icon: React.ReactNode
   roles: string[]
+  group?: 'company' | 'admin' | 'user'
 }
 
 export default function DashboardLayout({
@@ -294,59 +295,77 @@ export default function DashboardLayout({
   }
 
   const navigationItems: NavItem[] = [
-        {
-          name: lt('Tenant Admin'),
-          href: '/tenant-admin',
-          icon: <Building2 className="w-5 h-5" />,
-          roles: ['SUPER_ADMIN', 'TENANT_ADMIN'],
-        },
     {
       name: lt('Dashboard'),
       href: '/dashboard',
       icon: <Home className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'ACCOUNTANT', 'OPERATOR', 'SUPER_ADMIN'],
+      group: 'company',
     },
     {
       name: lt('Documents'),
       href: '/dashboard/documents',
       icon: <FileText className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'ACCOUNTANT', 'OPERATOR', 'SUPER_ADMIN'],
+      group: 'company',
     },
     {
       name: lt('Transactions'),
       href: '/dashboard/transactions',
       icon: <CreditCard className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'],
+      group: 'company',
     },
     {
       name: lt('Banking'),
       href: '/dashboard/banking',
       icon: <Landmark className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'],
+      group: 'company',
     },
     {
       name: lt('Accounts'),
       href: '/dashboard/accounts',
       icon: <FolderTree className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'],
+      group: 'company',
     },
     {
       name: lt('Reports'),
       href: '/dashboard/reports',
       icon: <BarChart3 className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'],
+      group: 'company',
     },
     {
       name: lt('Team'),
       href: '/dashboard/team',
       icon: <Users className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'SUPER_ADMIN'],
+      group: 'company',
     },
+    // Admin group: tenant management and platform admin
+    {
+      name: lt('Tenant Admin'),
+      href: '/tenant-admin',
+      icon: <Building2 className="w-5 h-5" />,
+      roles: ['COMPANY_ADMIN', 'TENANT_ADMIN', 'SUPER_ADMIN'],
+      group: 'admin',
+    },
+    {
+      name: lt('Admin'),
+      href: '/admin',
+      icon: <Building2 className="w-5 h-5" />,
+      roles: ['SUPER_ADMIN'],
+      group: 'admin',
+    },
+    // User & Billing / Settings group
     {
       name: lt('Settings'),
       href: '/dashboard/settings',
       icon: <Settings className="w-5 h-5" />,
       roles: ['COMPANY_ADMIN', 'ACCOUNTANT', 'OPERATOR', 'SUPER_ADMIN'],
+      group: 'user',
     },
   ]
 
@@ -487,7 +506,7 @@ export default function DashboardLayout({
                 {lt('Company')}
               </h3>
               <div className="space-y-1">
-                {visibleNavItems.filter(item => item.href !== '/dashboard/settings').map((item) => (
+                {visibleNavItems.filter(item => (item.group || 'company') === 'company').map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
@@ -510,13 +529,44 @@ export default function DashboardLayout({
               </div>
             </div>
 
+            {/* Admin Section */}
+            {visibleNavItems.some(i => i.group === 'admin') && (
+              <div>
+                <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  {lt('Admin')}
+                </h3>
+                <div className="space-y-1">
+                  {visibleNavItems.filter(item => item.group === 'admin').map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      prefetch
+                      className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                        pathname === item.href 
+                          ? 'bg-primary/10 text-primary' 
+                          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                      } ${navigatingTo === item.href ? 'opacity-80' : ''}`}
+                      onClick={() => handleNavClick(item.href)}
+                      aria-busy={navigatingTo === item.href}
+                    >
+                      {item.icon}
+                      <span className="ml-3">{item.name}</span>
+                      {navigatingTo === item.href && (
+                        <Loader2 className="ml-auto h-4 w-4 animate-spin text-gray-500" />
+                      )}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* User Section */}
             <div>
               <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                 {lt('USER & BILLING')}
               </h3>
               <div className="space-y-1">
-                {visibleNavItems.filter(item => item.href === '/dashboard/settings').map((item) => (
+                {visibleNavItems.filter(item => item.group === 'user').map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
