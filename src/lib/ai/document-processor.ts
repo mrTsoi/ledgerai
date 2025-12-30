@@ -209,6 +209,14 @@ const TENANT_DEBUG_ENABLED = (() => {
   return v === '1' || v === 'true' || v === 'yes' || v === 'on'
 })()
 
+// Confidence threshold for trusting AI-provided tenant boolean flag.
+// Can be overridden via env var `AI_TENANT_CONFIDENCE_THRESHOLD` (0.0 - 1.0).
+const AI_TENANT_CONFIDENCE_THRESHOLD = (() => {
+  const raw = process.env.AI_TENANT_CONFIDENCE_THRESHOLD || process.env.NEXT_PUBLIC_AI_TENANT_CONFIDENCE_THRESHOLD
+  const n = Number(raw)
+  return Number.isFinite(n) ? Math.min(Math.max(n, 0), 1) : 0.8
+})()
+
 function tenantDebugLog(payload: Record<string, unknown>) {
   if (!TENANT_DEBUG_ENABLED) return
   // Keep logs compact and predictable; do not log raw extracted_data blobs.
@@ -633,14 +641,44 @@ export class AIProcessingService {
         })
         
         // Check if tenant is involved in the transaction
-        // We trust the AI's judgment (is_belongs_to_tenant) if available, otherwise fallback to string matching
+        // We *conservatively* trust the AI's boolean only when accompanied by
+        // sufficient confidence or by confirmatory name matches. Otherwise
+        // fall back to string matching heuristics below.
         let isTenantMatch = false
-        
-          if (typeof extractedData.is_belongs_to_tenant === 'boolean') {
-            isTenantMatch = extractedData.is_belongs_to_tenant
+
+        if (typeof extractedData.is_belongs_to_tenant === 'boolean') {
+          const aiBelongs = extractedData.is_belongs_to_tenant
+          const aiConf = typeof extractedData.confidence_score === 'number' ? Number(extractedData.confidence_score) : 0
+          const threshold = AI_TENANT_CONFIDENCE_THRESHOLD
+
+          // Helper: do we have a tenant name match from vendor/customer strings?
+          const hasVendorConfirm = vendorName && tenantNames.length > 0 ? tenantNames.some(tn => nameIncludes(vendorName, tn)) : false
+          const hasCustomerConfirm = customerName && tenantNames.length > 0 ? tenantNames.some(tn => nameIncludes(customerName, tn)) : false
+
+          // If AI asserts it belongs and confidence is high OR we have a name confirmation,
+          // accept the AI boolean as true. If AI asserts it does NOT belong, accept that
+          // only when confidence is high or there is corroborating mismatch evidence.
+          if (aiBelongs === true) {
+            if (aiConf >= threshold || hasVendorConfirm || hasCustomerConfirm) {
+              isTenantMatch = true
+            } else {
+              tenantDebugLog({ documentId, tenantId: docRow.tenant_id, note: 'AI boolean ignored (low confidence/no name confirm)', aiConf, threshold })
+              // leave isTenantMatch as false and fall through to string checks below
+            }
+          } else {
+            // AI says it's NOT the tenant
+            const explicitFalseConfirm = aiConf >= threshold || ((customerName && customerName.length >= 3) && !hasCustomerConfirm) || ((vendorName && vendorName.length >= 3) && !hasVendorConfirm)
+            if (explicitFalseConfirm) {
+              isTenantMatch = false
+            } else {
+              tenantDebugLog({ documentId, tenantId: docRow.tenant_id, note: 'AI negative boolean ignored (low confidence/no corroborating mismatch)', aiConf, threshold })
+              // fall through to string matching
+            }
+          }
         } else {
-           // Special handling for Bank Statements
-           if (extractedData.document_type === 'bank_statement') {
+          // No explicit boolean from AI; use string matching heuristics below.
+          // Special handling for Bank Statements
+          if (extractedData.document_type === 'bank_statement') {
               // For bank statements, check account holder name if available
               const accountHolder = normalizeCompanyName(extractedData.account_holder_name)
                 if (accountHolder && tenantNames.some(tn => nameIncludes(accountHolder, tn))) {
@@ -1613,6 +1651,13 @@ export class AIProcessingService {
         data.ship_to ||
         data.to ||
         data.recipient_name ||
+        data.payer ||
+        data.payer_name ||
+        data.payer_party ||
+        data.payor ||
+        data.payee ||
+        data.bill_to_name ||
+        data.payer_details ||
         undefined
     }
 
