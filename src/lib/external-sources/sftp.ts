@@ -1,6 +1,4 @@
-import SftpClient from 'ssh2-sftp-client'
 import { minimatch } from 'minimatch'
-import path from 'path'
 import { guessMimeType } from './mime'
 import type { ExternalFetchedFile, ExternalSourceConfig, ExternalSourceSecrets } from './types'
 
@@ -20,6 +18,8 @@ export async function fetchFromSftp(config: ExternalSourceConfig, secrets: Exter
   if (!host) throw new Error('SFTP host is required')
   if (!secrets.username) throw new Error('SFTP username is required')
 
+  const sftpModule: any = await import('ssh2-sftp-client')
+  const SftpClient = sftpModule && (sftpModule.default ?? sftpModule)
   const sftp = new SftpClient()
 
   try {
@@ -60,7 +60,8 @@ export async function fetchFromSftp(config: ExternalSourceConfig, secrets: Exter
       list: candidates,
       download: async (remoteFilePath: string): Promise<ExternalFetchedFile> => {
         const buf = (await sftp.get(remoteFilePath)) as Buffer
-        const filename = path.posix.basename(remoteFilePath)
+        const pathMod: any = await import('path')
+        const filename = pathMod.posix.basename(remoteFilePath)
         return {
           identity: {
             remote_path: remoteFilePath,
