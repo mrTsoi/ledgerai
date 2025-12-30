@@ -60,6 +60,8 @@
       "tenants": "租戶管理",
       "audit": "審計日誌",
       "languages": "語言管理"
+      ,"processing": "處理中",
+      "security": "安全性"
     }
   },
   "auth": {

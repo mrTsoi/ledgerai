@@ -2184,7 +2184,9 @@
       "tenants": "租戶管理",
       "audit": "審計日誌",
       "languages": "語言管理",
-      "pending": "待處理訂閱"
+      "pending": "待處理訂閱",
+      "processing": "處理中",
+      "security": "安全性"
     },
     "unauthorized": "您無權查看此管理區域。"
   },

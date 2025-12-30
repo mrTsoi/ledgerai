@@ -2183,7 +2183,9 @@
       "tenants": "租户管理",
       "pending": "待处理订阅",
       "audit": "审计日志",
-      "languages": "语言管理"
+      "languages": "语言管理",
+      "processing": "处理中",
+      "security": "安全"
     },
     "unauthorized": "您无权查看此管理区域。"
   },
