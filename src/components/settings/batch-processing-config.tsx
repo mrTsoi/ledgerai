@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, Zap } from 'lucide-react'
 import { toast } from "sonner"
+import { useLiterals } from '@/hooks/use-literals'
 
 interface SystemBatchConfig {
   default_batch_size: number
@@ -23,6 +24,7 @@ interface TenantBatchConfig {
 }
 
 export function BatchProcessingConfig() {
+  const lt = useLiterals()
   const { currentTenant, tenants, memberships, isSuperAdmin } = useTenant()
   const userRole = useUserRole()
   const { subscription, loading: subLoading } = useSubscription()
@@ -66,7 +68,7 @@ export function BatchProcessingConfig() {
 
       const res = await fetch(`/api/batch-processing/config?tenant_id=${encodeURIComponent(tenantId)}`)
       const json = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(json?.error || 'Failed to load batch processing config')
+      if (!res.ok) throw new Error(json?.error || lt('Failed to load batch processing config'))
 
       const sysConfig = (json?.system_config as SystemBatchConfig) || { default_batch_size: 10, max_batch_size: 50 }
       setSystemConfig(sysConfig)
@@ -83,7 +85,7 @@ export function BatchProcessingConfig() {
     } finally {
       setFetching(false)
     }
-  }, [currentTenant])
+  }, [currentTenant, lt])
 
   useEffect(() => {
     if (currentTenant && hasFeature) {
@@ -105,7 +107,7 @@ export function BatchProcessingConfig() {
       }
 
       if (!canEditThisTenant) {
-        toast.error('You can only apply settings to companies you manage')
+        toast.error(lt('You can only apply settings to companies you manage'))
         return
       }
 
@@ -119,7 +121,7 @@ export function BatchProcessingConfig() {
       if (scope === 'selected_managed') {
         const filtered = (selectedTenantIds || []).filter((id) => managedTenantIdSet.has(id))
         if (filtered.length === 0) {
-          toast.error('Select at least one company')
+          toast.error(lt('Select at least one company'))
           return
         }
         tenantIds = filtered
@@ -138,17 +140,17 @@ export function BatchProcessingConfig() {
       })
 
       const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to apply settings')
+      if (!res.ok) throw new Error(json?.error || lt('Failed to apply settings'))
 
       const updated = Number(json?.updated || 0)
       if (scope === 'current') {
-        toast.success('Batch processing settings saved')
+        toast.success(lt('Batch processing settings saved'))
       } else {
-        toast.success(`Batch processing settings applied to ${updated} compan${updated === 1 ? 'y' : 'ies'}`)
+        toast.success(lt('Batch processing settings applied to {updated} companies', { updated }))
       }
     } catch (error: any) {
       console.error('Error saving settings:', error)
-      toast.error('Failed to save settings: ' + error.message)
+      toast.error(lt('Failed to save settings: {message}', { message: error.message }))
     } finally {
       setLoading(false)
     }
@@ -168,13 +170,13 @@ export function BatchProcessingConfig() {
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <CardTitle className="flex items-center gap-2">
-              Batch Processing
+              {lt('Batch Processing')}
               <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100">
-                New
+                {lt('New')}
               </Badge>
             </CardTitle>
             <CardDescription>
-              Configure concurrent processing limits for your workspace.
+              {lt('Configure concurrent processing limits for your workspace.')}
             </CardDescription>
           </div>
           <Zap className="h-5 w-5 text-blue-500" />
@@ -183,7 +185,7 @@ export function BatchProcessingConfig() {
       <CardContent>
         <form onSubmit={handleSave} className="space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="batchSize">Concurrent Batch Size</Label>
+            <Label htmlFor="batchSize">{lt('Concurrent Batch Size')}</Label>
             <div className="flex items-center gap-4">
               <Input
                 id="batchSize"
@@ -196,31 +198,31 @@ export function BatchProcessingConfig() {
                 className="w-32"
               />
               <span className="text-sm text-muted-foreground">
-                Max allowed: {systemConfig?.max_batch_size || 50}
+                {lt('Max allowed: {max}', { max: systemConfig?.max_batch_size || 50 })}
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Higher batch sizes process more items simultaneously but may impact system performance.
+              {lt('Higher batch sizes process more items simultaneously but may impact system performance.')}
             </p>
           </div>
 
           {canEdit && managedTenants.length > 1 && (
             <div className="grid gap-2">
-              <Label>Apply To</Label>
+              <Label>{lt('Apply To')}</Label>
               <Select value={applyScope} onValueChange={(v) => setApplyScope(v as any)}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select scope" />
+                  <SelectValue placeholder={lt('Select scope')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="current">This company</SelectItem>
-                  <SelectItem value="all_managed">All managed companies</SelectItem>
-                  <SelectItem value="selected_managed">Selected companies</SelectItem>
+                  <SelectItem value="current">{lt('This company')}</SelectItem>
+                  <SelectItem value="all_managed">{lt('All managed companies')}</SelectItem>
+                  <SelectItem value="selected_managed">{lt('Selected companies')}</SelectItem>
                 </SelectContent>
               </Select>
 
               {applyScope === 'selected_managed' && (
                 <div className="mt-2 space-y-2 rounded-md border p-3">
-                  <div className="text-sm text-muted-foreground">Select companies</div>
+                  <div className="text-sm text-muted-foreground">{lt('Select companies')}</div>
                   <div className="space-y-2">
                     {managedTenants.map((t) => {
                       const checked = selectedTenantIds.includes(t.id)
@@ -251,7 +253,7 @@ export function BatchProcessingConfig() {
           {canEdit && (
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {applyScope === 'current' || managedTenants.length <= 1 ? 'Save Changes' : 'Apply Settings'}
+              {applyScope === 'current' || managedTenants.length <= 1 ? lt('Save Changes') : lt('Apply Settings')}
             </Button>
           )}
         </form>

@@ -2,6 +2,14 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 import { Database } from '@/types/database.types'
 
+function withAuthCookies(target: NextResponse, source: NextResponse) {
+  // Preserve any auth cookie changes (refresh, sign-in/out) made by Supabase.
+  source.cookies.getAll().forEach((cookie) => {
+    target.cookies.set(cookie.name, cookie.value, cookie)
+  })
+  return target
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -59,8 +67,31 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname
   // Regex to match locale prefix (optional)
-  const localePrefix = /^\/(en|zh-CN|zh-TW)/
+  const localePrefix = /^\/(en|zh-CN|zh-HK|zh-TW)/
   const pathWithoutLocale = path.replace(localePrefix, '') || '/'
+
+  // Restrict platform admin routes to SUPER_ADMIN only.
+  // Note: localePrefix is always in this app, but we still handle both cases safely.
+  if (pathWithoutLocale === '/admin' || pathWithoutLocale.startsWith('/admin/')) {
+    if (!user) {
+      const url = request.nextUrl.clone()
+      const localeMatch = path.match(localePrefix)
+      const locale = localeMatch ? localeMatch[0] : ''
+      url.pathname = `${locale}/login`
+      return withAuthCookies(NextResponse.redirect(url), supabaseResponse)
+    }
+
+    const { data: isSuperAdmin, error: superAdminError } = await (supabase as any).rpc('is_super_admin')
+    const allowed = isSuperAdmin === true
+
+    if (superAdminError || !allowed) {
+      const url = request.nextUrl.clone()
+      const localeMatch = path.match(localePrefix)
+      const locale = localeMatch ? localeMatch[0] : ''
+      url.pathname = `${locale}/dashboard`
+      return withAuthCookies(NextResponse.redirect(url), supabaseResponse)
+    }
+  }
 
   // Protect routes that require authentication
   if (
@@ -68,6 +99,7 @@ export async function updateSession(request: NextRequest) {
     !pathWithoutLocale.startsWith('/login') &&
     !pathWithoutLocale.startsWith('/signup') &&
     !pathWithoutLocale.startsWith('/auth') &&
+    !pathWithoutLocale.startsWith('/forgot-password') &&
     pathWithoutLocale !== '/' // Allow landing page if exists
   ) {
     const url = request.nextUrl.clone()
@@ -86,7 +118,7 @@ export async function updateSession(request: NextRequest) {
     const locale = localeMatch ? localeMatch[0] : ''
     
     url.pathname = `${locale}/login`
-    return NextResponse.redirect(url)
+    return withAuthCookies(NextResponse.redirect(url), supabaseResponse)
   }
 
   // Redirect authenticated users away from auth pages
@@ -100,7 +132,7 @@ export async function updateSession(request: NextRequest) {
     const locale = localeMatch ? localeMatch[0] : ''
     
     url.pathname = `${locale}/dashboard`
-    return NextResponse.redirect(url)
+    return withAuthCookies(NextResponse.redirect(url), supabaseResponse)
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're

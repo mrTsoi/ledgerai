@@ -168,7 +168,7 @@ BEGIN
 
   RETURN v_log_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ============================================================================
 -- 5. FUNCTION: Update Tenant Statistics
@@ -260,7 +260,7 @@ BEGIN
     last_activity = EXCLUDED.last_activity,
     updated_at = NOW();
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+  $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ============================================================================
 -- 6. FUNCTION: Get System Overview
@@ -284,7 +284,7 @@ BEGIN
     (SELECT COUNT(*)::INTEGER FROM transactions WHERE status = 'POSTED') as total_transactions,
     (SELECT COALESCE(SUM(storage_used_bytes), 0)::DECIMAL(10,2) / 1073741824 FROM tenant_statistics) as storage_used_gb;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+  $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ============================================================================
 -- 7. FUNCTION: Get Tenant Details (Admin)
@@ -326,7 +326,7 @@ BEGIN
   LEFT JOIN tenant_statistics ts ON t.id = ts.tenant_id
   WHERE t.id = p_tenant_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ============================================================================
 -- 8. TRIGGER: Auto-create tenant statistics on tenant creation

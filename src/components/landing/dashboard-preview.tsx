@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowUpRight, DollarSign, Users, CreditCard, Activity } from 'lucide-react'
+import { useLiterals } from '@/hooks/use-literals'
 
 const data = [
   { name: 'Jan', total: 1200 },
@@ -23,6 +24,7 @@ const transactions = [
 ]
 
 export function DashboardPreview() {
+  const lt = useLiterals()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -36,8 +38,8 @@ export function DashboardPreview() {
       {/* Mock Header */}
       <div className="flex items-center justify-between mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
-          <p className="text-muted-foreground">Overview of your financial performance.</p>
+			<h2 className="text-2xl font-bold tracking-tight">{lt('Dashboard')}</h2>
+			<p className="text-muted-foreground">{lt('Overview of your financial performance.')}</p>
         </div>
         <div className="flex items-center space-x-2">
           <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">JD</div>
@@ -47,10 +49,10 @@ export function DashboardPreview() {
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
         {[
-          { title: 'Total Revenue', value: '$45,231.89', icon: DollarSign, change: '+20.1%', color: 'text-green-600' },
-          { title: 'Subscriptions', value: '+2350', icon: Users, change: '+180.1%', color: 'text-green-600' },
-          { title: 'Sales', value: '+12,234', icon: CreditCard, change: '+19%', color: 'text-green-600' },
-          { title: 'Active Now', value: '+573', icon: Activity, change: '+201', color: 'text-green-600' },
+			{ title: lt('Total Revenue'), value: '$45,231.89', icon: DollarSign, change: '+20.1%', color: 'text-green-600' },
+			{ title: lt('Subscriptions'), value: '+2350', icon: Users, change: '+180.1%', color: 'text-green-600' },
+			{ title: lt('Sales'), value: '+12,234', icon: CreditCard, change: '+19%', color: 'text-green-600' },
+			{ title: lt('Active Now'), value: '+573', icon: Activity, change: '+201', color: 'text-green-600' },
         ].map((stat, i) => (
           <Card key={i} className="animate-in fade-in zoom-in-95 duration-500 fill-mode-backwards" style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'backwards' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -62,7 +64,7 @@ export function DashboardPreview() {
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
               <p className="text-xs text-muted-foreground">
-                <span className={stat.color}>{stat.change}</span> from last month
+					<span className={stat.color}>{stat.change}</span> {lt('from last month')}
               </p>
             </CardContent>
           </Card>
@@ -73,7 +75,7 @@ export function DashboardPreview() {
         {/* Chart */}
         <Card className="col-span-4 animate-in fade-in slide-in-from-left-4 duration-700 delay-300">
           <CardHeader>
-            <CardTitle>Overview</CardTitle>
+			<CardTitle>{lt('Overview')}</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
             <div className="h-[300px] w-full">
@@ -121,9 +123,9 @@ export function DashboardPreview() {
         {/* Recent Sales */}
         <Card className="col-span-3 animate-in fade-in slide-in-from-right-4 duration-700 delay-500">
           <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
+			<CardTitle>{lt('Recent Transactions')}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              You made 265 sales this month.
+				{lt('You made 265 sales this month.')}
             </p>
           </CardHeader>
           <CardContent>

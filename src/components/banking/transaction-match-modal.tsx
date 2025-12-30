@@ -13,6 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider"
 import { Plus, Loader2, Search } from 'lucide-react'
 import { toast } from "sonner"
+import { useLiterals } from '@/hooks/use-literals'
+import { useLocale } from 'next-intl'
+import { fetchEntityTranslationMap, overlayEntityTranslations } from '@/lib/i18n/entity-translations'
 
 type BankTransaction = Database['public']['Tables']['bank_transactions']['Row']
 type Transaction = Database['public']['Tables']['transactions']['Row']
@@ -33,6 +36,8 @@ interface Props {
 }
 
 export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatch }: Props) {
+  const lt = useLiterals()
+  const locale = useLocale()
   const [matches, setMatches] = useState<ReconciliationMatch[]>([])
   const [loading, setLoading] = useState(false)
   const [matching, setMatching] = useState(false)
@@ -56,9 +61,23 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
       .eq('tenant_id', bankTransaction.tenant_id)
       .eq('is_active', true)
       .order('code')
-    
-    if (data) setAccounts(data)
-  }, [bankTransaction.tenant_id, supabase])
+
+    const base = (data || []) as ChartOfAccount[]
+
+    if (locale && locale !== 'en' && base.length > 0) {
+      const translationMap = await fetchEntityTranslationMap(supabase, {
+        tenantId: bankTransaction.tenant_id,
+        entityType: 'chart_of_accounts',
+        entityIds: base.map((a) => a.id),
+        locale,
+        fields: ['name', 'description']
+      })
+      setAccounts(overlayEntityTranslations(base, translationMap, ['name', 'description']))
+      return
+    }
+
+    setAccounts(base)
+  }, [bankTransaction.tenant_id, supabase, locale])
 
   const findPotentialMatches = useCallback(async () => {
     try {
@@ -126,18 +145,18 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
         })
       })
 
-      if (!response.ok) throw new Error('Failed to fetch AI matches')
+      if (!response.ok) throw new Error(lt('Failed to fetch AI matches'))
       
       const result = await response.json()
 
       setMatches(result.matches || [])
     } catch (error: any) {
       console.error('Error finding matches:', error)
-      toast.error('Failed to find matches: ' + error.message)
+      toast.error(lt('Failed to find matches: {message}', { message: error.message }))
     } finally {
       setLoading(false)
     }
-  }, [bankTransaction, dateWindow, searchTerm, supabase])
+  }, [bankTransaction, dateWindow, searchTerm, supabase, lt])
 
   useEffect(() => {
     if (!isOpen || !bankTransaction) return
@@ -220,12 +239,12 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
           if (statusError) throw statusError
       }
 
-      toast.success('Transactions matched successfully')
+      toast.success(lt('Transactions matched successfully'))
       onMatch()
       onClose()
     } catch (error: any) {
       console.error('Error matching transaction:', error)
-      toast.error('Failed to match: ' + error.message)
+      toast.error(lt('Failed to match: {message}', { message: error.message }))
     } finally {
       setMatching(false)
     }
@@ -233,7 +252,7 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
 
   const handleCreateAndMatch = async () => {
     if (!newTxAccount || !newTxDesc) {
-        toast.error('Please fill in all fields')
+        toast.error(lt('Please fill in all fields'))
         return
     }
 
@@ -296,13 +315,13 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
             match_type: 'MANUAL'
         })
 
-        toast.success('Transaction created and matched')
+        toast.success(lt('Transaction created and matched'))
         onMatch()
         onClose()
 
     } catch (error: any) {
         console.error('Error creating transaction:', error)
-        toast.error('Failed to create: ' + error.message)
+      toast.error(lt('Failed to create: {message}', { message: error.message }))
     } finally {
         setMatching(false)
     }
@@ -312,12 +331,12 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Match Transaction</DialogTitle>
+          <DialogTitle>{lt('Match Transaction')}</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <div className="bg-gray-50 p-4 rounded-md border">
-            <h4 className="text-sm font-medium text-gray-500 mb-2">Bank Transaction</h4>
+            <h4 className="text-sm font-medium text-gray-500 mb-2">{lt('Bank Transaction')}</h4>
             <div className="flex justify-between items-center">
               <div>
                 <p className="font-medium">{bankTransaction.description}</p>
@@ -339,8 +358,8 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
           <div className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Match Window</Label>
-                <span className="text-sm text-muted-foreground">±{dateWindow} days</span>
+                <Label>{lt('Match Window')}</Label>
+                <span className="text-sm text-muted-foreground">{lt('±{days} days', { days: dateWindow })}</span>
               </div>
               <Slider
                 value={[dateWindow]}
@@ -352,11 +371,11 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
             </div>
 
             <div className="space-y-2">
-              <Label>Find Match</Label>
+              <Label>{lt('Find Match')}</Label>
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input 
-                  placeholder="Search by description or amount..." 
+                  placeholder={lt('Search by description or amount...')} 
                   className="pl-8"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -370,10 +389,10 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[50px]"></TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                      <TableHead>Confidence</TableHead>
+                      <TableHead>{lt('Date')}</TableHead>
+                      <TableHead>{lt('Description')}</TableHead>
+                      <TableHead className="text-right">{lt('Amount')}</TableHead>
+                      <TableHead>{lt('Confidence')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -381,13 +400,13 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
                       <TableRow>
                         <TableCell colSpan={5} className="text-center py-8">
                           <Loader2 className="w-6 h-6 animate-spin mx-auto" />
-                          <p className="text-sm text-gray-500 mt-2">AI is analyzing matches...</p>
+                          <p className="text-sm text-gray-500 mt-2">{lt('AI is analyzing matches...')}</p>
                         </TableCell>
                       </TableRow>
                     ) : matches.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                          No potential matches found.
+                          {lt('No potential matches found.')}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -433,12 +452,12 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
               {selectedMatchIds.size > 0 && (
                   <div className="flex justify-between items-center bg-blue-50 p-3 rounded-md border border-blue-100">
                       <div className="text-sm">
-                          <span className="font-medium">{selectedMatchIds.size}</span> selected
+                      <span className="font-medium">{selectedMatchIds.size}</span> {lt('selected')}
                           <span className="mx-2">|</span>
-                          Total: <span className="font-mono font-medium">{getSelectedTotal().toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span>
+                      {lt('Total:')} <span className="font-mono font-medium">{getSelectedTotal().toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span>
                       </div>
                       <div className="text-sm">
-                          Difference: <span className={`font-mono font-medium ${Math.abs(bankTransaction.amount - getSelectedTotal()) < 0.01 ? 'text-green-600' : 'text-red-600'}`}>
+                      {lt('Difference:')} <span className={`font-mono font-medium ${Math.abs(bankTransaction.amount - getSelectedTotal()) < 0.01 ? 'text-green-600' : 'text-red-600'}`}>
                               {(bankTransaction.amount - getSelectedTotal()).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                           </span>
                       </div>
@@ -447,9 +466,9 @@ export function TransactionMatchModal({ bankTransaction, isOpen, onClose, onMatc
           </div>
 
         <DialogFooter className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button variant="ghost" onClick={onClose}>{lt('Cancel')}</Button>
             <Button onClick={handleConfirmMatches} disabled={selectedMatchIds.size === 0 || matching}>
-                {matching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Match'}
+            {matching ? <Loader2 className="w-4 h-4 animate-spin" /> : lt('Confirm Match')}
             </Button>
         </DialogFooter>
       </DialogContent>

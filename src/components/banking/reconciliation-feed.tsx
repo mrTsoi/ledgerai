@@ -24,6 +24,7 @@ import {
   Loader2
 } from 'lucide-react'
 import { useTenant } from '@/hooks/use-tenant'
+import { useLiterals } from '@/hooks/use-literals'
 import { TransactionMatchModal } from './transaction-match-modal'
 import { DuplicateResolutionModal } from './duplicate-resolution-modal'
 import { StatementVerificationModal } from './statement-verification-modal'
@@ -78,6 +79,7 @@ export function ReconciliationFeed({ accountId }: Props) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
   
   const { currentTenant } = useTenant()
+  const lt = useLiterals()
   const { batchSize } = useBatchConfig()
   const supabase = useMemo(() => createClient(), [])
   const tenantId = currentTenant?.id
@@ -108,7 +110,7 @@ export function ReconciliationFeed({ accountId }: Props) {
       // Transform data to include source file
       const transformedData = (data || []).map((tx: any) => ({
         ...tx,
-        source_file: tx.bank_statements?.documents?.file_name || 'Unknown Source',
+        source_file: tx.bank_statements?.documents?.file_name || lt('Unknown Source'),
         document_id: tx.bank_statements?.documents?.id
       }))
 
@@ -121,11 +123,11 @@ export function ReconciliationFeed({ accountId }: Props) {
       setSelectedIds(new Set()) // Clear selection on refresh
     } catch (error) {
       console.error('Error fetching transactions:', error)
-      toast.error('Failed to load transactions')
+      toast.error(lt('Failed to load transactions'))
     } finally {
       setLoading(false)
     }
-  }, [accountId, supabase, tenantId])
+  }, [accountId, supabase, tenantId, lt])
 
   useEffect(() => {
     fetchTransactions()
@@ -151,8 +153,8 @@ export function ReconciliationFeed({ accountId }: Props) {
 
     try {
       // 1. Update bank_transaction status
-      const { error: btError } = await (supabase
-        .from('bank_transactions') as any)
+      const { error: btError } = await supabase
+        .from('bank_transactions')
         .update({
           status: 'PENDING',
           matched_transaction_id: null
@@ -171,11 +173,11 @@ export function ReconciliationFeed({ accountId }: Props) {
           console.warn('Could not delete from junction table (might not exist)', junctionError)
       }
 
-      toast.success('Transaction unmatched')
+      toast.success(lt('Transaction unmatched'))
       fetchTransactions()
     } catch (error: any) {
       console.error('Error unmatching transaction:', error)
-      toast.error('Failed to unmatch: ' + error.message)
+      toast.error(lt('Failed to unmatch: {message}', { message: error.message }))
     } finally {
       setUnmatchTx(null)
     }
@@ -187,11 +189,11 @@ export function ReconciliationFeed({ accountId }: Props) {
       const pendingTxs = transactions.filter(t => t.status === 'PENDING')
       
       if (pendingTxs.length === 0) {
-        toast.info('No pending transactions to match')
+        toast.info(lt('No pending transactions to match'))
         return
       }
 
-      toast.info(`Auto-matching ${pendingTxs.length} transactions...`)
+      toast.info(lt('Auto-matching {count} transactions...', { count: pendingTxs.length }))
       setMatchProgress({ current: 0, total: pendingTxs.length })
       
       let matchedCount = 0
@@ -244,16 +246,16 @@ export function ReconciliationFeed({ accountId }: Props) {
             const bestMatch = result.matches?.[0]
             if (bestMatch && bestMatch.confidence_score >= 0.9) {
                // Auto match!
-               await (supabase
-                .from('bank_transactions') as any)
+               await supabase
+                .from('bank_transactions')
                 .update({
                   status: 'MATCHED',
                   matched_transaction_id: bestMatch.transaction.id,
                   confidence_score: bestMatch.confidence_score
                 })
                 .eq('id', tx.id)
-                
-               await (supabase.from('bank_transaction_matches') as any).insert({
+               
+               await supabase.from('bank_transaction_matches').insert({
                   bank_transaction_id: tx.id,
                   transaction_id: bestMatch.transaction.id,
                   match_type: 'EXACT' // AI Exact
@@ -274,15 +276,15 @@ export function ReconciliationFeed({ accountId }: Props) {
       }
 
       if (matchedCount > 0) {
-        toast.success(`Auto-matched ${matchedCount} transactions`)
+        toast.success(lt('Auto-matched {count} transactions', { count: matchedCount }))
         fetchTransactions()
       } else {
-        toast.info('No high-confidence matches found')
+        toast.info(lt('No high-confidence matches found'))
       }
 
     } catch (error) {
       console.error('Auto match error:', error)
-      toast.error('Auto match failed')
+      toast.error(lt('Auto match failed'))
     } finally {
       setIsAutoMatching(false)
     }
@@ -309,7 +311,7 @@ export function ReconciliationFeed({ accountId }: Props) {
 
   // Bulk Actions
   const handleBulkDelete = async () => {
-    if (!confirm(`Are you sure you want to delete ${selectedIds.size} transactions?`)) return
+    if (!confirm(lt('Are you sure you want to delete {count} transactions?', { count: selectedIds.size }))) return
 
     try {
       const ids = Array.from(selectedIds)
@@ -324,11 +326,11 @@ export function ReconciliationFeed({ accountId }: Props) {
         if (error) throw error
       }
 
-      toast.success(`Deleted ${selectedIds.size} transactions`)
+      toast.success(lt('Deleted {count} transactions', { count: selectedIds.size }))
       fetchTransactions()
     } catch (error) {
       console.error('Error deleting transactions:', error)
-      toast.error('Failed to delete transactions')
+      toast.error(lt('Failed to delete transactions'))
     }
   }
 
@@ -337,20 +339,20 @@ export function ReconciliationFeed({ accountId }: Props) {
       const ids = Array.from(selectedIds)
       const chunks = chunkArray(ids, batchSize)
 
-      for (const chunk of chunks) {
-        const { error } = await (supabase
-          .from('bank_transactions') as any)
+        for (const chunk of chunks) {
+        const { error } = await supabase
+          .from('bank_transactions')
           .update({ status: 'EXCLUDED' })
           .in('id', chunk)
 
         if (error) throw error
       }
 
-      toast.success(`Excluded ${selectedIds.size} transactions`)
+      toast.success(lt('Excluded {count} transactions', { count: selectedIds.size }))
       fetchTransactions()
     } catch (error) {
       console.error('Error excluding transactions:', error)
-      toast.error('Failed to exclude transactions')
+      toast.error(lt('Failed to exclude transactions'))
     }
   }
 
@@ -389,16 +391,16 @@ export function ReconciliationFeed({ accountId }: Props) {
     const validatedTransactions = transactions.map(tx => ({
       ...tx,
       is_duplicate: duplicates.has(tx.id),
-      duplicate_reason: duplicates.has(tx.id) ? 'Duplicate found in current feed' : undefined
+      duplicate_reason: duplicates.has(tx.id) ? lt('Duplicate found in current feed') : undefined
     }))
 
     setTransactions(validatedTransactions)
     setIsValidating(false)
     
     if (duplicates.size > 0) {
-      toast.warning(`Found ${duplicates.size} potential duplicates`)
+      toast.warning(lt('Found {count} potential duplicates', { count: duplicates.size }))
     } else {
-      toast.success('No duplicates found in current feed')
+      toast.success(lt('No duplicates found in current feed'))
     }
   }
 
@@ -411,12 +413,12 @@ export function ReconciliationFeed({ accountId }: Props) {
 
       if (error) throw error
 
-      toast.success(`Deleted ${idsToDelete.length} duplicates`)
+      toast.success(lt('Deleted {count} duplicates', { count: idsToDelete.length }))
       setDuplicateGroups([]) // Clear groups
       fetchTransactions() // Refresh list
     } catch (error: any) {
       console.error('Error resolving duplicates:', error)
-      toast.error('Failed to delete duplicates: ' + error.message)
+      toast.error(lt('Failed to delete duplicates: {message}', { message: error.message }))
     }
   }
 
@@ -436,7 +438,7 @@ export function ReconciliationFeed({ accountId }: Props) {
     if (!acc[docId]) {
       acc[docId] = {
         id: docId,
-        fileName: tx.source_file || 'Unknown Source',
+        fileName: tx.source_file || lt('Unknown Source'),
         transactions: []
       }
     }
@@ -445,18 +447,18 @@ export function ReconciliationFeed({ accountId }: Props) {
   }, {} as Record<string, { id: string, fileName: string, transactions: TransactionWithMeta[] }>)
 
   if (loading) {
-    return <div className="p-8 text-center">Loading feed...</div>
+    return <div className="p-8 text-center">{lt('Loading feed...')}</div>
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Transaction Feed</h3>
+        <h3 className="text-lg font-medium">{lt('Transaction Feed')}</h3>
         <div className="flex gap-2">
           {duplicateGroups.length > 0 && (
             <Button variant="destructive" size="sm" onClick={() => setIsResolveDuplicatesOpen(true)}>
               <AlertCircle className="w-4 h-4 mr-2" />
-              Fix Duplicates ({duplicateGroups.length})
+              {lt('Fix Duplicates ({count})', { count: duplicateGroups.length })}
             </Button>
           )}
 
@@ -464,18 +466,18 @@ export function ReconciliationFeed({ accountId }: Props) {
             <>
               <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
                 <Trash2 className="w-4 h-4 mr-2" />
-                Delete ({selectedIds.size})
+                {lt('Delete ({count})', { count: selectedIds.size })}
               </Button>
               <Button variant="secondary" size="sm" onClick={handleBulkExclude}>
                 <Ban className="w-4 h-4 mr-2" />
-                Exclude ({selectedIds.size})
+                {lt('Exclude ({count})', { count: selectedIds.size })}
               </Button>
             </>
           ) : isAutoMatching ? (
             <div className="flex items-center gap-3 bg-white border rounded-md px-3 py-1.5 shadow-sm">
               <div className="flex flex-col gap-1 w-[180px]">
                 <div className="flex justify-between text-xs text-gray-500">
-                  <span>AI Matching...</span>
+                  <span>{lt('AI Matching...')}</span>
                   <span>{Math.round((matchProgress.current / matchProgress.total) * 100)}%</span>
                 </div>
                 <Progress value={(matchProgress.current / matchProgress.total) * 100} className="h-1.5" />
@@ -488,11 +490,11 @@ export function ReconciliationFeed({ accountId }: Props) {
             <>
               <Button variant="outline" size="sm" onClick={handleAutoMatch} disabled={isValidating}>
                 <Sparkles className="w-4 h-4 mr-2" />
-                Auto Match
+                {lt('Auto Match')}
               </Button>
               <Button variant="outline" size="sm" onClick={validateTransactions} disabled={isValidating}>
                 <ShieldCheck className="w-4 h-4 mr-2" />
-                {isValidating ? 'Scanning...' : 'Validate Feed'}
+                {isValidating ? lt('Scanning...') : lt('Validate Feed')}
               </Button>
             </>
           )}
@@ -516,7 +518,7 @@ export function ReconciliationFeed({ accountId }: Props) {
                   <FileText className="w-4 h-4 text-blue-500" />
                   {group.fileName}
                   <span className="text-xs text-gray-500 font-normal">
-                    ({group.transactions.length} items)
+                    {lt('({count} items)', { count: group.transactions.length })}
                   </span>
                 </div>
               </div>
@@ -529,7 +531,7 @@ export function ReconciliationFeed({ accountId }: Props) {
                     className="h-7 text-xs"
                     onClick={() => setVerifyDocumentId(group.id)}
                   >
-                    Verify Source
+                    {lt('Verify Source')}
                   </Button>
                 )}
               </div>
@@ -553,11 +555,11 @@ export function ReconciliationFeed({ accountId }: Props) {
                         }}
                       />
                     </TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
+                    <TableHead>{lt('Date')}</TableHead>
+                    <TableHead>{lt('Description')}</TableHead>
+                    <TableHead>{lt('Amount')}</TableHead>
+                    <TableHead>{lt('Status')}</TableHead>
+                    <TableHead className="text-right">{lt('Action')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -599,7 +601,7 @@ export function ReconciliationFeed({ accountId }: Props) {
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>AI Confidence Score: {Math.round(tx.confidence_score * 100)}%</p>
+                                  <p>{lt('AI Confidence Score: {percent}%', { percent: Math.round(tx.confidence_score * 100) })}</p>
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
@@ -612,26 +614,26 @@ export function ReconciliationFeed({ accountId }: Props) {
                       <TableCell>
                         {tx.status === 'MATCHED' ? (
                           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                            Matched
+                            {lt('Matched')}
                           </Badge>
                         ) : tx.status === 'EXCLUDED' ? (
                           <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
-                            Excluded
+                            {lt('Excluded')}
                           </Badge>
                         ) : (
                           <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                            Pending
+                            {lt('Pending')}
                           </Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-right">
                         {tx.status === 'MATCHED' ? (
                           <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleUnmatch(tx)}>
-                            Unmatch
+                            {lt('Unmatch')}
                           </Button>
                         ) : tx.status !== 'EXCLUDED' && (
                           <Button size="sm" variant="outline" onClick={() => handleMatch(tx)}>
-                            Match
+                            {lt('Match')}
                           </Button>
                         )}
                       </TableCell>
@@ -645,7 +647,7 @@ export function ReconciliationFeed({ accountId }: Props) {
         
         {transactions.length === 0 && (
           <div className="text-center py-8 text-gray-500 border rounded-md bg-gray-50">
-            No transactions found. Upload a statement to get started.
+            {lt('No transactions found. Upload a statement to get started.')}
           </div>
         )}
       </div>
@@ -683,14 +685,14 @@ export function ReconciliationFeed({ accountId }: Props) {
       <Dialog open={!!unmatchTx} onOpenChange={(open) => !open && setUnmatchTx(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Unmatch Transaction</DialogTitle>
+            <DialogTitle>{lt('Unmatch Transaction')}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to unmatch this transaction? It will return to the pending list.
+              {lt('Are you sure you want to unmatch this transaction? It will return to the pending list.')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setUnmatchTx(null)}>Cancel</Button>
-            <Button variant="destructive" onClick={confirmUnmatch}>Unmatch</Button>
+            <Button variant="ghost" onClick={() => setUnmatchTx(null)}>{lt('Cancel')}</Button>
+            <Button variant="destructive" onClick={confirmUnmatch}>{lt('Unmatch')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

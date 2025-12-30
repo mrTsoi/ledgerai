@@ -113,7 +113,7 @@ export const generateProfitLossPDF = (
     }
   })
 
-  finalY = (doc as any).lastAutoTable.finalY + 10
+  finalY = ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? finalY) + 10
 
   // Expenses Section
   doc.setFontSize(12)
@@ -136,7 +136,7 @@ export const generateProfitLossPDF = (
     }
   })
 
-  finalY = (doc as any).lastAutoTable.finalY + 10
+  finalY = ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? finalY) + 10
 
   // Net Income Summary
   doc.setFillColor(netIncome >= 0 ? 220 : 254, netIncome >= 0 ? 252 : 226, netIncome >= 0 ? 231 : 226)
@@ -199,7 +199,7 @@ export const generateBalanceSheetPDF = (
     }
   })
 
-  finalY = (doc as any).lastAutoTable.finalY + 10
+  finalY = ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? finalY) + 10
 
   // Liabilities Section
   doc.setFontSize(12)
@@ -222,7 +222,7 @@ export const generateBalanceSheetPDF = (
     }
   })
 
-  finalY = (doc as any).lastAutoTable.finalY + 10
+  finalY = ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? finalY) + 10
 
   // Equity Section
   doc.setFontSize(12)
@@ -245,7 +245,7 @@ export const generateBalanceSheetPDF = (
     }
   })
 
-  finalY = (doc as any).lastAutoTable.finalY + 10
+  finalY = ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? finalY) + 10
 
   // Summary
   doc.setFillColor(243, 244, 246) // gray-100

@@ -1,103 +1,158 @@
 import { Link } from '@/i18n/navigation'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, CheckCircle2, BarChart3, Shield, Globe2, Zap } from 'lucide-react'
+import { ArrowRight, BarChart3, CheckCircle2, FileText, Shield, Users, Zap } from 'lucide-react'
 import { PricingSection } from '@/components/landing/pricing-section'
 import { DashboardPreview } from '@/components/landing/dashboard-preview'
+import MarketingShell from '@/components/landing/marketing-shell'
+import { getLt } from '@/lib/i18n/lt-server'
+import { FEATURE_DEFINITIONS, featureKeyToSlug } from '@/lib/subscription/features'
+import { HeroBackground } from '@/components/landing/hero-background'
+import { getPublicPlatformAppearance } from '@/lib/platform-appearance/public'
 
-export default function Home() {
+function renderTitleWithHighlight(title: string, highlight?: string) {
+  const h = (highlight || '').trim()
+  if (!h) return title
+  const idx = title.toLowerCase().indexOf(h.toLowerCase())
+  if (idx < 0) return title
+  const before = title.slice(0, idx)
+  const mid = title.slice(idx, idx + h.length)
+  const after = title.slice(idx + h.length)
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">L</div>
-            <span className="text-xl font-bold text-gray-900">LedgerAI</span>
-          </div>
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm font-medium text-gray-600 hover:text-gray-900">Features</a>
-            <a href="#pricing" className="text-sm font-medium text-gray-600 hover:text-gray-900">Pricing</a>
-            <a href="#about" className="text-sm font-medium text-gray-600 hover:text-gray-900">About</a>
-          </nav>
-          <div className="flex items-center gap-4">
-            <Link href="/login">
-              <Button variant="ghost">Log in</Button>
-            </Link>
-            <Link href="/signup">
-              <Button>Get Started</Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+    <>
+      {before}
+      <span className="text-blue-600">{mid}</span>
+      {after}
+    </>
+  )
+}
 
-      <main className="flex-1">
+export default async function Home() {
+  const lt = await getLt()
+  const appearance = await getPublicPlatformAppearance()
+  const landing = appearance?.landing_page
+  const name = (appearance as any)?.platform?.name || 'LedgerAI'
+
+  return (
+    <MarketingShell>
         {/* Hero Section */}
-        <section className="py-20 md:py-32 bg-gradient-to-b from-white to-gray-50">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900 mb-6">
-              Accounting Reimagined with <span className="text-blue-600">AI Intelligence</span>
+        <section className="relative py-20 md:py-32 overflow-hidden">
+          <HeroBackground
+            className="absolute inset-0"
+            media={landing?.hero_media}
+            rotationSeconds={landing?.hero_rotation_seconds}
+            overlayOpacity={landing?.hero_overlay_opacity}
+          />
+          <div className="container mx-auto px-4 text-center relative">
+            <div className="inline-flex items-center gap-2 rounded-full border bg-white/70 backdrop-blur px-4 py-2 text-xs font-semibold text-gray-700 motion-safe:animate-in motion-safe:fade-in">
+              <span className="h-2 w-2 rounded-full bg-blue-600" />
+                {lt(landing?.hero_badge || 'AI-powered multi-tenant accounting')}
+            </div>
+
+            <h1 className="mt-6 text-4xl md:text-6xl font-bold tracking-tight text-gray-900 mb-6 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4">
+      				{renderTitleWithHighlight(
+                 lt(landing?.hero_title || 'Accounting Reimagined with AI Intelligence'),
+                 landing?.hero_title_highlight
+                )}
             </h1>
-            <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-              Automate your financial workflows, gain real-time insights, and manage multiple entities with the world&apos;s most advanced multi-tenant accounting platform.
+            <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:[animation-delay:120ms]">
+      				{lt(
+                 landing?.hero_subtitle ||
+                  "Automate your financial workflows, gain real-time insights, and manage multiple entities with the world's most advanced multi-tenant accounting platform."
+                )}
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:[animation-delay:200ms]">
               <Link href="/signup">
                 <Button size="lg" className="h-12 px-8 text-lg">
-                  Start Free Trial <ArrowRight className="ml-2 w-5 h-5" />
+					{lt('Start Free Trial')} <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
               <Link href="/demo">
                 <Button size="lg" variant="outline" className="h-12 px-8 text-lg">
-                  View Demo
+					{lt('View Demo')}
                 </Button>
               </Link>
             </div>
             <div className="mt-16 relative mx-auto max-w-6xl">
-              <div className="aspect-[16/10] bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200">
+              <div className="aspect-[16/10] bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:[animation-delay:260ms]">
                 <DashboardPreview />
               </div>
+              <div className="pointer-events-none absolute -inset-1 rounded-xl bg-gradient-to-r from-blue-600/10 via-transparent to-blue-600/10" />
             </div>
           </div>
         </section>
 
-        {/* Features Grid */}
-        <section id="features" className="py-20 bg-white">
+        {/* Core Platform Features */}
+        <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Everything you need to scale</h2>
-              <p className="text-lg text-gray-600">Powerful features built for modern businesses and accounting firms.</p>
+				<h2 className="text-3xl font-bold text-gray-900 mb-4">{lt('Everything you need to scale')}</h2>
+				<p className="text-lg text-gray-600">{lt('Powerful features built for modern businesses and accounting firms.')}</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
               <FeatureCard 
                 icon={<Zap className="w-6 h-6 text-yellow-500" />}
-                title="AI Automation"
-                description="Automatically categorize transactions and reconcile accounts with 99% accuracy using our advanced AI models."
+				title={lt('AI Automation')}
+				description={lt('Extract invoices and receipts, propose categorization, and keep an auditable trail of decisions.')}
               />
               <FeatureCard 
-                icon={<Globe2 className="w-6 h-6 text-blue-500" />}
-                title="Multi-Currency"
-                description="Handle transactions in any currency with real-time exchange rates and automatic gain/loss calculation."
+                icon={<Users className="w-6 h-6 text-blue-500" />}
+				title={lt('Multi-Tenant Operations')}
+				description={lt('Manage multiple companies or clients from a single workspace with strict data isolation.')}
               />
               <FeatureCard 
                 icon={<Shield className="w-6 h-6 text-green-500" />}
-                title="Enterprise Security"
-                description="Bank-grade encryption, role-based access control, and comprehensive audit logs keep your data safe."
+				title={lt('Security & Auditability')}
+				description={lt('Role-based access control, row-level security, and comprehensive audit logs keep your data safe.')}
               />
               <FeatureCard 
                 icon={<BarChart3 className="w-6 h-6 text-purple-500" />}
-                title="Real-time Reporting"
-                description="Generate balance sheets, P&L, and cash flow statements instantly. Export to PDF, Excel, or CSV."
+				title={lt('Real-time Reporting')}
+				description={lt('Generate balance sheets, P&L, and cash flow statements instantly with export-friendly outputs.')}
               />
               <FeatureCard 
-                icon={<CheckCircle2 className="w-6 h-6 text-indigo-500" />}
-                title="Multi-Tenant Support"
-                description="Manage multiple companies or clients from a single dashboard with strict data isolation."
+                icon={<FileText className="w-6 h-6 text-indigo-500" />}
+				title={lt('Accounting Workflows')}
+				description={lt('Charts of accounts, transactions, documents, approvals, and review-ready trails in one place.')}
               />
               <FeatureCard 
-                icon={<Globe2 className="w-6 h-6 text-teal-500" />}
-                title="Global Compliance"
-                description="Built-in support for international accounting standards and tax regulations across multiple regions."
+                icon={<CheckCircle2 className="w-6 h-6 text-teal-500" />}
+				title={lt('Team Collaboration')}
+				description={lt('Invite teammates, assign roles, and standardize processes across clients and entities.')}
               />
+            </div>
+
+            <div className="mt-10 text-center">
+              <Link href="/features">
+                <Button variant="outline">{lt('Explore all features')}</Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Advanced (Subscription) Features */}
+        <section className="py-20 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">{lt('Advanced features for paid subscriptions')}</h2>
+              <p className="text-lg text-gray-600">{lt('See what each plan unlocks and how it works inside LedgerAI.').replace(/LedgerAI/g, name)}</p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {FEATURE_DEFINITIONS.map((f) => (
+                <FeatureLinkCard
+                  key={f.key}
+                  title={lt(f.label)}
+                  href={`/features/${featureKeyToSlug(f.key)}`}
+                  badge={f.isNew ? lt('New') : undefined}
+                  description={lt('Learn how this feature works, where to configure it, and which plans include it.')}
+                />
+              ))}
+            </div>
+
+            <div className="mt-10 text-center">
+              <Link href="/pricing">
+                <Button>{lt('Compare plans')}</Button>
+              </Link>
             </div>
           </div>
         </section>
@@ -108,64 +163,18 @@ export default function Home() {
         {/* CTA Section */}
         <section className="py-20 bg-blue-600 text-white">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to transform your accounting?</h2>
+				<h2 className="text-3xl md:text-4xl font-bold mb-6">{lt('Ready to transform your accounting?')}</h2>
             <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-              Join thousands of businesses that trust LedgerAI for their financial management.
+              {lt('Join thousands of businesses that trust LedgerAI for their financial management.').replace(/LedgerAI/g, name)}
             </p>
             <Link href="/signup">
               <Button size="lg" variant="secondary" className="h-12 px-8 text-lg text-blue-600">
-                Get Started Now
+					{lt('Get Started Now')}
               </Button>
             </Link>
           </div>
         </section>
-      </main>
-
-      <footer className="bg-gray-900 text-gray-400 py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">L</div>
-                <span className="text-lg font-bold text-white">LedgerAI</span>
-              </div>
-              <p className="text-sm">
-                The next generation of accounting software powered by artificial intelligence.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-white font-semibold mb-4">Product</h3>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white">Features</a></li>
-                <li><a href="#" className="hover:text-white">Pricing</a></li>
-                <li><a href="#" className="hover:text-white">Security</a></li>
-                <li><a href="#" className="hover:text-white">Roadmap</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-white font-semibold mb-4">Company</h3>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white">About Us</a></li>
-                <li><a href="#" className="hover:text-white">Careers</a></li>
-                <li><a href="#" className="hover:text-white">Blog</a></li>
-                <li><a href="#" className="hover:text-white">Contact</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-white font-semibold mb-4">Legal</h3>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white">Cookie Policy</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 pt-8 text-sm text-center">
-            © {new Date().getFullYear()} LedgerAI Inc. All rights reserved.
-          </div>
-        </div>
-      </footer>
-    </div>
+    </MarketingShell>
   )
 }
 
@@ -180,3 +189,32 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode, titl
     </div>
   )
 }
+
+function FeatureLinkCard({
+  title,
+  description,
+  href,
+  badge,
+}: {
+  title: string
+  description: string
+  href: string
+  badge?: string
+}) {
+  return (
+    <Link href={href} className="block">
+      <div className="p-6 rounded-xl border bg-white hover:shadow-lg transition-shadow h-full">
+        <div className="flex items-start justify-between gap-4 mb-2">
+          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+          {badge ? (
+            <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider">
+              {badge}
+            </span>
+          ) : null}
+        </div>
+        <p className="text-gray-600">{description}</p>
+      </div>
+    </Link>
+  )
+}
+

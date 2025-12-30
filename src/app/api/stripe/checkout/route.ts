@@ -1,6 +1,84 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type Stripe from 'stripe'
 import { createClient } from '@/lib/supabase/server'
 import { getStripe } from '@/lib/stripe'
+
+async function ensureActivePriceAndProduct(
+  stripe: Stripe,
+  priceId: string,
+  opts: { required?: boolean } = {}
+): Promise<void> {
+  const price = await stripe.prices.retrieve(priceId, { expand: ['product'] })
+
+  if (price.active === false) {
+    try {
+      await stripe.prices.update(priceId, { active: true })
+    } catch (e) {
+      // Some legacy/auto-created Stripe prices cannot be updated.
+      if (opts.required) throw e
+      return
+    }
+  }
+
+  if (typeof price.product !== 'string') {
+    if ('deleted' in price.product) {
+      throw new Error(`Stripe product for price ${priceId} is deleted and cannot be reactivated`)
+    }
+    if (price.product.active === false) {
+      try {
+        await stripe.products.update(price.product.id, { active: true })
+      } catch (e) {
+        if (opts.required) throw e
+        return
+      }
+    }
+  }
+}
+
+async function createReplacementProductAndPrice(params: {
+  stripe: Stripe
+  planId: string
+  planName: string
+  planDescription?: string
+  interval: 'month' | 'year'
+  unitAmount: number
+  lookupKey?: string
+}): Promise<string> {
+  const { stripe, planId, planName, planDescription, interval, unitAmount, lookupKey } = params
+
+  const product = await stripe.products.create({
+    name: planName,
+    description: planDescription,
+    metadata: { plan_id: planId },
+  })
+
+  try {
+    const price = await stripe.prices.create({
+      product: product.id,
+      unit_amount: unitAmount,
+      currency: 'usd',
+      recurring: { interval },
+      ...(lookupKey ? { lookup_key: lookupKey } : {}),
+      metadata: { plan_id: planId, interval },
+    })
+    return price.id
+  } catch (e: any) {
+    // If lookup_key collides with an existing archived price, retry without it.
+    const price = await stripe.prices.create({
+      product: product.id,
+      unit_amount: unitAmount,
+      currency: 'usd',
+      recurring: { interval },
+      metadata: { plan_id: planId, interval, ...(lookupKey ? { lookup_key: lookupKey } : {}) },
+    })
+    return price.id
+  }
+}
+
+function isStripeSubscriptionNotFoundError(e: any): boolean {
+  const msg = String(e?.message || '')
+  return e?.type === 'StripeInvalidRequestError' && (msg.includes('No such subscription') || msg.includes('resource_missing'))
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,6 +102,9 @@ export async function POST(req: NextRequest) {
       return new NextResponse('Plan not found', { status: 404 })
     }
 
+    // Narrow plan into a local shape used below
+    const planRow = plan as { price_yearly?: number; price_monthly?: number; name?: string; id?: string; description?: string }
+
     const stripe = await getStripe()
 
     // Get or create customer
@@ -33,9 +114,8 @@ export async function POST(req: NextRequest) {
       .eq('user_id', user.id)
       .single()
 
-    let customerId = (subscription as any)?.stripe_customer_id
-    // Removed duplicate declaration of existingSubscriptionId here
-    const currentPlanId = (subscription as any)?.plan_id
+    let customerId = subscription?.stripe_customer_id
+    const currentPlanId = subscription?.plan_id
 
     if (!customerId) {
       const customer = await stripe.customers.create({
@@ -76,11 +156,8 @@ export async function POST(req: NextRequest) {
           existingSubscriptionId = existingSub.id
           
           // Sync DB if needed
-          if ((subscription as any)?.stripe_subscription_id !== existingSubscriptionId) {
-             await (supabase
-              .from('user_subscriptions') as any)
-              .update({ stripe_subscription_id: existingSubscriptionId })
-              .eq('user_id', user.id)
+           if (subscription?.stripe_subscription_id !== existingSubscriptionId) {
+             await supabase.from('user_subscriptions').update({ stripe_subscription_id: existingSubscriptionId }).eq('user_id', user.id)
           }
         } else {
           // No active subscriptions in Stripe, even if DB thought so.
@@ -102,8 +179,8 @@ export async function POST(req: NextRequest) {
           
           // Calculate new price amount
           const priceAmount = interval === 'year'
-            ? ((plan as any).price_yearly || (plan as any).price_monthly * 12)
-            : (plan as any).price_monthly
+            ? (planRow.price_yearly ?? ((planRow.price_monthly ?? 0) * 12))
+            : (planRow.price_monthly ?? 0)
           const newPriceAmount = Math.round(priceAmount * 100)          // We need to find or create the price ID in Stripe for this plan
           // For simplicity in this demo, we'll create a new price on the fly or search for it
           // In production, you should map your DB plan IDs to Stripe Price IDs
@@ -120,41 +197,46 @@ export async function POST(req: NextRequest) {
           // but passing the existing customer. Stripe might create a duplicate sub.
           // To avoid duplicate, we should really update.
           
-          // Let's try to find a Price for this plan.
-          // We'll search products by name.
-          const products = await stripe.products.search({
-            query: `name:'${(plan as any).name}'`,
-          })
-          
-          let priceId
-          
-          if (products.data.length > 0) {
-            const productId = products.data[0].id
-            // Find price
-            const prices = await stripe.prices.list({ product: productId, lookup_keys: [`${(plan as any).id}_${interval}`] })
-            if (prices.data.length > 0) {
-              priceId = prices.data[0].id
-            } else {
-               const price = await stripe.prices.create({
-                product: productId,
-                unit_amount: newPriceAmount,
-                currency: 'usd',
-                recurring: { interval: interval as 'month' | 'year' },
-                lookup_key: `${(plan as any).id}_${interval}`
+          // Prefer stable lookup_key pricing; create replacement product/price if the old one is tied to an inactive product.
+          const lookupKey = `${planRow.id}_${interval}`
+          let priceId: string | null = null
+
+          const byLookup = await stripe.prices.list({ lookup_keys: [lookupKey], limit: 1 })
+          if (byLookup.data.length > 0) {
+            priceId = byLookup.data[0].id
+            try {
+              await ensureActivePriceAndProduct(stripe, priceId, { required: true })
+            } catch {
+              // The existing lookup-key price is not usable (inactive product and cannot be reactivated).
+              // Create a replacement price under a new active product.
+              priceId = await createReplacementProductAndPrice({
+                stripe,
+                planId: String(planRow.id),
+                planName: planRow.name || 'Plan',
+                planDescription: planRow.description || undefined,
+                interval: interval as 'month' | 'year',
+                unitAmount: newPriceAmount,
+                lookupKey,
               })
-              priceId = price.id
             }
           } else {
-            // Create product and price
-            const product = await stripe.products.create({ name: (plan as any).name })
-            const price = await stripe.prices.create({
-              product: product.id,
-              unit_amount: newPriceAmount,
-              currency: 'usd',
-              recurring: { interval: interval as 'month' | 'year' },
-              lookup_key: `${(plan as any).id}_${interval}`
+            // No lookup-key price exists yet: create one (or fall back without lookup_key if it collides).
+            priceId = await createReplacementProductAndPrice({
+              stripe,
+              planId: String(planRow.id),
+              planName: planRow.name || 'Plan',
+              planDescription: planRow.description || undefined,
+              interval: interval as 'month' | 'year',
+              unitAmount: newPriceAmount,
+              lookupKey,
             })
-            priceId = price.id
+          }
+
+          // Ensure current subscription price/product is active (needed for schedules).
+          const currentPriceId = existingSub.items.data?.[0]?.price?.id
+          if (typeof currentPriceId === 'string' && currentPriceId) {
+            // Best-effort only: some Stripe-generated legacy prices cannot be updated.
+            await ensureActivePriceAndProduct(stripe, currentPriceId, { required: false })
           }
 
           // Check if it's a downgrade
@@ -167,7 +249,7 @@ export async function POST(req: NextRequest) {
           // If we recovered the sub from Stripe, currentPlanId might be null/old.
           // Trust the price comparison logic primarily.
 
-          if (currentPlanId === (plan as any).id) {
+          if (currentPlanId === planRow.id) {
             // Same plan, check interval change
             if (currentInterval === 'year' && interval === 'month') {
               // Year -> Month is a downgrade (scheduled)
@@ -188,6 +270,10 @@ export async function POST(req: NextRequest) {
           }
 
           if (isDowngrade) {
+            // Special-case: downgrade to Free should not attempt to switch Stripe prices.
+            // Instead, schedule cancellation at period end and let the app switch to Free in DB.
+            const isFreeTarget = newPriceAmount === 0
+
             // Downgrade: Schedule for end of period
             // 1. Check for existing schedule
             const schedules = await stripe.subscriptionSchedules.list({
@@ -203,14 +289,48 @@ export async function POST(req: NextRequest) {
               scheduleId = schedule.id
             }
 
+            const schedule = await stripe.subscriptionSchedules.retrieve(scheduleId)
+            const phase0Start = schedule.current_phase?.start_date ?? schedule.phases?.[0]?.start_date
+            const phase0End = schedule.current_phase?.end_date ?? schedule.phases?.[0]?.end_date ?? (existingSub as any)?.current_period_end
+            if (!phase0End || typeof phase0End !== 'number') {
+              return NextResponse.json(
+                { error: 'Unable to schedule change: missing current billing period end date from Stripe' },
+                { status: 409 }
+              )
+            }
+
+            if (isFreeTarget) {
+              // If the subscription is managed by a subscription schedule, Stripe forbids setting
+              // cancellation directly on the subscription. Always manage end-of-period cancellation
+              // by updating/creating the schedule.
+              await stripe.subscriptionSchedules.update(scheduleId, {
+                end_behavior: 'cancel',
+                phases: [
+                  {
+                    items: [{ price: existingSub.items.data[0].price.id, quantity: 1 }],
+                    ...(typeof phase0Start === 'number' ? { start_date: phase0Start } : {}),
+                    end_date: phase0End,
+                  },
+                ],
+              })
+
+              await supabase.from('user_subscriptions').update({
+                next_plan_id: planRow.id,
+                next_plan_start_date: new Date(phase0End * 1000).toISOString(),
+                next_billing_interval: null,
+              }).eq('user_id', user.id)
+
+              return NextResponse.json({ url: `${baseUrl}?success=true&tab=billing&change=scheduled` })
+            }
+
             // 2. Update schedule
             await stripe.subscriptionSchedules.update(scheduleId, {
               end_behavior: 'release',
               phases: [
                 {
                   items: [{ price: existingSub.items.data[0].price.id, quantity: 1 }],
-                  start_date: 'now',
-                  end_date: existingSub.current_period_end,
+                  ...(typeof phase0Start === 'number' ? { start_date: phase0Start } : {}),
+                  end_date: phase0End,
                 },
                 {
                   items: [{ price: priceId, quantity: 1 }],
@@ -219,64 +339,66 @@ export async function POST(req: NextRequest) {
             })
 
             // Update local DB to reflect scheduled change
-            await (supabase
-              .from('user_subscriptions') as any)
-              .update({
-                next_plan_id: (plan as any).id,
-                next_plan_start_date: new Date(existingSub.current_period_end * 1000).toISOString()
-              })
-              .eq('user_id', user.id)
+            await supabase.from('user_subscriptions').update({
+                next_plan_id: planRow.id,
+                next_plan_start_date: new Date(phase0End * 1000).toISOString(),
+                next_billing_interval: interval as 'month' | 'year'
+              }).eq('user_id', user.id)
             
-            return NextResponse.json({ url: `${baseUrl}?success=true&tab=billing&downgrade=scheduled` })
+            return NextResponse.json({ url: `${baseUrl}?success=true&tab=billing&change=scheduled` })
           } else {
             // Upgrade: Immediate
-            // NOTE: Stripe API does not support 'allow_promotion_codes' on subscription updates directly.
-            // To support promo codes on upgrades, we would need to create a new Checkout Session in 'setup' or 'subscription' mode
-            // or apply a coupon manually if we had one.
-            // Since we are doing a direct API update here, we can't easily pop up the promo code box.
-            // However, if the user wants to use a promo code, they might expect to be redirected to Checkout.
-            // Let's redirect to Checkout for Upgrades too if we want to support promo codes!
-            // But Checkout for existing subscription is tricky (it might create a duplicate).
-            // Stripe Checkout supports 'mode: subscription' with 'setup_future_usage' etc.
-            // Actually, if we pass the existing 'subscription' ID to checkout, it updates it? No.
-            
-            // ALTERNATIVE: We can apply a coupon to the subscription update if the user provided one in the UI.
-            // But our UI doesn't have a promo code input (Stripe Checkout does).
-            
-            // If we want to support promo codes on upgrade, we should probably use a Checkout Session 
-            // that updates the subscription. But Stripe Checkout creates NEW subscriptions by default.
-            // There is no "Update Subscription" mode in Checkout.
-            
-            // So, for Upgrades with Promo Codes, we are stuck unless we build our own UI for promo code 
-            // and apply it via API.
-            
-            // For now, we will stick to direct update. 
-            // If the user really wants to use a promo code, they might need to cancel and re-subscribe 
-            // OR we implement a "Apply Coupon" feature separately.
-            
-            await stripe.subscriptions.update(existingSubscriptionId, {
-              items: [{
-                id: itemId,
-                price: priceId,
-              }],
-              proration_behavior: 'always_invoice', // Charge/Credit immediately
-            })
+            // REQUIREMENT: Customer must confirm proration & billing cycle in Stripe.
+            // Stripe Checkout cannot update an existing subscription without creating a new one,
+            // so we use Stripe Billing Portal's subscription_update flow.
+            try {
+              const portal = await stripe.billingPortal.sessions.create({
+                customer: customerId,
+                return_url: `${baseUrl}?success=true&tab=billing&updated=true`,
+                // Use the portal flow to update an existing subscription item.
+                flow_data: {
+                  type: 'subscription_update',
+                  subscription_update: {
+                    subscription: existingSubscriptionId,
+                    items: [
+                      {
+                        id: itemId,
+                        price: priceId,
+                        quantity: 1,
+                      },
+                    ],
+                    proration_behavior: 'always_invoice',
+                  },
+                },
+              } as any)
 
-            // Update local DB immediately for better UX (webhook will confirm later)
-            await (supabase
-              .from('user_subscriptions') as any)
-              .update({
-                plan_id: (plan as any).id,
-                // Don't update status/dates yet, let webhook handle it or wait for refresh
-              })
-              .eq('user_id', user.id)
-
-            return NextResponse.json({ url: `${baseUrl}?success=true&tab=billing&updated=true` })
+              return NextResponse.json({ url: portal.url })
+            } catch (e: any) {
+              // Common cause: Billing Portal not configured in Stripe dashboard.
+              const msg = String(e?.message || '')
+              return NextResponse.json(
+                {
+                  error:
+                    msg ||
+                    'Unable to start Stripe Billing Portal session. Ensure Billing Portal is enabled/configured in Stripe.',
+                },
+                { status: 409 }
+              )
+            }
           }
         }
       } catch (e) {
-        console.log('Existing subscription not found or invalid, creating new one', e)
-        // Fall through to create new session
+        console.error('Failed to update existing Stripe subscription', e)
+
+        // Only fall back to creating a new subscription if the existing subscription truly doesn't exist.
+        if (isStripeSubscriptionNotFoundError(e)) {
+          console.log('Existing subscription not found, creating new one')
+          // Fall through to create new session
+        } else {
+          // If Stripe rejects the change (e.g., inactive product/price), surface an actionable error.
+          const msg = String((e as any)?.message || 'Stripe update failed')
+          return NextResponse.json({ error: msg }, { status: 409 })
+        }
       }
     }
 
@@ -288,10 +410,13 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: (plan as any).name,
-              description: (plan as any).description || undefined,
+              name: planRow.name,
+              description: planRow.description || undefined,
             },
-            unit_amount: Math.round((interval === 'year' ? ((plan as any).price_yearly || (plan as any).price_monthly * 12) : (plan as any).price_monthly) * 100),
+            unit_amount: Math.round(((interval === 'year'
+              ? (planRow.price_yearly ?? ((planRow.price_monthly ?? 0) * 12))
+              : (planRow.price_monthly ?? 0))
+            ) * 100),
             recurring: {
               interval: interval as 'month' | 'year',
             },
@@ -304,10 +429,10 @@ export async function POST(req: NextRequest) {
       cancel_url: `${baseUrl}?canceled=true&tab=billing`,
       metadata: {
         userId: user.id,
-        planId: (plan as any).id,
+        planId: planRow.id,
       },
       allow_promotion_codes: true,
-    })
+    } as Stripe.Checkout.SessionCreateParams)
 
     return NextResponse.json({ url: session.url })
   } catch (error: any) {

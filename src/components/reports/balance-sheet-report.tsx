@@ -11,6 +11,7 @@ import { Loader2, Download, FileText, FileDown } from 'lucide-react'
 import { format } from 'date-fns'
 import { generateBalanceSheetPDF } from '@/lib/pdf-generator'
 import { toast } from "sonner"
+import { useLiterals } from '@/hooks/use-literals'
 
 interface BSRow {
   account_id: string
@@ -22,6 +23,7 @@ interface BSRow {
 }
 
 export function BalanceSheetReport() {
+  const lt = useLiterals()
   const [data, setData] = useState<BSRow[]>([])
   const [loading, setLoading] = useState(false)
   const [asOfDate, setAsOfDate] = useState(format(new Date(), 'yyyy-MM-dd'))
@@ -44,11 +46,11 @@ export function BalanceSheetReport() {
       setData(reportData || [])
     } catch (error) {
       console.error('Error generating balance sheet:', error)
-      toast.error('Failed to generate report')
+      toast.error(lt('Failed to generate report'))
     } finally {
       setLoading(false)
     }
-  }, [asOfDate, supabase, tenantId])
+  }, [asOfDate, supabase, tenantId, lt])
 
   useEffect(() => {
     generateReport()
@@ -65,39 +67,41 @@ export function BalanceSheetReport() {
   const isBalanced = Math.abs(totalAssets - (totalLiabilities + totalEquity)) < 0.01
 
   const exportToCSV = () => {
+    const formattedAsOf = format(new Date(asOfDate), 'MMM dd, yyyy')
+
     const lines = [
-      'Balance Sheet',
-      `As of: ${format(new Date(asOfDate), 'MMM dd, yyyy')}`,
+      lt('Balance Sheet'),
+      lt('As of: {date}', { date: formattedAsOf }),
       '',
-      'ASSETS',
-      'Account Code,Account Name,Amount'
+      lt('ASSETS'),
+      lt('Account Code,Account Name,Amount')
     ]
 
     assets.forEach(row => {
       lines.push(`${row.account_code},${row.account_name},${row.amount.toFixed(2)}`)
     })
 
-    lines.push(`Total Assets,,${totalAssets.toFixed(2)}`)
+    lines.push(`${lt('Total Assets')},,${totalAssets.toFixed(2)}`)
     lines.push('')
-    lines.push('LIABILITIES')
-    lines.push('Account Code,Account Name,Amount')
+    lines.push(lt('LIABILITIES'))
+    lines.push(lt('Account Code,Account Name,Amount'))
 
     liabilities.forEach(row => {
       lines.push(`${row.account_code},${row.account_name},${row.amount.toFixed(2)}`)
     })
 
-    lines.push(`Total Liabilities,,${totalLiabilities.toFixed(2)}`)
+    lines.push(`${lt('Total Liabilities')},,${totalLiabilities.toFixed(2)}`)
     lines.push('')
-    lines.push('EQUITY')
-    lines.push('Account Code,Account Name,Amount')
+    lines.push(lt('EQUITY'))
+    lines.push(lt('Account Code,Account Name,Amount'))
 
     equity.forEach(row => {
       lines.push(`${row.account_code},${row.account_name},${row.amount.toFixed(2)}`)
     })
 
-    lines.push(`Total Equity,,${totalEquity.toFixed(2)}`)
+    lines.push(`${lt('Total Equity')},,${totalEquity.toFixed(2)}`)
     lines.push('')
-    lines.push(`Total Liabilities & Equity,,${(totalLiabilities + totalEquity).toFixed(2)}`)
+    lines.push(`${lt('Total Liabilities & Equity')},,${(totalLiabilities + totalEquity).toFixed(2)}`)
 
     const csv = lines.join('\n')
     const blob = new Blob([csv], { type: 'text/csv' })
@@ -113,19 +117,19 @@ export function BalanceSheetReport() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Balance Sheet</CardTitle>
+            <CardTitle>{lt('Balance Sheet')}</CardTitle>
             <CardDescription>
-              View assets, liabilities, and equity at a point in time
+              {lt('View assets, liabilities, and equity at a point in time')}
             </CardDescription>
           </div>
           <div className="flex gap-2">
             <Button onClick={() => generateBalanceSheetPDF(data, asOfDate, currentTenant?.name)} variant="outline" size="sm" disabled={data.length === 0}>
               <FileDown className="w-4 h-4 mr-2" />
-              Export PDF
+              {lt('Export PDF')}
             </Button>
             <Button onClick={exportToCSV} variant="outline" size="sm" disabled={data.length === 0}>
               <Download className="w-4 h-4 mr-2" />
-              Export CSV
+              {lt('Export CSV')}
             </Button>
           </div>
         </div>
@@ -134,7 +138,7 @@ export function BalanceSheetReport() {
         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
           <div>
-            <Label htmlFor="asOfDate">As of Date</Label>
+            <Label htmlFor="asOfDate">{lt('As of Date')}</Label>
             <Input
               id="asOfDate"
               type="date"
@@ -145,7 +149,7 @@ export function BalanceSheetReport() {
           <div className="flex items-end">
             <Button onClick={generateReport} disabled={loading} className="w-full">
               {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
-              Generate Report
+              {lt('Generate Report')}
             </Button>
           </div>
         </div>
@@ -158,35 +162,35 @@ export function BalanceSheetReport() {
         ) : data.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>No data available as of this date</p>
+            <p>{lt('No data available as of this date')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column: Assets */}
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold mb-4 text-blue-700">ASSETS</h3>
+                <h3 className="text-lg font-semibold mb-4 text-blue-700">{lt('ASSETS')}</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-2 px-2 text-sm">Code</th>
-                        <th className="text-left py-2 px-2 text-sm">Account</th>
-                        <th className="text-right py-2 px-2 text-sm">Amount</th>
+                        <th className="text-left py-2 px-2 text-sm">{lt('Code')}</th>
+                        <th className="text-left py-2 px-2 text-sm">{lt('Account')}</th>
+                        <th className="text-right py-2 px-2 text-sm">{lt('Amount')}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {assets.map((row) => (
                         <tr key={row.account_id} className="border-b hover:bg-gray-50">
                           <td className="py-2 px-2 font-mono text-xs">{row.account_code}</td>
-                          <td className="py-2 px-2 text-sm">{row.account_name}</td>
+                          <td className="py-2 px-2 text-sm">{lt(row.account_name)}</td>
                           <td className="py-2 px-2 text-right font-mono text-sm">${row.amount.toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
                       <tr className="border-t-2 border-gray-300 bg-blue-50">
-                        <td colSpan={2} className="py-2 px-2 font-semibold">Total Assets</td>
+                        <td colSpan={2} className="py-2 px-2 font-semibold">{lt('Total Assets')}</td>
                         <td className="py-2 px-2 text-right font-mono font-semibold text-blue-700">
                           ${totalAssets.toFixed(2)}
                         </td>
@@ -201,28 +205,28 @@ export function BalanceSheetReport() {
             <div className="space-y-6">
               {/* Liabilities */}
               <div>
-                <h3 className="text-lg font-semibold mb-4 text-red-700">LIABILITIES</h3>
+                <h3 className="text-lg font-semibold mb-4 text-red-700">{lt('LIABILITIES')}</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-2 px-2 text-sm">Code</th>
-                        <th className="text-left py-2 px-2 text-sm">Account</th>
-                        <th className="text-right py-2 px-2 text-sm">Amount</th>
+                        <th className="text-left py-2 px-2 text-sm">{lt('Code')}</th>
+                        <th className="text-left py-2 px-2 text-sm">{lt('Account')}</th>
+                        <th className="text-right py-2 px-2 text-sm">{lt('Amount')}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {liabilities.map((row) => (
                         <tr key={row.account_id} className="border-b hover:bg-gray-50">
                           <td className="py-2 px-2 font-mono text-xs">{row.account_code}</td>
-                          <td className="py-2 px-2 text-sm">{row.account_name}</td>
+                          <td className="py-2 px-2 text-sm">{lt(row.account_name)}</td>
                           <td className="py-2 px-2 text-right font-mono text-sm">${row.amount.toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
                       <tr className="border-t-2 border-gray-300 bg-red-50">
-                        <td colSpan={2} className="py-2 px-2 font-semibold">Total Liabilities</td>
+                        <td colSpan={2} className="py-2 px-2 font-semibold">{lt('Total Liabilities')}</td>
                         <td className="py-2 px-2 text-right font-mono font-semibold text-red-700">
                           ${totalLiabilities.toFixed(2)}
                         </td>
@@ -234,28 +238,28 @@ export function BalanceSheetReport() {
 
               {/* Equity */}
               <div>
-                <h3 className="text-lg font-semibold mb-4 text-purple-700">EQUITY</h3>
+                <h3 className="text-lg font-semibold mb-4 text-purple-700">{lt('EQUITY')}</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-2 px-2 text-sm">Code</th>
-                        <th className="text-left py-2 px-2 text-sm">Account</th>
-                        <th className="text-right py-2 px-2 text-sm">Amount</th>
+                        <th className="text-left py-2 px-2 text-sm">{lt('Code')}</th>
+                        <th className="text-left py-2 px-2 text-sm">{lt('Account')}</th>
+                        <th className="text-right py-2 px-2 text-sm">{lt('Amount')}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {equity.map((row) => (
                         <tr key={row.account_id} className="border-b hover:bg-gray-50">
                           <td className="py-2 px-2 font-mono text-xs">{row.account_code}</td>
-                          <td className="py-2 px-2 text-sm">{row.account_name}</td>
+                          <td className="py-2 px-2 text-sm">{lt(row.account_name)}</td>
                           <td className="py-2 px-2 text-right font-mono text-sm">${row.amount.toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
                       <tr className="border-t-2 border-gray-300 bg-purple-50">
-                        <td colSpan={2} className="py-2 px-2 font-semibold">Total Equity</td>
+                        <td colSpan={2} className="py-2 px-2 font-semibold">{lt('Total Equity')}</td>
                         <td className="py-2 px-2 text-right font-mono font-semibold text-purple-700">
                           ${totalEquity.toFixed(2)}
                         </td>
@@ -268,7 +272,7 @@ export function BalanceSheetReport() {
               {/* Total Liabilities & Equity */}
               <div className="p-4 bg-gray-100 rounded">
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold">Total Liabilities & Equity</span>
+                  <span className="font-semibold">{lt('Total Liabilities & Equity')}</span>
                   <span className="font-mono font-semibold">${(totalLiabilities + totalEquity).toFixed(2)}</span>
                 </div>
               </div>
@@ -279,19 +283,27 @@ export function BalanceSheetReport() {
               <div className={`p-6 rounded-lg ${isBalanced ? 'bg-green-100' : 'bg-red-100'}`}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-bold">Balance Verification</h3>
-                    <p className="text-sm text-gray-600">As of {format(new Date(asOfDate), 'MMM dd, yyyy')}</p>
+                    <h3 className="text-lg font-bold">{lt('Balance Verification')}</h3>
+                    <p className="text-sm text-gray-600">
+                      {lt('As of {date}', { date: format(new Date(asOfDate), 'MMM dd, yyyy') })}
+                    </p>
                   </div>
                   <div className="text-right">
                     {isBalanced ? (
-                      <p className="text-green-700 font-semibold text-lg">✓ Balanced</p>
+                      <p className="text-green-700 font-semibold text-lg">{lt('✓ Balanced')}</p>
                     ) : (
                       <p className="text-red-700 font-semibold text-lg">
-                        ✗ Out of Balance: ${Math.abs(totalAssets - (totalLiabilities + totalEquity)).toFixed(2)}
+                        {lt('✗ Out of Balance: {amount}', {
+                          amount: `$${Math.abs(totalAssets - (totalLiabilities + totalEquity)).toFixed(2)}`,
+                        })}
                       </p>
                     )}
                     <p className="text-sm text-gray-600 mt-1">
-                      Assets: ${totalAssets.toFixed(2)} = Liabilities: ${totalLiabilities.toFixed(2)} + Equity: ${totalEquity.toFixed(2)}
+                      {lt('Assets: {assets} = Liabilities: {liabilities} + Equity: {equity}', {
+                        assets: `$${totalAssets.toFixed(2)}`,
+                        liabilities: `$${totalLiabilities.toFixed(2)}`,
+                        equity: `$${totalEquity.toFixed(2)}`,
+                      })}
                     </p>
                   </div>
                 </div>

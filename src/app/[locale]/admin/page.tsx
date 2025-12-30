@@ -9,6 +9,8 @@ import { TranslationManagement } from '@/components/admin/translation-management
 import { AIProviderManagement } from '@/components/admin/ai-provider-management'
 import { PlatformCustomizer } from '@/components/admin/platform-customizer'
 import { ProcessingSettings } from '@/components/admin/processing-settings'
+import { SecuritySettings } from '@/components/admin/security-settings'
+import { PendingSubscriptionsAdmin } from '@/components/admin/pending-subscriptions'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
@@ -44,11 +46,13 @@ export default function AdminPage() {
           <TabsTrigger value="tenants">{t('tabs.tenants')}</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+          <TabsTrigger value="pending">Pending Subscriptions</TabsTrigger>
           <TabsTrigger value="audit">{t('tabs.audit')}</TabsTrigger>
           <TabsTrigger value="languages">{t('tabs.languages')}</TabsTrigger>
           <TabsTrigger value="translations">Translations</TabsTrigger>
           <TabsTrigger value="ai-providers">AI Providers</TabsTrigger>
-          <TabsTrigger value="processing">Processing</TabsTrigger>
+          <TabsTrigger value="processing">{t('tabs.processing')}</TabsTrigger>
+          <TabsTrigger value="security">{t('tabs.security')}</TabsTrigger>
           <TabsTrigger value="customization">Customization</TabsTrigger>
         </TabsList>
 
@@ -66,6 +70,9 @@ export default function AdminPage() {
 
         <TabsContent value="subscriptions">
           <SubscriptionManagement />
+        </TabsContent>
+        <TabsContent value="pending">
+          <PendingSubscriptionsAdmin />
         </TabsContent>
 
         <TabsContent value="audit">
@@ -86,6 +93,10 @@ export default function AdminPage() {
 
         <TabsContent value="processing">
           <ProcessingSettings />
+        </TabsContent>
+
+        <TabsContent value="security">
+          <SecuritySettings />
         </TabsContent>
 
         <TabsContent value="customization">

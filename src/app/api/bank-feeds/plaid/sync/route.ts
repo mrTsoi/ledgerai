@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getPlaidClient } from '@/lib/plaid'
@@ -16,7 +16,7 @@ function toTxType(amount: number): 'DEBIT' | 'CREDIT' {
   return amount < 0 ? 'CREDIT' : 'DEBIT'
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const supabase = await createClient()
 
   const {
@@ -177,10 +177,8 @@ export async function POST(req: Request) {
           })
 
         if (rows.length > 0) {
-          const { data: insertedCount, error: rpcError } = await (service as any).rpc(
-            'insert_bank_feed_transactions',
-            { p_rows: rows }
-          )
+          const { rpc } = await import('@/lib/supabase/typed')
+          const { data: insertedCount, error: rpcError } = await rpc('insert_bank_feed_transactions', { p_rows: rows })
 
           if (rpcError) throw rpcError
           totalInserted += Number(insertedCount || 0)

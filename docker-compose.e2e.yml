@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  stripe-mock:
+    image: stripe/stripe-mock:latest
+    container_name: stripe-mock
+    ports:
+      - "${STRIPE_PORT:-12111}:12111"
+
+  supabase-mock:
+    image: node:18
+    container_name: supabase-mock
+    working_dir: /usr/src/app
+    environment:
+      - PORT=54321
+    volumes:
+      - ./tests/e2e/supabase-mock.js:/usr/src/app/supabase-mock.js:ro
+    command: ["node", "supabase-mock.js"]
+    ports:
+      - "${SUPABASE_PORT:-54321}:54321"
+    depends_on:
+      - stripe-mock

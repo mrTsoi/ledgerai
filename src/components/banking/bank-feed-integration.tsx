@@ -1,9 +1,12 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { usePlaidLink } from 'react-plaid-link'
 import { createClient } from '@/lib/supabase/client'
 import { useTenant, useUserRole } from '@/hooks/use-tenant'
+import { useSubscription } from '@/hooks/use-subscription'
+import { useLiterals } from '@/hooks/use-literals'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,14 +30,18 @@ type WebhookKeyRow = {
 
 type BankAccountLite = {
   id: string
-  name: string | null
+  account_name: string | null
 }
 
 export function BankFeedIntegration() {
+  const lt = useLiterals()
   const { currentTenant } = useTenant()
   const userRole = useUserRole()
+  const { subscription, loading: subscriptionLoading } = useSubscription()
   const supabase = useMemo(() => createClient(), [])
   const tenantId = currentTenant?.id
+
+  const hasBankFeature = Boolean(subscription?.features?.bank_integration === true)
 
   const [connection, setConnection] = useState<ConnectionRow | null>(null)
   const [linkToken, setLinkToken] = useState<string | null>(null)
@@ -55,7 +62,16 @@ export function BankFeedIntegration() {
 
   const isMissingRelation = (e: any) => {
     const msg = String(e?.message || '').toLowerCase()
-    return msg.includes('relation') && msg.includes('does not exist')
+    const code = String(e?.code || '').toLowerCase()
+    const status = (e?.status ?? e?.statusCode ?? e?.cause?.status) as number | undefined
+
+    if (status === 404) return true
+    if (code === '42p01') return true
+    if (msg.includes('relation') && msg.includes('does not exist')) return true
+    // Supabase/PostgREST commonly returns this for missing tables/views
+    if (msg.includes('schema cache') && msg.includes('could not find the table')) return true
+    if (msg.includes('could not find the table')) return true
+    return false
   }
 
   const isPlaidNotConfigured = (e: any) => {
@@ -65,6 +81,7 @@ export function BankFeedIntegration() {
 
   const fetchConnection = useCallback(async () => {
     if (!tenantId) return
+    if (!hasBankFeature) return
 
     try {
       setLoading(true)
@@ -80,7 +97,7 @@ export function BankFeedIntegration() {
     } catch (e: any) {
       if (isMissingRelation(e)) {
         setConnection(null)
-        setPlaidUiMessage('Bank feed tables are not installed yet.')
+        setPlaidUiMessage(lt('Bank feed tables are not installed yet.'))
         return
       }
 
@@ -88,10 +105,12 @@ export function BankFeedIntegration() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, tenantId])
+  }, [supabase, tenantId, lt, hasBankFeature])
+  
 
   const fetchWebhookKey = useCallback(async () => {
     if (!tenantId || !canManage) return
+    if (!hasBankFeature) return
 
     try {
       const { data, error } = await (supabase.from('bank_feed_api_keys') as any)
@@ -111,10 +130,11 @@ export function BankFeedIntegration() {
 
       setWebhookKeyRow(null)
     }
-  }, [supabase, tenantId, canManage])
+  }, [supabase, tenantId, canManage, hasBankFeature])
 
   const fetchLinkToken = useCallback(async () => {
     if (!tenantId) return
+    if (!hasBankFeature) return
 
     try {
       const res = await fetch('/api/bank-feeds/plaid/link-token', {
@@ -124,7 +144,7 @@ export function BankFeedIntegration() {
       })
 
       const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to create link token')
+      if (!res.ok) throw new Error(json?.error || lt('Failed to create link token'))
 
       setLinkToken(json.link_token)
       setPlaidConfigured(true)
@@ -132,14 +152,14 @@ export function BankFeedIntegration() {
     } catch (e: any) {
       if (isPlaidNotConfigured(e)) {
         setPlaidConfigured(false)
-        setPlaidUiMessage('Plaid is not configured for this environment.')
+        setPlaidUiMessage(lt('Plaid is not configured for this environment.'))
         return
       }
 
       setPlaidConfigured(null)
-      setPlaidUiMessage(e?.message || 'Failed to start Plaid connection')
+      setPlaidUiMessage(e?.message || lt('Failed to start Plaid connection'))
     }
-  }, [tenantId])
+  }, [tenantId, lt, hasBankFeature])
 
   useEffect(() => {
     fetchConnection()
@@ -157,10 +177,11 @@ export function BankFeedIntegration() {
 
   const fetchTestAccount = useCallback(async () => {
     if (!tenantId || !canManage) return
+    if (!hasBankFeature) return
 
     try {
       const { data, error } = await (supabase.from('bank_accounts') as any)
-        .select('id, name')
+        .select('id, account_name')
         .eq('tenant_id', tenantId)
         .order('created_at', { ascending: true })
         .limit(1)
@@ -171,7 +192,7 @@ export function BankFeedIntegration() {
       console.error('Error fetching bank accounts for webhook test:', e)
       setTestAccount(null)
     }
-  }, [supabase, tenantId, canManage])
+  }, [supabase, tenantId, canManage, hasBankFeature])
 
   useEffect(() => {
     fetchTestAccount()
@@ -190,17 +211,17 @@ export function BankFeedIntegration() {
         })
 
         const json = await res.json()
-        if (!res.ok) throw new Error(json?.error || 'Failed to connect')
+        if (!res.ok) throw new Error(json?.error || lt('Failed to connect'))
 
-        toast.success('Bank feed connected')
+        toast.success(lt('Bank feed connected'))
         await fetchConnection()
       } catch (e: any) {
-        toast.error(e.message || 'Failed to connect bank feed')
+        toast.error(e?.message || lt('Failed to connect bank feed'))
       } finally {
         setWorking(false)
       }
     },
-    [tenantId, fetchConnection]
+    [tenantId, fetchConnection, lt]
   )
 
   const { open, ready } = usePlaidLink({
@@ -210,6 +231,7 @@ export function BankFeedIntegration() {
 
   const startPlaidConnect = async () => {
     if (!tenantId || !canManage) return
+    if (!hasBankFeature) return
 
     setPendingPlaidOpen(true)
 
@@ -232,6 +254,7 @@ export function BankFeedIntegration() {
 
   const syncNow = async () => {
     if (!tenantId) return
+    if (!hasBankFeature) return
 
     try {
       setWorking(true)
@@ -242,12 +265,16 @@ export function BankFeedIntegration() {
       })
 
       const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Sync failed')
+      if (!res.ok) throw new Error(json?.error || lt('Sync failed'))
 
-      toast.success(`Synced. Inserted ${json.inserted ?? 0} transactions.`)
+      toast.success(
+        lt('Synced. Inserted {count} transactions.', {
+          count: json.inserted ?? 0,
+        })
+      )
       await fetchConnection()
     } catch (e: any) {
-      toast.error(e.message || 'Failed to sync transactions')
+      toast.error(e?.message || lt('Failed to sync transactions'))
     } finally {
       setWorking(false)
     }
@@ -255,6 +282,7 @@ export function BankFeedIntegration() {
 
   const rotateWebhookKey = async () => {
     if (!tenantId) return
+    if (!hasBankFeature) return
 
     try {
       setWorking(true)
@@ -267,13 +295,13 @@ export function BankFeedIntegration() {
       })
 
       const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to rotate key')
+      if (!res.ok) throw new Error(json?.error || lt('Failed to rotate key'))
 
       setGeneratedWebhookKey(json.api_key)
-      toast.success('Webhook API key rotated')
+      toast.success(lt('Webhook API key rotated'))
       await fetchWebhookKey()
     } catch (e: any) {
-      toast.error(e.message || 'Failed to rotate webhook key')
+      toast.error(e?.message || lt('Failed to rotate webhook key'))
     } finally {
       setWorking(false)
     }
@@ -284,20 +312,21 @@ export function BankFeedIntegration() {
 
     try {
       await navigator.clipboard.writeText(generatedWebhookKey)
-      toast.success('Copied API key')
+      toast.success(lt('Copied API key'))
     } catch {
-      toast.error('Failed to copy')
+      toast.error(lt('Failed to copy'))
     }
   }
 
   const sendTestWebhook = async () => {
     if (!tenantId) return
+    if (!hasBankFeature) return
     if (!testApiKey.trim()) {
-      toast.error('Enter an API key to test')
+      toast.error(lt('Enter an API key to test'))
       return
     }
     if (!testAccount?.id) {
-      toast.error('Create a bank account first')
+      toast.error(lt('Create a bank account first'))
       return
     }
 
@@ -333,11 +362,15 @@ export function BankFeedIntegration() {
       })
 
       const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Webhook test failed')
+      if (!res.ok) throw new Error(json?.error || lt('Webhook test failed'))
 
-      toast.success(`Webhook OK. Inserted ${json.inserted ?? 0} transaction(s).`)
+      toast.success(
+        lt('Webhook OK. Inserted {count} transaction(s).', {
+          count: json.inserted ?? 0,
+        })
+      )
     } catch (e: any) {
-      toast.error(e.message || 'Webhook test failed')
+      toast.error(e?.message || lt('Webhook test failed'))
     } finally {
       setWorking(false)
     }
@@ -369,40 +402,77 @@ export function BankFeedIntegration() {
     ].join('\n')
   }, [testApiKey, tenantId, testAccount?.id])
 
+  if (subscriptionLoading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center p-6">
+          <div className="text-sm text-muted-foreground">{lt('Checking your subscription...')}</div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!hasBankFeature) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{lt('Bank Feed Integration')}</CardTitle>
+          <CardDescription>{lt('Subscription Required')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-muted-foreground">
+            {lt('Bank feeds are available only on paid plans that include this feature. Please upgrade your subscription or contact your tenant administrator.')}
+          </div>
+          <div className="mt-4">
+            <Link href="/dashboard/settings?tab=billing" className="no-underline">
+              <Button>{lt('Upgrade')}</Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Bank Feed Integration</CardTitle>
-          <CardDescription>Connect Plaid to automatically fetch bank transactions.</CardDescription>
+          <CardTitle>{lt('Bank Feed Integration')}</CardTitle>
+          <CardDescription>{lt('Connect Plaid to automatically fetch bank transactions.')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {!canManage ? (
             <div className="text-sm text-muted-foreground">
-              Only Company Admins can connect bank feeds.
+              {lt('Only Company Admins can connect bank feeds.')}
             </div>
           ) : loading ? (
-            <div className="text-sm text-muted-foreground">Loading…</div>
+            <div className="text-sm text-muted-foreground">{lt('Loading…')}</div>
           ) : connection ? (
             <div className="space-y-3">
               <div className="text-sm">
-                <div>Status: {connection.status}</div>
+                <div>{lt('Status: {status}', { status: connection.status })}</div>
                 {connection.last_synced_at && (
-                  <div>Last synced: {new Date(connection.last_synced_at).toLocaleString()}</div>
+                  <div>
+                    {lt('Last synced: {date}', {
+                      date: new Date(connection.last_synced_at).toLocaleString(),
+                    })}
+                  </div>
                 )}
                 {connection.error_message && (
-                  <div className="text-destructive">Error: {connection.error_message}</div>
+                  <div className="text-destructive">
+                    {lt('Error: {message}', { message: connection.error_message })}
+                  </div>
                 )}
               </div>
               <div className="flex gap-2">
                 <Button onClick={syncNow} disabled={working}>
-                  Sync Now
+                  {lt('Sync Now')}
                 </Button>
               </div>
             </div>
           ) : (
             <div className="space-y-3">
-              <div className="text-sm text-muted-foreground">No Plaid connection yet.</div>
+              <div className="text-sm text-muted-foreground">{lt('No Plaid connection yet.')}</div>
               {plaidUiMessage ? (
                 <div className="text-sm text-muted-foreground">{plaidUiMessage}</div>
               ) : null}
@@ -410,7 +480,7 @@ export function BankFeedIntegration() {
                 onClick={startPlaidConnect}
                 disabled={working || (plaidConfigured === false)}
               >
-                Connect Plaid
+                {lt('Connect Plaid')}
               </Button>
             </div>
           )}
@@ -419,66 +489,75 @@ export function BankFeedIntegration() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Webhook Ingestion (Global)</CardTitle>
+          <CardTitle>{lt('Webhook Ingestion (Global)')}</CardTitle>
           <CardDescription>
-            Use this when your bank-data provider can push transactions via webhook (works in regions where OAuth connectors don’t).
+            {lt(
+              'Use this when your bank-data provider can push transactions via webhook (works in regions where OAuth connectors don’t).'
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {!canManage ? (
             <div className="text-sm text-muted-foreground">
-              Only Company Admins can manage webhook API keys.
+              {lt('Only Company Admins can manage webhook API keys.')}
             </div>
           ) : (
             <>
               <div className="space-y-2 text-sm">
                 <div>
-                  Endpoint: <span className="font-mono">/api/banking/webhook</span>
+                  {lt('Endpoint:')} <span className="font-mono">/api/banking/webhook</span>
                 </div>
                 <div>
-                  Header: <span className="font-mono">x-ledgerai-tenant-api-key</span>
+                  {lt('Header:')} <span className="font-mono">x-ledgerai-tenant-api-key</span>
                 </div>
                 {webhookKeyRow ? (
                   <div className="text-muted-foreground">
-                    Active key prefix: <span className="font-mono">{webhookKeyRow.key_prefix}</span>
+                    {lt('Active key prefix:')} <span className="font-mono">{webhookKeyRow.key_prefix}</span>
                     {webhookKeyRow.last_used_at ? (
-                      <> • last used {new Date(webhookKeyRow.last_used_at).toLocaleString()}</>
+                      <>
+                        {' '}
+                        •{' '}
+                        {lt('last used {date}', {
+                          date: new Date(webhookKeyRow.last_used_at).toLocaleString(),
+                        })}
+                      </>
                     ) : null}
                   </div>
                 ) : (
-                  <div className="text-muted-foreground">No webhook key yet.</div>
+                  <div className="text-muted-foreground">{lt('No webhook key yet.')}</div>
                 )}
                 {testAccount?.id ? (
                   <div className="text-muted-foreground">
-                    Test bank account: <span className="font-mono">{testAccount.name || testAccount.id}</span>
+                    {lt('Test bank account:')}{' '}
+                    <span className="font-mono">{testAccount.account_name || testAccount.id}</span>
                   </div>
                 ) : (
                   <div className="text-muted-foreground">
-                    Test requires at least one bank account.
+                    {lt('Test requires at least one bank account.')}
                   </div>
                 )}
               </div>
 
               <div className="flex flex-wrap gap-2">
                 <Button variant="outline" onClick={rotateWebhookKey} disabled={working}>
-                  {webhookKeyRow ? 'Rotate API Key' : 'Generate API Key'}
+                  {webhookKeyRow ? lt('Rotate API Key') : lt('Generate API Key')}
                 </Button>
                 {generatedWebhookKey ? (
                   <Button onClick={copyGeneratedKey} disabled={working}>
-                    Copy Key
+                    {lt('Copy Key')}
                   </Button>
                 ) : null}
               </div>
 
               {generatedWebhookKey ? (
                 <div className="rounded-md border p-3 text-sm">
-                  <div className="mb-2 font-medium">New API key (shown once)</div>
+                  <div className="mb-2 font-medium">{lt('New API key (shown once)')}</div>
                   <div className="font-mono break-all">{generatedWebhookKey}</div>
                 </div>
               ) : null}
 
               <div className="grid gap-2">
-                <Label htmlFor="bank-feed-test-key">API key for test</Label>
+                <Label htmlFor="bank-feed-test-key">{lt('API key for test')}</Label>
                 <Input
                   id="bank-feed-test-key"
                   value={testApiKey}
@@ -487,20 +566,22 @@ export function BankFeedIntegration() {
                 />
                 <div className="flex flex-wrap gap-2">
                   <Button onClick={sendTestWebhook} disabled={working || !canManage}>
-                    Send Test Webhook
+                    {lt('Send Test Webhook')}
                   </Button>
                 </div>
               </div>
 
               <div className="rounded-md border p-3">
-                <div className="mb-2 text-sm font-medium">curl example</div>
+                <div className="mb-2 text-sm font-medium">{lt('curl example')}</div>
                 <pre className="whitespace-pre-wrap break-words text-xs text-muted-foreground">
                   {curlSnippet}
                 </pre>
               </div>
 
               <div className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
-                Payload must include <span className="font-mono">tenant_id</span>, <span className="font-mono">bank_account_id</span>, <span className="font-mono">provider</span>, and <span className="font-mono">transactions</span>.
+                {lt('Payload must include')}{' '}
+                <span className="font-mono">tenant_id</span>, <span className="font-mono">bank_account_id</span>, <span className="font-mono">provider</span>, {lt('and')}{' '}
+                <span className="font-mono">transactions</span>.
               </div>
             </>
           )}

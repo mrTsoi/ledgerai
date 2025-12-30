@@ -6,6 +6,19 @@ import { userHasFeature } from '@/lib/subscription/server'
 /**
  * POST /api/documents/process
  * Trigger AI processing for a document
+ *
+ * Request body: { documentId: string }
+ * Response: {
+ *   success: boolean,
+ *   message: string,
+ *   documentId: string,
+ *   validationStatus?: string, // e.g. 'COMPLETE' | 'NEEDS_REVIEW'
+ *   validationFlags?: string[], // e.g. ['DUPLICATE_DOCUMENT','WRONG_TENANT']
+ *   tenantCandidates?: Array<object>,
+ *   isMultiTenant?: boolean,
+ *   tenantCorrection?: object,
+ *   recordsCreated?: boolean // IMPORTANT: false indicates the processor skipped creating ledger/bank records (e.g. duplicate without existing transaction or unresolved wrong-tenant). UI should surface review/override actions.
+ * }
  */
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      const ok = await userHasFeature(supabase as any, user.id, 'ai_access')
+      const ok = await userHasFeature(supabase, user.id, 'ai_access')
       if (!ok) {
         return NextResponse.json({ error: 'AI automation is not available on your plan' }, { status: 403 })
       }
@@ -59,7 +72,7 @@ export async function POST(request: NextRequest) {
       .from('memberships')
       .select('*')
       .eq('user_id', user.id)
-      .eq('tenant_id', (document as any).tenant_id)
+      .eq('tenant_id', document.tenant_id)
       .eq('is_active', true)
       .single()
 
@@ -86,7 +99,11 @@ export async function POST(request: NextRequest) {
       message: 'Document processed successfully',
       documentId,
       validationStatus: result.validationStatus,
-      validationFlags: result.validationFlags
+      validationFlags: result.validationFlags,
+      tenantCandidates: result.tenantCandidates ?? [],
+      isMultiTenant: result.isMultiTenant ?? false,
+      tenantCorrection: result.tenantCorrection ?? { actionTaken: 'NONE' },
+      recordsCreated: result.recordsCreated ?? true
     })
 
   } catch (error) {

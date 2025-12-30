@@ -500,6 +500,12 @@ WHERE user_id = '<your-user-id>';
 # Development
 npm run dev          # Start development server
 
+
+## Testing notes
+
+- `use-batch-config` behavior: the hook fetches batch configuration from `/api/batch-processing/config` using an absolute URL constructed from `window.location.origin` in the browser. In server or test environments where `window` is not available, the hook will attempt to use `NEXT_PUBLIC_BASE_URL`, `NEXT_PUBLIC_APP_URL`, or `VERCEL_URL` to build the URL. If none are available (common in Node-based tests), the hook skips the network fetch and falls back to safe defaults (e.g. `batchSize = 5`).
+
+- If you want tests to exercise real network behavior, set `NEXT_PUBLIC_BASE_URL` (or `NEXT_PUBLIC_APP_URL`) in your test environment to a valid URL.
 # Production
 npm run build        # Build for production
 npm run start        # Start production server

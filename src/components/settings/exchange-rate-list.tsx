@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Loader2, Plus, Trash2, Save, X } from 'lucide-react'
 import { Database } from '@/types/database.types'
 import { toast } from "sonner"
+import { useLiterals } from '@/hooks/use-literals'
 
 type ExchangeRate = Database['public']['Tables']['exchange_rates']['Row']
 
@@ -25,6 +26,7 @@ const SUPPORTED_CURRENCIES = [
 ]
 
 export function ExchangeRateList() {
+  const lt = useLiterals()
   const { currentTenant } = useTenant()
   const userRole = useUserRole()
   const tenantId = currentTenant?.id
@@ -40,7 +42,7 @@ export function ExchangeRateList() {
   })
 
   const canEdit = userRole === 'COMPANY_ADMIN' || userRole === 'SUPER_ADMIN' || userRole === 'ACCOUNTANT'
-  const baseCurrency = (currentTenant as any)?.currency || 'USD'
+  const baseCurrency = currentTenant?.currency || 'USD'
 
   const fetchRates = useCallback(async () => {
     if (!tenantId) return
@@ -49,14 +51,14 @@ export function ExchangeRateList() {
       setLoading(true)
       const res = await fetch(`/api/exchange-rates?tenant_id=${encodeURIComponent(tenantId)}`)
       const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to load exchange rates')
+      if (!res.ok) throw new Error(json?.error || lt('Failed to load exchange rates'))
       setRates(json?.rates || [])
     } catch (error) {
       console.error('Error fetching rates:', error)
     } finally {
       setLoading(false)
     }
-  }, [tenantId])
+  }, [tenantId, lt])
 
   useEffect(() => {
     if (tenantId) {
@@ -79,30 +81,30 @@ export function ExchangeRateList() {
         }),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to add rate')
+      if (!res.ok) throw new Error(json?.error || lt('Failed to add rate'))
       
       await fetchRates()
       setIsAdding(false)
       setNewRate({ currency: 'EUR', rate: '' })
-      toast.success('Exchange rate added successfully')
+      toast.success(lt('Exchange rate added successfully'))
     } catch (error: any) {
-      toast.error('Failed to add rate: ' + error.message)
+      toast.error(lt('Failed to add rate: {message}', { message: error.message }))
     } finally {
       setSaving(false)
     }
   }
 
   const handleDeleteRate = async (id: string) => {
-    if (!confirm('Are you sure you want to remove this custom exchange rate?')) return
+    if (!confirm(lt('Are you sure you want to remove this custom exchange rate?'))) return
 
     try {
       const res = await fetch(`/api/exchange-rates?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
       const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to delete rate')
+      if (!res.ok) throw new Error(json?.error || lt('Failed to delete rate'))
       await fetchRates()
-      toast.success('Exchange rate deleted successfully')
+      toast.success(lt('Exchange rate deleted successfully'))
     } catch (error: any) {
-      toast.error('Failed to delete rate: ' + error.message)
+      toast.error(lt('Failed to delete rate: {message}', { message: error.message }))
     }
   }
 
@@ -114,11 +116,11 @@ export function ExchangeRateList() {
         body: JSON.stringify({ id, rate: newRateValue }),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to update rate')
+      if (!res.ok) throw new Error(json?.error || lt('Failed to update rate'))
       await fetchRates()
-      toast.success('Exchange rate updated successfully')
+      toast.success(lt('Exchange rate updated successfully'))
     } catch (error: any) {
-      toast.error('Failed to update rate: ' + error.message)
+      toast.error(lt('Failed to update rate: {message}', { message: error.message }))
     }
   }
 
@@ -135,13 +137,13 @@ export function ExchangeRateList() {
         <div>
           <CardTitle>Exchange Rates</CardTitle>
           <CardDescription>
-            Manage custom exchange rates relative to your base currency ({baseCurrency}).
+            {lt('Manage custom exchange rates relative to your base currency ({baseCurrency}).', { baseCurrency })}
           </CardDescription>
         </div>
         {canEdit && !isAdding && (
           <Button onClick={() => setIsAdding(true)} size="sm">
             <Plus className="w-4 h-4 mr-2" />
-            Add Rate
+            {lt('Add Rate')}
           </Button>
         )}
       </CardHeader>
@@ -149,9 +151,9 @@ export function ExchangeRateList() {
         <div className="space-y-4">
           {/* Header */}
           <div className="grid grid-cols-3 gap-4 font-medium text-sm text-gray-500 pb-2 border-b">
-            <div>Currency</div>
-            <div>Rate (1 Unit = ? {baseCurrency})</div>
-            <div className="text-right">Actions</div>
+            <div>{lt('Currency')}</div>
+            <div>{lt('Rate (1 Unit = ? {baseCurrency})', { baseCurrency })}</div>
+            <div className="text-right">{lt('Actions')}</div>
           </div>
 
           {/* List */}
@@ -193,7 +195,7 @@ export function ExchangeRateList() {
 
           {rates.length === 0 && !isAdding && (
             <div className="text-center py-4 text-gray-500 text-sm">
-              No custom exchange rates defined. System defaults will be used.
+              {lt('No custom exchange rates defined. System defaults will be used.')}
             </div>
           )}
 
@@ -215,7 +217,7 @@ export function ExchangeRateList() {
                 <Input
                   type="number"
                   step="0.000001"
-                  placeholder="Rate"
+                  placeholder={lt('Rate')}
                   value={newRate.rate}
                   onChange={(e) => setNewRate({ ...newRate, rate: e.target.value })}
                   className="h-9"

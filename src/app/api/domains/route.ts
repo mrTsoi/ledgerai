@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { userHasFeature } from '@/lib/subscription/server'
 
 export const runtime = 'nodejs'
 
@@ -16,11 +17,19 @@ export async function GET(req: Request) {
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  try {
+    const ok = await userHasFeature(supabase as any, user.id, 'custom_domain')
+    if (!ok) return NextResponse.json({ error: 'Custom domains are not available on your plan' }, { status: 403 })
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+  }
+
   const url = new URL(req.url)
   const tenantId = url.searchParams.get('tenant_id')
   if (!tenantId) return badRequest('tenant_id is required')
 
-  const { data, error } = await (supabase.from('tenant_domains') as any)
+  const { data, error } = await supabase
+    .from('tenant_domains')
     .select('id, tenant_id, domain, is_primary, verified_at, verification_token, created_at')
     .eq('tenant_id', tenantId)
     .order('created_at', { ascending: false })
@@ -42,9 +51,16 @@ export async function POST(req: Request) {
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  try {
+    const ok = await userHasFeature(supabase as any, user.id, 'custom_domain')
+    if (!ok) return NextResponse.json({ error: 'Custom domains are not available on your plan' }, { status: 403 })
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+  }
+
   let body: { tenant_id?: string; domain?: string }
   try {
-    body = (await req.json()) as any
+    body = (await req.json()) as unknown as { tenant_id?: string; domain?: string }
   } catch {
     return badRequest('Invalid JSON body')
   }
@@ -62,10 +78,7 @@ export async function POST(req: Request) {
   }
 
   // Determine if this is the first domain for the tenant (make it primary).
-  const { data: existing, error: existingError } = await (supabase.from('tenant_domains') as any)
-    .select('id')
-    .eq('tenant_id', tenantId)
-    .limit(1)
+  const { data: existing, error: existingError } = await supabase.from('tenant_domains').select('id').eq('tenant_id', tenantId).limit(1)
 
   if (existingError) {
     const status = existingError.code === 'PGRST205' ? 500 : 400
@@ -74,7 +87,7 @@ export async function POST(req: Request) {
 
   const isPrimary = !existing || existing.length === 0
 
-  const { error: insertError } = await (supabase.from('tenant_domains') as any).insert({
+  const { error: insertError } = await supabase.from('tenant_domains').insert({
     tenant_id: tenantId,
     domain,
     is_primary: isPrimary,
@@ -97,11 +110,18 @@ export async function DELETE(req: Request) {
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  try {
+    const ok = await userHasFeature(supabase as any, user.id, 'custom_domain')
+    if (!ok) return NextResponse.json({ error: 'Custom domains are not available on your plan' }, { status: 403 })
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+  }
+
   const url = new URL(req.url)
   const id = url.searchParams.get('id')
   if (!id) return badRequest('id is required')
 
-  const { error } = await (supabase.from('tenant_domains') as any).delete().eq('id', id)
+  const { error } = await supabase.from('tenant_domains').delete().eq('id', id)
 
   if (error) {
     const status = error.code === 'PGRST205' ? 500 : 400

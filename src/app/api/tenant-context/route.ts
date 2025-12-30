@@ -17,7 +17,8 @@ export async function GET(req: Request) {
 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: membershipData, error: membershipError } = await (supabase.from('memberships') as any)
+  const { data: membershipData, error: membershipError } = await supabase
+    .from('memberships')
     .select('*')
     .eq('user_id', user.id)
 
@@ -26,11 +27,13 @@ export async function GET(req: Request) {
   }
 
   const activeMemberships = (membershipData || []).filter((m: any) => m?.is_active !== false)
-  const isSuperAdmin = activeMemberships.some((m: any) => m?.role === 'SUPER_ADMIN')
+
+  const { data: isSuperAdminRaw } = await (supabase as any).rpc('is_super_admin')
+  const isSuperAdmin = isSuperAdminRaw === true
 
   let tenants: any[] = []
   if (isSuperAdmin) {
-    const { data, error } = await (supabase.from('tenants') as any).select('*').order('name')
+    const { data, error } = await supabase.from('tenants').select('*').order('name')
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
     tenants = data || []
   } else {
@@ -39,7 +42,7 @@ export async function GET(req: Request) {
       .filter((id: any) => typeof id === 'string' && id.length > 0)
 
     if (tenantIds.length > 0) {
-      const { data, error } = await (supabase.from('tenants') as any).select('*').in('id', tenantIds)
+      const { data, error } = await supabase.from('tenants').select('*').in('id', tenantIds)
       if (error) return NextResponse.json({ error: error.message }, { status: 400 })
       tenants = data || []
     }
@@ -51,14 +54,15 @@ export async function GET(req: Request) {
   let mapped_tenant_id: string | null = null
 
   if (hostname && !isLocalHostname(hostname)) {
-    const { data: domainRow, error: domainError } = await (supabase.from('tenant_domains') as any)
+    const { data: domainRow, error: domainError } = await supabase
+      .from('tenant_domains')
       .select('tenant_id, verified_at')
       .eq('domain', hostname)
       .maybeSingle()
 
     if (!domainError) {
-      const verifiedAt = (domainRow as any)?.verified_at as string | null | undefined
-      const tenantId = (domainRow as any)?.tenant_id as string | undefined
+      const verifiedAt = (domainRow as { verified_at?: string } | null)?.verified_at as string | null | undefined
+      const tenantId = (domainRow as { tenant_id?: string } | null)?.tenant_id as string | undefined
 
       if (verifiedAt && tenantId) {
         const allowed = isSuperAdmin || tenants.some((t: any) => t?.id === tenantId)

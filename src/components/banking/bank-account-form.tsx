@@ -10,6 +10,9 @@ import { X, Loader2, Save } from 'lucide-react'
 import { useTenant } from '@/hooks/use-tenant'
 import { CurrencySelect } from '@/components/ui/currency-select'
 import { toast } from "sonner"
+import { useLiterals } from '@/hooks/use-literals'
+import { useLocale } from 'next-intl'
+import { fetchEntityTranslationMap, overlayEntityTranslations } from '@/lib/i18n/entity-translations'
 
 type BankAccount = Database['public']['Tables']['bank_accounts']['Row']
 type ChartOfAccount = Database['public']['Tables']['chart_of_accounts']['Row']
@@ -24,6 +27,9 @@ export function BankAccountForm({ onClose, onSaved, initialData }: Props) {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [accounts, setAccounts] = useState<ChartOfAccount[]>([])
+
+  const lt = useLiterals()
+  const locale = useLocale()
   
   const [formData, setFormData] = useState({
     account_name: initialData?.account_name || '',
@@ -50,13 +56,26 @@ export function BankAccountForm({ onClose, onSaved, initialData }: Props) {
         .order('code')
 
       if (error) throw error
-      setAccounts(data || [])
+      const base = (data || []) as ChartOfAccount[]
+
+      if (locale && locale !== 'en' && base.length > 0) {
+        const translationMap = await fetchEntityTranslationMap(supabase, {
+          tenantId,
+          entityType: 'chart_of_accounts',
+          entityIds: base.map((a) => a.id),
+          locale,
+          fields: ['name', 'description']
+        })
+        setAccounts(overlayEntityTranslations(base, translationMap, ['name', 'description']))
+      } else {
+        setAccounts(base)
+      }
     } catch (error) {
       console.error('Error fetching accounts:', error)
     } finally {
       setLoading(false)
     }
-  }, [supabase, tenantId])
+  }, [supabase, tenantId, locale])
 
   useEffect(() => {
     fetchChartOfAccounts()
@@ -65,7 +84,7 @@ export function BankAccountForm({ onClose, onSaved, initialData }: Props) {
   const handleSave = async () => {
     if (!tenantId) return
     if (!formData.account_name) {
-      toast.error('Account Name is required')
+      toast.error(lt('Account Name is required'))
       return
     }
 
@@ -100,10 +119,10 @@ export function BankAccountForm({ onClose, onSaved, initialData }: Props) {
 
       onSaved()
       onClose()
-      toast.success('Bank account saved successfully')
+      toast.success(lt('Bank account saved successfully'))
     } catch (error: any) {
       console.error('Error saving bank account:', error)
-      toast.error('Failed to save: ' + error.message)
+      toast.error(lt('Failed to save: {message}', { message: error.message }))
     } finally {
       setSaving(false)
     }
@@ -114,7 +133,7 @@ export function BankAccountForm({ onClose, onSaved, initialData }: Props) {
       <div className="bg-white w-full max-w-md rounded-lg shadow-xl overflow-hidden">
         <div className="p-4 border-b flex items-center justify-between bg-gray-50">
           <h2 className="font-semibold text-lg">
-            {initialData ? 'Edit Bank Account' : 'Add Bank Account'}
+            {initialData ? lt('Edit Bank Account') : lt('Add Bank Account')}
           </h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
             <X className="w-5 h-5" />
@@ -123,76 +142,76 @@ export function BankAccountForm({ onClose, onSaved, initialData }: Props) {
 
         <div className="p-6 space-y-4">
           <div className="space-y-2">
-            <Label>Account Name *</Label>
+            <Label>{lt('Account Name')} *</Label>
             <Input 
               value={formData.account_name}
               onChange={e => setFormData({...formData, account_name: e.target.value})}
-              placeholder="e.g. Chase Operating"
+              placeholder={lt('e.g. Chase Operating')}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Bank Name</Label>
+            <Label>{lt('Bank Name')}</Label>
             <Input 
               value={formData.bank_name}
               onChange={e => setFormData({...formData, bank_name: e.target.value})}
-              placeholder="e.g. Chase Bank"
+              placeholder={lt('e.g. Chase Bank')}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Account Number (Last 4)</Label>
+              <Label>{lt('Account Number (Last 4)')}</Label>
               <Input 
                 value={formData.account_number}
                 onChange={e => setFormData({...formData, account_number: e.target.value})}
-                placeholder="1234"
+                placeholder={lt('1234')}
                 maxLength={4}
               />
             </div>
             <div className="space-y-2">
-              <Label>Currency</Label>
+              <Label>{lt('Currency')}</Label>
               <CurrencySelect 
                 value={formData.currency}
-                onChange={value => setFormData({...formData, currency: value})}
+                onChange={value => setFormData({...formData, currency: lt(value)})}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label>Linked GL Account (Asset)</Label>
+            <Label>{lt('Linked GL Account (Asset)')}</Label>
             <select 
               className="w-full p-2 border rounded-md text-sm"
               value={formData.gl_account_id}
               onChange={e => setFormData({...formData, gl_account_id: e.target.value})}
             >
-              <option value="">-- Select Account --</option>
+              <option value="">{lt('-- Select Account --')}</option>
               {accounts.map(acc => (
                 <option key={acc.id} value={acc.id}>
-                  {acc.code} - {acc.name}
+                  {acc.code} - {lt(acc.name)}
                 </option>
               ))}
             </select>
             <p className="text-xs text-gray-500">
-              Select the General Ledger asset account that represents this bank account.
+              {lt('Select the General Ledger asset account that represents this bank account.')}
             </p>
           </div>
         </div>
 
         <div className="p-4 border-t bg-gray-50 flex justify-end gap-3">
           <Button variant="outline" onClick={onClose} disabled={saving}>
-            Cancel
+            {lt('Cancel')}
           </Button>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
+                {lt('Saving...')}
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Save Account
+                {lt('Save Account')}
               </>
             )}
           </Button>

@@ -42,7 +42,7 @@ RETURNS void AS $$
 BEGIN
   REFRESH MATERIALIZED VIEW account_balances;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ============================================================================
 -- 2. FUNCTION: Get Trial Balance
@@ -90,7 +90,7 @@ BEGIN
   GROUP BY coa.id, coa.code, coa.name, coa.account_type, coa.account_subtype
   ORDER BY coa.code;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ============================================================================
 -- 3. FUNCTION: Get Profit & Loss Statement
@@ -146,7 +146,7 @@ BEGIN
   ) != 0
   ORDER BY coa.account_type DESC, coa.code;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ============================================================================
 -- 4. FUNCTION: Get Balance Sheet
@@ -196,7 +196,7 @@ BEGIN
     END,
     coa.code;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+  $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ============================================================================
 -- 5. FUNCTION: Calculate Net Income for Period
@@ -249,7 +249,7 @@ BEGIN
 
   RETURN v_total_revenue - v_total_expense;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ============================================================================
 -- 6. FUNCTION: Get Account Activity Detail
@@ -298,7 +298,7 @@ BEGIN
     SUM(debit - credit) OVER (ORDER BY transaction_date, id)::DECIMAL(15,2) as running_balance
   FROM activity;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ============================================================================
 -- 7. TABLE: Report Templates (for future custom reports)

@@ -37,7 +37,7 @@ BEGIN
   GROUP BY dates.d
   ORDER BY dates.d;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Function to get subscription revenue stats
 CREATE OR REPLACE FUNCTION get_subscription_stats()
@@ -80,7 +80,7 @@ BEGIN
 
   RETURN QUERY SELECT v_total_mrr, v_active_subs, COALESCE(v_breakdown, '[]'::json);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Grant access to Super Admins
 -- (RLS is already enabled, but functions need to be accessible)

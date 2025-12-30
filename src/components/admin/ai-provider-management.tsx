@@ -9,9 +9,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
 import { Loader2, ShieldAlert, Settings2, Star } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { useLiterals } from '@/hooks/use-literals'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 type AIProvider = Database['public']['Tables']['ai_providers']['Row'] & {
   current_month_calls?: number
@@ -21,18 +24,38 @@ type AIProvider = Database['public']['Tables']['ai_providers']['Row'] & {
 }
 
 export function AIProviderManagement() {
+  const lt = useLiterals()
   const supabase = useMemo(() => createClient(), [])
   const [providers, setProviders] = useState<AIProvider[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [assignments, setAssignments] = useState<Record<string, string | null>>({})
+  const [platformDefaultProviderId, setPlatformDefaultProviderId] = useState<string | null>(null)
   const [editingProvider, setEditingProvider] = useState<AIProvider | null>(null)
   const [editConfigJson, setEditConfigJson] = useState('')
   const [editApiKey, setEditApiKey] = useState('')
   const [editIsDefault, setEditIsDefault] = useState(false)
+  const [editDefaultModel, setEditDefaultModel] = useState('')
   const [editPerMinute, setEditPerMinute] = useState<number | ''>('')
   const [editPerHour, setEditPerHour] = useState<number | ''>('')
   const [editPerDay, setEditPerDay] = useState<number | ''>('')
+
+  const fetchPlatformDefaultProvider = useCallback(async () => {
+    try {
+      const { data, error } = await (supabase.from('system_settings') as any)
+        .select('setting_value')
+        .eq('setting_key', 'ai_default_provider')
+        .maybeSingle()
+
+      if (error) throw error
+      const id = (data as any)?.setting_value?.ai_provider_id
+      setPlatformDefaultProviderId(typeof id === 'string' && id.trim() ? id : null)
+    } catch (err) {
+      // Best-effort; don't block the page if the setting is missing or RLS blocks.
+      console.warn('Platform default AI provider setting not available:', err)
+    }
+  }, [supabase])
 
   const fetchProviders = useCallback(async () => {
     try {
@@ -62,15 +85,42 @@ export function AIProviderManagement() {
       setProviders(mapped)
     } catch (err) {
       console.error('Error fetching AI providers:', err)
-      setError('Failed to load AI providers. Please try again later.')
+      setError(lt('Failed to load AI providers. Please try again later.'))
     } finally {
       setLoading(false)
+    }
+  }, [supabase, lt])
+
+  const fetchAssignments = useCallback(async () => {
+    try {
+      const { data, error } = await (supabase.from('ai_provider_assignments') as any)
+        .select('purpose, ai_provider_id')
+
+      if (error) throw error
+      const next: Record<string, string | null> = {}
+      for (const row of data ?? []) {
+        const purpose = String((row as any).purpose ?? '').trim()
+        if (!purpose) continue
+        next[purpose] = (row as any).ai_provider_id ? String((row as any).ai_provider_id) : null
+      }
+      setAssignments(next)
+    } catch (err) {
+      // If the table doesn't exist yet (migration not applied), don't hard-fail the page.
+      console.warn('AI provider assignments not available:', err)
     }
   }, [supabase])
 
   useEffect(() => {
     fetchProviders()
   }, [fetchProviders])
+
+  useEffect(() => {
+    fetchAssignments()
+  }, [fetchAssignments])
+
+  useEffect(() => {
+    fetchPlatformDefaultProvider()
+  }, [fetchPlatformDefaultProvider])
 
   const updateProviderConfig = (index: number, changes: Partial<AIProvider>) => {
     setProviders(prev => {
@@ -106,13 +156,53 @@ export function AIProviderManagement() {
       }
 
       await fetchProviders()
+
+      // Save platform default provider (does not require per-purpose assignments)
+      const { error: defaultProviderErr } = await (supabase.from('system_settings') as any).upsert(
+        {
+          setting_key: 'ai_default_provider',
+          setting_value: {
+            ai_provider_id: platformDefaultProviderId,
+          },
+        },
+        { onConflict: 'setting_key' }
+      )
+      if (defaultProviderErr) throw defaultProviderErr
+
+      // Save platform routing assignments (best-effort; requires migration)
+      const rows = Object.entries(assignments).map(([purpose, ai_provider_id]) => ({
+        purpose,
+        ai_provider_id: ai_provider_id || null,
+      }))
+
+      if (rows.length > 0) {
+        const { error } = await (supabase.from('ai_provider_assignments') as any).upsert(rows, {
+          onConflict: 'purpose',
+        })
+        if (error) throw error
+      }
     } catch (err) {
       console.error('Error saving AI providers:', err)
-      setError('Failed to save changes. Please try again.')
+      setError(lt('Failed to save changes. Please try again.'))
     } finally {
       setSaving(false)
     }
   }
+
+  const purposes = useMemo(
+    () =>
+      [
+        { id: 'TRANSLATION', label: lt('Translation') },
+        { id: 'CHATBOT', label: lt('Chatbot / AI Agent') },
+        { id: 'MARKETING', label: lt('Marketing / Website Copy') },
+        { id: 'DOCUMENT_PROCESSING', label: lt('Document Processing') },
+        { id: 'TRANSACTION_CATEGORIZATION', label: lt('Transaction Categorization') },
+        { id: 'BANK_RECONCILIATION', label: lt('Bank Statement Reconciliation') },
+      ] as const,
+    [lt]
+  )
+
+  const activeProviders = useMemo(() => providers.filter((p) => p.is_active), [providers])
 
   const openEditConfig = (provider: AIProvider) => {
     setEditingProvider(provider)
@@ -120,6 +210,14 @@ export function AIProviderManagement() {
     setEditConfigJson(JSON.stringify(cfg, null, 2))
     setEditApiKey(cfg.platform_api_key || '')
     setEditIsDefault(cfg.is_default === true)
+    setEditDefaultModel(
+      String(
+        cfg.defaultModel ??
+          cfg.default_model ??
+          cfg.model ??
+          (Array.isArray(cfg.models) ? (cfg.models[0] ?? '') : '')
+      )
+    )
     setEditPerMinute(provider.per_minute_limit_default ?? cfg.per_minute_limit_default ?? '')
     setEditPerHour(provider.per_hour_limit_default ?? cfg.per_hour_limit_default ?? '')
     setEditPerDay(provider.per_day_limit_default ?? cfg.per_day_limit_default ?? '')
@@ -132,13 +230,14 @@ export function AIProviderManagement() {
     try {
       parsed = editConfigJson.trim() ? JSON.parse(editConfigJson) : {}
     } catch {
-      setError('Invalid JSON in provider configuration. Please fix and try again.')
+      setError(lt('Invalid JSON in provider configuration. Please fix and try again.'))
       return
     }
 
     // Inject platform-level fields into config
     parsed.platform_api_key = editApiKey || null
     parsed.is_default = editIsDefault
+    parsed.defaultModel = editDefaultModel.trim() ? editDefaultModel.trim() : null
     parsed.per_minute_limit_default = typeof editPerMinute === 'number' ? editPerMinute : null
     parsed.per_hour_limit_default = typeof editPerHour === 'number' ? editPerHour : null
     parsed.per_day_limit_default = typeof editPerDay === 'number' ? editPerDay : null
@@ -158,7 +257,7 @@ export function AIProviderManagement() {
       await fetchProviders()
     } catch (err) {
       console.error('Error saving provider config:', err)
-      setError('Failed to save provider configuration.')
+      setError(lt('Failed to save provider configuration.'))
     } finally {
       setSaving(false)
     }
@@ -176,14 +275,14 @@ export function AIProviderManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">AI Providers</h2>
+          <h2 className="text-2xl font-bold">{lt('AI Providers')}</h2>
           <p className="text-sm text-gray-600">
-            Configure which AI providers are available and set monthly call limits to avoid hitting provider quotas.
+            {lt('Configure which AI providers are available and set monthly call limits to avoid hitting provider quotas.')}
           </p>
         </div>
         <Button onClick={handleSave} disabled={saving}>
           {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          Save Changes
+          {lt('Save Changes')}
         </Button>
       </div>
 
@@ -198,28 +297,111 @@ export function AIProviderManagement() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Provider Configuration</CardTitle>
+          <CardTitle>{lt('Platform Default Provider')}</CardTitle>
           <CardDescription>
-            Enable/disable providers and control how many AI calls each provider can receive per month.
+            {lt('Used when a purpose does not have an explicit routing assignment.')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+            <div className="text-sm font-medium">{lt('Default')}</div>
+            <div className="w-full md:w-[360px]">
+              <Select
+                value={platformDefaultProviderId ?? '__AUTO__'}
+                onValueChange={(v) => setPlatformDefaultProviderId(v === '__AUTO__' ? null : v)}
+                disabled={saving}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={lt('Select provider')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__AUTO__">
+                    {lt('Auto (use provider marked default, else first active)')}
+                  </SelectItem>
+                  {activeProviders.map((prov) => (
+                    <SelectItem key={prov.id} value={String(prov.id)}>
+                      {prov.display_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{lt('Provider Routing')}</CardTitle>
+          <CardDescription>
+            {lt('Choose which AI provider is used for each platform function. Unset uses the platform default provider.')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {purposes.map((p) => (
+            <div key={p.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+              <div className="text-sm font-medium">{p.label}</div>
+              <div className="w-full md:w-[360px]">
+                <Select
+                  value={assignments[p.id] ?? '__DEFAULT__'}
+                  onValueChange={(v) =>
+                    setAssignments((prev) => ({
+                      ...prev,
+                      [p.id]: v === '__DEFAULT__' ? null : v,
+                    }))
+                  }
+                  disabled={saving}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={lt('Select provider')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__DEFAULT__">{lt('Use platform default')}</SelectItem>
+                    {activeProviders.map((prov) => (
+                      <SelectItem key={prov.id} value={String(prov.id)}>
+                        {prov.display_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{lt('Provider Configuration')}</CardTitle>
+          <CardDescription>
+            {lt('Enable/disable providers and control how many AI calls each provider can receive per month.')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Endpoint</TableHead>
-                <TableHead className="w-40">Active</TableHead>
-                <TableHead className="w-72">Rate Limits (Default)</TableHead>
-                <TableHead className="w-40 text-right">Usage (This Month)</TableHead>
-                <TableHead className="w-32 text-right">Config</TableHead>
+                <TableHead>{lt('Name')}</TableHead>
+                <TableHead>{lt('Endpoint')}</TableHead>
+                <TableHead className="w-40">{lt('Active')}</TableHead>
+                <TableHead className="w-72">{lt('Rate Limits (Default)')}</TableHead>
+                <TableHead className="w-40 text-right">{lt('Usage (This Month)')}</TableHead>
+                <TableHead className="w-32 text-right">{lt('Config')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {providers.map((p, index) => (
                 <TableRow key={p.id}>
                   <TableCell>
-                    <div className="font-medium">{p.display_name}</div>
+                    <div className="flex items-center gap-2">
+                      <div className="font-medium">{p.display_name}</div>
+                      {(p.config as any)?.is_default === true && (
+                        <Badge variant="secondary" className="flex items-center gap-1">
+                          <Star className="w-3 h-3" />
+                          {lt('Default')}
+                        </Badge>
+                      )}
+                    </div>
                     <div className="text-xs text-gray-500">{p.name}</div>
                   </TableCell>
                   <TableCell className="max-w-xs truncate text-xs text-gray-600">
@@ -231,13 +413,13 @@ export function AIProviderManagement() {
                         checked={p.is_active ?? true}
                         onCheckedChange={(value) => updateProviderConfig(index, { is_active: value })}
                       />
-                      <span className="text-xs text-gray-600">Active</span>
+                      <span className="text-xs text-gray-600">{lt('Active')}</span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="grid grid-cols-3 gap-2">
                       <div className="space-y-1">
-                        <Label className="text-xs text-gray-500">/ min</Label>
+                        <Label className="text-xs text-gray-500">{lt('/ min')}</Label>
                         <Input
                           type="number"
                           min={0}
@@ -250,7 +432,7 @@ export function AIProviderManagement() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs text-gray-500">/ hour</Label>
+                        <Label className="text-xs text-gray-500">{lt('/ hour')}</Label>
                         <Input
                           type="number"
                           min={0}
@@ -263,7 +445,7 @@ export function AIProviderManagement() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs text-gray-500">/ day</Label>
+                        <Label className="text-xs text-gray-500">{lt('/ day')}</Label>
                         <Input
                           type="number"
                           min={0}
@@ -278,7 +460,7 @@ export function AIProviderManagement() {
                     </div>
                   </TableCell>
                   <TableCell className="text-right text-xs text-gray-600">
-                    {p.current_month_calls ?? 0} calls this month
+                    {p.current_month_calls ?? 0} {lt('calls this month')}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
@@ -288,7 +470,7 @@ export function AIProviderManagement() {
                       onClick={() => openEditConfig(p)}
                     >
                       <Settings2 className="w-3 h-3 mr-1" />
-                      Edit
+                      {lt('Edit')}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -300,12 +482,12 @@ export function AIProviderManagement() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Threshold Behavior</CardTitle>
+          <CardTitle>{lt('Threshold Behavior')}</CardTitle>
           <CardDescription>
-            When a provider approaches its per-minute, per-hour, or per-day limits, tenant AI calls should be throttled
-            or routed to fallback providers. This UI stores default limits in provider config; backend enforcement can
-            read <code>per_minute_limit_default</code>, <code>per_hour_limit_default</code>, and
-            <code>per_day_limit_default</code> from <code>ai_providers.config</code>.
+            {lt('When a provider approaches its per-minute, per-hour, or per-day limits, tenant AI calls should be throttled or routed to fallback providers.')}{' '}
+            {lt('This UI stores default limits in provider config; backend enforcement can read')}{' '}
+            <code>per_minute_limit_default</code>, <code>per_hour_limit_default</code>, {lt('and')}{' '}
+            <code>per_day_limit_default</code> {lt('from')} <code>ai_providers.config</code>.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -317,17 +499,18 @@ export function AIProviderManagement() {
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Settings2 className="w-4 h-4" />
-                  Edit Provider Configuration
+                  {lt('Edit Provider Configuration')}
                 </DialogTitle>
                 <DialogDescription>
-                  Editing <span className="font-medium">{editingProvider.display_name}</span> ({editingProvider.name}).
-                  This acts as the platform default config and can be overridden per tenant.
+                  {lt('Editing')}{' '}
+                  <span className="font-medium">{editingProvider.display_name}</span> ({editingProvider.name}).{' '}
+                  {lt('This acts as the platform default config and can be overridden per tenant.')}
                 </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4 py-2">
                 <div className="grid gap-2">
-                  <Label htmlFor="endpoint">API Endpoint</Label>
+                  <Label htmlFor="endpoint">{lt('API Endpoint')}</Label>
                   <Input
                     id="endpoint"
                     value={editingProvider.api_endpoint || ''}
@@ -335,22 +518,22 @@ export function AIProviderManagement() {
                       const value = e.target.value
                       setEditingProvider(prev => (prev ? { ...prev, api_endpoint: value } as AIProvider : prev))
                     }}
-                    placeholder="https://openrouter.ai/api/v1"
+                    placeholder={lt('https://openrouter.ai/api/v1')}
                   />
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="platform-key">Platform API Key (optional)</Label>
+                  <Label htmlFor="platform-key">{lt('Platform API Key (optional)')}</Label>
                   <Input
                     id="platform-key"
                     type="password"
                     value={editApiKey}
                     onChange={(e) => setEditApiKey(e.target.value)}
-                    placeholder="sk-..."
+                    placeholder={lt('sk-...')}
                   />
                   <p className="text-xs text-gray-600">
-                    If provided, this key will be used when a tenant has not set their own key. Tenant-level
-                    API keys in <code>tenant_ai_configurations</code> always take precedence.
+                    {lt('If provided, this key will be used when a tenant has not set their own key.')}{' '}
+                    {lt('Tenant-level API keys in')} <code>tenant_ai_configurations</code> {lt('always take precedence.')}
                   </p>
                 </div>
 
@@ -358,17 +541,32 @@ export function AIProviderManagement() {
                   <div>
                     <Label className="flex items-center gap-1 text-sm font-medium">
                       <Star className="w-3 h-3 text-yellow-500" />
-                      Default AI Provider
+                      {lt('Default AI Provider')}
                     </Label>
                     <p className="text-xs text-gray-600">
-                      Mark this provider as the default for the platform. Tenants can still override it.
+                      {lt('Mark this provider as the default for the platform. Tenants can still override it.')}
                     </p>
                   </div>
                   <Switch checked={editIsDefault} onCheckedChange={setEditIsDefault} />
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="config-json">Provider Config (JSON)</Label>
+                  <Label htmlFor="default-model">{lt('Default Model')}</Label>
+                  <Input
+                    id="default-model"
+                    value={editDefaultModel}
+                    onChange={(e) => setEditDefaultModel(e.target.value)}
+                    placeholder={lt('e.g. google/gemini-2.0-flash-exp:free')}
+                  />
+                  <p className="text-xs text-gray-600">
+                    {lt('Used when a tenant has not set a model.')}{' '}
+                    {lt('If empty, the backend falls back to the first entry in')}{' '}
+                    <code>models</code> {lt('(if present) or provider-specific defaults.')}
+                  </p>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="config-json">{lt('Provider Config (JSON)')}</Label>
                   <Textarea
                     id="config-json"
                     className="font-mono text-xs min-h-[180px]"
@@ -376,8 +574,9 @@ export function AIProviderManagement() {
                     onChange={(e) => setEditConfigJson(e.target.value)}
                   />
                   <p className="text-xs text-gray-600">
-                    Define defaults such as <code>models</code>, <code>baseUrl</code>, and other
-                    provider-specific options. Platform-level config is merged with tenant-level overrides.
+                    {lt('Define defaults such as')}{' '}
+                    <code>models</code>, <code>baseUrl</code>, {lt('and other provider-specific options.')}{' '}
+                    {lt('Platform-level config is merged with tenant-level overrides.')}
                   </p>
                 </div>
               </div>
@@ -389,7 +588,7 @@ export function AIProviderManagement() {
                   onClick={() => setEditingProvider(null)}
                   disabled={saving}
                 >
-                  Cancel
+                  {lt('Cancel')}
                 </Button>
                 <Button
                   type="button"
@@ -400,12 +599,13 @@ export function AIProviderManagement() {
                     try {
                       parsed = editConfigJson.trim() ? JSON.parse(editConfigJson) : {}
                     } catch {
-                      setError('Invalid JSON in provider configuration. Please fix and try again.')
+                      setError(lt('Invalid JSON in provider configuration. Please fix and try again.'))
                       return
                     }
 
                     parsed.platform_api_key = editApiKey || null
                     parsed.is_default = editIsDefault
+                    parsed.defaultModel = editDefaultModel.trim() ? editDefaultModel.trim() : null
 
                     try {
                       setSaving(true)
@@ -425,7 +625,7 @@ export function AIProviderManagement() {
                       await fetchProviders()
                     } catch (err) {
                       console.error('Error saving provider config:', err)
-                      setError('Failed to save provider configuration.')
+                      setError(lt('Failed to save provider configuration.'))
                     } finally {
                       setSaving(false)
                     }
@@ -433,7 +633,7 @@ export function AIProviderManagement() {
                   disabled={saving}
                 >
                   {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Save Config
+                  {lt('Save Config')}
                 </Button>
               </DialogFooter>
             </>

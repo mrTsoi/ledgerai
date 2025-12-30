@@ -10,6 +10,7 @@ import { Loader2, Search, UserPlus, Shield, Building2, Mail, User } from 'lucide
 import { format } from 'date-fns'
 import { Database } from '@/types/database.types'
 import { toast } from "sonner"
+import { useLiterals } from '@/hooks/use-literals'
 
 type AdminUserView = {
   user_id: string
@@ -25,6 +26,7 @@ type AdminUserView = {
 type Tenant = Database['public']['Tables']['tenants']['Row']
 
 export function UserManagement() {
+  const lt = useLiterals()
   const [users, setUsers] = useState<AdminUserView[]>([])
   const [tenants, setTenants] = useState<Tenant[]>([])
   const [loading, setLoading] = useState(true)
@@ -151,8 +153,8 @@ export function UserManagement() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>User Management</CardTitle>
-            <CardDescription>Manage users, roles, and tenant assignments</CardDescription>
+            <CardTitle>{lt('User Management')}</CardTitle>
+            <CardDescription>{lt('Manage users, roles, and tenant assignments')}</CardDescription>
           </div>
           {/* <Button onClick={() => setShowAssignModal(true)}>
             <UserPlus className="w-4 h-4 mr-2" />
@@ -165,7 +167,7 @@ export function UserManagement() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Search users by name, email, or tenant..."
+              placeholder={lt('Search users by name, email, or tenant...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -183,7 +185,7 @@ export function UserManagement() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold">{user.full_name || 'Unknown Name'}</h3>
+                      <h3 className="font-semibold">{user.full_name || lt('Unknown Name')}</h3>
                       <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                         {format(new Date(user.user_created_at), 'MMM d, yyyy')}
                       </span>
@@ -263,6 +265,7 @@ function ManageAccessModal({
   onAssign: (userId: string, tenantId: string, role: string) => void
   onRemove: (userId: string, tenantId: string) => void
 }) {
+  const lt = useLiterals()
   const [tenantId, setTenantId] = useState('')
   const [role, setRole] = useState('OPERATOR')
 
@@ -274,13 +277,13 @@ function ManageAccessModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Manage Access: {user.full_name}</h3>
+          <h3 className="text-lg font-semibold">{lt('Manage Access: {name}', { name: user.full_name })}</h3>
           <Button variant="ghost" size="sm" onClick={onClose}>✕</Button>
         </div>
         
         {/* Existing Assignments */}
         <div className="mb-6">
-          <h4 className="text-sm font-medium text-gray-500 mb-3">Current Assignments</h4>
+          <h4 className="text-sm font-medium text-gray-500 mb-3">{lt('Current Assignments')}</h4>
           <div className="space-y-2">
             {user.memberships && user.memberships.length > 0 ? (
               user.memberships.map((m: any, idx: number) => (
@@ -295,28 +298,28 @@ function ManageAccessModal({
                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     onClick={() => onRemove(user.user_id, m.tenant_id)}
                   >
-                    Remove
+                    {lt('Remove')}
                   </Button>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-gray-400 italic">No active assignments</p>
+              <p className="text-sm text-gray-400 italic">{lt('No active assignments')}</p>
             )}
           </div>
         </div>
 
         {/* Add New Assignment */}
         <div className="pt-4 border-t">
-          <h4 className="text-sm font-medium text-gray-500 mb-3">Add New Assignment</h4>
+          <h4 className="text-sm font-medium text-gray-500 mb-3">{lt('Add New Assignment')}</h4>
           <div className="space-y-4">
             <div>
-              <Label>Select Tenant</Label>
+              <Label>{lt('Select Tenant')}</Label>
               <select 
                 className="w-full p-2 border rounded-md mt-1"
                 value={tenantId}
                 onChange={(e) => setTenantId(e.target.value)}
               >
-                <option value="">Select a tenant...</option>
+                <option value="">{lt('Select a tenant...')}</option>
                 {availableTenants.map(t => (
                   <option key={t.id} value={t.id}>{t.name}</option>
                 ))}
@@ -324,16 +327,16 @@ function ManageAccessModal({
             </div>
 
             <div>
-              <Label>Select Role</Label>
+              <Label>{lt('Select Role')}</Label>
               <select 
                 className="w-full p-2 border rounded-md mt-1"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
               >
-                <option value="OPERATOR">Operator</option>
-                <option value="ACCOUNTANT">Accountant</option>
-                <option value="COMPANY_ADMIN">Company Admin</option>
-                <option value="SUPER_ADMIN">Super Admin</option>
+                <option value="OPERATOR">{lt('Operator')}</option>
+                <option value="ACCOUNTANT">{lt('Accountant')}</option>
+                <option value="COMPANY_ADMIN">{lt('Company Admin')}</option>
+                <option value="SUPER_ADMIN">{lt('Super Admin')}</option>
               </select>
             </div>
 

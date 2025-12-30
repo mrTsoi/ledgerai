@@ -15,6 +15,7 @@ CREATE OR REPLACE FUNCTION public.insert_bank_feed_transactions(p_rows jsonb)
 RETURNS integer
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   inserted_count integer;

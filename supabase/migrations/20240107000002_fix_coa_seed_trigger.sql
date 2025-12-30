@@ -50,7 +50,7 @@ BEGIN
   (p_tenant_id, '6900', 'Bank Fees', 'EXPENSE', 'OPERATING_EXPENSE', 'Banking charges');
   
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- 2. Update the trigger function to be SECURITY DEFINER as well (for good measure)
 CREATE OR REPLACE FUNCTION auto_seed_chart_of_accounts()
@@ -59,4 +59,4 @@ BEGIN
   PERFORM seed_chart_of_accounts(NEW.id);
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;

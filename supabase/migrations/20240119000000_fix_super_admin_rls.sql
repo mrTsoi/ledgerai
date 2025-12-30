@@ -14,7 +14,7 @@ BEGIN
     AND is_active = true
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ============================================================================
 -- 0. Tenants (Fix for Settings/Currency update)

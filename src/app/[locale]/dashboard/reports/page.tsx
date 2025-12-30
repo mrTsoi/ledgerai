@@ -2,48 +2,49 @@
 
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { FileText, TrendingUp, Scale, BarChart3 } from 'lucide-react'
 import { TrialBalanceReport } from '@/components/reports/trial-balance-report'
 import { ProfitLossReport } from '@/components/reports/profit-loss-report'
 import { BalanceSheetReport } from '@/components/reports/balance-sheet-report'
 import { FinancialCharts } from '@/components/reports/financial-charts'
+import { useLiterals } from '@/hooks/use-literals'
 
 type ReportType = 'trial-balance' | 'profit-loss' | 'balance-sheet' | 'charts'
 
-const reports = [
-  {
-    id: 'charts' as ReportType,
-    name: 'Financial Analysis',
-    description: 'Interactive charts for income, expenses, and trends',
-    icon: BarChart3,
-    color: 'text-indigo-600'
-  },
-  {
-    id: 'trial-balance' as ReportType,
-    name: 'Trial Balance',
-    description: 'View all account balances to verify debits equal credits',
-    icon: Scale,
-    color: 'text-blue-600'
-  },
-  {
-    id: 'profit-loss' as ReportType,
-    name: 'Profit & Loss',
-    description: 'View revenue and expenses for a period',
-    icon: TrendingUp,
-    color: 'text-green-600'
-  },
-  {
-    id: 'balance-sheet' as ReportType,
-    name: 'Balance Sheet',
-    description: 'View assets, liabilities, and equity at a point in time',
-    icon: FileText,
-    color: 'text-purple-600'
-  }
-]
-
 export default function ReportsPage() {
+  const lt = useLiterals()
   const [selectedReport, setSelectedReport] = useState<ReportType>('charts')
+
+  const reports = [
+    {
+      id: 'charts' as ReportType,
+      name: lt('Financial Analysis'),
+      description: lt('Interactive charts for income, expenses, and trends'),
+      icon: BarChart3,
+      color: 'text-indigo-600'
+    },
+    {
+      id: 'trial-balance' as ReportType,
+      name: lt('Trial Balance'),
+      description: lt('View all account balances to verify debits equal credits'),
+      icon: Scale,
+      color: 'text-blue-600'
+    },
+    {
+      id: 'profit-loss' as ReportType,
+      name: lt('Profit & Loss'),
+      description: lt('View revenue and expenses for a period'),
+      icon: TrendingUp,
+      color: 'text-green-600'
+    },
+    {
+      id: 'balance-sheet' as ReportType,
+      name: lt('Balance Sheet'),
+      description: lt('View assets, liabilities, and equity at a point in time'),
+      icon: FileText,
+      color: 'text-purple-600'
+    }
+  ]
 
   return (
     <div className="space-y-6">

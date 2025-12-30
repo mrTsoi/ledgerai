@@ -138,6 +138,7 @@ RETURNS TABLE (
 )
 LANGUAGE sql
 SECURITY DEFINER
+SET search_path = public
 AS $$
   SELECT
     COUNT(*)::bigint AS document_count,

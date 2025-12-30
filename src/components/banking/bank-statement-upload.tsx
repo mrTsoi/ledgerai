@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { Upload, Loader2, FileText } from 'lucide-react'
+import { Upload, Loader2 } from 'lucide-react'
 import { useTenant } from '@/hooks/use-tenant'
 import { toast } from "sonner"
+import { useLiterals } from '@/hooks/use-literals'
+import { uploadDocumentViaApi } from '@/lib/uploads/upload-document-client'
+import { CloudImportDialog } from '@/components/documents/cloud-import-dialog'
 
 interface Props {
   accountId: string
@@ -13,9 +15,9 @@ interface Props {
 }
 
 export function BankStatementUpload({ accountId, onUploadComplete }: Props) {
+  const lt = useLiterals()
   const [uploading, setUploading] = useState(false)
   const { currentTenant } = useTenant()
-  const supabase = createClient()
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -24,33 +26,15 @@ export function BankStatementUpload({ accountId, onUploadComplete }: Props) {
     try {
       setUploading(true)
 
-      // 1. Upload file to storage
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`
-      const filePath = `${currentTenant.id}/${fileName}`
+      const uploaded = await uploadDocumentViaApi({
+        tenantId: currentTenant.id,
+        file,
+        documentType: 'bank_statement',
+        bankAccountId: accountId,
+      })
 
-      const { error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(filePath, file)
-
-      if (uploadError) throw uploadError
-
-      // 2. Create document record
-      const { data: doc, error: docError } = await (supabase
-        .from('documents') as any)
-        .insert({
-          tenant_id: currentTenant.id,
-          file_path: filePath,
-          file_name: file.name,
-          file_size: file.size,
-          file_type: file.type,
-          status: 'UPLOADED',
-          document_type: 'bank_statement' // Explicitly set type
-        })
-        .select()
-        .single()
-
-      if (docError) throw docError
+      const documentId = uploaded.documentId
+      if (!documentId) throw new Error(lt('Upload failed'))
 
       // 3. Trigger AI Processing (via API or Edge Function)
       // For now, we'll call the process endpoint if it exists, or rely on the background trigger
@@ -59,7 +43,7 @@ export function BankStatementUpload({ accountId, onUploadComplete }: Props) {
       await fetch('/api/documents/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId: doc.id })
+        body: JSON.stringify({ documentId })
       })
 
       // 4. Link document to bank account (This might need to happen after processing if we want to verify dates first, 
@@ -82,50 +66,72 @@ export function BankStatementUpload({ accountId, onUploadComplete }: Props) {
       // Let's modify the document schema? No, let's use the metadata field in document_data if possible, but that's created later.
       
       // Alternative: Create a placeholder bank_statement record NOW.
-      const { error: stmtError } = await (supabase
-        .from('bank_statements') as any)
-        .insert({
-          tenant_id: currentTenant.id,
-          bank_account_id: accountId,
-          document_id: (doc as any).id,
-          status: 'IMPORTED' // Will be updated to PROCESSED by AI
-        })
-
-      if (stmtError) console.error('Error linking statement:', stmtError)
+      // bank_statement row is created by /api/documents/upload
 
       onUploadComplete()
-      toast.success('Statement uploaded successfully')
+      toast.success(lt('Statement uploaded successfully'))
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Upload error:', error)
-      toast.error('Upload failed')
+      const msg = String(error?.message || '')
+      if (msg === 'No company selected') {
+        toast.error(lt('No company selected'))
+      } else {
+        toast.error(lt('Upload failed'))
+      }
     } finally {
       setUploading(false)
     }
   }
 
   return (
-    <div className="relative">
-      <input
-        type="file"
-        accept=".pdf,.jpg,.jpeg,.png"
-        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        onChange={handleFileChange}
-        disabled={uploading}
-      />
-      <Button disabled={uploading} className="w-full sm:w-auto">
-        {uploading ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Processing...
-          </>
-        ) : (
-          <>
-            <Upload className="w-4 h-4 mr-2" />
-            Upload Statement
-          </>
-        )}
-      </Button>
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="relative">
+        <input
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          onChange={handleFileChange}
+          disabled={uploading}
+        />
+        <Button disabled={uploading} className="w-full sm:w-auto">
+          {uploading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              {lt('Processing...')}
+            </>
+          ) : (
+            <>
+              <Upload className="w-4 h-4 mr-2" />
+              {lt('Upload Statement')}
+            </>
+          )}
+        </Button>
+      </div>
+
+      <div className="relative">
+        <input
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          onChange={handleFileChange}
+          disabled={uploading}
+        />
+        <Button disabled={uploading} variant="outline" className="w-full sm:w-auto">
+          {lt('Camera')}
+        </Button>
+      </div>
+
+      {currentTenant ? (
+        <CloudImportDialog
+          tenantId={currentTenant.id}
+          documentType="bank_statement"
+          bankAccountId={accountId}
+          triggerLabel={lt('Cloud Storage')}
+          onImported={onUploadComplete}
+        />
+      ) : null}
     </div>
   )
 }

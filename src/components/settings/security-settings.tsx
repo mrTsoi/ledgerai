@@ -9,8 +9,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, Shield, ShieldCheck, ShieldAlert, Copy } from "lucide-react"
 import { toast } from "sonner"
 import { ImagePreview } from "@/components/ui/image-preview"
+import { useLiterals } from "@/hooks/use-literals"
 
 export function SecuritySettings() {
+  const lt = useLiterals()
   const [loading, setLoading] = useState(false)
   const [factors, setFactors] = useState<any[]>([])
   const [qrCode, setQrCode] = useState<string | null>(null)
@@ -48,7 +50,7 @@ export function SecuritySettings() {
       setSecret(data.totp.secret)
       setIsEnrolling(true)
     } catch (error: any) {
-      toast.error(error.message)
+      toast.error(error.message || lt('Something went wrong'))
     } finally {
       setLoading(false)
     }
@@ -73,14 +75,14 @@ export function SecuritySettings() {
 
       if (verifyError) throw verifyError
 
-      toast.success("Two-factor authentication enabled successfully")
+      toast.success(lt('Two-factor authentication enabled successfully'))
       setIsEnrolling(false)
       setQrCode(null)
       setSecret(null)
       setVerifyCode("")
       fetchFactors()
     } catch (error: any) {
-      toast.error(error.message)
+      toast.error(error.message || lt('Something went wrong'))
     } finally {
       setLoading(false)
     }
@@ -92,10 +94,10 @@ export function SecuritySettings() {
       const { error } = await supabase.auth.mfa.unenroll({ factorId: id })
       if (error) throw error
       
-      toast.success("Two-factor authentication disabled")
+      toast.success(lt('Two-factor authentication disabled'))
       fetchFactors()
     } catch (error: any) {
-      toast.error(error.message)
+      toast.error(error.message || lt('Something went wrong'))
     } finally {
       setLoading(false)
     }
@@ -108,10 +110,10 @@ export function SecuritySettings() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Shield className="h-5 w-5" />
-          Two-Factor Authentication (2FA)
+          {lt('Two-Factor Authentication (2FA)')}
         </CardTitle>
         <CardDescription>
-          Add an extra layer of security to your account using an authenticator app.
+          {lt('Add an extra layer of security to your account using an authenticator app.')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -122,8 +124,8 @@ export function SecuritySettings() {
                 <ShieldCheck className="h-6 w-6 text-green-600" />
               </div>
               <div>
-                <h3 className="font-medium text-green-900">2FA is enabled</h3>
-                <p className="text-sm text-green-700">Your account is secured with TOTP.</p>
+                <h3 className="font-medium text-green-900">{lt('2FA is enabled')}</h3>
+                <p className="text-sm text-green-700">{lt('Your account is secured with TOTP.')}</p>
               </div>
             </div>
             <Button 
@@ -135,7 +137,7 @@ export function SecuritySettings() {
               }}
               disabled={loading}
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Disable 2FA"}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : lt('Disable 2FA')}
             </Button>
           </div>
         ) : (
@@ -145,13 +147,13 @@ export function SecuritySettings() {
                 <ShieldAlert className="h-6 w-6 text-yellow-600" />
               </div>
               <div>
-                <h3 className="font-medium text-yellow-900">2FA is not enabled</h3>
-                <p className="text-sm text-yellow-700">We recommend enabling 2FA for better security.</p>
+                <h3 className="font-medium text-yellow-900">{lt('2FA is not enabled')}</h3>
+                <p className="text-sm text-yellow-700">{lt('We recommend enabling 2FA for better security.')}</p>
               </div>
             </div>
             {!isEnrolling && (
               <Button onClick={startEnrollment} disabled={loading}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enable 2FA"}
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : lt('Enable 2FA')}
               </Button>
             )}
           </div>
@@ -161,15 +163,15 @@ export function SecuritySettings() {
           <div className="space-y-6 border-t pt-6">
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-4">
-                <h3 className="font-medium">1. Scan QR Code</h3>
+                <h3 className="font-medium">{lt('1. Scan QR Code')}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Use an authenticator app like Google Authenticator or Authy to scan this QR code.
+                  {lt('Use an authenticator app like Google Authenticator or Authy to scan this QR code.')}
                 </p>
                 <div className="p-4 bg-white border rounded-lg w-fit">
-                  <ImagePreview src={qrCode} alt="QR Code" className="w-48 h-48" />
+                  <ImagePreview src={qrCode} alt={lt('QR Code')} className="w-48 h-48" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Or enter code manually:</Label>
+                  <Label className="text-xs text-muted-foreground">{lt('Or enter code manually:')}</Label>
                   <div className="flex items-center gap-2">
                     <code className="px-2 py-1 bg-muted rounded text-sm font-mono">{secret}</code>
                     <Button 
@@ -179,7 +181,7 @@ export function SecuritySettings() {
                       onClick={() => {
                         if (secret) {
                           navigator.clipboard.writeText(secret)
-                          toast.success("Secret copied to clipboard")
+                          toast.success(lt('Secret copied to clipboard'))
                         }
                       }}
                     >
@@ -190,15 +192,15 @@ export function SecuritySettings() {
               </div>
 
               <div className="space-y-4">
-                <h3 className="font-medium">2. Verify Code</h3>
+                <h3 className="font-medium">{lt('2. Verify Code')}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Enter the 6-digit code from your authenticator app to verify the setup.
+                  {lt('Enter the 6-digit code from your authenticator app to verify the setup.')}
                 </p>
                 <div className="space-y-2">
-                  <Label htmlFor="verify-code">Authentication Code</Label>
+                  <Label htmlFor="verify-code">{lt('Authentication Code')}</Label>
                   <Input
                     id="verify-code"
-                    placeholder="000000"
+                    placeholder={lt('000000')}
                     value={verifyCode}
                     onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     className="font-mono tracking-widest text-center text-lg"
@@ -211,7 +213,7 @@ export function SecuritySettings() {
                     disabled={loading || verifyCode.length !== 6}
                   >
                     {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                    Verify & Enable
+                    {lt('Verify & Enable')}
                   </Button>
                   <Button 
                     variant="outline"
@@ -222,7 +224,7 @@ export function SecuritySettings() {
                       setVerifyCode("")
                     }}
                   >
-                    Cancel
+                    {lt('Cancel')}
                   </Button>
                 </div>
               </div>

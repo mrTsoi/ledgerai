@@ -15,6 +15,7 @@ import { toast } from "sonner"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ImagePreview } from '@/components/ui/image-preview'
+import { useLiterals } from '@/hooks/use-literals'
 
 type Document = Database['public']['Tables']['documents']['Row']
 type BankTransaction = Database['public']['Tables']['bank_transactions']['Row']
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
+  const lt = useLiterals()
   const [document, setDocument] = useState<Document | null>(null)
   const [transactions, setTransactions] = useState<Partial<BankTransaction>[]>([])
   const [loading, setLoading] = useState(true)
@@ -84,11 +86,11 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
       }
 
       let txs: any[] = []
-      if (statement) {
+        if (statement) {
         const { data: dbTxs, error: txError } = await supabase
           .from('bank_transactions')
           .select('*')
-          .eq('bank_statement_id', (statement as any).id)
+          .eq('bank_statement_id', statement.id)
           .order('transaction_date', { ascending: false })
 
         if (txError) {
@@ -106,8 +108,9 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
             .eq('document_id', documentId)
             .maybeSingle()
          
-         if (!docDataError && (docData as any)?.extracted_data?.bank_transactions) {
-             setTransactions((docData as any).extracted_data.bank_transactions.map((t: any, i: number) => ({
+         if (!docDataError && (docData as { extracted_data?: any } | null)?.extracted_data?.bank_transactions) {
+           const extracted = (docData as { extracted_data?: any }).extracted_data
+           setTransactions(extracted.bank_transactions.map((t: any, i: number) => ({
                  id: `temp-${i}`,
                  transaction_date: t.date,
                  description: t.description,
@@ -121,10 +124,10 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
       }
 
       // 3. Load Preview
-      if ((doc as any)?.file_path) {
+      if (doc?.file_path) {
         const { data: blob, error: storageError } = await supabase.storage
           .from('documents')
-          .download((doc as any).file_path)
+          .download(doc.file_path as string)
 
         if (storageError) {
           console.error('Error downloading preview:', storageError)
@@ -136,11 +139,11 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
 
     } catch (error) {
       console.error('Error fetching details:', error)
-      toast.error('Failed to load statement details')
+      toast.error(lt('Failed to load statement details'))
     } finally {
       setLoading(false)
     }
-  }, [documentId, supabase])
+  }, [documentId, supabase, lt])
 
   useEffect(() => {
     fetchDetails()
@@ -155,8 +158,8 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
       const newTxs = transactions.filter(t => t.id?.toString().startsWith('temp-'))
 
       for (const tx of updates) {
-        const { error } = await (supabase
-          .from('bank_transactions') as any)
+        const { error } = await supabase
+          .from('bank_transactions')
           .update({
             transaction_date: tx.transaction_date,
             description: tx.description,
@@ -184,11 +187,11 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
             .maybeSingle()
             
           if (statement) {
-              statementId = (statement as any).id
+              statementId = statement.id
               
               const toInsert = newTxs.map(tx => ({
                   bank_statement_id: statementId,
-                  tenant_id: (statement as any).tenant_id,
+                  tenant_id: statement.tenant_id,
                   transaction_date: tx.transaction_date,
                   description: tx.description,
                   amount: tx.amount,
@@ -197,10 +200,8 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
                   raw_data: { source: 'manual_entry' }
               }))
               
-              const { error: insertError } = await (supabase
-                .from('bank_transactions') as any)
-                .insert(toInsert)
-                
+              const { error: insertError } = await supabase.from('bank_transactions').insert(toInsert)
+              
               if (insertError) throw insertError
           } else {
               console.warn('No statement found for document, cannot insert new transactions yet')
@@ -216,33 +217,33 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
         .eq('document_id', documentId)
         .single()
 
-      if (currentData) {
+        if (currentData) {
           const updatedExtracted = {
-              ...(currentData as any).extracted_data,
-              bank_transactions: transactions.map(t => ({
-                  date: t.transaction_date,
-                  description: t.description,
-                  amount: t.amount,
-                  type: t.transaction_type
-              }))
+            ...((currentData as { extracted_data?: any }).extracted_data || {}),
+            bank_transactions: transactions.map(t => ({
+              date: t.transaction_date,
+              description: t.description,
+              amount: t.amount,
+              type: t.transaction_type
+            }))
           }
 
-          await (supabase
-            .from('document_data') as any)
-            .update({
-                extracted_data: updatedExtracted,
-                metadata: { verified_by_user: true }
-            })
-            .eq('document_id', documentId)
-      }
+          await supabase
+          .from('document_data')
+          .update({
+            extracted_data: updatedExtracted,
+            metadata: { verified_by_user: true }
+          })
+          .eq('document_id', documentId)
+        }
 
-      toast.success('Changes saved successfully')
+      toast.success(lt('Changes saved successfully'))
       if (onSaved) onSaved()
       onClose()
 
     } catch (error: any) {
       console.error('Error saving:', error)
-      toast.error('Failed to save: ' + error.message)
+      toast.error(lt('Failed to save: {message}', { message: error.message }))
     } finally {
       setSaving(false)
     }
@@ -269,14 +270,14 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
       const tx = transactions.find(t => t.id === id)
       if (!tx) return
 
-      if (tx.id && !tx.id.toString().startsWith('temp-')) {
-          if (!confirm('Delete this transaction permanently?')) return
+        if (tx.id && !tx.id.toString().startsWith('temp-')) {
+          if (!confirm(lt('Delete this transaction permanently?'))) return
           
           try {
-              await (supabase.from('bank_transactions') as any).delete().eq('id', tx.id)
+          await supabase.from('bank_transactions').delete().eq('id', tx.id)
           } catch (e) {
               console.error(e)
-              toast.error('Failed to delete')
+            toast.error(lt('Failed to delete'))
               return
           }
       }
@@ -288,7 +289,7 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
     const newTx: Partial<BankTransaction> = {
       id: `temp-new-${Date.now()}`,
       transaction_date: new Date().toISOString().split('T')[0],
-      description: 'New Transaction',
+      description: lt('New Transaction'),
       amount: 0,
       transaction_type: 'DEBIT',
       status: 'PENDING'
@@ -394,7 +395,7 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
             document?.file_type.startsWith('image/') ? (
               <ImagePreview
                 src={previewUrl}
-                alt="Preview"
+                alt={lt('Preview')}
                 style={{
                   transform: `translate(${position.x}px, ${position.y}px) scale(${zoomLevel / 100})`,
                   transition: isDragging ? 'none' : 'transform 0.2s',
@@ -402,10 +403,10 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
                 className="max-w-full max-h-full object-contain pointer-events-none"
               />
             ) : (
-              <iframe src={previewUrl} className="w-full h-full bg-white" title="PDF Preview" />
+              <iframe src={previewUrl} className="w-full h-full bg-white" title={lt('PDF Preview')} />
             )
           ) : (
-            <div className="text-white opacity-50">No Preview</div>
+            <div className="text-white opacity-50">{lt('No Preview')}</div>
           )}
         </div>
       </div>
@@ -414,7 +415,7 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
       <div className="w-full lg:w-[700px] bg-white h-[60vh] lg:h-full flex flex-col shadow-2xl">
         <div className="p-4 border-b flex items-center justify-between bg-gray-50">
           <div>
-            <h2 className="font-semibold text-lg">Verify Transactions</h2>
+            <h2 className="font-semibold text-lg">{lt('Verify Transactions')}</h2>
             <p className="text-sm text-gray-500">{document?.file_name}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={onClose}>
@@ -426,7 +427,7 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
           <div className="relative flex-1">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
             <Input
-              placeholder="Search transactions..."
+              placeholder={lt('Search transactions...')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8"
@@ -434,7 +435,7 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
           </div>
           <Button variant="outline" onClick={addNewTransaction}>
             <Plus className="w-4 h-4 mr-2" />
-            Add Transaction
+            {lt('Add Transaction')}
           </Button>
         </div>
 
@@ -444,25 +445,25 @@ export function StatementDetailModal({ documentId, onClose, onSaved }: Props) {
               <TableRow>
                 <TableHead className="w-[130px] cursor-pointer hover:bg-gray-50" onClick={() => handleSort('transaction_date')}>
                   <div className="flex items-center gap-1">
-                    Date
+                    {lt('Date')}
                     <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </TableHead>
                 <TableHead className="cursor-pointer hover:bg-gray-50" onClick={() => handleSort('description')}>
                   <div className="flex items-center gap-1">
-                    Description
+                    {lt('Description')}
                     <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </TableHead>
                 <TableHead className="w-[100px] cursor-pointer hover:bg-gray-50" onClick={() => handleSort('transaction_type')}>
                   <div className="flex items-center gap-1">
-                    Type
+                    {lt('Type')}
                     <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </TableHead>
                 <TableHead className="w-[100px] text-right cursor-pointer hover:bg-gray-50" onClick={() => handleSort('amount')}>
                   <div className="flex items-center gap-1 justify-end">
-                    Amount
+                    {lt('Amount')}
                     <ArrowUpDown className="w-3 h-3" />
                   </div>
                 </TableHead>

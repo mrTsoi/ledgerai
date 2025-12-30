@@ -1,6 +1,20 @@
 import type { ExternalFetchedFile } from './types'
 import { guessMimeType } from './mime'
 
+type JsonObj = Record<string, unknown>
+
+function getString(obj: JsonObj | null | undefined, key: string): string | undefined {
+  if (!obj) return undefined
+  const v = obj[key]
+  return typeof v === 'string' ? v : undefined
+}
+
+function getNumber(obj: JsonObj | null | undefined, key: string): number | undefined {
+  if (!obj) return undefined
+  const v = obj[key]
+  return typeof v === 'number' ? v : typeof v === 'string' && v !== '' && !Number.isNaN(Number(v)) ? Number(v) : undefined
+}
+
 type MicrosoftTokenResponse = {
   token_type: string
   scope?: string
@@ -28,12 +42,19 @@ async function refreshAccessToken(params: { refreshToken: string }) {
     }),
   })
 
-  const json = (await res.json()) as any
+  const json = (await res.json()) as JsonObj
   if (!res.ok) {
-    throw new Error(json?.error_description || json?.error || 'Failed to refresh Microsoft token')
+    const errDesc = getString(json, 'error_description') || getString(json, 'error')
+    throw new Error(errDesc || 'Failed to refresh Microsoft token')
   }
 
-  return json as MicrosoftTokenResponse
+  return {
+    token_type: String(json['token_type']),
+    scope: getString(json, 'scope'),
+    expires_in: getNumber(json, 'expires_in') || 0,
+    access_token: String(json['access_token']),
+    refresh_token: getString(json, 'refresh_token'),
+  }
 }
 
 export async function oneDriveGetAccount(params: { refreshToken: string }) {
@@ -46,14 +67,16 @@ export async function oneDriveGetAccount(params: { refreshToken: string }) {
     headers: { Authorization: `Bearer ${token.access_token}` },
   })
 
-  const json = (await res.json()) as any
+  const json = (await res.json()) as JsonObj
   if (!res.ok) {
-    throw new Error(json?.error?.message || 'Failed to get OneDrive account')
+    const err = json?.error as JsonObj | undefined
+    const msg = getString(err, 'message')
+    throw new Error(msg || 'Failed to get OneDrive account')
   }
 
   return {
-    email: (json?.mail as string | undefined) || (json?.userPrincipalName as string | undefined) || null,
-    displayName: (json?.displayName as string | undefined) || null,
+    email: getString(json, 'mail') || getString(json, 'userPrincipalName') || null,
+    displayName: getString(json, 'displayName') || null,
   }
 }
 
@@ -67,12 +90,14 @@ export async function oneDriveGetItemName(params: { itemId: string; refreshToken
     headers: { Authorization: `Bearer ${token.access_token}` },
   })
 
-  const json = (await res.json()) as any
+  const json = (await res.json()) as JsonObj
   if (!res.ok) {
-    throw new Error(json?.error?.message || 'Failed to resolve OneDrive item')
+    const err = json?.error as JsonObj | undefined
+    const msg = getString(err, 'message')
+    throw new Error(msg || 'Failed to resolve OneDrive item')
   }
 
-  return (json?.name as string | undefined) || null
+  return getString(json, 'name') || null
 }
 
 export async function oneDriveList(params: { folderId: string; refreshToken: string }) {
@@ -89,21 +114,26 @@ export async function oneDriveList(params: { folderId: string; refreshToken: str
     headers: { Authorization: `Bearer ${token.access_token}` },
   })
 
-  const json = (await res.json()) as any
+  const json = (await res.json()) as JsonObj
   if (!res.ok) {
-    throw new Error(json?.error?.message || 'Failed to list OneDrive files')
+    const err = json?.error as JsonObj | undefined
+    const msg = getString(err, 'message')
+    throw new Error(msg || 'Failed to list OneDrive files')
   }
 
-  const items = (json.value || []) as any[]
-  const files = items
-    .filter((i) => !!i.file)
-    .map((i) => ({
-      id: i.id as string,
-      name: i.name as string,
-      size: typeof i.size === 'number' ? i.size : undefined,
-      modifiedTime: i.lastModifiedDateTime as string | undefined,
-      downloadUrl: i['@microsoft.graph.downloadUrl'] as string | undefined,
-    }))
+  const itemsRaw = Array.isArray(json.value) ? json.value : []
+  const files = itemsRaw
+    .filter((i) => !!(i && typeof i === 'object' && (i as JsonObj).file))
+    .map((i) => {
+      const obj = i as JsonObj
+      return {
+        id: getString(obj, 'id') || '',
+        name: getString(obj, 'name') || '',
+        size: getNumber(obj, 'size'),
+        modifiedTime: getString(obj, 'lastModifiedDateTime'),
+        downloadUrl: (obj['@microsoft.graph.downloadUrl'] as string) || undefined,
+      }
+    })
 
   return {
     accessToken: token.access_token,
@@ -127,18 +157,23 @@ export async function oneDriveListFolders(params: { parentId: string; refreshTok
     headers: { Authorization: `Bearer ${token.access_token}` },
   })
 
-  const json = (await res.json()) as any
+  const json = (await res.json()) as JsonObj
   if (!res.ok) {
-    throw new Error(json?.error?.message || 'Failed to list OneDrive folders')
+    const err = json?.error as JsonObj | undefined
+    const msg = getString(err, 'message')
+    throw new Error(msg || 'Failed to list OneDrive folders')
   }
 
-  const items = (json.value || []) as any[]
-  const folders = items
-    .filter((i) => !!i.folder)
-    .map((i) => ({
-      id: i.id as string,
-      name: i.name as string,
-    }))
+  const itemsRaw = Array.isArray(json.value) ? json.value : []
+  const folders = itemsRaw
+    .filter((i) => !!(i && typeof i === 'object' && (i as JsonObj).folder))
+    .map((i) => {
+      const obj = i as JsonObj
+      return {
+        id: getString(obj, 'id') || '',
+        name: getString(obj, 'name') || '',
+      }
+    })
 
   return {
     accessToken: token.access_token,

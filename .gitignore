@@ -32,6 +32,10 @@ yarn-error.log*
 # env files
 .env*.local
 .env
+.env.local.bak*
+
+# pentest (local configs and generated artifacts)
+security/pentest/
 
 # vercel
 .vercel

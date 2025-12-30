@@ -159,4 +159,4 @@ BEGIN
   JOIN subscription_plans sp ON us.plan_id = sp.id
   WHERE us.user_id = p_user_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;

@@ -7,8 +7,10 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Loader2, User } from "lucide-react"
 import { toast } from "sonner"
+import { useLiterals } from "@/hooks/use-literals"
 
 export function ProfileSettings() {
+  const lt = useLiterals()
   const [loading, setLoading] = useState(false)
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
@@ -19,7 +21,7 @@ export function ProfileSettings() {
       setLoading(true)
       const res = await fetch('/api/profile')
       const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to load profile')
+      if (!res.ok) throw new Error(json?.error || lt('Failed to load profile'))
 
       setUserId(json?.user?.id || null)
       setEmail(json?.user?.email || "")
@@ -29,7 +31,7 @@ export function ProfileSettings() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [lt])
 
   useEffect(() => {
     getProfile()
@@ -46,12 +48,12 @@ export function ProfileSettings() {
         body: JSON.stringify({ full_name: fullName }),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to update profile')
+      if (!res.ok) throw new Error(json?.error || lt('Failed to update profile'))
       
-      toast.success("Profile updated successfully.")
+      toast.success(lt('Profile updated successfully.'))
     } catch (error) {
       console.error('Error updating profile:', error)
-      toast.error("Failed to update profile.")
+      toast.error(lt('Failed to update profile.'))
     } finally {
       setLoading(false)
     }
@@ -60,33 +62,33 @@ export function ProfileSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Profile Information</CardTitle>
+        <CardTitle>{lt('Profile Information')}</CardTitle>
         <CardDescription>
-          Update your personal information and email address.
+          {lt('Update your personal information and email address.')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{lt('Email')}</Label>
           <Input id="email" value={email} disabled />
           <p className="text-xs text-muted-foreground">
-            Your email address is managed through your login provider.
+            {lt('Your email address is managed through your login provider.')}
           </p>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="fullName">Full Name</Label>
+          <Label htmlFor="fullName">{lt('Full Name')}</Label>
           <Input
             id="fullName"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            placeholder="Enter your full name"
+            placeholder={lt('Enter your full name')}
           />
         </div>
       </CardContent>
       <CardFooter>
         <Button onClick={updateProfile} disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Save Changes
+          {lt('Save Changes')}
         </Button>
       </CardFooter>
     </Card>

@@ -44,7 +44,24 @@ export async function auditTransactions(tenantId: string): Promise<AuditIssue[]>
 
   // 2. Fetch Tenant Name for validation
   const { data: tenant } = await supabase.from('tenants').select('name').eq('id', tenantId).single()
-  const tenantName = (tenant as any)?.name?.toLowerCase() || ''
+  const primaryTenantName = (tenant as any)?.name || ''
+  // Also load any configured name aliases for robust matching
+  let tenantAliasRows: any[] = []
+  try {
+    const { data: aliasData } = await supabase
+      .from('tenant_identifiers')
+      .select('identifier_value')
+      .eq('tenant_id', tenantId)
+      .in('identifier_type', ['NAME_ALIAS'])
+      .limit(50)
+    tenantAliasRows = Array.isArray(aliasData) ? aliasData : []
+  } catch (e) {
+    tenantAliasRows = []
+  }
+
+  const tenantNames = [primaryTenantName, ...tenantAliasRows.map((r: any) => r.identifier_value || '')]
+    .map((s: any) => String(s || '').toLowerCase())
+    .filter(Boolean)
 
   // 3. Analyze
   const seenRefs = new Map<string, string>() // ref -> txId
@@ -235,28 +252,31 @@ export async function auditTransactions(tenantId: string): Promise<AuditIssue[]>
     // G. Check Wrong Tenant (using existing document data)
     // docData and dd are already defined above
 
-    if (dd && tenantName) {
+     if (dd && tenantNames.length > 0) {
        const vendor = dd.vendor_name?.toLowerCase() || ''
        // customer_name is not a column, try to get from extracted_data
        const customer = (dd.extracted_data as any)?.customer_name?.toLowerCase() || 
-                        (dd.extracted_data as any)?.receiver_name?.toLowerCase() || 
-                        (dd.extracted_data as any)?.client_name?.toLowerCase() || ''
-       
-       const isTenantInvolved = vendor.includes(tenantName) || customer.includes(tenantName) || tenantName.includes(vendor) || tenantName.includes(customer)
-       
+                  (dd.extracted_data as any)?.receiver_name?.toLowerCase() || 
+                  (dd.extracted_data as any)?.client_name?.toLowerCase() || ''
+
+       const isTenantInvolved = tenantNames.some(tn => (
+        (vendor && (vendor.includes(tn) || tn.includes(vendor))) ||
+        (customer && (customer.includes(tn) || tn.includes(customer)))
+       ))
+
        if (!isTenantInvolved) {
-          const docType = (dd.extracted_data as any)?.document_type
-          if (docType !== 'receipt') {
-             issues.push({
-              transactionId: tx.id,
-              description: tx.description || 'Unknown Transaction',
-              issueType: 'WRONG_TENANT',
-              severity: 'MEDIUM',
-              details: `Tenant '${(tenant as any)?.name}' not found in document vendor/customer`
-            })
-          }
+         const docType = (dd.extracted_data as any)?.document_type
+         if (docType !== 'receipt') {
+           issues.push({
+            transactionId: tx.id,
+            description: tx.description || 'Unknown Transaction',
+            issueType: 'WRONG_TENANT',
+            severity: 'MEDIUM',
+            details: `Tenant '${(tenant as any)?.name}' not found in document vendor/customer`
+          })
+         }
        }
-    }
+     }
     // I. Check Document Validation Flags (from initial processing)
     if (tx.documents && (tx.documents as any).validation_flags) {
       const flags = (tx.documents as any).validation_flags as string[]

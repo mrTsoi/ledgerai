@@ -1,1322 +1,921 @@
-'use client'
+"use client"
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useTenant, useUserRole } from '@/hooks/use-tenant'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import { Folder, File as FileIcon } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { AutomatedSyncSettings } from './automated-sync-settings'
+import { useLiterals } from '@/hooks/use-literals'
+import { useTenant } from '@/hooks/use-tenant'
 import { toast } from 'sonner'
-
-type Provider = 'SFTP' | 'FTPS' | 'GOOGLE_DRIVE' | 'ONEDRIVE'
-
-type SourceRow = {
-  id: string
-  tenant_id: string
-  name: string
-  provider: Provider
-  enabled: boolean
-  schedule_minutes: number
-  last_run_at: string | null
-  config: any
-}
-
-type FolderItem = {
-  id: string
-  name: string
-}
-
-type FileItem = {
-  id: string
-  name: string
-  size?: number
-  modifiedTime?: string
-  mimeType?: string
-}
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 export function ExternalSourcesSettings() {
+  const lt = useLiterals()
   const { currentTenant } = useTenant()
-  const role = useUserRole()
-  const canManage = role === 'COMPANY_ADMIN' || role === 'SUPER_ADMIN'
-  const supabase = useMemo(() => createClient(), [])
 
-  const tenantId = currentTenant?.id
-
-  const [sources, setSources] = useState<SourceRow[]>([])
-  const [loading, setLoading] = useState(false)
-  const [working, setWorking] = useState(false)
-
-  const [statusById, setStatusById] = useState<Record<string, boolean>>({})
-  const [cloudInfoById, setCloudInfoById] = useState<
-    Record<
-      string,
-      {
-        account?: { email: string | null; displayName: string | null } | null
-        folder_id?: string | null
-        folder_name?: string | null
-      }
-    >
-  >({})
-
-  const [cronConfigured, setCronConfigured] = useState<boolean>(false)
-  const [cronEnabled, setCronEnabled] = useState<boolean>(true)
-  const [cronDefaultLimit, setCronDefaultLimit] = useState<string>('10')
-  const [cronKeyPrefix, setCronKeyPrefix] = useState<string | null>(null)
-  const [generatedCronSecret, setGeneratedCronSecret] = useState<string | null>(null)
-
-  const [pickerSourceId, setPickerSourceId] = useState<string | null>(null)
-  const [pickerParentId, setPickerParentId] = useState<string>('root')
-  const [pickerStack, setPickerStack] = useState<string[]>([])
-  const [pickerFolders, setPickerFolders] = useState<FolderItem[]>([])
-  const [pickerFiles, setPickerFiles] = useState<FileItem[]>([])
-  const [pickerLoading, setPickerLoading] = useState(false)
-
-  // Wizard state (persisted so OAuth redirect can resume)
-  const [wizardOpen, setWizardOpen] = useState(false)
-  const [wizardStep, setWizardStep] = useState<1 | 2 | 3 | 4>(1)
-  const [wizardSourceId, setWizardSourceId] = useState<string | null>(null)
-
-  // Minimal "create" form
-  const [name, setName] = useState('')
-  const [provider, setProvider] = useState<Provider>('SFTP')
-  const [enabled, setEnabled] = useState(true)
-  const [scheduleMinutes, setScheduleMinutes] = useState('60')
-
-  const [host, setHost] = useState('')
-  const [port, setPort] = useState('')
-  const [remotePath, setRemotePath] = useState('/')
-  const [fileGlob, setFileGlob] = useState('**/*')
-
-  const [folderId, setFolderId] = useState('')
-
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [privateKeyPem, setPrivateKeyPem] = useState('')
-
-  const [clientCertPem, setClientCertPem] = useState('')
-  const [clientKeyPem, setClientKeyPem] = useState('')
-  const [caCertPem, setCaCertPem] = useState('')
-
-  const [documentType, setDocumentType] = useState<'invoice' | 'receipt' | 'bank_statement' | 'other' | 'none'>('none')
-  const [bankAccountId, setBankAccountId] = useState<string>('')
-  const [bankAccounts, setBankAccounts] = useState<any[]>([])
-
-  const persistWizard = useCallback((next: { open?: boolean; step?: number; sourceId?: string | null }) => {
-    if (typeof window === 'undefined') return
-    const payload = {
-      open: typeof next.open === 'boolean' ? next.open : wizardOpen,
-      step: typeof next.step === 'number' ? next.step : wizardStep,
-      sourceId: typeof next.sourceId !== 'undefined' ? next.sourceId : wizardSourceId,
-    }
-    window.localStorage.setItem('externalSourcesWizard', JSON.stringify(payload))
-  }, [wizardOpen, wizardStep, wizardSourceId])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    try {
-      const raw = window.localStorage.getItem('externalSourcesWizard')
-      if (!raw) return
-      const parsed = JSON.parse(raw)
-      if (parsed?.open) setWizardOpen(true)
-      if (parsed?.step) setWizardStep(parsed.step)
-      if (parsed?.sourceId) setWizardSourceId(parsed.sourceId)
-    } catch {
-      // ignore
-    }
-  }, [])
-
-  const resetWizard = useCallback(() => {
-    setWizardOpen(false)
-    setWizardStep(1)
-    setWizardSourceId(null)
-    if (typeof window !== 'undefined') window.localStorage.removeItem('externalSourcesWizard')
-  }, [])
-
-  const wizardSource = wizardSourceId ? sources.find((s) => s.id === wizardSourceId) || null : null
-
-  const startWizard = () => {
-    setWizardOpen(true)
-    setWizardStep(1)
-    setWizardSourceId(null)
-    persistWizard({ open: true, step: 1, sourceId: null })
-  }
+  const [sources, setSources] = useState<any[]>([])
+  const [loadingSources, setLoadingSources] = useState(false)
 
   const fetchSources = useCallback(async () => {
-    if (!tenantId || !canManage) return
-
+    if (!currentTenant) return
+    setLoadingSources(true)
     try {
-      setLoading(true)
-      const res = await fetch(`/api/external-sources?tenant_id=${encodeURIComponent(tenantId)}`)
-      const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to load sources')
-      setSources(json.data || [])
-    } catch (e: any) {
-      toast.error(e.message || 'Failed to load external sources')
-    } finally {
-      setLoading(false)
-    }
-  }, [tenantId, canManage])
-
-  const fetchCronConfig = useCallback(async () => {
-    if (!tenantId || !canManage) return
-
-    try {
-      const res = await fetch(`/api/external-sources/cron?tenant_id=${encodeURIComponent(tenantId)}`)
-      const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to load cron config')
-
-      if (!json.configured) {
-        setCronConfigured(false)
-        setCronEnabled(true)
-        setCronDefaultLimit('10')
-        setCronKeyPrefix(null)
+      const res = await fetch(`/api/external-sources?tenant_id=${encodeURIComponent(currentTenant.id)}`)
+      if (!res.ok) {
+        setSources([])
         return
       }
-
-      setCronConfigured(true)
-      setCronEnabled(!!json.enabled)
-      setCronDefaultLimit(String(json.default_run_limit ?? 10))
-      setCronKeyPrefix(json.key_prefix || null)
-    } catch {
-      // ignore
+      const json = await res.json().catch(() => ({ data: [] }))
+      setSources(json?.data || [])
+    } catch (e) {
+      console.error('Failed to fetch external sources', e)
+      setSources([])
+    } finally {
+      setLoadingSources(false)
     }
-  }, [tenantId, canManage])
-
-  const fetchBankAccounts = useCallback(async () => {
-    if (!tenantId || !canManage) return
-
-    try {
-      const { data, error } = await (supabase.from('bank_accounts') as any)
-        .select('id, account_name, bank_name')
-        .eq('tenant_id', tenantId)
-        .eq('is_active', true)
-
-      if (error) return
-      setBankAccounts(data || [])
-    } catch {
-      // ignore
-    }
-  }, [supabase, tenantId, canManage])
+  }, [currentTenant])
 
   useEffect(() => {
-    fetchSources()
+    void fetchSources()
   }, [fetchSources])
 
-  useEffect(() => {
-    fetchCronConfig()
-  }, [fetchCronConfig])
-
-  const fetchStatuses = useCallback(async () => {
-    if (!canManage) return
-    if (!sources.length) {
-      setStatusById({})
-      return
-    }
-
+  const createSource = async () => {
+    if (!currentTenant) return
+    const name = prompt(String(lt('Name for new source')))
+    if (!name) return
     try {
-      const entries = await Promise.all(
-        sources.map(async (s) => {
-          if (s.provider !== 'GOOGLE_DRIVE' && s.provider !== 'ONEDRIVE') return [s.id, true] as const
-          const res = await fetch(`/api/external-sources/status?source_id=${encodeURIComponent(s.id)}`)
-          const json = await res.json()
-          if (!res.ok) return [s.id, false] as const
-          return [s.id, !!json.connected] as const
-        })
-      )
-
-      setStatusById(Object.fromEntries(entries))
-    } catch {
-      // ignore
-    }
-  }, [sources, canManage])
-
-  useEffect(() => {
-    fetchStatuses()
-  }, [fetchStatuses])
-
-  const fetchCloudWhoAmI = useCallback(async () => {
-    if (!canManage) return
-    const cloud = sources.filter((s) => s.provider === 'GOOGLE_DRIVE' || s.provider === 'ONEDRIVE')
-    if (!cloud.length) {
-      setCloudInfoById({})
-      return
-    }
-
-    try {
-      const entries = await Promise.all(
-        cloud.map(async (s) => {
-          const res = await fetch(`/api/external-sources/whoami?source_id=${encodeURIComponent(s.id)}`)
-          const json = await res.json().catch(() => ({}))
-          if (!res.ok) return [s.id, null] as const
-          return [
-            s.id,
-            {
-              account: json.account || null,
-              folder_id: json.folder_id ?? null,
-              folder_name: json.folder_name ?? null,
-            },
-          ] as const
-        })
-      )
-
-      setCloudInfoById(Object.fromEntries(entries.filter((e) => e[1] !== null)) as any)
-    } catch {
-      // ignore
-    }
-  }, [sources, canManage])
-
-  useEffect(() => {
-    fetchCloudWhoAmI()
-  }, [fetchCloudWhoAmI])
-
-  useEffect(() => {
-    fetchBankAccounts()
-  }, [fetchBankAccounts])
-
-  const rotateCronSecret = async () => {
-    if (!tenantId) return
-    try {
-      setWorking(true)
-      setGeneratedCronSecret(null)
-
-      const res = await fetch('/api/external-sources/cron/rotate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenant_id: tenantId }),
-      })
-
-      const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to rotate cron secret')
-
-      setGeneratedCronSecret(json.cron_secret)
-      setCronKeyPrefix(json.key_prefix || null)
-      setCronConfigured(true)
-      toast.success('Cron secret rotated')
+      const payload = { tenant_id: currentTenant.id, name, provider: 'SFTP', enabled: false, schedule_minutes: 60 }
+      const res = await fetch('/api/external-sources/upsert', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
+      const parsed = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(parsed?.error || 'Create failed')
+      toast.success(lt('Created source'))
+      try { window.dispatchEvent(new CustomEvent('externalSourcesChanged')) } catch {}
+      await fetchSources()
     } catch (e: any) {
-      toast.error(e.message || 'Failed to rotate cron secret')
-    } finally {
-      setWorking(false)
+      console.error(e)
+      toast.error(e?.message || lt('Failed to create source'))
     }
   }
 
-  const saveCronConfig = async () => {
-    if (!tenantId) return
+  const deleteSource = async (id: string) => {
+    if (!confirm(lt('Delete this external source? This will remove its configuration and any import history.'))) return
     try {
-      setWorking(true)
-      const res = await fetch('/api/external-sources/cron', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tenant_id: tenantId,
-          enabled: cronEnabled,
-          default_run_limit: Number(cronDefaultLimit || 10),
-        }),
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to save cron config')
-      toast.success('Cron configuration saved')
-      await fetchCronConfig()
+      const res = await fetch('/api/external-sources/delete', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ source_id: id }) })
+      const parsed = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(parsed?.error || 'Delete failed')
+      toast.success(lt('Deleted external source'))
+      try { window.dispatchEvent(new CustomEvent('externalSourcesChanged')) } catch {}
+      await fetchSources()
     } catch (e: any) {
-      toast.error(e.message || 'Failed to save cron config')
-    } finally {
-      setWorking(false)
+      console.error(e)
+      toast.error(e?.message || lt('Failed to delete source'))
     }
   }
 
-  const copyCronSecret = async () => {
-    if (!generatedCronSecret) return
+  // Setup Wizard / Edit dialog state
+  const [wizOpen, setWizOpen] = useState(false)
+  const [wizStep, setWizStep] = useState<1|2|3>(1)
+  const [wizId, setWizId] = useState<string | null>(null)
+  const [wizName, setWizName] = useState('')
+  const [wizProvider, setWizProvider] = useState<'SFTP'|'FTPS'|'GOOGLE_DRIVE'|'ONEDRIVE'>('SFTP')
+  const [wizSchedule, setWizSchedule] = useState<number>(60)
+  const [wizWorking, setWizWorking] = useState(false)
+  const [wizConfig, setWizConfig] = useState<any>({})
+  const [wizConnectingOAuth, setWizConnectingOAuth] = useState(false)
+
+  const startOAuthConnect = async (): Promise<boolean> => {
+    if (!currentTenant) {
+      toast.error(lt('No tenant selected'))
+      return false
+    }
     try {
-      await navigator.clipboard.writeText(generatedCronSecret)
-      toast.success('Copied cron secret')
-    } catch {
-      toast.error('Failed to copy')
+      setWizConnectingOAuth(true)
+      // route differs per provider: google -> /oauth/google/start, onedrive -> /oauth/microsoft/start
+      const providerPath = wizProvider === 'GOOGLE_DRIVE' ? 'google' : wizProvider === 'ONEDRIVE' ? 'microsoft' : null
+      if (!providerPath) {
+        setWizConnectingOAuth(false)
+        toast.error(lt('Unsupported provider for OAuth'))
+        return false
+      }
+
+      // Ensure we have a persisted source to attach the OAuth flow to (API requires `source_id`)
+      let sourceId = wizId
+      if (!sourceId) {
+        try {
+          const payload = {
+            tenant_id: currentTenant.id,
+            name: wizName || `${wizProvider} connection`,
+            provider: wizProvider,
+            enabled: false,
+            schedule_minutes: wizSchedule,
+          }
+          const up = await fetch('/api/external-sources/upsert', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
+          const upj = await up.json().catch(() => ({}))
+          if (!up.ok) throw new Error(upj?.error || 'Failed to create source')
+          sourceId = String(upj?.id || upj?.data?.id)
+          if (sourceId) setWizId(sourceId)
+        } catch (e: any) {
+          console.error('Failed to create source for OAuth', e)
+          setWizConnectingOAuth(false)
+          toast.error(e?.message || lt('Failed to create source'))
+          return false
+        }
+      }
+
+      const url = `/api/external-sources/oauth/${providerPath}/start?source_id=${encodeURIComponent(sourceId)}&tenant_id=${encodeURIComponent(currentTenant.id)}`
+      const width = 620
+      const height = 720
+      const left = Math.max(0, Math.floor((window.screen.width - width) / 2))
+      const top = Math.max(0, Math.floor((window.screen.height - height) / 2))
+      const popup = window.open(url, 'external_oauth', `width=${width},height=${height},left=${left},top=${top}`)
+      if (!popup) {
+        setWizConnectingOAuth(false)
+        toast.error(lt('Popup blocked'))
+        return false
+      }
+      return await new Promise<boolean>(async (resolve) => {
+        const origin = window.location.origin;
+        const cleanup = () => {
+          try { window.removeEventListener('message', onMessage) } catch {}
+        };
+
+        const onMessage = async (ev: MessageEvent) => {
+          try {
+            if (ev.origin !== origin) return;
+            const data = ev.data;
+            if (data && data.type === 'external_oauth' && String(data.source_id) === String(sourceId)) {
+              cleanup();
+              // Fetch latest config for this source
+              let config = {};
+              try {
+                const res = await fetch(`/api/external-sources?tenant_id=${encodeURIComponent(currentTenant.id)}`);
+                const json = await res.json().catch(() => ({ data: [] }));
+                const found = (json?.data || []).find((it: any) => String(it.id) === String(sourceId));
+                if (found) config = found.config || {};
+              } catch {}
+              setWizConfig((prev: any) => ({ ...prev, ...config, oauth_connected: true }));
+              setWizId(String(sourceId));
+              toast.success(lt('Provider connected'));
+              try { popup.close(); } catch (e) {}
+              setWizConnectingOAuth(false);
+              resolve(true);
+            }
+          } catch (e) {
+            console.error('message handler error', e);
+          }
+        };
+
+        window.addEventListener('message', onMessage);
+      });
+    } catch (e) {
+      console.error(e)
+      setWizConnectingOAuth(false)
+      toast.error(lt('Failed to start OAuth'))
+      return false
     }
   }
 
-  const isCloud = (s: SourceRow) => s.provider === 'GOOGLE_DRIVE' || s.provider === 'ONEDRIVE'
+  function FolderPicker({ sourceId, onSelect, onClose }: { sourceId: string; onSelect: (folderId: string) => void; onClose: () => void }) {
+    const [parentId, setParentId] = useState('root')
+    const [loading, setLoading] = useState(false)
+    const [folders, setFolders] = useState<any[]>([])
+    const [files, setFiles] = useState<any[]>([])
+    const [history, setHistory] = useState<string[]>([])
+    const [crumbs, setCrumbs] = useState<Array<{ id: string; name: string }>>([{ id: 'root', name: lt('Root') }])
+    const [selected, setSelected] = useState<string | null>(null)
+    const [searchTerm, setSearchTerm] = useState('')
+    const [focusIndex, setFocusIndex] = useState<number>(-1)
+    const itemRefs = useRef<Array<HTMLDivElement | null>>([])
 
-  const cloudConnected = (s: SourceRow) => {
-    if (!isCloud(s)) return true
-    return !!statusById[s.id]
-  }
+    const storageKey = `external_sources_folderpicker_${sourceId}_crumbs`
 
-  const cloudHasFolder = (s: SourceRow) => {
-    if (!isCloud(s)) return true
-    const folder = s.config?.folder_id
-    return typeof folder === 'string' && folder.trim().length > 0
-  }
-
-  const canRunSource = (s: SourceRow) => {
-    if (!isCloud(s)) return true
-    return cloudConnected(s) && cloudHasFolder(s)
-  }
-
-  const loadFolders = useCallback(
-    async (sourceId: string, parentId: string) => {
+    useEffect(() => {
       try {
-        setPickerLoading(true)
-        const res = await fetch(
-          `/api/external-sources/folders?source_id=${encodeURIComponent(sourceId)}&parent_id=${encodeURIComponent(parentId)}`
-        )
-        const json = await res.json()
-        if (!res.ok) throw new Error(json?.error || 'Failed to load folders')
-        setPickerFolders((json.folders || []) as FolderItem[])
-        setPickerFiles((json.files || []) as FileItem[])
+        const raw = localStorage.getItem(storageKey)
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          if (Array.isArray(parsed) && parsed.length) setCrumbs(parsed)
+        }
+      } catch (e) {
+        // ignore
+      }
+    }, [storageKey])
+
+    const fetchPage = useCallback(async (pid: string, pushCrumb?: { id: string; name: string } | null) => {
+      setLoading(true)
+      try {
+        const res = await fetch(`/api/external-sources/folders?source_id=${encodeURIComponent(sourceId)}&parent_id=${encodeURIComponent(pid)}`)
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(json?.error || 'Failed to list')
+        setFolders(json.folders || [])
+        setFiles(json.files || [])
+        setParentId(json.parent_id || pid)
+        if (pushCrumb) {
+              setCrumbs((c) => {
+                const next = [...c, pushCrumb]
+                try { localStorage.setItem(storageKey, JSON.stringify(next)) } catch {}
+                return next
+              })
+        }
       } catch (e: any) {
-        toast.error(e.message || 'Failed to load folders')
-        setPickerFolders([])
-        setPickerFiles([])
+        toast.error(e?.message || 'Failed to list folders')
       } finally {
-        setPickerLoading(false)
+        setLoading(false)
       }
-    },
-    []
-  )
+    }, [sourceId, storageKey])
 
-  const openFolderPicker = async (s: SourceRow) => {
-    setPickerSourceId(s.id)
-    setPickerParentId('root')
-    setPickerStack([])
-    setPickerFolders([])
-    setPickerFiles([])
-    await loadFolders(s.id, 'root')
-  }
+    useEffect(() => { void fetchPage('root', null) }, [fetchPage])
 
-  const closeFolderPicker = () => {
-    setPickerSourceId(null)
-    setPickerParentId('root')
-    setPickerStack([])
-    setPickerFolders([])
-    setPickerFiles([])
-  }
+    const enter = (f: any) => {
+      setHistory((h) => [...h, parentId])
+      void fetchPage(f.id, { id: f.id, name: f.name })
+    }
 
-  const navigateIntoFolder = async (folderId: string) => {
-    if (!pickerSourceId) return
-    setPickerStack((prev) => [...prev, pickerParentId])
-    setPickerParentId(folderId)
-    await loadFolders(pickerSourceId, folderId)
-  }
-
-  const navigateBackFolder = async () => {
-    if (!pickerSourceId) return
-    setPickerStack((prev) => {
-      if (prev.length === 0) return prev
-      const next = [...prev]
-      const parent = next.pop()!
-      setPickerParentId(parent)
-      void loadFolders(pickerSourceId, parent)
-      return next
-    })
-  }
-
-  const updateCloudFolder = async (s: SourceRow, newFolderId: string) => {
-    try {
-      setWorking(true)
-
-      const nextConfig = {
-        ...(s.config || {}),
-        folder_id: newFolderId,
-      }
-
-      const res = await fetch('/api/external-sources/upsert', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: s.id,
-          tenant_id: s.tenant_id,
-          name: s.name,
-          provider: s.provider,
-          enabled: s.enabled,
-          schedule_minutes: s.schedule_minutes,
-          config: nextConfig,
-        }),
+    const goUp = () => {
+      const prev = history[history.length - 1]
+      if (!prev) return
+      setHistory((h) => h.slice(0, -1))
+      // pop last crumb
+      setCrumbs((c) => {
+        const next = c.length > 1 ? c.slice(0, -1) : c
+        try { localStorage.setItem(storageKey, JSON.stringify(next)) } catch {}
+        return next
       })
-
-      const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to save folder')
-
-      toast.success('Folder selected')
-
-      setSources((prev) =>
-        prev.map((row) => (row.id === s.id ? { ...row, config: nextConfig } : row))
-      )
-    } catch (e: any) {
-      toast.error(e.message || 'Failed to save folder')
-    } finally {
-      setWorking(false)
-      closeFolderPicker()
-    }
-  }
-
-  const upsertSource = async (override?: { id?: string; enabled?: boolean }) => {
-    if (!tenantId) return
-    if (!name.trim()) {
-      toast.error('Name is required')
-      return
+      void fetchPage(prev, null)
     }
 
-    try {
-      setWorking(true)
-
-      const config: any = {
-        file_glob: fileGlob.trim() || '**/*',
-        document_type: documentType === 'none' ? null : documentType,
-        bank_account_id: documentType === 'bank_statement' ? bankAccountId || null : null,
-      }
-
-      let secrets: any | undefined
-
-      if (provider === 'SFTP' || provider === 'FTPS') {
-        config.host = host.trim() || undefined
-        config.port = port.trim() ? Number(port.trim()) : undefined
-        config.remote_path = remotePath.trim() || '/'
-
-        secrets = {
-          username: username.trim() || undefined,
-          password: password || undefined,
-        }
-
-        if (provider === 'SFTP') {
-          if (privateKeyPem.trim()) secrets.private_key_pem = privateKeyPem
-        }
-
-        if (provider === 'FTPS') {
-          if (clientCertPem.trim()) secrets.client_cert_pem = clientCertPem
-          if (clientKeyPem.trim()) secrets.client_key_pem = clientKeyPem
-          if (caCertPem.trim()) secrets.ca_cert_pem = caCertPem
-        }
-      } else {
-        config.folder_id = folderId.trim() || undefined
-      }
-
-      const payload: any = {
-        id: override?.id,
-        tenant_id: tenantId,
-        name: name.trim(),
-        provider,
-        enabled: typeof override?.enabled === 'boolean' ? override.enabled : enabled,
-        schedule_minutes: Number(scheduleMinutes || 60),
-        config,
-      }
-
-      if (typeof secrets !== 'undefined') payload.secrets = secrets
-
-      const res = await fetch('/api/external-sources/upsert', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+    const gotoCrumb = (index: number) => {
+      const crumb = crumbs[index]
+      if (!crumb) return
+      // navigate to crumb.id and trim crumbs
+      setCrumbs((c) => {
+        const next = c.slice(0, index + 1)
+        try { localStorage.setItem(storageKey, JSON.stringify(next)) } catch {}
+        return next
       })
-
-      const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to save')
-
-      toast.success('Saved external source')
-      setName('')
-      setHost('')
-      setPort('')
-      setRemotePath('/')
-      setFileGlob('**/*')
-      setFolderId('')
-      setUsername('')
-      setPassword('')
-      setPrivateKeyPem('')
-      setClientCertPem('')
-      setClientKeyPem('')
-      setCaCertPem('')
-      setDocumentType('none')
-      setBankAccountId('')
-      await fetchSources()
-      return json?.id as string | undefined
-    } catch (e: any) {
-      toast.error(e.message || 'Failed to save')
-      return undefined
-    } finally {
-      setWorking(false)
-    }
-  }
-
-  const connectSource = async (s: SourceRow) => {
-    const returnTo = window.location.pathname + window.location.search
-    const startPath =
-      s.provider === 'GOOGLE_DRIVE'
-        ? `/api/external-sources/oauth/google/start?mode=json&source_id=${encodeURIComponent(s.id)}&return_to=${encodeURIComponent(returnTo)}`
-        : `/api/external-sources/oauth/microsoft/start?mode=json&source_id=${encodeURIComponent(s.id)}&return_to=${encodeURIComponent(returnTo)}`
-
-    try {
-      setWorking(true)
-      persistWizard({ open: true, step: wizardStep, sourceId: s.id })
-      const res = await fetch(startPath)
-      const json = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(json?.error || 'Failed to start OAuth')
-      if (!json?.auth_url) throw new Error('OAuth URL not returned')
-      window.location.href = String(json.auth_url)
-    } catch (e: any) {
-      toast.error(e.message || 'Failed to start OAuth')
-    } finally {
-      setWorking(false)
-    }
-  }
-
-  const ensureWizardSource = async () => {
-    if (!tenantId) return null
-    const createdId = await upsertSource({ enabled: false })
-    if (createdId) {
-      setWizardSourceId(createdId)
-      persistWizard({ open: true, step: 2, sourceId: createdId })
-      await fetchSources()
-      return createdId
-    }
-    return null
-  }
-
-  const saveWizardSource = async (opts?: { enabled?: boolean }) => {
-    if (!tenantId) return null
-    const id = wizardSourceId
-    if (!id) return null
-    const savedId = await upsertSource({ id, enabled: opts?.enabled })
-    if (savedId) {
-      await fetchSources()
-      await fetchStatuses()
-      await fetchCloudWhoAmI()
-    }
-    return savedId || null
-  }
-
-  const wizardNext = async () => {
-    if (!wizardOpen) return
-
-    if (wizardStep === 1) {
-      const createdId = await ensureWizardSource()
-      if (!createdId) return
-      setWizardStep(2)
-      persistWizard({ open: true, step: 2, sourceId: createdId })
-      return
+      setHistory((h) => h.slice(0, index === 0 ? 0 : index - 0))
+      void fetchPage(crumb.id, null)
     }
 
-    if (wizardStep === 2) {
-      // For SFTP/FTPS we require a successful test before moving on.
-      if (provider === 'SFTP' || provider === 'FTPS') {
-        const savedId = await saveWizardSource({ enabled: false })
-        if (!savedId) return
-        await testSource(savedId)
-      } else {
-        // Cloud: user must connect in this step.
-        if (!wizardSourceId) return
-        const connected = statusById[wizardSourceId]
-        if (!connected) {
-          toast.error('Please connect the account first')
-          return
-        }
-      }
+    const filteredFolders = useMemo(() => {
+      if (!searchTerm) return folders
+      const q = searchTerm.toLowerCase()
+      return folders.filter((f: any) => (f.name || '').toLowerCase().includes(q))
+    }, [folders, searchTerm])
 
-      setWizardStep(3)
-      persistWizard({ open: true, step: 3 })
-      return
-    }
+    const filteredFiles = useMemo(() => {
+      if (!searchTerm) return files
+      const q = searchTerm.toLowerCase()
+      return files.filter((f: any) => (f.name || '').toLowerCase().includes(q))
+    }, [files, searchTerm])
 
-    if (wizardStep === 3) {
-      // Save folder/glob/doc mapping
-      const savedId = await saveWizardSource({ enabled: false })
-      if (!savedId) return
-
-      // Cloud providers need a folder selected
-      if ((provider === 'GOOGLE_DRIVE' || provider === 'ONEDRIVE') && !(folderId || wizardSource?.config?.folder_id)) {
-        toast.error('Please select a folder')
+    const onKeyDownItem = (e: React.KeyboardEvent, idx: number, f: any) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setFocusIndex((i) => Math.min(i + 1, filteredFolders.length - 1))
         return
       }
-
-      setWizardStep(4)
-      persistWizard({ open: true, step: 4 })
-      return
+      if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setFocusIndex((i) => Math.max(i - 1, 0))
+        return
+      }
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        enter(f)
+        return
+      }
     }
+
+    useEffect(() => {
+      if (focusIndex >= 0 && itemRefs.current[focusIndex]) {
+        try { itemRefs.current[focusIndex]?.focus() } catch {}
+      }
+    }, [focusIndex])
+
+    return (
+      <div className="mt-3 border rounded p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="font-medium">{lt('Folder Picker')}</div>
+          <div className="flex gap-2">
+            <Button variant="ghost" onClick={goUp} disabled={crumbs.length <= 1}>{lt('Up')}</Button>
+            <Button variant="ghost" onClick={onClose}>{lt('Close')}</Button>
+          </div>
+        </div>
+
+        <div className="mb-2 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="text-muted-foreground">{lt('Path')}:</div>
+            <div className="flex items-center gap-1 overflow-auto">
+              {crumbs.map((c, i) => (
+                <button key={c.id} className="text-sm text-primary underline" onClick={() => gotoCrumb(i)}>{c.name}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Select Root button when at root */}
+        {parentId === 'root' && (
+          <div className="mb-2">
+            <Button size="sm" variant="outline" onClick={() => { setSelected('root'); onSelect('root'); onClose(); }}>{lt('Select Root')}</Button>
+          </div>
+        )}
+
+        <div className="mb-2 grid grid-cols-1 gap-2">
+          <Input placeholder={lt('Filter folders and files')} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <div className="text-sm font-medium mb-2">{lt('Folders')}</div>
+            <ScrollArea className="h-56 border rounded p-2">
+              {loading ? <div className="text-sm text-muted-foreground">{lt('Loading…')}</div> : (
+                filteredFolders.length === 0 ? <div className="text-sm text-muted-foreground">{lt('No folders')}</div> : (
+                  <div className="space-y-1">
+                    {filteredFolders.map((f: any, idx: number) => (
+                      <div
+                        key={f.id}
+                        ref={(el) => { itemRefs.current[idx] = el }}
+                        tabIndex={0}
+                        onKeyDown={(e) => onKeyDownItem(e as any, idx, f)}
+                        className={`flex items-center justify-between p-1 rounded cursor-pointer focus:outline-none ${focusIndex === idx ? 'ring ring-primary' : ''} ${selected === f.id ? 'bg-muted' : ''}`}
+                        onClick={() => enter(f)}
+                        role="button"
+                        aria-pressed={selected === f.id}
+                      >
+                        <div className="truncate flex items-center gap-2">
+                          <Folder className="w-4 h-4 opacity-80" />
+                          <span className="text-sm">{f.name}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={(ev) => { ev.stopPropagation(); enter(f) }}>{lt('Open')}</Button>
+                          <Button size="sm" onClick={(ev) => { ev.stopPropagation(); setSelected(f.id); onSelect(f.id); onClose(); }}>{lt('Select')}</Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              )}
+            </ScrollArea>
+          </div>
+          <div>
+            <div className="text-sm font-medium mb-2">{lt('Preview files')}</div>
+            <ScrollArea className="h-56 border rounded p-2">
+              {filteredFiles.length === 0 ? <div className="text-sm text-muted-foreground">{lt('No files')}</div> : (
+                <div className="space-y-1 text-sm">
+                  {filteredFiles.map((f: any) => (
+                    <div key={f.id} className="flex items-center justify-between">
+                      <div className="truncate flex items-center gap-2"><FileIcon className="w-4 h-4 opacity-70" />{f.name}</div>
+                      <div className="text-xs text-muted-foreground">{f.size ?? ''}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  const wizardBack = () => {
-    const prev = wizardStep === 1 ? 1 : ((wizardStep - 1) as any)
-    setWizardStep(prev)
-    persistWizard({ open: true, step: prev })
-  }
+  const [wizTesting, setWizTesting] = useState(false)
+  const [wizTestResult, setWizTestResult] = useState<any | null>(null)
+  const [showFolderPicker, setShowFolderPicker] = useState(false)
 
-  const wizardFinish = async () => {
-    if (!wizardSourceId) return
-    const savedId = await saveWizardSource({ enabled: true })
-    if (!savedId) return
-    toast.success('External source is ready')
-    resetWizard()
-    await fetchSources()
-  }
-
-  const disconnectSource = async (sourceId: string) => {
+  const testConnection = async () => {
+    if (!currentTenant) return toast.error(lt('No tenant selected'))
+    setWizTesting(true)
+    setWizTestResult(null)
     try {
-      setWorking(true)
-      const res = await fetch('/api/external-sources/disconnect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source_id: sourceId }),
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Disconnect failed')
-      toast.success('Disconnected')
-      await fetchStatuses()
-    } catch (e: any) {
-      toast.error(e.message || 'Disconnect failed')
-    } finally {
-      setWorking(false)
-    }
-  }
+      let sourceId = wizId
+      if (!sourceId) {
+        // persist a draft source so we can test against server-side secrets handling
+        const payload: any = {
+          tenant_id: currentTenant.id,
+          name: wizName || `temp-${Date.now()}`,
+          provider: wizProvider,
+          enabled: false,
+          schedule_minutes: Number(wizSchedule || 60),
+          config: { ...wizConfig },
+          _test_only: true,
+        }
+        // move secret out of config into secrets if present, but server will not persist secrets when _test_only
+        if (payload.config?.secret) {
+          payload.secrets = { secret: payload.config.secret }
+          delete payload.config.secret
+        }
 
-  const deleteSource = async (sourceId: string) => {
-    if (!confirm('Delete this external source? This will remove its configuration and any import history.')) return
-
-    try {
-      setWorking(true)
-      const res = await fetch('/api/external-sources/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source_id: sourceId }),
-      })
-      const json = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(json?.error || 'Delete failed')
-
-      if (pickerSourceId === sourceId) {
-        closeFolderPicker()
+        const up = await fetch('/api/external-sources/upsert', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
+        const upJson = await up.json().catch(() => ({}))
+        if (!up.ok) throw new Error(upJson?.error || 'Failed to persist source')
+        sourceId = upJson.id
+        setWizId(String(sourceId))
+        // fetchSources to refresh list
+        void fetchSources()
       }
 
-      toast.success('Deleted external source')
-      await fetchSources()
-      await fetchStatuses()
-      await fetchCloudWhoAmI()
+      const res = await fetch('/api/external-sources/test', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ source_id: sourceId }) })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok || json?.ok === false) {
+        const err = json?.error || 'Test failed'
+        setWizTestResult({ ok: false, error: err })
+        toast.error(err)
+      } else {
+        setWizTestResult({ ok: true, list: json.list || [] })
+        toast.success(lt('Connection test succeeded'))
+      }
     } catch (e: any) {
-      toast.error(e.message || 'Delete failed')
+      console.error('Test connection error', e)
+      setWizTestResult({ ok: false, error: e?.message || 'Test failed' })
+      toast.error(e?.message || lt('Test failed'))
     } finally {
-      setWorking(false)
+      setWizTesting(false)
     }
   }
 
-  const testSource = async (sourceId: string) => {
+  const openWizardForNew = () => {
+    setWizId(null)
+    setWizName('')
+    setWizProvider('SFTP')
+    setWizSchedule(60)
+    setWizConfig({})
+    setWizStep(1)
+    setWizOpen(true)
+  }
+
+  const openWizardForEdit = (s: any) => {
+    setWizId(String(s.id))
+    setWizName(s.name || '')
+    setWizProvider(s.provider || 'SFTP')
+    setWizSchedule(Number(s.schedule_minutes || 60))
+    setWizConfig(s.config || {})
+    setWizStep(1)
+    setWizOpen(true)
+  }
+
+  const wizNext = () => setWizStep((p) => (p === 3 ? 3 : (p + 1) as 1|2|3))
+  const wizBack = () => setWizStep((p) => (p === 1 ? 1 : (p - 1) as 1|2|3))
+
+  const canProceed = useMemo(() => {
+    if (wizStep === 1) {
+      return String(wizName || '').trim().length > 0
+    }
+    if (wizStep === 2) {
+      if (wizProvider === 'SFTP' || wizProvider === 'FTPS') {
+        return Boolean((wizConfig?.host || '').toString().trim() && (wizConfig?.username || '').toString().trim())
+      }
+      // OAuth providers require both connected state and folder selection
+      return Boolean(wizConfig?.oauth_connected && wizConfig?.folder_id)
+    }
+    return true
+  }, [wizStep, wizName, wizProvider, wizConfig])
+
+  const wizSave = async () => {
+    if (!currentTenant) return toast.error(lt('No tenant selected'))
+    if (!wizName) return toast.error(lt('Name is required'))
+    setWizWorking(true)
     try {
-      setWorking(true)
-      const res = await fetch('/api/external-sources/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source_id: sourceId }),
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Test failed')
-      toast.success(`Connected. Found ${json.list?.length ?? 0} file(s).`)
-    } catch (e: any) {
-      toast.error(e.message || 'Test failed')
-    } finally {
-      setWorking(false)
-    }
-  }
-
-  const runSource = async (sourceId: string) => {
-    if (!tenantId) return
-
-    try {
-      setWorking(true)
-      const res = await fetch('/api/external-sources/run', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenant_id: tenantId, source_id: sourceId, limit: 10 }),
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Run failed')
-      toast.success(`Run complete. Imported ${json.inserted ?? 0} file(s).`)
+      const payload: any = { tenant_id: currentTenant.id, name: wizName, provider: wizProvider, schedule_minutes: Number(wizSchedule), enabled: true, config: wizConfig }
+      if (wizId) payload.id = wizId
+      const res = await fetch('/api/external-sources/upsert', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
+      const parsed = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(parsed?.error || 'Save failed')
+      toast.success(wizId ? lt('Updated source') : lt('Created source'))
+      try { window.dispatchEvent(new CustomEvent('externalSourcesChanged')) } catch {}
       await fetchSources()
+      setWizOpen(false)
     } catch (e: any) {
-      toast.error(e.message || 'Run failed')
+      console.error(e)
+      toast.error(e?.message || lt('Failed to save'))
     } finally {
-      setWorking(false)
+      setWizWorking(false)
     }
-  }
-
-  if (!currentTenant) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>External Sources</CardTitle>
-          <CardDescription>Select a tenant first.</CardDescription>
-        </CardHeader>
-      </Card>
-    )
   }
 
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>External Sources</CardTitle>
-          <CardDescription>
-            Schedule automatic document ingestion from SFTP/FTPS and cloud drives.
-          </CardDescription>
+          <CardTitle>{lt('External Sources')}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {!canManage ? (
-            <div className="text-sm text-muted-foreground">Only Company Admins can manage external sources.</div>
-          ) : (
-            <>
-              <div className="rounded-md border p-3 space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="text-sm">
-                    <div className="font-medium">Setup Wizard</div>
-                    <div className="text-muted-foreground">
-                      A guided setup flow to help you connect the correct account and verify what will be imported.
+        <CardContent>
+          <Tabs defaultValue="configuration">
+            <TabsList>
+              <TabsTrigger value="configuration">{lt('Configuration')}</TabsTrigger>
+              <TabsTrigger value="scheduler">{lt('Scheduler')}</TabsTrigger>
+              <TabsTrigger value="diagnostic">{lt('Test & Diagnostic')}</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="configuration">
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{lt('Setup Wizard')}</CardTitle>
+                    <CardDescription>{lt('Guided setup to add a new external source.')}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-muted-foreground">{lt('A small guided flow will help connect cloud drives and SFTP sources.')}</div>
+                      <div className="flex gap-2">
+                        <Button onClick={openWizardForNew}>{lt('Add Source')}</Button>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex gap-2">
-                    {!wizardOpen ? (
-                      <Button onClick={startWizard} disabled={working || loading}>
-                        Start Wizard
-                      </Button>
-                    ) : (
-                      <Button variant="outline" onClick={resetWizard} disabled={working}>
-                        Cancel
-                      </Button>
-                    )}
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
 
-                {wizardOpen ? (
-                  <div className="space-y-4">
-                    <div className="text-sm text-muted-foreground">
-                      Step {wizardStep} of 4
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{lt('Configured Sources')}</CardTitle>
+                    <CardDescription>{lt('List of connected external sources for this tenant.')}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-muted-foreground">{loadingSources ? lt('Loading…') : lt('{count} source(s)', { count: sources.length })}</div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => fetchSources()}>{lt('Refresh')}</Button>
+                      </div>
                     </div>
-
-                    {wizardStep === 1 ? (
-                      <div className="grid gap-3 md:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label htmlFor="wiz-name">Source name</Label>
-                          <Input
-                            id="wiz-name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="e.g. Finance Google Drive"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Provider</Label>
-                          <Select value={provider} onValueChange={(v) => setProvider(v as Provider)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select provider" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="SFTP">SFTP (SSH)</SelectItem>
-                              <SelectItem value="FTPS">FTPS (TLS / mTLS)</SelectItem>
-                              <SelectItem value="GOOGLE_DRIVE">Google Drive</SelectItem>
-                              <SelectItem value="ONEDRIVE">OneDrive</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="md:col-span-2 text-xs text-muted-foreground">
-                          Tip: for cloud drives, this wizard will show “Connected as” so you can confirm the exact account being used.
-                        </div>
-                      </div>
-                    ) : null}
-
-                    {wizardStep === 2 ? (
-                      <div className="space-y-3">
-                        {!wizardSourceId ? (
-                          <div className="text-sm text-muted-foreground">Creating the source…</div>
-                        ) : provider === 'GOOGLE_DRIVE' || provider === 'ONEDRIVE' ? (
-                          <div className="space-y-3">
-                            <div className="text-sm">
-                              <div className="font-medium">Connect account</div>
-                              <div className="text-muted-foreground">
-                                This decides which {provider === 'GOOGLE_DRIVE' ? 'Google Drive' : 'OneDrive'} will be accessed.
-                              </div>
-                            </div>
-
-                            <div className="rounded-md bg-muted p-3 text-sm">
-                              Status:{' '}
-                              {statusById[wizardSourceId] ? (
-                                <span className="font-medium">connected</span>
-                              ) : (
-                                <span className="font-medium">not connected</span>
-                              )}
-                              {cloudInfoById[wizardSourceId]?.account?.email || cloudInfoById[wizardSourceId]?.account?.displayName ? (
-                                <>
-                                  {' '}
-                                  • Connected as{' '}
-                                  <span className="font-medium">
-                                    {cloudInfoById[wizardSourceId]?.account?.email || cloudInfoById[wizardSourceId]?.account?.displayName}
-                                  </span>
-                                </>
-                              ) : null}
-                            </div>
-
-                            <div className="flex flex-wrap gap-2">
-                              {statusById[wizardSourceId] ? (
-                                <Button variant="outline" onClick={() => disconnectSource(wizardSourceId)} disabled={working}>
-                                  Disconnect
-                                </Button>
-                              ) : (
-                                <Button
-                                  onClick={() => connectSource({
-                                    id: wizardSourceId,
-                                    tenant_id: tenantId!,
-                                    name,
-                                    provider,
-                                    enabled,
-                                    schedule_minutes: Number(scheduleMinutes || 60),
-                                    last_run_at: null,
-                                    config: {},
-                                  })}
-                                  disabled={working}
-                                >
-                                  Connect
-                                </Button>
-                              )}
-                            </div>
-
-                            <div className="text-xs text-muted-foreground">
-                              Your OAuth app must allow redirect URI:{' '}
-                              <span className="font-mono">{window.location.origin}/api/external-sources/oauth/{provider === 'GOOGLE_DRIVE' ? 'google' : 'microsoft'}/callback</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="grid gap-3 md:grid-cols-2">
-                            <div className="space-y-2">
-                              <Label htmlFor="ext-host">Host</Label>
-                              <Input id="ext-host" value={host} onChange={(e) => setHost(e.target.value)} placeholder="sftp.example.com" />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="ext-port">Port</Label>
-                              <Input id="ext-port" value={port} onChange={(e) => setPort(e.target.value)} placeholder={provider === 'SFTP' ? '22' : '21'} />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="ext-path">Remote Path</Label>
-                              <Input id="ext-path" value={remotePath} onChange={(e) => setRemotePath(e.target.value)} placeholder="/" />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="ext-user">Username</Label>
-                              <Input id="ext-user" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="username" />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="ext-pass">Password (optional)</Label>
-                              <Input id="ext-pass" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                            </div>
-
-                            {provider === 'SFTP' ? (
-                              <div className="space-y-2 md:col-span-2">
-                                <Label htmlFor="ext-key">SSH Private Key PEM (optional)</Label>
-                                <Textarea id="ext-key" value={privateKeyPem} onChange={(e) => setPrivateKeyPem(e.target.value)} placeholder="-----BEGIN OPENSSH PRIVATE KEY-----" />
-                              </div>
-                            ) : null}
-
-                            {provider === 'FTPS' ? (
-                              <>
-                                <div className="space-y-2 md:col-span-2">
-                                  <Label htmlFor="ftps-cert">Client Certificate PEM (mTLS optional)</Label>
-                                  <Textarea id="ftps-cert" value={clientCertPem} onChange={(e) => setClientCertPem(e.target.value)} placeholder="-----BEGIN CERTIFICATE-----" />
-                                </div>
-                                <div className="space-y-2 md:col-span-2">
-                                  <Label htmlFor="ftps-key">Client Key PEM (mTLS optional)</Label>
-                                  <Textarea id="ftps-key" value={clientKeyPem} onChange={(e) => setClientKeyPem(e.target.value)} placeholder="-----BEGIN PRIVATE KEY-----" />
-                                </div>
-                                <div className="space-y-2 md:col-span-2">
-                                  <Label htmlFor="ftps-ca">CA Certificate PEM (optional)</Label>
-                                  <Textarea id="ftps-ca" value={caCertPem} onChange={(e) => setCaCertPem(e.target.value)} placeholder="-----BEGIN CERTIFICATE-----" />
-                                </div>
-                              </>
-                            ) : null}
-                          </div>
-                        )}
-                      </div>
-                    ) : null}
-
-                    {wizardStep === 3 ? (
-                      <div className="space-y-3">
-                        {(provider === 'GOOGLE_DRIVE' || provider === 'ONEDRIVE') ? (
-                          <div className="space-y-2">
-                            <div className="text-sm">
-                              <div className="font-medium">Select folder & file pattern</div>
-                              <div className="text-muted-foreground">Pick a folder so you know exactly what will be scanned.</div>
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label>File Pattern (glob)</Label>
-                              <Input value={fileGlob} onChange={(e) => setFileGlob(e.target.value)} placeholder="**/*.pdf" />
-                            </div>
-
-                            <div className="rounded-md border p-3 text-sm">
-                              Current folder:{' '}
-                              <span className="font-mono text-xs break-all">
-                                {folderId || (wizardSource?.config?.folder_id as string | undefined) || '(not set)'}
-                              </span>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2">
-                              <Button
-                                variant="outline"
-                                onClick={() => wizardSource && openFolderPicker(wizardSource)}
-                                disabled={working || pickerLoading || !wizardSource}
-                              >
-                                Pick Folder
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="space-y-2">
-                            <Label>File Pattern (glob)</Label>
-                            <Input value={fileGlob} onChange={(e) => setFileGlob(e.target.value)} placeholder="**/*" />
-                          </div>
-                        )}
-
-                        <div className="grid gap-3 md:grid-cols-2">
-                          <div className="space-y-2">
-                            <Label>Document Type</Label>
-                            <Select value={documentType} onValueChange={(v) => setDocumentType(v as any)}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="none">Auto/Unknown</SelectItem>
-                                <SelectItem value="invoice">Invoice</SelectItem>
-                                <SelectItem value="receipt">Receipt</SelectItem>
-                                <SelectItem value="bank_statement">Bank Statement</SelectItem>
-                                <SelectItem value="other">Other</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Bank Account (for statements)</Label>
-                            <Select value={bankAccountId} onValueChange={setBankAccountId} disabled={documentType !== 'bank_statement'}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select bank account" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {bankAccounts.map((a) => (
-                                  <SelectItem key={a.id} value={a.id}>
-                                    {(a.bank_name ? `${a.bank_name} - ` : '') + a.account_name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      </div>
-                    ) : null}
-
-                    {wizardStep === 4 ? (
-                      <div className="space-y-3">
-                        <div className="text-sm">
-                          <div className="font-medium">Review & enable</div>
-                          <div className="text-muted-foreground">Turn it on and optionally run a quick test.</div>
-                        </div>
-
-                        <div className="grid gap-3 md:grid-cols-2">
-                          <div className="space-y-2">
-                            <Label htmlFor="ext-schedule">Schedule (minutes)</Label>
-                            <Input id="ext-schedule" value={scheduleMinutes} onChange={(e) => setScheduleMinutes(e.target.value)} />
-                          </div>
-                          <div className="flex items-center gap-2 pt-6">
-                            <Switch checked={enabled} onCheckedChange={setEnabled} />
-                            <span className="text-sm">Enabled</span>
-                          </div>
-                        </div>
-
-                        {wizardSourceId ? (
-                          <div className="flex flex-wrap gap-2">
-                            <Button variant="outline" onClick={() => testSource(wizardSourceId)} disabled={working}>
-                              Test
-                            </Button>
-                            <Button onClick={wizardFinish} disabled={working}>
-                              Finish
-                            </Button>
-                          </div>
-                        ) : null}
-                      </div>
-                    ) : null}
-
-                    <div className="flex justify-between gap-2">
-                      <Button variant="outline" onClick={wizardBack} disabled={working || wizardStep === 1}>
-                        Back
-                      </Button>
-                      {wizardStep < 4 ? (
-                        <Button onClick={wizardNext} disabled={working}>
-                          Next
-                        </Button>
+                    <div className="space-y-2 mt-3">
+                      {sources.length === 0 ? (
+                        <div className="text-sm text-muted-foreground">{lt('No external sources configured.')}</div>
                       ) : (
-                        <Button variant="outline" onClick={resetWizard} disabled={working}>
-                          Close
-                        </Button>
+                        <div className="space-y-2">
+                          {sources.map((s: any) => (
+                            <div key={s.id} className="flex items-center justify-between rounded border p-2">
+                              <div className="min-w-0">
+                                <div className="font-medium truncate">{s.name}</div>
+                                <div className="text-xs text-muted-foreground">{s.provider} • {s.schedule_minutes}m</div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button variant="outline" onClick={() => openWizardForEdit(s)}>{lt('Edit')}</Button>
+                                <Button variant="destructive" onClick={() => deleteSource(s.id)}>{lt('Delete')}</Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </div>
-                  </div>
-                ) : null}
+                  </CardContent>
+                </Card>
               </div>
+            </TabsContent>
 
-              <div className="rounded-md border p-3 space-y-3">
-                <div className="text-sm">
-                  <div className="font-medium">Supabase Cron (per-tenant)</div>
-                  <div className="text-muted-foreground">
-                    Generate a tenant-specific cron secret (stored as a hash) and use it in your scheduled trigger.
+            <TabsContent value="scheduler">
+              <AutomatedSyncSettings />
+            </TabsContent>
+
+            <TabsContent value="diagnostic">
+              <div className="py-2">
+                <div className="mb-3 text-sm font-medium">{lt('Test & Debug External Source')}</div>
+                <div className="flex flex-col gap-2 max-w-xl">
+                  <Label>{lt('Select Source')}</Label>
+                  <Select
+                    value={String(wizId || '')}
+                    onValueChange={v => {
+                      setWizId(v);
+                      const found = sources.find((s: any) => String(s.id) === v);
+                      if (found) setWizConfig(found.config || {});
+                    }}
+                  >
+                    <SelectTrigger><SelectValue placeholder={lt('Choose source...')} /></SelectTrigger>
+                    <SelectContent>
+                      {sources.map((s: any) => (
+                        <SelectItem key={s.id} value={String(s.id)}>{s.name} ({s.provider})</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex gap-2 mt-2">
+                    <Button
+                      onClick={async () => {
+                        if (!wizId) return toast.error(lt('Select a source'));
+                        setWizTesting(true);
+                        setWizTestResult(null);
+                        try {
+                          const res = await fetch('/api/external-sources/test', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ source_id: wizId }) });
+                          const json = await res.json().catch(() => ({}));
+                          if (!res.ok || json?.ok === false) {
+                            setWizTestResult({ ok: false, error: json?.error || 'Test failed' });
+                            toast.error(json?.error || 'Test failed');
+                          } else {
+                            setWizTestResult({ ok: true, list: json.list || [] });
+                            toast.success(lt('Connection test succeeded'));
+                          }
+                        } catch (e: any) {
+                          setWizTestResult({ ok: false, error: e?.message || 'Test failed' });
+                          toast.error(e?.message || 'Test failed');
+                        } finally {
+                          setWizTesting(false);
+                        }
+                      }}
+                      disabled={!wizId || wizTesting}
+                    >{wizTesting ? lt('Testing…') : lt('Test Connection')}</Button>
+                    <Button
+                      variant="outline"
+                      onClick={async () => {
+                        if (!wizId) return toast.error(lt('Select a source'));
+                        try {
+                          const res = await fetch('/api/external-sources/trigger', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ source_id: wizId }) });
+                          const json = await res.json().catch(() => ({}));
+                          if (!res.ok) throw new Error(json?.error || 'Failed to trigger');
+                          toast.success(lt('Scheduled sync triggered'));
+                        } catch (e: any) {
+                          toast.error(e?.message || lt('Failed to trigger'));
+                        }
+                      }}
+                      disabled={!wizId}
+                    >{lt('Trigger Scheduled Sync')}</Button>
                   </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="text-sm text-muted-foreground">
-                    Status: {cronConfigured ? 'configured' : 'not configured'}
-                    {cronKeyPrefix ? ` • key prefix ${cronKeyPrefix}` : ''}
-                  </div>
-                </div>
-
-                <div className="grid gap-3 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Enabled</Label>
-                    <div className="flex items-center gap-2">
-                      <Switch checked={cronEnabled} onCheckedChange={setCronEnabled} disabled={!cronConfigured} />
-                      <span className="text-sm text-muted-foreground">Allow scheduled imports for this tenant</span>
+                  {wizTestResult && (
+                    <div className="mt-3 p-3 border rounded bg-muted">
+                      {wizTestResult.ok ? (
+                        <div>
+                          <div className="font-medium">{lt('Test succeeded')}</div>
+                          <div className="text-sm text-muted-foreground">{lt('{count} file(s) found', { count: (wizTestResult.list || []).length })}</div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="font-medium text-destructive">{lt('Test failed')}</div>
+                          <div className="text-sm text-muted-foreground">{wizTestResult.error}</div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="cron-limit">Default run limit</Label>
-                    <Input
-                      id="cron-limit"
-                      value={cronDefaultLimit}
-                      onChange={(e) => setCronDefaultLimit(e.target.value)}
-                      disabled={!cronConfigured}
-                    />
-                    <p className="text-sm text-muted-foreground">Used when cron calls omit a limit (1–50).</p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" onClick={rotateCronSecret} disabled={working}>
-                    {cronConfigured ? 'Rotate Cron Secret' : 'Generate Cron Secret'}
-                  </Button>
-                  <Button variant="outline" onClick={saveCronConfig} disabled={working || !cronConfigured}>
-                    Save Cron Config
-                  </Button>
-                  {generatedCronSecret ? (
-                    <Button onClick={copyCronSecret} disabled={working}>
-                      Copy Secret
-                    </Button>
-                  ) : null}
-                </div>
-
-                {generatedCronSecret ? (
-                  <div className="rounded-md border p-3 text-sm space-y-2">
-                    <div className="font-medium">New cron secret (shown once)</div>
-                    <div className="font-mono break-all text-xs">{generatedCronSecret}</div>
-                    <div className="text-muted-foreground text-xs">
-                      Use this as header <span className="font-mono">x-ledgerai-cron-secret</span> when calling
-                      <span className="font-mono"> /api/external-sources/run</span> with <span className="font-mono">tenant_id</span>.
-                    </div>
-                  </div>
-                ) : null}
-
-                <div className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
-                  Scheduled call body example:
-                  <pre className="mt-2 whitespace-pre-wrap break-words text-xs">{JSON.stringify({ tenant_id: tenantId, limit: 10 }, null, 2)}</pre>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={fetchSources} disabled={working || loading}>
-                  Refresh
-                </Button>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Configured Sources</CardTitle>
-          <CardDescription>{loading ? 'Loading…' : `${sources.length} source(s)`}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {!canManage ? null : sources.length === 0 ? (
-            <div className="text-sm text-muted-foreground">No external sources configured.</div>
-          ) : (
-            sources.map((s) => (
-              <div key={s.id} className="rounded-md border p-3 space-y-3">
-                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                  <div className="text-sm">
-                    <div className="font-medium">{s.name}</div>
-                    <div className="text-muted-foreground">
-                      {s.provider} • every {s.schedule_minutes}m • {s.enabled ? 'enabled' : 'disabled'}
-                      {s.last_run_at ? ` • last run ${new Date(s.last_run_at).toLocaleString()}` : ''}
-                      {isCloud(s)
-                        ? ` • folder ${(s.config?.folder_id as string | undefined) || '(not set)'}`
-                        : ''}
-                    </div>
-
-                    {isCloud(s) ? (
-                      <div className="mt-1 text-xs text-muted-foreground">
-                        {!cloudConnected(s) ? (
-                          <>Step 1: Connect • Step 2: Pick Folder • Step 3: Test</>
-                        ) : (
-                          <>
-                            Connected as{' '}
-                            <span className="font-medium">
-                              {cloudInfoById[s.id]?.account?.email || cloudInfoById[s.id]?.account?.displayName || 'unknown'}
-                            </span>
-                            {cloudInfoById[s.id]?.folder_id ? (
-                              <>
-                                {' '}
-                                • Folder:{' '}
-                                <span className="font-medium">
-                                  {cloudInfoById[s.id]?.folder_name || cloudInfoById[s.id]?.folder_id}
-                                </span>
-                              </>
-                            ) : (
-                              <> • Folder: not selected</>
-                            )}
-                          </>
+                  )}
+                  {/* Debug info: last run, last error, logs */}
+                  {wizId && (() => {
+                    const found = sources.find((s: any) => String(s.id) === String(wizId));
+                    if (!found) return null;
+                    return (
+                      <div className="mt-4 p-3 border rounded bg-muted/50">
+                        <div className="font-medium mb-1">{lt('Debug Info')}</div>
+                        <div className="text-xs text-muted-foreground">{lt('Last Run')}: {found.last_run ? new Date(found.last_run).toLocaleString() : lt('Never')}</div>
+                        <div className="text-xs text-muted-foreground">{lt('Last Error')}: {found.last_error || lt('None')}</div>
+                        {found.logs && Array.isArray(found.logs) && found.logs.length > 0 && (
+                          <div className="mt-2">
+                            <div className="text-xs font-medium">{lt('Recent Logs')}:</div>
+                            <div className="text-xs whitespace-pre-wrap max-h-40 overflow-auto bg-background border rounded p-2 mt-1">{found.logs.slice(-5).join('\n')}</div>
+                          </div>
                         )}
                       </div>
-                    ) : null}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {isCloud(s) ? (
-                      cloudConnected(s) ? (
-                        <Button variant="outline" onClick={() => disconnectSource(s.id)} disabled={working}>
-                          Disconnect
-                        </Button>
-                      ) : (
-                        <Button variant="outline" onClick={() => connectSource(s)} disabled={working}>
-                          Connect
-                        </Button>
-                      )
-                    ) : null}
+                    );
+                  })()}
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        
+        <Dialog open={wizOpen} onOpenChange={setWizOpen}>
+          <DialogContent
+            style={{
+              maxHeight: '90vh',
+              minWidth: 380,
+              maxWidth: 1100,
+              minHeight: 300,
+              width: '60vw',
+              overflowY: 'auto',
+              resize: 'both',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle>{wizId ? lt('Edit External Source') : lt('Add External Source')}</DialogTitle>
+              <DialogDescription>{lt('Use the wizard to add or edit an external source.')}</DialogDescription>
+            </DialogHeader>
 
-                    {isCloud(s) && cloudConnected(s) ? (
-                      <Button
-                        variant="outline"
-                        onClick={() => openFolderPicker(s)}
-                        disabled={working || pickerLoading}
-                      >
-                        Pick Folder
-                      </Button>
-                    ) : null}
-
-                    <Button variant="outline" onClick={() => testSource(s.id)} disabled={working || !canRunSource(s)}>
-                      Test
-                    </Button>
-                    <Button onClick={() => runSource(s.id)} disabled={working || !canRunSource(s)}>
-                      Run Now
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={() => deleteSource(s.id)}
-                      disabled={working}
-                    >
-                      Delete
-                    </Button>
+            <div className="space-y-4 flex-1 overflow-y-auto" style={{ minHeight: 0 }}>
+              {wizStep === 1 && (
+                <div>
+                  <Label>{lt('Name')}</Label>
+                  <Input value={wizName} onChange={(e) => setWizName(e.target.value)} />
+                  {!wizName && <p className="text-xs text-destructive mt-1">{lt('Name is required')}</p>}
+                  <div className="mt-2">
+                    <Label>{lt('Provider')}</Label>
+                    <Select value={wizProvider} onValueChange={(v) => setWizProvider(v as any)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="SFTP">SFTP</SelectItem>
+                        <SelectItem value="FTPS">FTPS</SelectItem>
+                        <SelectItem value="GOOGLE_DRIVE">Google Drive</SelectItem>
+                        <SelectItem value="ONEDRIVE">OneDrive</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
+              )}
 
-                {pickerSourceId === s.id ? (
-                  <div className="rounded-md border bg-muted/30 p-3 space-y-3">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="text-sm text-muted-foreground">
-                        Browse folders (starting at root)
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={navigateBackFolder}
-                          disabled={pickerLoading || pickerStack.length === 0}
-                        >
-                          Back
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => loadFolders(s.id, pickerParentId)}
-                          disabled={pickerLoading}
-                        >
-                          Refresh
-                        </Button>
-                        <Button variant="outline" onClick={closeFolderPicker} disabled={pickerLoading}>
-                          Close
-                        </Button>
-                      </div>
+              {wizStep === 2 && (
+                <div>
+                  {wizProvider === 'SFTP' ? (
+                    <div className="space-y-2">
+                      <Label>{lt('Host')}</Label>
+                      <Input value={wizConfig.host || ''} onChange={(e) => setWizConfig((p: any) => ({ ...p, host: e.target.value }))} />
+                      {!wizConfig?.host && <p className="text-xs text-destructive mt-1">{lt('Host is required')}</p>}
+                      <Label>{lt('Port')}</Label>
+                      <Input type="number" value={String(wizConfig.port || 22)} onChange={(e) => setWizConfig((p: any) => ({ ...p, port: Number(e.target.value || 0) }))} />
+                      <Label>{lt('Username')}</Label>
+                      <Input value={wizConfig.username || ''} onChange={(e) => setWizConfig((p: any) => ({ ...p, username: e.target.value }))} />
+                      {!wizConfig?.username && <p className="text-xs text-destructive mt-1">{lt('Username is required')}</p>}
+                      <Label>{lt('Password (optional)')}</Label>
+                      <Input value={wizConfig.secret || ''} onChange={(e) => setWizConfig((p: any) => ({ ...p, secret: e.target.value }))} />
+                      <Label>{lt('Client Private Key (PEM, optional)')}</Label>
+                      <textarea className="w-full border rounded p-2 text-xs font-mono" rows={3} placeholder={lt('Paste private key (PEM)')}
+                        value={wizConfig.client_key || ''}
+                        onChange={e => setWizConfig((p: any) => ({ ...p, client_key: e.target.value }))}
+                      />
+                      <Label>{lt('Remote Server Public Key/Certificate (PEM, optional)')}</Label>
+                      <textarea className="w-full border rounded p-2 text-xs font-mono" rows={3} placeholder={lt('Paste server public key/certificate (PEM)')}
+                        value={wizConfig.server_cert || ''}
+                        onChange={e => setWizConfig((p: any) => ({ ...p, server_cert: e.target.value }))}
+                      />
+                      <Label>{lt('Remote path')}</Label>
+                      <Input value={wizConfig.remote_path || '/'} onChange={(e) => setWizConfig((p: any) => ({ ...p, remote_path: e.target.value }))} />
                     </div>
-
-                    <div className="text-sm">
-                      <div className="text-muted-foreground">Current folder:</div>
-                      <div className="font-mono text-xs break-all">{pickerParentId}</div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => updateCloudFolder(s, pickerParentId)}
-                        disabled={working || pickerLoading}
-                      >
-                        Select This Folder
-                      </Button>
-                    </div>
-
-                    {pickerLoading ? (
-                      <div className="text-sm text-muted-foreground">Loading folders…</div>
-                    ) : pickerFolders.length === 0 ? (
-                      <div className="text-sm text-muted-foreground">
-                        No folders found under this location. You can still click “Select This Folder” to use the current folder (including root).
+                  ) : wizProvider === 'FTPS' ? (
+                    <div className="space-y-2">
+                      <Label>{lt('Host')}</Label>
+                      <Input value={wizConfig.host || ''} onChange={(e) => setWizConfig((p: any) => ({ ...p, host: e.target.value }))} />
+                      {!wizConfig?.host && <p className="text-xs text-destructive mt-1">{lt('Host is required')}</p>}
+                      <Label>{lt('Port')}</Label>
+                      <Input type="number" value={String(wizConfig.port || 21)} onChange={(e) => setWizConfig((p: any) => ({ ...p, port: Number(e.target.value || 0) }))} />
+                      <Label>{lt('Username')}</Label>
+                      <Input value={wizConfig.username || ''} onChange={(e) => setWizConfig((p: any) => ({ ...p, username: e.target.value }))} />
+                      {!wizConfig?.username && <p className="text-xs text-destructive mt-1">{lt('Username is required')}</p>}
+                      <Label>{lt('Password')}</Label>
+                      <Input value={wizConfig.secret || ''} onChange={(e) => setWizConfig((p: any) => ({ ...p, secret: e.target.value }))} />
+                      <Label>{lt('Remote Server SSL Certificate (PEM, optional)')}</Label>
+                      <textarea className="w-full border rounded p-2 text-xs font-mono" rows={3} placeholder={lt('Paste server SSL certificate (PEM)')}
+                        value={wizConfig.server_cert || ''}
+                        onChange={e => setWizConfig((p: any) => ({ ...p, server_cert: e.target.value }))}
+                      />
+                      <Label>{lt('Client Certificate (PEM, optional)')}</Label>
+                      <textarea className="w-full border rounded p-2 text-xs font-mono" rows={3} placeholder={lt('Paste client certificate (PEM)')}
+                        value={wizConfig.client_cert || ''}
+                        onChange={e => setWizConfig((p: any) => ({ ...p, client_cert: e.target.value }))}
+                      />
+                      <Label>{lt('Client Private Key (PEM, optional)')}</Label>
+                      <textarea className="w-full border rounded p-2 text-xs font-mono" rows={3} placeholder={lt('Paste client private key (PEM)')}
+                        value={wizConfig.client_key || ''}
+                        onChange={e => setWizConfig((p: any) => ({ ...p, client_key: e.target.value }))}
+                      />
+                      <div className="flex gap-2 mt-2">
+                        <Button type="button" variant="outline" onClick={async () => {
+                          toast.info(lt('Generating certificate...'));
+                          try {
+                            // Dynamically import forge for browser use
+                            const forge = await import('node-forge');
+                            const pki = forge.pki;
+                            // Generate a keypair
+                            const keys = pki.rsa.generateKeyPair(2048);
+                            // Create a self-signed certificate
+                            const cert = pki.createCertificate();
+                            cert.publicKey = keys.publicKey;
+                            cert.serialNumber = String(Math.floor(Math.random() * 1e16));
+                            cert.validity.notBefore = new Date();
+                            cert.validity.notAfter = new Date();
+                            cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1);
+                            const attrs = [
+                              { name: 'commonName', value: 'LedgerAI FTPS Client' },
+                              { name: 'organizationName', value: 'LedgerAI' },
+                            ];
+                            cert.setSubject(attrs);
+                            cert.setIssuer(attrs);
+                            cert.sign(keys.privateKey, forge.md.sha256.create());
+                            // Convert to PEM
+                            const pemCert = pki.certificateToPem(cert);
+                            const pemKey = pki.privateKeyToPem(keys.privateKey);
+                            setWizConfig((p: any) => ({ ...p, client_cert: pemCert, client_key: pemKey }));
+                            toast.success(lt('Generated client certificate & key'));
+                          } catch (err) {
+                            console.error(err);
+                            toast.error(lt('Failed to generate certificate'));
+                          }
+                        }}>{lt('Generate Client Certificate')}</Button>
+                        {wizConfig.client_cert && wizConfig.client_key && (
+                          <Button type="button" variant="outline" onClick={() => {
+                            // Download cert and key as files
+                            const download = (filename: string, text: string) => {
+                              const blob = new Blob([text], { type: 'text/plain' });
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = filename;
+                              document.body.appendChild(a);
+                              a.click();
+                              setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+                            };
+                            download('client-cert.pem', wizConfig.client_cert);
+                            download('client-key.pem', wizConfig.client_key);
+                          }}>{lt('Download Cert & Key')}</Button>
+                        )}
                       </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {pickerFolders.map((f) => (
-                          <div key={f.id} className="flex items-center justify-between gap-2 rounded border bg-background p-2">
-                            <Button
-                              variant="ghost"
-                              className="h-8 px-2 justify-start flex-1"
-                              onClick={() => navigateIntoFolder(f.id)}
-                              disabled={pickerLoading}
-                            >
-                              {f.name}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              className="h-8"
-                              onClick={() => updateCloudFolder(s, f.id)}
-                              disabled={working || pickerLoading}
-                            >
-                              Select
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                      {!pickerLoading ? (
-                        <div className="space-y-2">
-                          <div className="text-sm text-muted-foreground">Files (preview)</div>
-                          {pickerFiles.length === 0 ? (
-                            <div className="text-sm text-muted-foreground">
-                              No files found in this folder.
-                            </div>
-                          ) : (
-                            <div className="space-y-1">
-                              {pickerFiles.slice(0, 20).map((f) => (
-                                <div key={f.id} className="text-sm flex items-center justify-between gap-2 rounded border bg-background px-2 py-1">
-                                  <div className="truncate">{f.name}</div>
-                                  <div className="text-xs text-muted-foreground whitespace-nowrap">
-                                    {typeof f.size === 'number' ? `${Math.round(f.size / 1024)} KB` : ''}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                      <Label>{lt('Remote path')}</Label>
+                      <Input value={wizConfig.remote_path || '/'} onChange={(e) => setWizConfig((p: any) => ({ ...p, remote_path: e.target.value }))} />
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {/* Show selected folder if any */}
+                      {wizConfig.folder_id && (
+                        <div className="mb-2 p-2 border rounded bg-muted text-sm flex items-center gap-2">
+                          <Folder className="w-4 h-4 opacity-80" />
+                          <span>{wizConfig.folder_id === 'root' ? lt('Root') : wizConfig.folder_id}</span>
                         </div>
-                      ) : null}
+                      )}
+                      <div className="flex gap-2">
+                        <Button variant="outline" onClick={async () => {
+                          if (wizConfig?.oauth_connected && wizId) {
+                            setShowFolderPicker(true)
+                            return
+                          }
+                          // trigger OAuth flow automatically and open picker on success
+                          const ok = await startOAuthConnect()
+                          if (ok) {
+                            // ensure latest sources fetched
+                            try { await fetchSources() } catch {}
+                            setShowFolderPicker(true)
+                          }
+                        }} disabled={wizConnectingOAuth}>{lt('Browse folders')}</Button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mt-4">
+                    <Label>{lt('Schedule (minutes)')}</Label>
+                    <Input type="number" value={String(wizSchedule)} onChange={(e) => setWizSchedule(Number(e.target.value || 0))} />
                   </div>
-                ) : null}
+                </div>
+              )}
+
+
+              {wizStep === 3 && (
+                <div>
+                  <p className="text-sm">{lt('Review settings before saving.')}</p>
+                  <div className="mt-2 space-y-1">
+                    <div><strong>{lt('Name')}:</strong> {wizName}</div>
+                    <div><strong>{lt('Provider')}:</strong> {wizProvider}</div>
+                    <div><strong>{lt('Schedule')}:</strong> {wizSchedule} {lt('minutes')}</div>
+                  </div>
+                  {wizTestResult && (
+                    <div className="mt-3 p-3 border rounded">
+                      {wizTestResult.ok ? (
+                        <div>
+                          <div className="font-medium">{lt('Test succeeded')}</div>
+                          <div className="text-sm text-muted-foreground">{lt('{count} file(s) found', { count: (wizTestResult.list || []).length })}</div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="font-medium text-destructive">{lt('Test failed')}</div>
+                          <div className="text-sm text-muted-foreground">{wizTestResult.error}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Always render FolderPicker modal if showFolderPicker is true and wizId is set */}
+              {showFolderPicker && wizId && (
+                <FolderPicker
+                  sourceId={wizId}
+                  onSelect={(fid) => {
+                    setWizConfig((p: any) => {
+                      // force new object to trigger re-render
+                      return { ...p, folder_id: fid };
+                    });
+                    setTimeout(() => setShowFolderPicker(false), 0);
+                    toast.success(lt('Folder selected'));
+                  }}
+                  onClose={() => setShowFolderPicker(false)}
+                />
+              )}
+
+              <div className="flex justify-between mt-4">
+                <div>
+                  <Button variant="ghost" onClick={wizBack} disabled={wizStep === 1}>{lt('Back')}</Button>
+                </div>
+                <div className="flex gap-2">
+                  {wizStep < 3 ? (
+                    <Button onClick={wizNext} disabled={!canProceed}>{lt('Next')}</Button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Button onClick={testConnection} disabled={wizTesting}>{wizTesting ? lt('Testing…') : lt('Test Connection')}</Button>
+                      <Button onClick={wizSave} disabled={wizWorking || (wizProvider !== 'SFTP' && !wizConfig?.oauth_connected)}>{wizWorking ? lt('Saving...') : lt('Save')}</Button>
+                    </div>
+                  )}
+                </div>
               </div>
-            ))
-          )}
+            </div>
+          </DialogContent>
+        </Dialog>
         </CardContent>
       </Card>
     </div>
   )
 }
+
+export default ExternalSourcesSettings

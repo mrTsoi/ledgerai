@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { Database } from '@/types/database.types'
 import { Trash2, CheckCircle } from 'lucide-react'
+import { useLiterals } from '@/hooks/use-literals'
 
 type BankTransaction = Database['public']['Tables']['bank_transactions']['Row'] & {
   source_file?: string
@@ -29,6 +30,8 @@ interface Props {
 export function DuplicateResolutionModal({ isOpen, onClose, duplicateGroups, onResolve }: Props) {
   const [selectedToDelete, setSelectedToDelete] = useState<Set<string>>(new Set())
   const [isResolving, setIsResolving] = useState(false)
+
+  const lt = useLiterals()
 
   // Auto-select duplicates (keep the first one, select others for deletion)
   const handleAutoSelect = () => {
@@ -76,16 +79,16 @@ export function DuplicateResolutionModal({ isOpen, onClose, duplicateGroups, onR
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Resolve Duplicates</DialogTitle>
+          <DialogTitle>{lt('Resolve Duplicates')}</DialogTitle>
           <DialogDescription>
-            Found {duplicateGroups.length} groups of potential duplicates. Select the transactions you want to DELETE.
+            {lt('Found {count} groups of potential duplicates. Select the transactions you want to DELETE.', { count: duplicateGroups.length })}
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex justify-end mb-2">
           <Button variant="outline" size="sm" onClick={handleAutoSelect}>
             <CheckCircle className="w-4 h-4 mr-2" />
-            Auto-Select (Keep Best)
+            {lt('Auto-Select (Keep Best)')}
           </Button>
         </div>
 
@@ -94,7 +97,7 @@ export function DuplicateResolutionModal({ isOpen, onClose, duplicateGroups, onR
             {duplicateGroups.map((group, idx) => (
               <div key={idx} className="border rounded-lg p-4 bg-gray-50">
                 <div className="text-sm font-medium text-gray-500 mb-2">
-                  Group {idx + 1}: {format(new Date(group.items[0].transaction_date), 'MMM d, yyyy')} • {group.items[0].amount} • {group.items[0].description}
+                  {lt('Group')} {idx + 1}: {format(new Date(group.items[0].transaction_date), 'MMM d, yyyy')} • {group.items[0].amount} • {group.items[0].description}
                 </div>
                 <div className="space-y-2">
                   {group.items.map(item => (
@@ -108,22 +111,22 @@ export function DuplicateResolutionModal({ isOpen, onClose, duplicateGroups, onR
                           <div className="flex items-center gap-2">
                             <span className="font-medium">{item.description}</span>
                             <Badge variant="outline" className="text-xs">
-                              {item.status}
+                              {lt(String(item.status ?? ''))}
                             </Badge>
                           </div>
                           <div className="text-xs text-gray-500">
-                            Source: {item.source_file || 'Unknown'} • ID: ...{item.id.slice(-4)}
+                            {lt('Source')}: {item.source_file || lt('Unknown')} • {lt('ID')}: ...{item.id.slice(-4)}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         {selectedToDelete.has(item.id) ? (
                           <span className="text-xs text-red-600 font-medium flex items-center">
-                            <Trash2 className="w-3 h-3 mr-1" /> Will Delete
+                            <Trash2 className="w-3 h-3 mr-1" /> {lt('Will Delete')}
                           </span>
                         ) : (
                           <span className="text-xs text-green-600 font-medium flex items-center">
-                            <CheckCircle className="w-3 h-3 mr-1" /> Will Keep
+                            <CheckCircle className="w-3 h-3 mr-1" /> {lt('Will Keep')}
                           </span>
                         )}
                       </div>
@@ -136,9 +139,9 @@ export function DuplicateResolutionModal({ isOpen, onClose, duplicateGroups, onR
         </div>
 
         <DialogFooter className="mt-4">
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button variant="ghost" onClick={onClose}>{lt('Cancel')}</Button>
           <Button variant="destructive" onClick={handleConfirm} disabled={selectedToDelete.size === 0 || isResolving}>
-            {isResolving ? 'Deleting...' : `Delete Selected (${selectedToDelete.size})`}
+            {isResolving ? lt('Deleting...') : lt('Delete Selected ({count})', { count: selectedToDelete.size })}
           </Button>
         </DialogFooter>
       </DialogContent>

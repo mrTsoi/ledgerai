@@ -1,6 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useTenant } from '@/hooks/use-tenant'
 
+/**
+ * Hook: useBatchConfig
+ *
+ * This hook fetches batch processing configuration for the current tenant
+ * from the server (`/api/batch-processing/config`). In browser environments
+ * it constructs an absolute URL using `window.location.origin`.
+ *
+ * In server or test environments (where `window` is not available), the
+ * hook will attempt to use `NEXT_PUBLIC_BASE_URL`, `NEXT_PUBLIC_APP_URL`,
+ * or `VERCEL_URL` to build the absolute URL. If none are available the
+ * network fetch is skipped and a safe default is used (batchSize = 5).
+ *
+ * This prevents runtime errors in Node-based tests (undici/URL parsing)
+ * while allowing the app to fetch real tenant/system config at runtime.
+ */
+
 interface BatchConfig {
   batch_size: number
 }
@@ -25,8 +41,21 @@ export function useBatchConfig() {
       try {
         setLoading(true)
 
+        // Determine base URL. In test or Node environments `window.location` may be unavailable.
+        const baseUrl =
+          typeof window !== 'undefined' && window.location && window.location.origin
+            ? window.location.origin
+            : process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+
+        if (!baseUrl) {
+          // Cannot construct a safe absolute URL in this environment (tests/Node). Skip network fetch and keep defaults.
+          console.warn('Skipping batch-config fetch: no base URL available')
+          setLoading(false)
+          return
+        }
+
         const res = await fetch(
-          `/api/batch-processing/config?tenant_id=${encodeURIComponent(currentTenant.id)}`
+          `${baseUrl}/api/batch-processing/config?tenant_id=${encodeURIComponent(currentTenant.id)}`
         )
         const json = await res.json().catch(() => ({}))
         if (!res.ok) throw new Error(json?.error || 'Failed to load batch config')

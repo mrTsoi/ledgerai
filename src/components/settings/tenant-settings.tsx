@@ -8,9 +8,12 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Loader2, Save } from 'lucide-react'
 import { CurrencySelect } from '@/components/ui/currency-select'
+import { LocaleSelect } from '@/components/ui/locale-select'
 import { toast } from "sonner"
+import { useLiterals } from '@/hooks/use-literals'
 
 export function TenantSettings() {
+  const lt = useLiterals()
   const { currentTenant, refreshTenants, isSuperAdmin } = useTenant()
   const userRole = useUserRole()
   const [loading, setLoading] = useState(false)
@@ -30,7 +33,7 @@ export function TenantSettings() {
         name: currentTenant.name,
         slug: currentTenant.slug,
         locale: currentTenant.locale || 'en-US',
-        currency: (currentTenant as any).currency || 'USD'
+        currency: currentTenant.currency || 'USD'
       })
     }
   }, [currentTenant])
@@ -52,13 +55,13 @@ export function TenantSettings() {
         }),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Failed to save settings')
+      if (!res.ok) throw new Error(json?.error || lt('Failed to save settings'))
       
       await refreshTenants()
-      toast.success('Settings saved successfully')
+      toast.success(lt('Settings saved successfully'))
     } catch (error: any) {
       console.error('Error saving settings:', error)
-      toast.error('Failed to save settings: ' + error.message)
+      toast.error(lt('Failed to save settings: {message}', { message: error.message }))
     } finally {
       setLoading(false)
     }
@@ -69,13 +72,13 @@ export function TenantSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Company Profile</CardTitle>
-        <CardDescription>Manage your company&apos;s basic information.</CardDescription>
+        <CardTitle>{lt('Company Profile')}</CardTitle>
+        <CardDescription>{lt("Manage your company's basic information.")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSave} className="space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Company Name</Label>
+            <Label htmlFor="name">{lt('Company Name')}</Label>
             <Input
               id="name"
               value={formData.name}
@@ -86,36 +89,28 @@ export function TenantSettings() {
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="slug">URL Slug</Label>
+            <Label htmlFor="slug">{lt('URL Slug')}</Label>
             <Input
               id="slug"
               value={formData.slug}
               disabled
               className="bg-gray-100"
             />
-            <p className="text-xs text-muted-foreground">The URL slug cannot be changed.</p>
+            <p className="text-xs text-muted-foreground">{lt('The URL slug cannot be changed.')}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="locale">Locale / Region</Label>
-              <select
-                id="locale"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              <Label htmlFor="locale">{lt('Locale / Region')}</Label>
+              <LocaleSelect
                 value={formData.locale}
-                onChange={(e) => setFormData({ ...formData, locale: e.target.value })}
+                onChange={(value) => setFormData({ ...formData, locale: value })}
                 disabled={!canEdit}
-              >
-                <option value="en-US">English (US)</option>
-                <option value="en-GB">English (UK)</option>
-                <option value="zh-CN">Chinese (Simplified)</option>
-                <option value="zh-TW">Chinese (Traditional)</option>
-                <option value="ja-JP">Japanese</option>
-              </select>
+              />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="currency">Base Currency</Label>
+              <Label htmlFor="currency">{lt('Base Currency')}</Label>
               <CurrencySelect
                 value={formData.currency}
                 onChange={(value) => setFormData({ ...formData, currency: value })}
@@ -127,7 +122,7 @@ export function TenantSettings() {
           {canEdit && (
             <Button type="submit" disabled={loading}>
               {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-              Save Changes
+              {lt('Save Changes')}
             </Button>
           )}
         </form>

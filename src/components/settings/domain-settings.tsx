@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useTenant, useUserRole } from '@/hooks/use-tenant'
+import { useSubscription } from '@/hooks/use-subscription'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
+import { useLiterals } from '@/hooks/use-literals'
 
 type TenantDomainRow = {
   id: string
@@ -35,8 +37,10 @@ function normalizeDomain(input: string): string {
 }
 
 export function DomainSettings() {
+  const lt = useLiterals()
   const { currentTenant } = useTenant()
   const userRole = useUserRole()
+  const { subscription, loading: subLoading } = useSubscription()
   const tenantId = currentTenant?.id
 
   const [domains, setDomains] = useState<TenantDomainRow[]>([])
@@ -44,6 +48,9 @@ export function DomainSettings() {
   const [saving, setSaving] = useState(false)
   const [domainInput, setDomainInput] = useState('')
   const [schemaMissing, setSchemaMissing] = useState(false)
+
+  const hasFeature = subscription?.features?.custom_domain === true
+  const canRender = !subLoading && hasFeature
 
   const canManage = userRole === 'COMPANY_ADMIN' || userRole === 'SUPER_ADMIN'
 
@@ -68,18 +75,21 @@ export function DomainSettings() {
       const message = String(e?.message || '')
       if (code === 'PGRST205' || message.includes("Could not find the table 'public.tenant_domains'")) {
         setSchemaMissing(true)
-        toast.error('Domains table is missing. Apply migrations (supabase db push) and refresh.')
+        toast.error(lt('Domains table is missing. Apply migrations (supabase db push) and refresh.'))
       } else {
-        toast.error('Failed to load domains')
+        toast.error(lt('Failed to load domains'))
       }
     } finally {
       setLoading(false)
     }
-  }, [tenantId])
+  }, [tenantId, lt])
 
   useEffect(() => {
+    if (!canRender) return
     fetchDomains()
-  }, [fetchDomains])
+  }, [fetchDomains, canRender])
+
+  if (!canRender) return null
 
   const handleAdd = async () => {
     if (!tenantId) return
@@ -87,7 +97,7 @@ export function DomainSettings() {
 
     const domain = normalizeDomain(domainInput)
     if (!domain) {
-      toast.error('Please enter a valid domain (e.g. example.com)')
+      toast.error(lt('Please enter a valid domain (e.g. example.com)'))
       return
     }
 
@@ -107,15 +117,15 @@ export function DomainSettings() {
 
       setDomainInput('')
       await fetchDomains()
-      toast.success('Domain added. Add the DNS TXT record to verify.')
+      toast.success(lt('Domain added. Add the DNS TXT record to verify.'))
     } catch (e: any) {
       console.error('Error adding domain:', e)
       const code = e?.code as string | undefined
       if (code === 'PGRST205') {
         setSchemaMissing(true)
-        toast.error('Domains table is missing. Apply migrations (supabase db push) and refresh.')
+        toast.error(lt('Domains table is missing. Apply migrations (supabase db push) and refresh.'))
       } else {
-        toast.error(e.message || 'Failed to add domain')
+        toast.error(e.message || lt('Failed to add domain'))
       }
     } finally {
       setSaving(false)
@@ -132,17 +142,17 @@ export function DomainSettings() {
       })
 
       const json = await res.json()
-      if (!res.ok) throw new Error(json?.error || 'Verification failed')
+      if (!res.ok) throw new Error(json?.error || lt('Verification failed'))
 
       if (json?.verified) {
-        toast.success(json.message || 'Domain verified')
+        toast.success(json.message || lt('Domain verified'))
         await fetchDomains()
       } else {
-        toast.info(json.message || 'DNS record not found yet')
+        toast.info(json.message || lt('DNS record not found yet'))
       }
     } catch (e: any) {
       console.error('Error verifying domain:', e)
-      toast.error(e.message || 'Failed to verify domain')
+      toast.error(e.message || lt('Failed to verify domain'))
     } finally {
       setSaving(false)
     }
@@ -150,7 +160,7 @@ export function DomainSettings() {
 
   const handleRemove = async (id: string) => {
     if (!canManage) return
-    if (!confirm('Remove this domain?')) return
+    if (!confirm(lt('Remove this domain?'))) return
 
     try {
       setSaving(true)
@@ -158,12 +168,12 @@ export function DomainSettings() {
         method: 'DELETE',
       })
       const json = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(json?.error || 'Failed to remove domain')
+      if (!res.ok) throw new Error(json?.error || lt('Failed to remove domain'))
       await fetchDomains()
-      toast.success('Domain removed')
+      toast.success(lt('Domain removed'))
     } catch (e: any) {
       console.error('Error removing domain:', e)
-      toast.error(e.message || 'Failed to remove domain')
+      toast.error(e.message || lt('Failed to remove domain'))
     } finally {
       setSaving(false)
     }
@@ -174,42 +184,41 @@ export function DomainSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Custom Domain</CardTitle>
+        <CardTitle>{lt('Custom Domain')}</CardTitle>
         <CardDescription>
-          Add a domain to access your tenant using a custom hostname.
+          {lt('Add a domain to access your tenant using a custom hostname.')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {!canManage ? (
           <div className="text-sm text-muted-foreground">
-            Only Company Admins can manage custom domains.
+            {lt('Only Company Admins can manage custom domains.')}
           </div>
         ) : (
           <div className="space-y-3">
-            <Label htmlFor="domain">Domain</Label>
+            <Label htmlFor="domain">{lt('Domain')}</Label>
             <div className="flex gap-2">
               <Input
                 id="domain"
                 value={domainInput}
                 onChange={(e) => setDomainInput(e.target.value)}
-                placeholder="example.com"
+                placeholder={lt('example.com')}
               />
               <Button onClick={handleAdd} disabled={saving || !domainInput.trim()}>
-                Add
+                {lt('Add')}
               </Button>
             </div>
           </div>
         )}
 
         {loading ? (
-          <div className="text-sm text-muted-foreground">Loading domains…</div>
+          <div className="text-sm text-muted-foreground">{lt('Loading domains…')}</div>
         ) : schemaMissing ? (
           <div className="text-sm text-muted-foreground">
-            Custom domains are not available because the database is missing the required table.
-            Apply migrations to your Supabase project and refresh.
+            {lt('Custom domains are not available because the database is missing the required table. Apply migrations to your Supabase project and refresh.')}
           </div>
         ) : domains.length === 0 ? (
-          <div className="text-sm text-muted-foreground">No custom domains added.</div>
+          <div className="text-sm text-muted-foreground">{lt('No custom domains added.')}</div>
         ) : (
           <div className="space-y-3">
             {domains.map((d) => {
@@ -222,7 +231,7 @@ export function DomainSettings() {
                     <div>
                       <div className="font-medium">{d.domain}</div>
                       <div className="text-sm text-muted-foreground">
-                        {d.verified_at ? 'Verified' : 'Not verified'}
+                        {d.verified_at ? lt('Verified') : lt('Not verified')}
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -232,7 +241,7 @@ export function DomainSettings() {
                           onClick={() => handleVerify(d.domain)}
                           disabled={saving}
                         >
-                          Verify
+                          {lt('Verify')}
                         </Button>
                       )}
                       {canManage && (
@@ -241,7 +250,7 @@ export function DomainSettings() {
                           onClick={() => handleRemove(d.id)}
                           disabled={saving}
                         >
-                          Remove
+                          {lt('Remove')}
                         </Button>
                       )}
                     </div>
@@ -249,7 +258,7 @@ export function DomainSettings() {
 
                   {!d.verified_at && (
                     <div className="text-sm text-muted-foreground space-y-1">
-                      <div>Add this DNS TXT record:</div>
+                      <div>{lt('Add this DNS TXT record:')}</div>
                       <div>
                         <span className="font-mono">{txtName}</span>
                       </div>
@@ -264,7 +273,7 @@ export function DomainSettings() {
 
             {primary?.verified_at && (
               <div className="text-sm text-muted-foreground">
-                After DNS propagation, you can use <span className="font-mono">https://{primary.domain}</span>.
+                {lt('After DNS propagation, you can use')} <span className="font-mono">https://{primary.domain}</span>{lt('.')}
               </div>
             )}
           </div>

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, Landmark, CreditCard, ArrowRight, MoreVertical, Edit, Trash } from 'lucide-react'
 import { useTenant } from '@/hooks/use-tenant'
+import { useLiterals } from '@/hooks/use-literals'
 import { BankAccountForm } from './bank-account-form'
 import Link from 'next/link'
 
@@ -19,6 +20,7 @@ export function BankAccountList() {
   const [editingAccount, setEditingAccount] = useState<BankAccount | undefined>(undefined)
 
   const { currentTenant } = useTenant()
+  const lt = useLiterals()
   const supabase = useMemo(() => createClient(), [])
   const tenantId = currentTenant?.id
 
@@ -50,7 +52,7 @@ export function BankAccountList() {
   }, [fetchAccounts, tenantId])
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this bank account?')) return
+    if (!confirm(lt('Are you sure you want to delete this bank account?'))) return
 
     try {
       const { error } = await (supabase
@@ -66,16 +68,16 @@ export function BankAccountList() {
   }
 
   if (loading) {
-    return <div className="p-8 text-center">Loading accounts...</div>
+    return <div className="p-8 text-center">{lt('Loading accounts...')}</div>
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Bank Accounts</h2>
+        <h2 className="text-xl font-semibold">{lt('Bank Accounts')}</h2>
         <Button onClick={() => { setEditingAccount(undefined); setShowForm(true); }}>
           <Plus className="w-4 h-4 mr-2" />
-          Add Account
+          {lt('Add Account')}
         </Button>
       </div>
 
@@ -83,13 +85,13 @@ export function BankAccountList() {
         <Card className="bg-gray-50 border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <Landmark className="w-12 h-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900">No Bank Accounts</h3>
+            <h3 className="text-lg font-medium text-gray-900">{lt('No Bank Accounts')}</h3>
             <p className="text-gray-500 mb-6 max-w-sm">
-              Connect your bank accounts to import statements and reconcile transactions automatically.
+              {lt('Connect your bank accounts to import statements and reconcile transactions automatically.')}
             </p>
             <Button onClick={() => { setEditingAccount(undefined); setShowForm(true); }}>
               <Plus className="w-4 h-4 mr-2" />
-              Add Your First Account
+              {lt('Add Your First Account')}
             </Button>
           </CardContent>
         </Card>
@@ -133,11 +135,11 @@ export function BankAccountList() {
               <CardContent>
                 <div className="mt-4 flex items-center justify-between">
                   <div className="text-sm text-gray-500">
-                    Currency: <span className="font-medium text-gray-900">{account.currency}</span>
+                    {lt('Currency')}: <span className="font-medium text-gray-900">{account.currency}</span>
                   </div>
                   <Link href={`/dashboard/banking/${account.id}`}>
                     <Button variant="outline" size="sm" className="gap-2">
-                      View Feed
+                      {lt('View Feed')}
                       <ArrowRight className="w-4 h-4" />
                     </Button>
                   </Link>

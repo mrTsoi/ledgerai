@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { Loader2, FileText, AlertTriangle, CheckCircle, ExternalLink } from 'lucide-react'
 import { DocumentVerificationModal } from '@/components/documents/document-verification-modal'
+import { useLiterals } from '@/hooks/use-literals'
 
 interface Props {
   isOpen: boolean
@@ -29,11 +30,12 @@ interface StatementVerification {
 }
 
 export function StatementVerificationModal({ isOpen, onClose, accountId }: Props) {
+  const lt = useLiterals()
   const [statements, setStatements] = useState<StatementVerification[]>([])
   const [loading, setLoading] = useState(true)
   const [viewDocumentId, setViewDocumentId] = useState<string | null>(null)
   
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo((): import('@supabase/supabase-js').SupabaseClient<import('@/types/database.types').Database> => createClient(), [])
 
   const fetchData = useCallback(async () => {
     try {
@@ -70,7 +72,7 @@ export function StatementVerificationModal({ isOpen, onClose, accountId }: Props
 
       if (error) throw error
 
-      const verified = stmts.map((stmt: any) => {
+      const verified = (stmts as any[]).map((stmt: any) => {
         const docData = stmt.document?.document_data?.[0] // Assuming one data record per doc
         
         // For bank statements, items might be in extracted_data.bank_transactions instead of line_items
@@ -82,20 +84,20 @@ export function StatementVerificationModal({ isOpen, onClose, accountId }: Props
         const extractedCount = Array.isArray(extractedItems) ? extractedItems.length : null
         
         // Calculate totals
-        const feedTotal = stmt.transactions?.reduce((sum: number, t: any) => sum + t.amount, 0) || 0
+        const feedTotal = (stmt.transactions || []).reduce((sum: number, t: any) => sum + (t?.amount || 0), 0)
         
         // Extracted total might be in total_amount or sum of line items
         let extractedTotal = docData?.total_amount
         if (!extractedTotal && Array.isArray(extractedItems)) {
            // Try to sum line items if total_amount is missing
            // This depends on line item structure
-           extractedTotal = extractedItems.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0)
+           extractedTotal = (Array.isArray(extractedItems) ? extractedItems : []).reduce((sum: number, item: any) => sum + (Number(item?.amount) || 0), 0)
         }
 
         return {
           id: stmt.id,
           statement_date: stmt.statement_date,
-          file_name: stmt.document?.file_name || 'Unknown',
+          file_name: stmt.document?.file_name || lt('Unknown'),
           document_id: stmt.document?.id,
           feed_count: stmt.transactions?.length || 0,
           extracted_count: extractedCount,
@@ -111,7 +113,7 @@ export function StatementVerificationModal({ isOpen, onClose, accountId }: Props
     } finally {
       setLoading(false)
     }
-  }, [accountId, supabase])
+  }, [accountId, supabase, lt])
 
   useEffect(() => {
     if (isOpen && accountId) {
@@ -124,9 +126,9 @@ export function StatementVerificationModal({ isOpen, onClose, accountId }: Props
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>Statement Verification</DialogTitle>
+            <DialogTitle>{lt('Statement Verification')}</DialogTitle>
             <DialogDescription>
-              Compare imported feed data against original statement documents.
+              {lt('Compare imported feed data against original statement documents.')}
             </DialogDescription>
           </DialogHeader>
 
@@ -137,12 +139,12 @@ export function StatementVerificationModal({ isOpen, onClose, accountId }: Props
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Statement</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-center">Items (Feed / Doc)</TableHead>
-                    <TableHead className="text-center">Total (Feed / Doc)</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
+                    <TableHead>{lt('Statement')}</TableHead>
+                    <TableHead>{lt('Date')}</TableHead>
+                    <TableHead className="text-center">{lt('Items (Feed / Doc)')}</TableHead>
+                    <TableHead className="text-center">{lt('Total (Feed / Doc)')}</TableHead>
+                    <TableHead>{lt('Status')}</TableHead>
+                    <TableHead className="text-right">{lt('Action')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -177,18 +179,18 @@ export function StatementVerificationModal({ isOpen, onClose, accountId }: Props
                         <TableCell>
                           {countMismatch || totalMismatch ? (
                             <Badge variant="destructive" className="flex w-fit items-center gap-1">
-                              <AlertTriangle className="w-3 h-3" /> Mismatch
+                              <AlertTriangle className="w-3 h-3" /> {lt('Mismatch')}
                             </Badge>
                           ) : (
                             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex w-fit items-center gap-1">
-                              <CheckCircle className="w-3 h-3" /> Verified
+                              <CheckCircle className="w-3 h-3" /> {lt('Verified')}
                             </Badge>
                           )}
                         </TableCell>
                         <TableCell className="text-right">
                           {stmt.document_id && (
                             <Button variant="ghost" size="sm" onClick={() => setViewDocumentId(stmt.document_id)}>
-                              <ExternalLink className="w-4 h-4 mr-2" /> View Source
+                              <ExternalLink className="w-4 h-4 mr-2" /> {lt('View Source')}
                             </Button>
                           )}
                         </TableCell>

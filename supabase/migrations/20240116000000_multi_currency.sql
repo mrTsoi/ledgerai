@@ -22,4 +22,4 @@ BEGIN
   SELECT currency INTO v_currency FROM tenants WHERE id = p_tenant_id;
   RETURN v_currency;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;

@@ -219,7 +219,7 @@ BEGIN
     AND is_active = true
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Insert default AI provider (placeholder)
 INSERT INTO ai_providers (name, display_name, api_endpoint, is_active, config)

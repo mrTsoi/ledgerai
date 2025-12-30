@@ -11,10 +11,12 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area
 } from 'recharts'
+import { useLiterals } from '@/hooks/use-literals'
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
 export function FinancialCharts() {
+  const lt = useLiterals()
   const { currentTenant } = useTenant()
   const supabase = useMemo(() => createClient(), [])
   const tenantId = currentTenant?.id
@@ -41,36 +43,36 @@ export function FinancialCharts() {
 
       // Process Line Items
       tx.line_items.forEach((item: any) => {
-        const type = item.chart_of_accounts?.account_type
-        const name = item.chart_of_accounts?.name
-        
+        const type = item.chart_of_accounts?.account_type;
+        const name = item.chart_of_accounts?.name;
+
         if (type === 'REVENUE') {
-          trends[key].income += item.credit
+          trends[key].income += item.credit;
         } else if (type === 'EXPENSE') {
-          trends[key].expense += item.debit
-          
+          // For expenses, sum (debit - credit) to handle COGS and similar cases
+          const expenseAmount = (item.debit || 0) - (item.credit || 0);
+          trends[key].expense += expenseAmount;
+
           // Category Aggregation
           if (name) {
-            categories[name] = (categories[name] || 0) + item.debit
+            categories[name] = (categories[name] || 0) + expenseAmount;
           }
 
           // Vendor Aggregation (from linked document)
-          // Note: This assumes the expense line item is associated with the vendor on the document
-          // which is generally true for the whole transaction.
-          const vendorName = tx.documents?.document_data?.vendor_name || 'Uncategorized'
+          const vendorName = tx.documents?.document_data?.vendor_name || 'Uncategorized';
           if (vendorName) {
-            vendors[vendorName] = (vendors[vendorName] || 0) + item.debit
+            vendors[vendorName] = (vendors[vendorName] || 0) + expenseAmount;
           }
         }
-      })
+      });
     })
 
     // Format Trend Data
     const trendArray = Object.entries(trends).map(([name, val]) => ({
       name,
-      Income: val.income,
-      Expense: val.expense,
-      Profit: val.income - val.expense
+      [lt('Income')]: val.income,
+      [lt('Expense')]: val.expense,
+      [lt('Profit')]: val.income - val.expense
     }))
     setTrendData(trendArray)
 
@@ -87,7 +89,7 @@ export function FinancialCharts() {
       .sort((a, b) => b.value - a.value)
       .slice(0, 10) // Top 10
     setVendorData(vendorArray)
-  }, [timeRange])
+  }, [timeRange, lt])
 
   const fetchData = useCallback(async () => {
     if (!tenantId) return
@@ -131,6 +133,15 @@ export function FinancialCharts() {
 
       if (txError) throw txError
 
+
+      // Debug: Log the structure of fetched transactions and their line_items
+      console.log('Fetched transactions:', JSON.stringify(transactions, null, 2));
+      if (transactions && transactions.length > 0) {
+        transactions.forEach((tx, i) => {
+          console.log(`Transaction[${i}] id:`, tx.id, 'line_items:', tx.line_items);
+        });
+      }
+
       processData(transactions)
 
     } catch (error) {
@@ -157,12 +168,12 @@ export function FinancialCharts() {
       <div className="flex justify-end">
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select range" />
+            <SelectValue placeholder={lt('Select range')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="month">Last 30 Days</SelectItem>
-            <SelectItem value="quarter">Last Quarter</SelectItem>
-            <SelectItem value="year">Last Year</SelectItem>
+            <SelectItem value="month">{lt('Last 30 Days')}</SelectItem>
+            <SelectItem value="quarter">{lt('Last Quarter')}</SelectItem>
+            <SelectItem value="year">{lt('Last Year')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -170,8 +181,8 @@ export function FinancialCharts() {
       {/* Income vs Expense Trend */}
       <Card>
         <CardHeader>
-          <CardTitle>Income vs Expenses</CardTitle>
-          <CardDescription>Financial performance over time</CardDescription>
+          <CardTitle>{lt('Income vs Expenses')}</CardTitle>
+          <CardDescription>{lt('Financial performance over time')}</CardDescription>
         </CardHeader>
         <CardContent className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -183,8 +194,9 @@ export function FinancialCharts() {
                 formatter={(value: number) => [`$${value.toFixed(2)}`, '']}
               />
               <Legend />
-              <Bar dataKey="Income" fill="#10b981" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Expense" fill="#ef4444" radius={[4, 4, 0, 0]} />
+              <Bar dataKey={lt("Income")} fill="#10b981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey={lt("Expense")} fill="#ef4444" radius={[4, 4, 0, 0]} />
+              <Bar dataKey={lt("Profit")} fill="#cfe015ff" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -194,8 +206,8 @@ export function FinancialCharts() {
         {/* Expenses by Category */}
         <Card>
           <CardHeader>
-            <CardTitle>Expenses by Category</CardTitle>
-            <CardDescription>Top expense categories</CardDescription>
+            <CardTitle>{lt('Expenses by Category')}</CardTitle>
+            <CardDescription>{lt('Top expense categories')}</CardDescription>
           </CardHeader>
           <CardContent className="h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -214,7 +226,7 @@ export function FinancialCharts() {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']} />
+                <Tooltip formatter={(value: number) => [`$${value.toFixed(2)}`, lt('Amount')]} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -223,8 +235,8 @@ export function FinancialCharts() {
         {/* Expenses by Vendor */}
         <Card>
           <CardHeader>
-            <CardTitle>Top Vendors</CardTitle>
-            <CardDescription>Highest spending by vendor</CardDescription>
+            <CardTitle>{lt('Top Vendors')}</CardTitle>
+            <CardDescription>{lt('Highest spending by vendor')}</CardDescription>
           </CardHeader>
           <CardContent className="h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -232,7 +244,7 @@ export function FinancialCharts() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={100} />
-                <Tooltip formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']} />
+                <Tooltip formatter={(value: number) => [`$${value.toFixed(2)}`, lt('Amount')]} />
                 <Bar dataKey="value" fill="#8884d8" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>

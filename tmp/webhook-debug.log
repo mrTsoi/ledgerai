@@ -1,0 +1,78 @@
+[2025-12-16T16:21:55.310Z] Stripe-Signature: t=1765902114,v1=f27b9522d5bb52a27e87bdd5547c53e2a43a7435a76c0eadb7ff72d5088f8ab7
+[raw-bytes-hex-first-64]: 7b226964223a226576745f696e7465675f31373635393032313134393631222c2274797065223a22636865636b6f75742e73657373696f6e2e636f6d706c6574
+[body-length]: 264
+[body]: {"id":"evt_integ_1765902114961","type":"checkout.session.completed","data":{"object":{"id":"cs_integ_1765902114961","subscription":"sub_Psj9KLFnnXPRtmD","metadata":{"userId":"215af7af-c09b-415f-991d-45a60aadaa11","planId":"26faf5ca-7550-430d-bd01-271d5c10217d"}}}}
+
+[2025-12-16T16:22:31.533Z] Stripe-Signature: t=1765902151,v1=4eece917dd247e264fa9d5e480c4b670b56508d53b1cf537df68ebf69236847b
+[raw-bytes-hex-first-64]: 7b226964223a226576745f696e7465675f31373635393032313531343738222c2274797065223a22636865636b6f75742e73657373696f6e2e636f6d706c6574
+[body-length]: 264
+[body]: {"id":"evt_integ_1765902151478","type":"checkout.session.completed","data":{"object":{"id":"cs_integ_1765902151478","subscription":"sub_Psj9wru6gJRZMZ0","metadata":{"userId":"0821df35-066e-47bd-899e-7b3c78c57fdb","planId":"26faf5ca-7550-430d-bd01-271d5c10217d"}}}}
+
+[2025-12-16T16:22:31.866Z] RPC result: {"rpcData":null,"rpcErr":{"code":"42804","details":null,"hint":"You will need to rewrite or cast the expression.","message":"column \"plan_id\" is of type uuid but expression is of type text"}}
+[2025-12-16T16:23:09.719Z] Stripe-Signature: t=1765902189,v1=0dd0a2343aead761505d3cac1b3b60a56fe53f7ac60203ab277e022a5bce0ab1
+[raw-bytes-hex-first-64]: 7b226964223a226576745f696e7465675f31373635393032313839363739222c2274797065223a22636865636b6f75742e73657373696f6e2e636f6d706c6574
+[body-length]: 264
+[body]: {"id":"evt_integ_1765902189679","type":"checkout.session.completed","data":{"object":{"id":"cs_integ_1765902189679","subscription":"sub_Psj0WO0Jf08qh77","metadata":{"userId":"aa05e236-39de-4ec9-82ff-e337ce89a58e","planId":"26faf5ca-7550-430d-bd01-271d5c10217d"}}}}
+
+[2025-12-16T16:23:09.958Z] RPC result: {"rpcData":null,"rpcErr":{"code":"42804","details":null,"hint":"You will need to rewrite or cast the expression.","message":"column \"plan_id\" is of type uuid but expression is of type text"}}
+[2025-12-16T16:23:54.474Z] Stripe-Signature: t=1765902234,v1=e44828fd590b4a1d1d42f0726dce5eb4a712f2d65d10d838553c036a28237391
+[raw-bytes-hex-first-64]: 7b226964223a226576745f696e7465675f31373635393032323334343034222c2274797065223a22636865636b6f75742e73657373696f6e2e636f6d706c6574
+[body-length]: 264
+[body]: {"id":"evt_integ_1765902234404","type":"checkout.session.completed","data":{"object":{"id":"cs_integ_1765902234404","subscription":"sub_PsjAEk5T0p7PkJH","metadata":{"userId":"396605f6-f17f-414f-a37d-35bfe7c6f80d","planId":"26faf5ca-7550-430d-bd01-271d5c10217d"}}}}
+
+[2025-12-16T16:23:55.047Z] fallback upsert: {"error":null,"data":[{"id":"cae5196e-5d74-453d-b78b-9bdd82aad45e","user_id":"396605f6-f17f-414f-a37d-35bfe7c6f80d","plan_id":"26faf5ca-7550-430d-bd01-271d5c10217d","status":"active","current_period_start":"2025-12-16T16:23:54.478+00:00","current_period_end":"2026-01-15T16:23:54.478+00:00","created_at":"2025-12-16T16:23:54.257728+00:00","updated_at":"2025-12-16T16:23:54.257728+00:00","stripe_customer_id":null,"stripe_subscription_id":null,"next_plan_id":null,"next_plan_start_date":null,"metadata":{}}],"count":null,"status":201,"statusText":"Created"}
+[2025-12-16T16:23:55.048Z] RPC result: {"rpcData":null,"rpcErr":{"code":"42804","details":null,"hint":"You will need to rewrite or cast the expression.","message":"column \"plan_id\" is of type uuid but expression is of type text"}}
+[2025-12-16T23:44:28.184Z] Stripe-Signature: t=1765928667,v1=407a0412cec28e08b73f93cf62c5382291987fa9f45ab287ec0a29a8e0d9c13c
+[raw-bytes-hex-first-64]: 7b226964223a226576745f696e7465675f31373635393238363637333838222c2274797065223a22636865636b6f75742e73657373696f6e2e636f6d706c6574
+[body-length]: 264
+[body]: {"id":"evt_integ_1765928667388","type":"checkout.session.completed","data":{"object":{"id":"cs_integ_1765928667388","subscription":"sub_PsppnCleqSFUPLX","metadata":{"userId":"92dad475-265a-44d8-b6b0-719e2d3d082e","planId":"26faf5ca-7550-430d-bd01-271d5c10217d"}}}}
+
+[2025-12-16T23:44:28.791Z] fallback upsert: {"error":{"code":"42P10","details":null,"hint":null,"message":"there is no unique or exclusion constraint matching the ON CONFLICT specification"},"data":null,"count":null,"status":400,"statusText":"Bad Request"}
+[2025-12-16T23:44:28.792Z] RPC result: {"rpcData":null,"rpcErr":{"code":"42804","details":null,"hint":"You will need to rewrite or cast the expression.","message":"column \"plan_id\" is of type uuid but expression is of type text"}}
+[2025-12-16T23:45:59.152Z] Stripe-Signature: t=1765928758,v1=35b114187241e79c0b52dc53eb508908687f216eabe151661b099f96c890db91
+[raw-bytes-hex-first-64]: 7b226964223a226576745f696e7465675f31373635393238373538383438222c2274797065223a22636865636b6f75742e73657373696f6e2e636f6d706c6574
+[body-length]: 264
+[body]: {"id":"evt_integ_1765928758848","type":"checkout.session.completed","data":{"object":{"id":"cs_integ_1765928758848","subscription":"sub_PsprFgL4zstcu0p","metadata":{"userId":"4cdcc501-6199-460c-aa32-39fbda1bb1c6","planId":"26faf5ca-7550-430d-bd01-271d5c10217d"}}}}
+
+[2025-12-16T23:45:59.904Z] fallback upsert: {"error":null,"data":[{"id":"61c5afe7-9f17-4ba7-b173-4090ec8bd725","user_id":"4cdcc501-6199-460c-aa32-39fbda1bb1c6","plan_id":"26faf5ca-7550-430d-bd01-271d5c10217d","status":"active","current_period_start":"2025-12-16T23:45:59.156+00:00","current_period_end":"2026-01-15T23:45:59.156+00:00","created_at":"2025-12-16T23:45:58.090939+00:00","updated_at":"2025-12-16T23:45:58.090939+00:00","stripe_customer_id":null,"stripe_subscription_id":"sub_PsprFgL4zstcu0p","next_plan_id":null,"next_plan_start_date":null,"metadata":{}}],"count":null,"status":201,"statusText":"Created"}
+[2025-12-16T23:45:59.905Z] RPC result: {"rpcData":null,"rpcErr":{"code":"42804","details":null,"hint":"You will need to rewrite or cast the expression.","message":"column \"plan_id\" is of type uuid but expression is of type text"}}
+[2025-12-17T01:25:20.042Z] Stripe-Signature: sig
+[raw-bytes-hex-first-64]: 
+[body-length]: 0
+[body]: 
+
+[2025-12-17T01:25:20.042Z] Stripe-Signature: sig
+[raw-bytes-hex-first-64]: 
+[body-length]: 0
+[body]: 
+
+[2025-12-17T01:25:20.044Z] Stripe-Signature: sig
+[raw-bytes-hex-first-64]: 
+[body-length]: 0
+[body]: 
+
+[2025-12-17T01:25:21.254Z] Stripe-Signature: tstest_signature
+[raw-bytes-hex-first-64]: 
+[body-length]: 0
+[body]: 
+
+[2025-12-17T12:17:49.237Z] Stripe-Signature: sig
+[raw-bytes-hex-first-64]: 
+[body-length]: 0
+[body]: 
+
+[2025-12-17T12:17:49.240Z] Stripe-Signature: sig
+[raw-bytes-hex-first-64]: 
+[body-length]: 0
+[body]: 
+
+[2025-12-17T12:17:49.241Z] Stripe-Signature: sig
+[raw-bytes-hex-first-64]: 
+[body-length]: 0
+[body]: 
+
+[2025-12-17T12:17:50.354Z] Stripe-Signature: tstest_signature
+[raw-bytes-hex-first-64]: 
+[body-length]: 0
+[body]: 
+

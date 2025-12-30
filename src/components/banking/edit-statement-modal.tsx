@@ -10,6 +10,7 @@ import { Database } from '@/types/database.types'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { X, ZoomIn, ZoomOut, RotateCcw, FileText, Save, Loader2 } from 'lucide-react'
+import { useLiterals } from '@/hooks/use-literals'
 
 type BankStatement = Database['public']['Tables']['bank_statements']['Row'] & {
   documents: {
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Props) {
+  const lt = useLiterals()
   const [formData, setFormData] = useState({
     start_date: statement.start_date || '',
     end_date: statement.end_date || '',
@@ -54,9 +56,9 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
       }
     } catch (error) {
       console.error('Error loading preview:', error)
-      toast.error('Failed to load document preview')
+      toast.error(lt('Failed to load document preview'))
     }
-  }, [supabase])
+  }, [supabase, lt])
 
   useEffect(() => {
     return () => {
@@ -85,11 +87,11 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
 
       if (error) throw error
 
-      toast.success('Statement updated')
+      toast.success(lt('Statement updated'))
       onSaved()
       onClose()
     } catch (error: any) {
-      toast.error('Failed to update: ' + error.message)
+      toast.error(lt('Failed to update: {message}', { message: error.message }))
     } finally {
       setSaving(false)
     }
@@ -149,7 +151,7 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
               setZoomLevel(100)
               setPosition({ x: 0, y: 0 })
             }}
-            title="Reset View"
+            title={lt('Reset View')}
           >
             <RotateCcw className="w-4 h-4" />
           </Button>
@@ -166,7 +168,7 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
             isImage ? (
               <ImagePreview
                 src={previewUrl}
-                alt="Document Preview"
+                alt={lt('Document Preview')}
                 style={{
                   transform: `translate(${position.x}px, ${position.y}px) scale(${zoomLevel / 100})`,
                   transition: isDragging ? 'none' : 'transform 0.2s',
@@ -177,13 +179,13 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
               <iframe 
                 src={previewUrl} 
                 className="w-full h-full bg-white"
-                title="PDF Preview"
+                title={lt('PDF Preview')}
               />
             )
           ) : (
             <div className="text-white text-center">
               <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <p>Loading preview...</p>
+              <p>{lt('Loading preview...')}</p>
             </div>
           )}
         </div>
@@ -192,7 +194,7 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
       {/* Right Pane: Edit Form */}
       <div className="w-full lg:w-[400px] bg-white h-[60vh] lg:h-full flex flex-col shadow-2xl">
         <div className="p-4 border-b flex items-center justify-between bg-gray-50">
-          <h2 className="font-semibold text-lg">Edit Statement</h2>
+          <h2 className="font-semibold text-lg">{lt('Edit Statement')}</h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
             <X className="w-5 h-5" />
           </Button>
@@ -201,7 +203,7 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Start Date</Label>
+              <Label>{lt('Start Date')}</Label>
               <Input 
                 type="date" 
                 value={formData.start_date} 
@@ -209,7 +211,7 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
               />
             </div>
             <div className="space-y-2">
-              <Label>End Date</Label>
+              <Label>{lt('End Date')}</Label>
               <Input 
                 type="date" 
                 value={formData.end_date} 
@@ -217,7 +219,7 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
               />
             </div>
             <div className="space-y-2">
-              <Label>Opening Balance</Label>
+              <Label>{lt('Opening Balance')}</Label>
               <Input 
                 type="number" 
                 step="0.01"
@@ -226,7 +228,7 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
               />
             </div>
             <div className="space-y-2">
-              <Label>Closing Balance</Label>
+              <Label>{lt('Closing Balance')}</Label>
               <Input 
                 type="number" 
                 step="0.01"
@@ -239,7 +241,7 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
 
         <div className="p-4 border-t bg-gray-50 flex gap-3">
           <Button variant="outline" className="flex-1" onClick={onClose}>
-            Cancel
+            {lt('Cancel')}
           </Button>
           <Button 
             className="flex-1" 
@@ -249,12 +251,12 @@ export function EditStatementModal({ statement, isOpen, onClose, onSaved }: Prop
             {saving ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
+                {lt('Saving...')}
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Save Changes
+                {lt('Save Changes')}
               </>
             )}
           </Button>
