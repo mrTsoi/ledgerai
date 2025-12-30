@@ -40,7 +40,14 @@ export default function SignupForm() {
     setLoading(true)
     try {
       const next = `/${locale}/dashboard`
-      const redirectTo = `${window.location.origin}/${locale}/auth/callback?next=${encodeURIComponent(next)}&plan_id=${encodeURIComponent(planId)}&interval=${encodeURIComponent(interval)}`
+      const origin = (process.env.NEXT_PUBLIC_SITE_URL as string) || window.location.origin
+      const redirectTo = `${origin.replace(/\/$/, '')}/${locale}/auth/callback?next=${encodeURIComponent(next)}&plan_id=${encodeURIComponent(planId)}&interval=${encodeURIComponent(interval)}`
+      console.debug('OAuth redirectTo (signup):', redirectTo)
+      try {
+        localStorage.setItem('supabase_oauth_redirectTo', redirectTo)
+      } catch (e) {
+        // ignore
+      }
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

@@ -28,7 +28,14 @@ export default function LoginForm() {
     setError(null)
     setLoading(true)
     try {
-      const redirectTo = `${window.location.origin}/${locale}/auth/callback?next=${encodeURIComponent(`/${locale}/dashboard`)}`
+      const origin = (process.env.NEXT_PUBLIC_SITE_URL as string) || window.location.origin
+      const redirectTo = `${origin.replace(/\/$/, '')}/${locale}/auth/callback?next=${encodeURIComponent(`/${locale}/dashboard`)}`
+      console.debug('OAuth redirectTo (login):', redirectTo)
+      try {
+        localStorage.setItem('supabase_oauth_redirectTo', redirectTo)
+      } catch (e) {
+        // ignore
+      }
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

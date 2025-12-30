@@ -12,6 +12,14 @@ export async function GET(
 ) {
   const { locale } = await params
 
+  // Debug logs to trace OAuth callback handling in dev
+  try {
+    console.debug('[auth/callback] incoming request url:', request.url)
+    console.debug('[auth/callback] incoming headers cookie:', request.headers.get('cookie'))
+  } catch (e) {
+    // ignore logging errors
+  }
+
   const url = new URL(request.url)
   const code = url.searchParams.get('code')
   const next = url.searchParams.get('next') || `/${locale}/dashboard`
@@ -134,15 +142,17 @@ export async function GET(
       }
     }
 
-    // Always redirect to absolute URL on the public domain
-    const PUBLIC_DOMAIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://ledgerai.sophiesofts.com';
+    // Always redirect to absolute URL on the same origin (fallback to configured public domain).
+    const requestOrigin = new URL(request.url).origin;
+    const PUBLIC_DOMAIN = process.env.NEXT_PUBLIC_SITE_URL || requestOrigin;
     const redirectUrl = next.startsWith('http')
       ? next
       : `${PUBLIC_DOMAIN.replace(/\/$/, '')}${next.startsWith('/') ? '' : '/'}${next}`;
     return NextResponse.redirect(redirectUrl);
   } catch {
-    // Always redirect to absolute URL on the public domain for error as well
-    const PUBLIC_DOMAIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://ledgerai.sophiesofts.com';
+    // Redirect back to the same origin (or configured public domain) on error as well
+    const requestOrigin = new URL(request.url).origin;
+    const PUBLIC_DOMAIN = process.env.NEXT_PUBLIC_SITE_URL || requestOrigin;
     const errorRedirect = `${PUBLIC_DOMAIN.replace(/\/$/, '')}/${locale}/login?error=oauth_failed`;
     return NextResponse.redirect(errorRedirect);
   }

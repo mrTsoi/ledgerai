@@ -113,8 +113,8 @@ export async function POST(req: Request) {
     )
   }
 
-  const origin = new URL(req.url).origin
-  const redirectTo = `${origin}/${encodeURIComponent(locale)}/auth/callback?next=${encodeURIComponent(
+  const origin = (process.env.NEXT_PUBLIC_SITE_URL as string) || new URL(req.url).origin
+  const redirectTo = `${origin.replace(/\/$/, '')}/${encodeURIComponent(locale)}/auth/callback?next=${encodeURIComponent(
     `/${locale}/dashboard`
   )}`
 

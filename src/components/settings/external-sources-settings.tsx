@@ -1169,6 +1169,65 @@ export function ExternalSourcesSettings() {
         </CardContent>
       </Card>
 
+      {/* Configuration checklist: consolidated guidance to reduce confusion */}
+      {canManage && sources.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{lt('Configuration Checklist')}</CardTitle>
+            <CardDescription>
+              {lt('High-level guidance to finish setup for each configured source.')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="text-sm text-muted-foreground">
+              {lt('Each source shows a concise next-step and quick actions to complete configuration.')}
+            </div>
+
+            <div className="space-y-2">
+              {sources.map((s) => {
+                const connected = isCloud(s) ? !!statusById[s.id] : true
+                const folderSet = isCloud(s) ? cloudInfoById[s.id]?.folder_id || !!s.config?.folder_id : true
+                const tokenErr = !!tokenErrorById[s.id]
+                const ready = connected && folderSet && !tokenErr
+
+                return (
+                  <div key={s.id} className="flex items-center justify-between gap-2 rounded-md border p-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate">{s.name}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {lt('{provider} • every {minutes}m', { provider: s.provider, minutes: s.schedule_minutes })}
+                      </div>
+                      <div className="mt-2 flex gap-2 text-xs">
+                        <div className={`px-2 py-1 rounded ${ready ? 'bg-green-50 text-green-800 border border-green-100' : 'bg-yellow-50 text-yellow-900 border border-yellow-100'}`}>
+                          {ready ? lt('Ready') : lt('Needs attention')}
+                        </div>
+                        {isCloud(s) && !connected ? <div className="px-2 py-1 rounded bg-red-50 text-red-800 border border-red-100">{lt('Not connected')}</div> : null}
+                        {isCloud(s) && connected && !folderSet ? <div className="px-2 py-1 rounded bg-yellow-50 text-yellow-900 border border-yellow-100">{lt('Folder not selected')}</div> : null}
+                        {tokenErr ? <div className="px-2 py-1 rounded bg-red-50 text-red-800 border border-red-100">{lt('Reconnect required')}</div> : null}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      {isCloud(s) && (!connected ? (
+                        <Button variant="outline" onClick={() => connectSource(s)} disabled={working}>{lt('Connect')}</Button>
+                      ) : (
+                        <Button variant="outline" onClick={() => disconnectSource(s.id)} disabled={working}>{lt('Disconnect')}</Button>
+                      ))}
+
+                      {isCloud(s) && connected ? (
+                        <Button variant="outline" onClick={() => openFolderPicker(s)} disabled={working || pickerLoading}>{lt('Pick Folder')}</Button>
+                      ) : null}
+
+                      <Button variant={ready ? undefined : 'outline'} onClick={() => testSource(s.id)} disabled={working || !canRunSource(s)}>{lt('Test')}</Button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle>{lt('Configured Sources')}</CardTitle>

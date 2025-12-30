@@ -11,6 +11,40 @@ const intlMiddleware = createMiddleware({
 });
 
 export async function middleware(request: NextRequest) {
+  try {
+    const code = request.nextUrl.searchParams.get('code')
+    if (code) {
+      console.debug('[middleware] incoming code param:', code, 'path:', request.nextUrl.pathname, 'fullUrl:', request.url)
+      try {
+        console.debug('[middleware] incoming cookies:', request.headers.get('cookie'))
+      } catch (e) {}
+
+      // If the OAuth provider returned to the app root (e.g. / or /en) with a code,
+      // redirect to our localized auth callback route so server-side exchange runs.
+      const path = request.nextUrl.pathname
+      const localeMatch = path.match(/^\/(en|zh-CN|zh-HK|zh-TW)/)
+      const locale = localeMatch ? localeMatch[0] : ''
+      const isAtRoot = path === '/' || path === '' || path === `/${locale.replace(/^\//, '')}` || path === `/${locale.replace(/^\//, '')}/`
+
+      if (isAtRoot) {
+        const PUBLIC_DOMAIN = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+        const requestOrigin = new URL(request.url).origin
+        const targetOrigin = (process.env.NEXT_PUBLIC_SITE_URL || requestOrigin).replace(/\/$/, '')
+        const targetPath = `${locale}/auth/callback`
+        const redirectUrl = `${targetOrigin.startsWith('http') ? '' : ''}${targetOrigin}${targetPath.startsWith('/') ? '' : '/'}${targetPath}${request.nextUrl.search}`
+
+        try {
+          const url = new URL(redirectUrl)
+          return NextResponse.redirect(url)
+        } catch (e) {
+          // fallback: simple redirect to relative path
+          const url = request.nextUrl.clone()
+          url.pathname = `/${locale.replace(/^\//, '')}/auth/callback`
+          return NextResponse.redirect(url)
+        }
+      }
+    }
+  } catch (e) {}
   // Legacy locale redirect: zh-TW -> zh-HK
   if (request.nextUrl.pathname === '/zh-TW' || request.nextUrl.pathname.startsWith('/zh-TW/')) {
     const url = request.nextUrl.clone();

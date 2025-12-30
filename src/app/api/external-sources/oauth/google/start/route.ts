@@ -33,8 +33,8 @@ export async function GET(req: Request) {
   const returnTo = returnToRaw && returnToRaw.startsWith('/') && !returnToRaw.startsWith('//') ? returnToRaw : null
 
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID
-  const origin = new URL(req.url).origin
-  const redirectUri = process.env.GOOGLE_OAUTH_REDIRECT_URI || `${origin}/api/external-sources/oauth/google/callback`
+  const origin = (process.env.NEXT_PUBLIC_SITE_URL as string) || new URL(req.url).origin
+  const redirectUri = process.env.GOOGLE_OAUTH_REDIRECT_URI || `${origin.replace(/\/$/, '')}/api/external-sources/oauth/google/callback`
   if (!clientId) {
     return NextResponse.json({ error: 'Google OAuth is not configured' }, { status: 503 })
   }

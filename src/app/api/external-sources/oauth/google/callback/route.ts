@@ -18,8 +18,8 @@ export async function GET(req: Request) {
 
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID
   const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET
-  const origin = new URL(req.url).origin
-  const redirectUri = process.env.GOOGLE_OAUTH_REDIRECT_URI || `${origin}/api/external-sources/oauth/google/callback`
+  const origin = (process.env.NEXT_PUBLIC_SITE_URL as string) || new URL(req.url).origin
+  const redirectUri = process.env.GOOGLE_OAUTH_REDIRECT_URI || `${origin.replace(/\/$/, '')}/api/external-sources/oauth/google/callback`
 
   if (!clientId || !clientSecret) {
     return NextResponse.json({ error: 'Google OAuth is not configured' }, { status: 503 })
@@ -159,7 +159,7 @@ export async function GET(req: Request) {
       ? parsed.return_to
       : null
 
-  const origin2 = new URL(req.url).origin
+  const origin2 = (process.env.NEXT_PUBLIC_SITE_URL as string) || new URL(req.url).origin
   const targetPath = returnTo || '/en/dashboard/settings?tab=external-sources'
   return NextResponse.redirect(new URL(targetPath, origin2))
 }
