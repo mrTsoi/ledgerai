@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { Database } from '@/types/database.types'
-import OpenAI from 'openai'
+// OpenAI is not used at module-eval; import dynamically when needed to avoid Node-only globals
 
 type BankTransaction = Database['public']['Tables']['bank_transactions']['Row']
 type Transaction = Database['public']['Tables']['transactions']['Row']

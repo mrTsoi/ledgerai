@@ -58,4 +58,12 @@ async function walk(dir) {
     console.log(m.file + ' => ' + m.hits.join(', '));
   }
   if (matches.length > 200) console.log('... (truncated)');
+  // Write full JSON results for review
+  try {
+    const outPath = path.resolve(process.cwd(), 'tmp', 'node-mods-scan.json');
+    await fs.writeFile(outPath, JSON.stringify(matches, null, 2), 'utf8');
+    console.log(`Wrote full results to ${outPath}`);
+  } catch (err) {
+    console.error('Failed to write JSON results:', err && err.message ? err.message : err);
+  }
 })();

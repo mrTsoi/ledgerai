@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { Database } from '@/types/database.types'
-import { DocumentProcessorServiceClient } from '@google-cloud/documentai'
-import OpenAI from 'openai'
+// Note: heavy SDKs (Google Document AI, OpenAI) are dynamically imported via wrappers
 import crypto from 'crypto'
 import {
   findDocumentsByTenantAndHash,
@@ -1231,7 +1230,8 @@ export class AIProcessingService {
         }
       }
 
-      const client = new DocumentProcessorServiceClient(clientConfig)
+      const { createDocumentAIClient } = await import('@/integrations/google/documentai-client')
+      const client = await createDocumentAIClient(clientConfig)
 
       // 3. Call Google API
       // Format: projects/{project_id}/locations/{location}/processors/{processor_id}
@@ -1253,14 +1253,14 @@ export class AIProcessingService {
       const entities = googleDoc.entities || []
       
       // Helper to find entity value
-      const findEntity = (type: string) => entities.find(e => e.type === type)?.normalizedValue?.text || 
-                                           entities.find(e => e.type === type)?.mentionText
+      const findEntity = (type: string) => entities.find((e: any) => e.type === type)?.normalizedValue?.text || 
+                   entities.find((e: any) => e.type === type)?.mentionText
 
       const vendorName = findEntity('supplier_name')
       const customerName = findEntity('receiver_name') // Google Invoice Parser uses receiver_name
       const invoiceDate = findEntity('invoice_date')
-      const totalAmount = entities.find(e => e.type === 'total_amount')?.normalizedValue?.text // usually structured
-      const currency = entities.find(e => e.type === 'currency')?.normalizedValue?.text || 'USD'
+      const totalAmount = entities.find((e: any) => e.type === 'total_amount')?.normalizedValue?.text // usually structured
+      const currency = entities.find((e: any) => e.type === 'currency')?.normalizedValue?.text || 'USD'
       const invoiceId = findEntity('invoice_id')
 
       // Parse date (Google usually returns YYYY-MM-DD in normalizedValue)
@@ -1280,11 +1280,11 @@ export class AIProcessingService {
 
       // Extract Line Items (if available)
       const lineItems = entities
-        .filter(e => e.type === 'line_item')
-        .map(item => {
-          const props = item.properties || []
-          const desc = props.find(p => p.type === 'line_item/description')?.mentionText || 'Item'
-          const amt = props.find(p => p.type === 'line_item/amount')?.normalizedValue?.text || '0'
+        .filter((e: any) => e.type === 'line_item')
+        .map((item: any) => {
+          const props: any[] = item.properties || []
+          const desc = props.find((p: any) => p.type === 'line_item/description')?.mentionText || 'Item'
+          const amt = props.find((p: any) => p.type === 'line_item/amount')?.normalizedValue?.text || '0'
           return {
             description: desc,
             amount: parseFloat(amt),
@@ -1447,12 +1447,9 @@ export class AIProcessingService {
       
       const dataUrl = `data:${document.file_type};base64,${base64Image}`
 
-      // 3. Initialize OpenAI Client
-      const openai = new OpenAI({
-        apiKey: apiKey,
-        baseURL: baseURL,
-        defaultHeaders: defaultHeaders
-      })
+      // 3. Initialize OpenAI Client (dynamically to avoid Node-only globals at module eval)
+      const { createOpenAIClient } = await import('@/lib/ai/openai-client')
+      const openai = await createOpenAIClient({ apiKey, baseURL, defaultHeaders })
 
       const normalizedTenantLocale = normalizeTenantLocaleTag(tenantLocale)
       const outputLanguage = resolveTenantLanguageLabel(normalizedTenantLocale)

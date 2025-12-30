@@ -1,0 +1,887 @@
+[
+  {
+    "package": "next",
+    "files": 888,
+    "hits": 1053
+  },
+  {
+    "package": "playwright-core",
+    "files": 63,
+    "hits": 87
+  },
+  {
+    "package": "playwright",
+    "files": 58,
+    "hits": 86
+  },
+  {
+    "package": "tailwindcss",
+    "files": 44,
+    "hits": 48
+  },
+  {
+    "package": "@reduxjs/toolkit",
+    "files": 42,
+    "hits": 42
+  },
+  {
+    "package": "@grpc/grpc-js",
+    "files": 28,
+    "hits": 32
+  },
+  {
+    "package": "react-dom",
+    "files": 22,
+    "hits": 22
+  },
+  {
+    "package": "tar",
+    "files": 18,
+    "hits": 22
+  },
+  {
+    "package": "openai",
+    "files": 17,
+    "hits": 20
+  },
+  {
+    "package": "vitest",
+    "files": 16,
+    "hits": 27
+  },
+  {
+    "package": "ssh2",
+    "files": 16,
+    "hits": 21
+  },
+  {
+    "package": "next-intl",
+    "files": 16,
+    "hits": 18
+  },
+  {
+    "package": "@types/ssh2",
+    "files": 15,
+    "hits": 18
+  },
+  {
+    "package": "react",
+    "files": 14,
+    "hits": 14
+  },
+  {
+    "package": "@types/node",
+    "files": 12,
+    "hits": 14
+  },
+  {
+    "package": "@babel/core",
+    "files": 11,
+    "hits": 17
+  },
+  {
+    "package": "google-auth-library",
+    "files": 11,
+    "hits": 15
+  },
+  {
+    "package": "rimraf",
+    "files": 11,
+    "hits": 13
+  },
+  {
+    "package": "eslint-plugin-react",
+    "files": 11,
+    "hits": 12
+  },
+  {
+    "package": "react-redux",
+    "files": 11,
+    "hits": 11
+  },
+  {
+    "package": "resolve",
+    "files": 10,
+    "hits": 11
+  },
+  {
+    "package": "use-sync-external-store",
+    "files": 10,
+    "hits": 10
+  },
+  {
+    "package": "jsdom",
+    "files": 9,
+    "hits": 9
+  },
+  {
+    "package": "protobufjs",
+    "files": 8,
+    "hits": 15
+  },
+  {
+    "package": "vite",
+    "files": 8,
+    "hits": 14
+  },
+  {
+    "package": "mkdirp",
+    "files": 8,
+    "hits": 12
+  },
+  {
+    "package": "@rushstack/eslint-patch",
+    "files": 8,
+    "hits": 8
+  },
+  {
+    "package": "eslint",
+    "files": 8,
+    "hits": 8
+  },
+  {
+    "package": "gaxios",
+    "files": 8,
+    "hits": 8
+  },
+  {
+    "package": "immer",
+    "files": 8,
+    "hits": 8
+  },
+  {
+    "package": "scheduler",
+    "files": 8,
+    "hits": 8
+  },
+  {
+    "package": "@testing-library/dom",
+    "files": 7,
+    "hits": 17
+  },
+  {
+    "package": "eslint-plugin-import",
+    "files": 7,
+    "hits": 7
+  },
+  {
+    "package": "postcss",
+    "files": 7,
+    "hits": 7
+  },
+  {
+    "package": "teeny-request",
+    "files": 7,
+    "hits": 7
+  },
+  {
+    "package": "typescript",
+    "files": 6,
+    "hits": 11
+  },
+  {
+    "package": "@testing-library/react",
+    "files": 6,
+    "hits": 6
+  },
+  {
+    "package": "eslint-module-utils",
+    "files": 6,
+    "hits": 6
+  },
+  {
+    "package": "jackspeak",
+    "files": 6,
+    "hits": 6
+  },
+  {
+    "package": "tsconfig-paths",
+    "files": 6,
+    "hits": 6
+  },
+  {
+    "package": "rollup",
+    "files": 5,
+    "hits": 11
+  },
+  {
+    "package": "express",
+    "files": 5,
+    "hits": 7
+  },
+  {
+    "package": "@supabase/auth-js",
+    "files": 5,
+    "hits": 5
+  },
+  {
+    "package": "@typescript-eslint/typescript-estree",
+    "files": 5,
+    "hits": 5
+  },
+  {
+    "package": "basic-ftp",
+    "files": 5,
+    "hits": 5
+  },
+  {
+    "package": "http-proxy-agent",
+    "files": 5,
+    "hits": 5
+  },
+  {
+    "package": "redux",
+    "files": 5,
+    "hits": 5
+  },
+  {
+    "package": "tiny-invariant",
+    "files": 5,
+    "hits": 5
+  },
+  {
+    "package": "use-intl",
+    "files": 5,
+    "hits": 5
+  },
+  {
+    "package": "superagent",
+    "files": 4,
+    "hits": 9
+  },
+  {
+    "package": "google-gax",
+    "files": 4,
+    "hits": 8
+  },
+  {
+    "package": "node-forge",
+    "files": 4,
+    "hits": 8
+  },
+  {
+    "package": "chokidar",
+    "files": 4,
+    "hits": 7
+  },
+  {
+    "package": "isexe",
+    "files": 4,
+    "hits": 6
+  },
+  {
+    "package": "prop-types",
+    "files": 4,
+    "hits": 6
+  },
+  {
+    "package": "tinyglobby",
+    "files": 4,
+    "hits": 6
+  },
+  {
+    "package": "@babel/types",
+    "files": 4,
+    "hits": 4
+  },
+  {
+    "package": "escalade",
+    "files": 4,
+    "hits": 4
+  },
+  {
+    "package": "jspdf",
+    "files": 4,
+    "hits": 4
+  },
+  {
+    "package": "react-refresh",
+    "files": 4,
+    "hits": 4
+  },
+  {
+    "package": "reselect",
+    "files": 4,
+    "hits": 4
+  },
+  {
+    "package": "@google-cloud/documentai",
+    "files": 3,
+    "hits": 9
+  },
+  {
+    "package": "napi-postinstall",
+    "files": 3,
+    "hits": 8
+  },
+  {
+    "package": "yargs",
+    "files": 3,
+    "hits": 8
+  },
+  {
+    "package": "body-parser",
+    "files": 3,
+    "hits": 6
+  },
+  {
+    "package": "eslint-import-resolver-typescript",
+    "files": 3,
+    "hits": 6
+  },
+  {
+    "package": "finalhandler",
+    "files": 3,
+    "hits": 5
+  },
+  {
+    "package": "send",
+    "files": 3,
+    "hits": 5
+  },
+  {
+    "package": "sharp",
+    "files": 3,
+    "hits": 5
+  },
+  {
+    "package": "@nodelib/fs.scandir",
+    "files": 3,
+    "hits": 4
+  },
+  {
+    "package": "@types/superagent",
+    "files": 3,
+    "hits": 4
+  },
+  {
+    "package": "dotenv",
+    "files": 3,
+    "hits": 4
+  },
+  {
+    "package": "gcp-metadata",
+    "files": 3,
+    "hits": 4
+  },
+  {
+    "package": "glob",
+    "files": 3,
+    "hits": 4
+  },
+  {
+    "package": "@nodelib/fs.stat",
+    "files": 3,
+    "hits": 3
+  },
+  {
+    "package": "@supabase/ssr",
+    "files": 3,
+    "hits": 3
+  },
+  {
+    "package": "cross-spawn",
+    "files": 3,
+    "hits": 3
+  },
+  {
+    "package": "fast-glob",
+    "files": 3,
+    "hits": 3
+  },
+  {
+    "package": "flat-cache",
+    "files": 3,
+    "hits": 3
+  },
+  {
+    "package": "loose-envify",
+    "files": 3,
+    "hits": 3
+  },
+  {
+    "package": "obug",
+    "files": 3,
+    "hits": 3
+  },
+  {
+    "package": "ws",
+    "files": 3,
+    "hits": 3
+  },
+  {
+    "package": "jiti",
+    "files": 2,
+    "hits": 8
+  },
+  {
+    "package": "yargs-parser",
+    "files": 2,
+    "hits": 8
+  },
+  {
+    "package": "esbuild",
+    "files": 2,
+    "hits": 6
+  },
+  {
+    "package": "browserslist",
+    "files": 2,
+    "hits": 5
+  },
+  {
+    "package": "@babel/helper-compilation-targets",
+    "files": 2,
+    "hits": 4
+  },
+  {
+    "package": "core-js",
+    "files": 2,
+    "hits": 4
+  },
+  {
+    "package": "is-core-module",
+    "files": 2,
+    "hits": 4
+  },
+  {
+    "package": "path-scurry",
+    "files": 2,
+    "hits": 4
+  },
+  {
+    "package": "readdirp",
+    "files": 2,
+    "hits": 4
+  },
+  {
+    "package": "mime",
+    "files": 2,
+    "hits": 3
+  },
+  {
+    "package": "styled-jsx",
+    "files": 2,
+    "hits": 3
+  },
+  {
+    "package": "update-browserslist-db",
+    "files": 2,
+    "hits": 3
+  },
+  {
+    "package": "@grpc/proto-loader",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "@isaacs/fs-minipass",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "@next/eslint-plugin-next",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "agent-base",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "ajv",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "debug",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "eslint-import-resolver-node",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "eslint-plugin-react-hooks",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "formidable",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "gtoken",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "https-proxy-agent",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "ignore",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "json5",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "jsx-ast-utils",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "lovable-tagger",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "minimatch",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "path-key",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "proxy-from-env",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "react-is",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "std-env",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "stripe",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "sucrase",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "undici-types",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "why-is-node-running",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "y18n",
+    "files": 2,
+    "hits": 2
+  },
+  {
+    "package": "unrs-resolver",
+    "files": 1,
+    "hits": 3
+  },
+  {
+    "package": "@next/env",
+    "files": 1,
+    "hits": 2
+  },
+  {
+    "package": "@supabase/supabase-js",
+    "files": 1,
+    "hits": 2
+  },
+  {
+    "package": "argparse",
+    "files": 1,
+    "hits": 2
+  },
+  {
+    "package": "es-toolkit",
+    "files": 1,
+    "hits": 2
+  },
+  {
+    "package": "raw-body",
+    "files": 1,
+    "hits": 2
+  },
+  {
+    "package": "ssh2-sftp-client",
+    "files": 1,
+    "hits": 2
+  },
+  {
+    "package": "supabase",
+    "files": 1,
+    "hits": 2
+  },
+  {
+    "package": "@babel/code-frame",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "@babel/parser",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "@emnapi/runtime",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "@protobufjs/utf8",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "@radix-ui/react-icons",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "@types/babel__core",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "@types/send",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "@types/serve-static",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "@types/ws",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "acorn",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "any-promise",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "async-function",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "autoprefixer",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "bin-links",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "commander",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "depd",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "destroy",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "detect-libc",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "duplexify",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "eslint-plugin-jsx-a11y",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "etag",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "file-entry-cache",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "form-data",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "generator-function",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "get-tsconfig",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "google-logging-utils",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "iceberg-js",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "js-yaml",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "lilconfig",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "locate-path",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "lz-string",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "mz",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "nan",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "node-fetch",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "object-inspect",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "path-exists",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "picomatch",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "postcss-load-config",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "read-cache",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "read-cmd-shim",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "readable-stream",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "require-directory",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "resolve-from",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "retry-request",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "semver",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "supports-preserve-symlinks-flag",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "tinyexec",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "typedarray",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "which",
+    "files": 1,
+    "hits": 1
+  },
+  {
+    "package": "write-file-atomic",
+    "files": 1,
+    "hits": 1
+  }
+]
