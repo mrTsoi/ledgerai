@@ -1052,7 +1052,7 @@ export default function DashboardPage() {
                   })}
 
                   <div>
-                    <Link href="/dashboard/settings?tab=external-sources" className="text-sm text-primary underline">{lt('Manage external sources')}</Link>
+                    <Link href="/tenant-admin?tab=external-sources" className="text-sm text-primary underline">{lt('Manage external sources')}</Link>
                   </div>
                 </div>
               )}

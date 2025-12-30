@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { useLiterals } from '@/hooks/use-literals'
+import { Link } from '@/i18n/navigation'
 
 type Provider = 'GOOGLE_DRIVE' | 'ONEDRIVE'
 
@@ -494,7 +495,19 @@ export function CloudImportDialog(props: Props) {
 
           {!selectedSource && !loadingSources ? (
             <div className="text-sm text-muted-foreground">
-              {lt('No cloud sources yet. Create one here or configure them in Settings → External Sources.')}
+              {lt('No cloud sources yet. ')}
+              <button
+                type="button"
+                className="text-primary underline mr-1"
+                onClick={() => setCreateMode(true)}
+              >
+                Create one here
+              </button>
+              {lt('or configure them in')} 
+              <Link href="/tenant-admin?tab=external-sources" className="text-primary underline ml-1">
+                {lt('Settings → External Sources')}
+              </Link>
+              .
             </div>
           ) : null}
         </div>
