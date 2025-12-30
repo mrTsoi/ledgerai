@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { usePlaidLink } from 'react-plaid-link'
 import { createClient } from '@/lib/supabase/client'
 import { useTenant, useUserRole } from '@/hooks/use-tenant'
+import { useSubscription } from '@/hooks/use-subscription'
 import { useLiterals } from '@/hooks/use-literals'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -35,8 +36,11 @@ export function BankFeedIntegration() {
   const lt = useLiterals()
   const { currentTenant } = useTenant()
   const userRole = useUserRole()
+  const { subscription, loading: subscriptionLoading } = useSubscription()
   const supabase = useMemo(() => createClient(), [])
   const tenantId = currentTenant?.id
+
+  const hasBankFeature = Boolean(subscription?.features?.bank_integration === true)
 
   const [connection, setConnection] = useState<ConnectionRow | null>(null)
   const [linkToken, setLinkToken] = useState<string | null>(null)
@@ -76,6 +80,7 @@ export function BankFeedIntegration() {
 
   const fetchConnection = useCallback(async () => {
     if (!tenantId) return
+    if (!hasBankFeature) return
 
     try {
       setLoading(true)
@@ -103,6 +108,7 @@ export function BankFeedIntegration() {
 
   const fetchWebhookKey = useCallback(async () => {
     if (!tenantId || !canManage) return
+    if (!hasBankFeature) return
 
     try {
       const { data, error } = await (supabase.from('bank_feed_api_keys') as any)
@@ -126,6 +132,7 @@ export function BankFeedIntegration() {
 
   const fetchLinkToken = useCallback(async () => {
     if (!tenantId) return
+    if (!hasBankFeature) return
 
     try {
       const res = await fetch('/api/bank-feeds/plaid/link-token', {
@@ -168,6 +175,7 @@ export function BankFeedIntegration() {
 
   const fetchTestAccount = useCallback(async () => {
     if (!tenantId || !canManage) return
+    if (!hasBankFeature) return
 
     try {
       const { data, error } = await (supabase.from('bank_accounts') as any)
@@ -221,6 +229,7 @@ export function BankFeedIntegration() {
 
   const startPlaidConnect = async () => {
     if (!tenantId || !canManage) return
+    if (!hasBankFeature) return
 
     setPendingPlaidOpen(true)
 
@@ -243,6 +252,7 @@ export function BankFeedIntegration() {
 
   const syncNow = async () => {
     if (!tenantId) return
+    if (!hasBankFeature) return
 
     try {
       setWorking(true)
@@ -270,6 +280,7 @@ export function BankFeedIntegration() {
 
   const rotateWebhookKey = async () => {
     if (!tenantId) return
+    if (!hasBankFeature) return
 
     try {
       setWorking(true)
@@ -307,6 +318,7 @@ export function BankFeedIntegration() {
 
   const sendTestWebhook = async () => {
     if (!tenantId) return
+    if (!hasBankFeature) return
     if (!testApiKey.trim()) {
       toast.error(lt('Enter an API key to test'))
       return
@@ -387,6 +399,37 @@ export function BankFeedIntegration() {
       '  }\'',
     ].join('\n')
   }, [testApiKey, tenantId, testAccount?.id])
+
+  if (subscriptionLoading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center p-6">
+          <div className="text-sm text-muted-foreground">{lt('Checking your subscription...')}</div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!hasBankFeature) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{lt('Bank Feed Integration')}</CardTitle>
+          <CardDescription>{lt('Subscription Required')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-muted-foreground">
+            {lt('Bank feeds are available only on paid plans that include this feature. Please upgrade your subscription or contact your tenant administrator.')}
+          </div>
+          <div className="mt-4">
+              <a href="/dashboard/settings?tab=billing" className="no-underline">
+              <Button>{lt('Upgrade')}</Button>
+            </a>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <div className="space-y-4">
