@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { CurrencySelect } from '@/components/ui/currency-select'
+import { LocaleSelect } from '@/components/ui/locale-select'
 import { toast } from 'sonner'
 import { useLiterals } from '@/hooks/use-literals'
 
@@ -156,6 +158,14 @@ export default function TenantDetails({ tenantId, onClose, onSaved }: { tenantId
                         <option value="Sole proprietor">Sole proprietor</option>
                         <option value="Partnership">Partnership</option>
                       </select>
+                    </div>
+                    <div>
+                      <Label>{lt('Locale / Region')}</Label>
+                      <LocaleSelect value={form.locale || 'en-US'} onChange={(v) => set('locale', v)} />
+                    </div>
+                    <div>
+                      <Label>{lt('Base Currency')}</Label>
+                      <CurrencySelect value={form.currency || 'USD'} onChange={(v) => set('currency', v)} />
                     </div>
                     <div className="col-span-2">
                       <Label>{lt('Company Address')}</Label>
