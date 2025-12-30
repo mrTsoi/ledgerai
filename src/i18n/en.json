@@ -2123,6 +2123,46 @@
       "17a2ab1f4b9e": "Access the Service in a way intended to avoid plan limits or bypass security controls.",
       "aee94383eea8": "Team Collaboration",
       "ef9e3942e7ae": "ADA - Cardano"
+    },
+    "tenant": {
+      "company_profile": {
+        "title": "Company Profile",
+        "company_info": "Company Info",
+        "name": "Company Name",
+        "type": "Company Type",
+        "address": "Company Address",
+        "telephone": "Company Telephone",
+        "email": "Company Email",
+        "registry_financial": "Registry & Financial",
+        "br_number": "Business Registration (BR) Number",
+        "ci_number": "Certificate of Incorporation (CI) Number",
+        "year_end_date": "Year End Date",
+        "first_year_of_engagement": "First Year of Engagement",
+        "billing_method": "Billing Method",
+        "people": "People",
+        "shareholders": "Shareholders (comma separated)",
+        "directors": "Directors (comma separated)",
+        "primary_contacts": "Primary Contacts",
+        "first_contact_name": "First Contact Name",
+        "first_contact_telephone": "First Contact Telephone",
+        "first_contact_mobile": "First Contact Mobile",
+        "first_contact_email": "First Contact Email",
+        "second_contact_name": "Second Contact Name",
+        "second_contact_telephone": "Second Contact Telephone",
+        "second_contact_mobile": "Second Contact Mobile",
+        "second_contact_email": "Second Contact Email"
+      }
+    },
+    "actions": {
+      "save_changes": "Save Changes",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "edit": "Edit"
+    },
+    "status": {
+      "saved": "Saved",
+      "save_failed": "Save failed",
+      "load_failed": "Failed to load tenant"
     }
   },
   "admin": {

@@ -2134,7 +2134,47 @@
       "0013b404d95f": "启用核心功能，如登录、会话管理和安全保护。",
       "d0451d6affb7": "6. 本政策的更新"
     }
-  },
+    },
+    "tenant": {
+      "company_profile": {
+        "title": "公司资料",
+        "company_info": "公司信息",
+        "name": "公司名称",
+        "type": "公司类型",
+        "address": "公司地址",
+        "telephone": "公司电话",
+        "email": "公司邮箱",
+        "registry_financial": "注册及财务信息",
+        "br_number": "商业登记（BR）编号",
+        "ci_number": "公司注册证（CI）编号",
+        "year_end_date": "会计年度结算日期",
+        "first_year_of_engagement": "首次合作年度",
+        "billing_method": "计费方式",
+        "people": "人员",
+        "shareholders": "股东（以逗号分隔）",
+        "directors": "董事（以逗号分隔）",
+        "primary_contacts": "主要联系人",
+        "first_contact_name": "首席联系人姓名",
+        "first_contact_telephone": "首席联系人电话",
+        "first_contact_mobile": "首席联系人手机",
+        "first_contact_email": "首席联系人邮箱",
+        "second_contact_name": "次要联系人姓名",
+        "second_contact_telephone": "次要联系人电话",
+        "second_contact_mobile": "次要联系人手机",
+        "second_contact_email": "次要联系人邮箱"
+      }
+    },
+    "actions": {
+      "save_changes": "保存更改",
+      "saving": "保存中...",
+      "cancel": "取消",
+      "edit": "编辑"
+    },
+    "status": {
+      "saved": "已保存",
+      "save_failed": "保存失败",
+      "load_failed": "加载租户信息失败"
+    },
   "admin": {
     "title": "平台管理",
     "description": "管理租户、用户并监控系统活动",

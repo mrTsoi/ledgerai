@@ -727,7 +727,7 @@ function CreateTenantForm({ onSubmit, onCancel }: { onSubmit: (data: any) => voi
   )
 }
 
-function TenantDetailsView({ tenant, onClose }: { tenant: TenantDetails; onClose: () => void }) {
+export function TenantDetailsView({ tenant, onClose }: { tenant: TenantDetails; onClose: () => void }) {
   const lt = useLiterals()
   return (
     <Card>

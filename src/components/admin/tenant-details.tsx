@@ -14,6 +14,8 @@ export default function TenantDetails({ tenantId, onClose, onSaved }: { tenantId
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState<any | null>(null)
+  const [aliases, setAliases] = useState<string[]>([])
+  const [newAlias, setNewAlias] = useState('')
 
   useEffect(() => {
     let mounted = true
@@ -24,7 +26,13 @@ export default function TenantDetails({ tenantId, onClose, onSaved }: { tenantId
         const json = await res.json()
         if (!res.ok) throw new Error(json?.error || lt('status.load_failed'))
         const tenant = json.tenant || json
-        if (mounted) setForm(tenant)
+        if (mounted) {
+          setForm(tenant)
+          // load aliases if provided by API
+          if (Array.isArray(json?.aliases)) setAliases(json.aliases.map((a: any) => String(a || '').trim()).filter(Boolean))
+          else if (Array.isArray(tenant?.aliases)) setAliases(tenant.aliases.map((a: any) => String(a || '').trim()).filter(Boolean))
+          else setAliases([])
+        }
       } catch (e: any) {
         console.error(e)
         toast.error(e?.message || lt('status.load_failed'))
@@ -76,6 +84,7 @@ export default function TenantDetails({ tenantId, onClose, onSaved }: { tenantId
         second_contact_telephone: form.second_contact_telephone,
         second_contact_mobile: form.second_contact_mobile,
         second_contact_email: form.second_contact_email,
+        aliases: Array.isArray(aliases) ? aliases : (Array.isArray(form.aliases) ? form.aliases : []),
       }
 
       const res = await fetch('/api/tenants', {
@@ -85,7 +94,24 @@ export default function TenantDetails({ tenantId, onClose, onSaved }: { tenantId
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json?.error || lt('status.save_failed'))
-      toast.success(lt('status.saved'))
+      // handle alias responses similar to tenant edit modal
+      try {
+        if (Array.isArray(json?.insertedAliases) && json.insertedAliases.length > 0) {
+          setAliases((prev) => {
+            const merged = Array.from(new Set([...(prev || []), ...json.insertedAliases.map((a: any) => String(a || '').trim())]))
+            return merged
+          })
+          toast.success(lt('Alias saved to database'))
+        } else if (Array.isArray(json?.deletedAliasIds) && json.deletedAliasIds.length > 0) {
+          if (Array.isArray(json?.aliases)) setAliases(json.aliases.map((a: any) => String(a || '').trim()).filter(Boolean))
+          toast.success(lt('Aliases updated'))
+        } else {
+          toast.success(lt('status.saved'))
+        }
+      } catch (e) {
+        toast.success(lt('status.saved'))
+      }
+
       if (onSaved) onSaved()
       onClose()
     } catch (e: any) {
@@ -111,127 +137,149 @@ export default function TenantDetails({ tenantId, onClose, onSaved }: { tenantId
         <div className="space-y-4 p-4">
           <Card>
               <CardHeader>
-                <CardTitle>{lt('tenant.company_profile.title')}</CardTitle>
+                <CardTitle>{lt('Company Profile')}</CardTitle>
               </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-4">
                 <section aria-labelledby="company-info">
-                    <h4 id="company-info" className="text-sm font-medium text-gray-700">{lt('tenant.company_profile.company_info')}</h4>
+                  <h4 id="company-info" className="text-sm font-medium text-gray-700">{lt('Company Info')}</h4>
                   <div className="mt-2 grid grid-cols-2 gap-4">
                     <div>
-                        <Label>{lt('tenant.company_profile.name')}</Label>
+                      <Label>{lt('Company Name')}</Label>
                       <Input value={form.name || ''} onChange={e => set('name', e.target.value)} />
                     </div>
                     <div>
-                        <Label>{lt('tenant.company_profile.type')}</Label>
+                      <Label>{lt('Company Type')}</Label>
                       <select className="w-full px-3 py-2 border rounded-md" value={form.company_type || ''} onChange={e => set('company_type', e.target.value)}>
-                          <option value="">--</option>
+                        <option value="">--</option>
                         <option value="Limited Company">Limited Company</option>
                         <option value="Sole proprietor">Sole proprietor</option>
                         <option value="Partnership">Partnership</option>
                       </select>
                     </div>
                     <div className="col-span-2">
-                        <Label>{lt('tenant.company_profile.address')}</Label>
+                      <Label>{lt('Company Address')}</Label>
                       <Textarea value={form.company_address || ''} onChange={e => set('company_address', e.target.value)} rows={3} />
                     </div>
                     <div>
-                        <Label>{lt('tenant.company_profile.telephone')}</Label>
+                      <Label>{lt('Company Telephone')}</Label>
                       <Input value={form.company_telephone || ''} onChange={e => set('company_telephone', e.target.value)} />
                     </div>
                     <div>
-                        <Label>{lt('tenant.company_profile.email')}</Label>
+                      <Label>{lt('Company Email')}</Label>
                       <Input value={form.company_email || ''} onChange={e => set('company_email', e.target.value)} />
+                    </div>
+                    <div className="col-span-2">
+                      <Label>{lt('Alternate Company Names')}</Label>
+                      <p className="text-xs text-gray-500 mb-2">{lt('Add alternate or localized company names to help AI matching.')}</p>
+                      <div className="flex gap-2">
+                        <Input value={newAlias} onChange={(e) => setNewAlias(e.target.value)} placeholder={lt('Add alternate name')} />
+                        <Button type="button" onClick={() => {
+                          const v = String(newAlias || '').trim()
+                          if (!v) return
+                          if (!aliases.includes(v)) setAliases(prev => [...prev, v])
+                          setNewAlias('')
+                        }}>{lt('Add')}</Button>
+                      </div>
+                      <div className="mt-2 space-y-2">
+                        {aliases.map((a, i) => (
+                          <div key={i} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                            <div className="text-sm truncate">{a}</div>
+                            <Button size="sm" variant="ghost" onClick={() => setAliases(prev => prev.filter(x => x !== a))}>{lt('Remove')}</Button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </section>
 
                 <section aria-labelledby="registry-financial">
-                    <h4 id="registry-financial" className="text-sm font-medium text-gray-700">{lt('tenant.company_profile.registry_financial')}</h4>
+                  <h4 id="registry-financial" className="text-sm font-medium text-gray-700">{lt('Registry & Financial')}</h4>
                   <div className="mt-2 grid grid-cols-2 gap-4">
                     <div>
-                        <Label>{lt('tenant.company_profile.br_number')}</Label>
+                      <Label>{lt('Business Registration (BR) Number')}</Label>
                       <Input value={form.business_registration_number || ''} onChange={e => set('business_registration_number', e.target.value)} />
                     </div>
                     <div>
-                        <Label>{lt('tenant.company_profile.ci_number')}</Label>
+                      <Label>{lt('Certificate of Incorporation (CI) Number')}</Label>
                       <Input value={form.certificate_of_incorporation_number || ''} onChange={e => set('certificate_of_incorporation_number', e.target.value)} />
                     </div>
                     <div>
-                        <Label>{lt('tenant.company_profile.year_end_date')}</Label>
+                      <Label>{lt('Year End Date')}</Label>
                       <Input type="date" value={form.year_end_date || ''} onChange={e => set('year_end_date', e.target.value)} />
                     </div>
                     <div>
-                        <Label>{lt('tenant.company_profile.first_year_of_engagement')}</Label>
+                      <Label>{lt('First Year of Engagement')}</Label>
                       <Input type="number" value={form.first_year_of_engagement || ''} onChange={e => set('first_year_of_engagement', e.target.value)} />
                     </div>
                     <div className="col-span-2">
-                        <Label>{lt('tenant.company_profile.billing_method')}</Label>
+                      <Label>{lt('Billing Method')}</Label>
                       <Input value={form.billing_method || ''} onChange={e => set('billing_method', e.target.value)} />
                     </div>
                   </div>
                 </section>
 
                 <section aria-labelledby="people">
-                    <h4 id="people" className="text-sm font-medium text-gray-700">{lt('tenant.company_profile.people')}</h4>
+                  <h4 id="people" className="text-sm font-medium text-gray-700">{lt('People')}</h4>
                   <div className="mt-2 grid grid-cols-2 gap-4">
                     <div className="col-span-2">
-                        <Label>{lt('tenant.company_profile.shareholders')}</Label>
+                      <Label>{lt('Shareholders (comma separated)')}</Label>
                       <Input value={(form.shareholders || []).join ? (form.shareholders || []).join(', ') : (form.shareholders || '')} onChange={e => set('shareholders', e.target.value)} />
                     </div>
                     <div className="col-span-2">
-                        <Label>{lt('tenant.company_profile.directors')}</Label>
+                      <Label>{lt('Directors (comma separated)')}</Label>
                       <Input value={(form.directors || []).join ? (form.directors || []).join(', ') : (form.directors || '')} onChange={e => set('directors', e.target.value)} />
                     </div>
                   </div>
                 </section>
 
                 <section aria-labelledby="contacts">
-                    <h4 id="contacts" className="text-sm font-medium text-gray-700">{lt('tenant.company_profile.primary_contacts')}</h4>
+                  <h4 id="contacts" className="text-sm font-medium text-gray-700">{lt('Primary Contacts')}</h4>
                   <div className="mt-2 grid grid-cols-2 gap-4">
                     <div>
-                        <Label>{lt('tenant.company_profile.first_contact_name')}</Label>
+                      <Label>{lt('First Contact Name')}</Label>
                       <Input value={form.first_contact_name || ''} onChange={e => set('first_contact_name', e.target.value)} />
                     </div>
                     <div>
-                        <Label>{lt('tenant.company_profile.first_contact_telephone')}</Label>
+                      <Label>{lt('First Contact Telephone')}</Label>
                       <Input value={form.first_contact_telephone || ''} onChange={e => set('first_contact_telephone', e.target.value)} />
                     </div>
                     <div>
-                        <Label>{lt('tenant.company_profile.first_contact_mobile')}</Label>
+                      <Label>{lt('First Contact Mobile')}</Label>
                       <Input value={form.first_contact_mobile || ''} onChange={e => set('first_contact_mobile', e.target.value)} />
                     </div>
                     <div>
-                        <Label>{lt('tenant.company_profile.first_contact_email')}</Label>
+                      <Label>{lt('First Contact Email')}</Label>
                       <Input value={form.first_contact_email || ''} onChange={e => set('first_contact_email', e.target.value)} />
                     </div>
 
                     <div>
-                        <Label>{lt('tenant.company_profile.second_contact_name')}</Label>
+                      <Label>{lt('Second Contact Name')}</Label>
                       <Input value={form.second_contact_name || ''} onChange={e => set('second_contact_name', e.target.value)} />
                     </div>
                     <div>
-                        <Label>{lt('tenant.company_profile.second_contact_telephone')}</Label>
+                      <Label>{lt('Second Contact Telephone')}</Label>
                       <Input value={form.second_contact_telephone || ''} onChange={e => set('second_contact_telephone', e.target.value)} />
                     </div>
                     <div>
-                        <Label>{lt('tenant.company_profile.second_contact_mobile')}</Label>
+                      <Label>{lt('Second Contact Mobile')}</Label>
                       <Input value={form.second_contact_mobile || ''} onChange={e => set('second_contact_mobile', e.target.value)} />
                     </div>
                     <div>
-                        <Label>{lt('tenant.company_profile.second_contact_email')}</Label>
+                      <Label>{lt('Second Contact Email')}</Label>
                       <Input value={form.second_contact_email || ''} onChange={e => set('second_contact_email', e.target.value)} />
                     </div>
                   </div>
                 </section>
-
-                <div className="flex gap-2 justify-end">
-                    <Button variant="outline" onClick={onClose}>{lt('actions.cancel')}</Button>
-                    <Button onClick={handleSave} disabled={saving}>{saving ? lt('actions.saving') : lt('actions.save_changes')}</Button>
-                </div>
               </div>
             </CardContent>
           </Card>
+          <div className="sticky bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose} type="button">{lt('Cancel')}</Button>
+            <Button onClick={handleSave} disabled={saving} type="button">
+              {saving ? lt('Saving...') : lt('Save Changes')}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

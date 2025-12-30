@@ -2135,6 +2135,46 @@
       "0982d31b6dcf": "根據您的位置及角色（終端用戶與租戶管理員），您可能有權存取、更正、匯出或刪除您的資訊。部分請求可能需要由您組織的管理員（若其為控制者）處理。",
       "d65ded94286c": "停用"
     }
+    },
+    "tenant": {
+    "company_profile": {
+      "title": "公司資料",
+      "company_info": "公司資料",
+      "name": "公司名稱",
+      "type": "公司類型",
+      "address": "公司地址",
+      "telephone": "公司電話",
+      "email": "公司電郵",
+      "registry_financial": "註冊與財務",
+      "br_number": "商業登記（BR）號碼",
+      "ci_number": "公司註冊證（CI）號碼",
+      "year_end_date": "會計年度結算日",
+      "first_year_of_engagement": "首次合作年度",
+      "billing_method": "收費方式",
+      "people": "人員",
+      "shareholders": "股東（以逗號分隔）",
+      "directors": "董事（以逗號分隔）",
+      "primary_contacts": "主要聯絡人",
+      "first_contact_name": "主要聯絡人姓名",
+      "first_contact_telephone": "主要聯絡人電話",
+      "first_contact_mobile": "主要聯絡人手機",
+      "first_contact_email": "主要聯絡人電郵",
+      "second_contact_name": "次要聯絡人姓名",
+      "second_contact_telephone": "次要聯絡人電話",
+      "second_contact_mobile": "次要聯絡人手機",
+      "second_contact_email": "次要聯絡人電郵"
+    }
+  },
+  "actions": {
+    "save_changes": "儲存更改",
+    "saving": "儲存中...",
+    "cancel": "取消",
+    "edit": "編輯"
+  },
+  "status": {
+    "saved": "已儲存",
+    "save_failed": "儲存失敗",
+    "load_failed": "載入租戶失敗"
   },
   "admin": {
     "title": "平台管理",

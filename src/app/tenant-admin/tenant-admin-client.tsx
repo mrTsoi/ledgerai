@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useTenant, useUserRole } from "@/hooks/use-tenant";
+import { useSubscription } from '@/hooks/use-subscription'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import TenantDetails from '@/components/admin/tenant-details'
+import { TenantDetailsView } from '@/components/admin/tenant-management'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { Button } from "@/components/ui/button";
 import { Loader2, Download, Upload, Trash2 } from "lucide-react";
@@ -15,9 +17,13 @@ export default function TenantAdminDashboard() {
   const { tenants, refreshTenants } = useTenant();
   const userRole = useUserRole();
   const lt = useLiterals();
+  const { subscription } = useSubscription();
+
+  const isFreePlan = (subscription?.plan_name || '').toString().toLowerCase().includes('free') || false
 
   const [loading, setLoading] = useState(false);
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
+  const [dashboardTenant, setDashboardTenant] = useState<any | null>(null);
   const [expandedTenantId, setExpandedTenantId] = useState<string | null>(null);
   const [tenantStats, setTenantStats] = useState<Record<string, any>>({});
   const [documentsByTenant, setDocumentsByTenant] = useState<Record<string, any[]>>({});
@@ -87,14 +93,20 @@ export default function TenantAdminDashboard() {
           toast.error('Invalid JSON file');
           return;
         }
-        const res = await fetch('/api/tenant-admin/restore', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tenantId, data: json }),
-        });
-        if (!res.ok) throw new Error(lt('Restore failed'));
-        toast.success(lt('Restore completed!'));
-        refreshTenants();
+        setRestoreLoading(true);
+        try {
+          const res = await fetch('/api/tenant-admin/restore', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tenantId, data: json }),
+          });
+          const resJson = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(resJson?.error || lt('Restore failed'));
+          toast.success(lt('Restore completed!'));
+          refreshTenants();
+        } finally {
+          setRestoreLoading(false);
+        }
       };
       input.click();
     } catch (e: any) {
@@ -184,7 +196,50 @@ export default function TenantAdminDashboard() {
       </CardHeader>
       <CardContent>
         <div className="mb-4">
-          <Input placeholder={lt("Search tenants...")} value={search} onChange={e => setSearch(e.target.value)} className="w-full md:max-w-sm" />
+          <div className="flex items-center gap-2">
+            <Input placeholder={lt("Search tenants...")} value={search} onChange={e => setSearch(e.target.value)} className="w-full md:max-w-sm" />
+            {(userRole === 'COMPANY_ADMIN' || userRole === 'SUPER_ADMIN') && !isFreePlan && (
+              <Button variant="outline" size="sm" onClick={() => {
+                // user-level import: open file picker and call restore without tenantId
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'application/json';
+                input.onchange = async (e: any) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const text = await file.text();
+                  let json;
+                  try { json = JSON.parse(text); } catch { toast.error('Invalid JSON file'); return; }
+                  setRestoreLoading(true);
+                  try {
+                    const res = await fetch('/api/tenant-admin/restore', {
+                      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: json })
+                    });
+                    const resJson = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(resJson?.error || lt('Restore failed'));
+                    toast.success(lt('Import completed!'));
+                    refreshTenants();
+                  } catch (err: any) {
+                    toast.error(err?.message || lt('Restore failed'));
+                  } finally { setRestoreLoading(false); }
+                };
+                input.click();
+              }}>
+                {lt('Import Tenant')}
+              </Button>
+            )}
+            {isFreePlan && (userRole === 'COMPANY_ADMIN' || userRole === 'SUPER_ADMIN') && (
+              <div className="flex items-center gap-3">
+                <div className="text-sm text-gray-500">{lt('Backup & Restore are available on paid plans.')}</div>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  // Navigate to billing tab in dashboard settings
+                  window.location.href = '/dashboard/settings?tab=billing'
+                }}>
+                  {lt('Upgrade')}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
         <div className="space-y-6">
           {filteredTenants.map((tenant) => (
@@ -220,15 +275,57 @@ export default function TenantAdminDashboard() {
                   }}>
                     {expandedTenantId === tenant.id ? lt("Hide Documents") : lt("Show Documents")}
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => openTenantDetails(tenant.id)}>
-                    {lt('View Details')}
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleBackup(tenant.id)} disabled={backupLoading}>
+                  { (userRole === 'COMPANY_ADMIN' || userRole === 'SUPER_ADMIN') && (
+                    <>
+                      <Button variant="outline" size="sm" onClick={() => setSelectedTenantId(tenant.id)}>
+                        {lt('Edit')}
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={async () => {
+                      // fetch tenant basic info + stats and open dashboard view
+                      try {
+                        const res = await fetch(`/api/tenants?tenant_id=${encodeURIComponent(tenant.id)}`)
+                        const json = await res.json()
+                        if (!res.ok) throw new Error(json?.error || lt('Failed to load tenant'))
+                        const tenantRec = json.tenant || json
+
+                        // fetch stats
+                        const statsRes = await fetch('/api/tenant-admin/stats', {
+                          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tenantIds: [tenant.id] })
+                        })
+                        const statsJson = await statsRes.json()
+                        const stats = (statsJson && statsJson.stats && statsJson.stats[tenant.id]) || {}
+
+                        const details = {
+                          tenant_id: tenant.id,
+                          tenant_name: tenant.name,
+                          tenant_slug: tenant.slug,
+                          locale: tenantRec.locale || tenant.locale || 'en',
+                          created_at: tenant.created_at || tenantRec.created_at,
+                          user_count: stats.users ?? 0,
+                          document_count: stats.documents ?? 0,
+                          transaction_count: stats.transactions ?? 0,
+                          total_revenue: 0,
+                          total_expenses: 0,
+                          net_income: 0,
+                          last_activity: stats.last_activity || null,
+                        }
+                        setDashboardTenant(details)
+                      } catch (e: any) {
+                        toast.error(e?.message || lt('Failed to load tenant'))
+                      }
+                    }}>
+                      {lt('View Details')}
+                    </Button>
+                    </>
+                  )}
+                  <Button variant="outline" size="sm" onClick={() => handleBackup(tenant.id)} disabled={backupLoading || isFreePlan} title={isFreePlan ? lt('Upgrade to a paid plan to access backups') : undefined}>
                     {backupLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Download className="w-4 h-4 mr-1" />} {lt("Backup")}
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleRestore(tenant.id)} disabled={restoreLoading}>
-                    {restoreLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />} {lt("Restore")}
-                  </Button>
+                  {userRole === 'SUPER_ADMIN' && (
+                    <Button variant="outline" size="sm" onClick={() => handleRestore(tenant.id)} disabled={restoreLoading}>
+                      {restoreLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />} {lt("Restore")}
+                    </Button>
+                  )}
                   <Button variant="destructive" size="sm" onClick={() => handleDeleteTenant(tenant.id)} disabled={deleteLoading}>
                     {deleteLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Trash2 className="w-4 h-4 mr-1" />} {lt("Delete Tenant")}
                   </Button>
@@ -296,6 +393,12 @@ export default function TenantAdminDashboard() {
             onClose={() => setSelectedTenantId(null)}
             onSaved={() => { setSelectedTenantId(null); refreshTenants(); }}
           />
+        )}
+
+        {dashboardTenant && (
+          <div className="mt-4">
+            <TenantDetailsView tenant={dashboardTenant} onClose={() => setDashboardTenant(null)} />
+          </div>
         )}
 
       </CardContent>
