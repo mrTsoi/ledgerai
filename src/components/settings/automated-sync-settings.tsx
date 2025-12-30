@@ -52,7 +52,7 @@ export function AutomatedSyncSettings() {
   useEffect(() => {
     // Fetch tenant-scoped state: enabled, webhookUrl, jobs
     // Server MUST return only tenant-scoped schedules and secrets (RLS enforced)
-    const init = async () => {
+    const fetchJobs = async () => {
       setLoading(true)
       try {
         if (!currentTenant) return
@@ -70,7 +70,6 @@ export function AutomatedSyncSettings() {
         // Fetch cron config (contains whether cron is configured/enabled and key prefix)
         const cronRes = await fetch(`/api/external-sources/cron?tenant_id=${encodeURIComponent(tenantId)}`)
         const cronJson = cronRes.ok ? await cronRes.json() : null
-        const configured = cronJson?.configured
         setEnabled(!!cronJson?.enabled)
 
         // If configured, we don't have the secret here (rotate endpoint returns it). Provide run URL without secret placeholder.
@@ -97,8 +96,81 @@ export function AutomatedSyncSettings() {
         setLoading(false)
       }
     }
-    init()
+    fetchJobs()
+
+    // listen for source changes (created/edited/deleted) so we can refresh jobs list
+    const handler = () => {
+      fetchJobs().catch((e) => console.error('Failed to refresh jobs after externalSourcesChanged', e))
+    }
+    window.addEventListener('externalSourcesChanged', handler)
+    return () => window.removeEventListener('externalSourcesChanged', handler)
   }, [currentTenant]);
+
+  // Helper to safely parse JSON or fallback to text for error messages
+  const parseResponse = async (res: Response) => {
+    const ct = res.headers.get('content-type') || ''
+    if (ct.includes('application/json')) {
+      try {
+        return await res.json()
+      } catch (e) {
+        try {
+          const txt = await res.text()
+          const obj = { __raw: txt }
+          ;(async () => {
+            try {
+              const payload = {
+                event: 'api_parse_fallback',
+                details: {
+                  endpoint: (res as any).url || null,
+                  status: res.status,
+                  raw_snippet: String(txt).slice(0, 1024),
+                  tenant_id: currentTenant?.id || null,
+                  ua: typeof navigator !== 'undefined' ? navigator.userAgent : null,
+                  ts: new Date().toISOString(),
+                },
+              }
+              await fetch('/api/security/logs', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
+            } catch (e) {
+              // swallow telemetry errors
+            }
+          })()
+          return obj
+        } catch {
+          return null
+        }
+      }
+    }
+    // not json: try text then attempt parse
+    try {
+      const txt = await res.text()
+      try {
+        return JSON.parse(txt)
+      } catch {
+        const obj = { __raw: txt }
+        ;(async () => {
+          try {
+            const payload = {
+              event: 'api_parse_fallback',
+              details: {
+                endpoint: (res as any).url || null,
+                status: res.status,
+                raw_snippet: String(txt).slice(0, 1024),
+                tenant_id: currentTenant?.id || null,
+                ua: typeof navigator !== 'undefined' ? navigator.userAgent : null,
+                ts: new Date().toISOString(),
+              },
+            }
+            await fetch('/api/security/logs', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
+          } catch (e) {
+            // swallow telemetry errors
+          }
+        })()
+        return obj
+      }
+    } catch {
+      return null
+    }
+  }
 
   const handleRotateSecret = async () => {
     setRotating(true);
@@ -134,10 +206,11 @@ export function AutomatedSyncSettings() {
         body: JSON.stringify({ tenant_id: tenantId }),
       })
       if (!res.ok) {
-        const j = await res.json().catch(() => ({}))
-        throw new Error(j?.error || 'Run failed')
+        const parsed = await parseResponse(res)
+        const msg = parsed && typeof parsed === 'object' ? (parsed.error || parsed.message || parsed.__raw) : (typeof parsed === 'string' ? parsed : null)
+        throw new Error(msg || 'Run failed')
       }
-      const json = await res.json()
+      const json = await parseResponse(res) || {}
       toast.success(lt('Sync triggered.'))
       console.info('Run result', json)
     } catch (err: any) {
@@ -222,8 +295,12 @@ export function AutomatedSyncSettings() {
       body: JSON.stringify(payload),
     })
       .then(async (res) => {
-        if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error || 'Save failed')
-        const j = await res.json()
+        if (!res.ok) {
+          const parsed = await parseResponse(res)
+          const msg = parsed && typeof parsed === 'object' ? (parsed.error || parsed.message || parsed.__raw) : (typeof parsed === 'string' ? parsed : null)
+          throw new Error(msg || 'Save failed')
+        }
+        const j = await parseResponse(res) || {}
         const id = j?.id || editingJob.id
         setJobs((prev) => {
           if (editingJob.id.startsWith('new-')) {
@@ -235,6 +312,11 @@ export function AutomatedSyncSettings() {
         setEditFrequency('')
         setEditCustom('')
         setEditError('')
+        try {
+          if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('externalSourcesChanged'))
+        } catch {
+          // ignore
+        }
         toast.success(lt('Schedule updated.'))
       })
       .catch((err) => {
@@ -277,8 +359,17 @@ export function AutomatedSyncSettings() {
       body: JSON.stringify({ source_id: id }),
     })
       .then(async (res) => {
-        if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error || 'Delete failed')
+        if (!res.ok) {
+          const parsed = await parseResponse(res)
+          const msg = parsed && typeof parsed === 'object' ? (parsed.error || parsed.message || parsed.__raw) : (typeof parsed === 'string' ? parsed : null)
+          throw new Error(msg || 'Delete failed')
+        }
         setJobs(jobs => jobs.filter(j => j.id !== id))
+        try {
+          if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('externalSourcesChanged'))
+        } catch {
+          // ignore
+        }
         toast.success(lt('Schedule deleted.'))
       })
       .catch((err) => {

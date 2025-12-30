@@ -116,22 +116,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'ltvars-call'
   },
   {
-    "text": "Bank Account (for statements)",
-    "key": "literal.0197e7bb9c04",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1024,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Files (preview)",
-    "key": "literal.019b8ec15d7c",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1350,
-    kind: 'lt-call'
-  },
-  {
     "text": "Depending on how the platform is configured, we may collect:",
     "key": "literal.01d09358bd52",
     namespace: 'literals',
@@ -152,7 +136,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.01eb94695483",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 55,
+    "line": 62,
     kind: 'lt-call'
   },
   {
@@ -192,7 +176,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.02c58d931bac",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 113,
+    "line": 120,
     kind: 'lt-call'
   },
   {
@@ -404,14 +388,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "disabled",
-    "key": "literal.07596f183f5e",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1192,
-    kind: 'lt-call'
-  },
-  {
     "text": "Failed to delete",
     "key": "literal.07931ff7dc8f",
     namespace: 'literals',
@@ -440,7 +416,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.07cc8fa5666b",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 492,
+    "line": 583,
     kind: 'lt-call'
   },
   {
@@ -612,6 +588,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Schedule",
+    "key": "literal.0a8adac9d6d5",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 677,
+    kind: 'lt-call'
+  },
+  {
     "text": "Statement History",
     "key": "literal.0a95177294aa",
     namespace: 'literals',
@@ -656,15 +640,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0b81497c8589",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 193,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Select This Folder",
-    "key": "literal.0b9c7115eb31",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1313,
+    "line": 200,
     kind: 'lt-call'
   },
   {
@@ -692,27 +668,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "CA Certificate PEM (optional)",
-    "key": "literal.0c04320fcc6e",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 959,
-    kind: 'lt-call'
-  },
-  {
     "text": "Linked GL Account (Asset)",
     "key": "literal.0c07b1cfeb01",
     namespace: 'literals',
     "file": "src/components/banking/bank-account-form.tsx",
     "line": 182,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Select a tenant first.",
-    "key": "literal.0c0f820e3b90",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 766,
     kind: 'lt-call'
   },
   {
@@ -761,14 +721,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
     "line": 205,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Generate a tenant-specific cron secret (stored as a hash) and use it in your scheduled trigger.",
-    "key": "literal.0cd628df4699",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1095,
     kind: 'lt-call'
   },
   {
@@ -872,7 +824,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.0e7155936917",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 104,
+    "line": 111,
     kind: 'lt-call'
   },
   {
@@ -921,14 +873,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/documents/documents-list.tsx",
     "line": 304,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Select folder & file pattern",
-    "key": "literal.0f2fad635ed0",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 974,
     kind: 'lt-call'
   },
   {
@@ -1064,7 +1008,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.126eda8b2162",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 321,
+    "line": 412,
     kind: 'lt-call'
   },
   {
@@ -1104,7 +1048,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1378167d5266",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 173,
+    "line": 180,
     kind: 'lt-call'
   },
   {
@@ -1388,14 +1332,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Run complete. Imported {count} file(s).",
-    "key": "literal.190cb1b08322",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 752,
-    kind: 'lt-call'
-  },
-  {
     "text": "Failed to import invoice: {message}",
     "key": "literal.1921b5feebcd",
     namespace: 'literals',
@@ -1473,6 +1409,22 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
     "line": 516,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Updated source",
+    "key": "literal.19ad9f407b0f",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 508,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Folders",
+    "key": "literal.19adc47be34b",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 355,
     kind: 'lt-call'
   },
   {
@@ -1628,6 +1580,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "List of connected external sources for this tenant.",
+    "key": "literal.1c72c529a6a3",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 554,
+    kind: 'lt-call'
+  },
+  {
     "text": "Start:",
     "key": "literal.1c7c77b27543",
     namespace: 'literals',
@@ -1648,7 +1608,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.1c9b088685fa",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 337,
+    "line": 428,
     kind: 'lt-call'
   },
   {
@@ -1700,6 +1660,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Host is required",
+    "key": "literal.1dd2eac59e32",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 631,
+    kind: 'lt-call'
+  },
+  {
     "text": "AI analysis failed",
     "key": "literal.1de533aaa456",
     namespace: 'literals',
@@ -1745,6 +1713,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 957,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Test succeeded",
+    "key": "literal.1e3d974e9e23",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 683,
     kind: 'lt-call'
   },
   {
@@ -1828,14 +1804,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "This decides which {drive} will be accessed.",
-    "key": "literal.1fd63f77edd2",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 857,
-    kind: 'lt-call'
-  },
-  {
     "text": "No active pending subscriptions.",
     "key": "literal.1ffb5058348b",
     namespace: 'literals',
@@ -1864,7 +1832,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.20552912034d",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 62,
+    "line": 69,
     kind: 'lt-call'
   },
   {
@@ -2004,14 +1972,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Failed to save folder",
-    "key": "literal.22142c89fcbe",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 462,
-    kind: 'lt-call'
-  },
-  {
     "text": "Billing cycle:",
     "key": "literal.221d346c9beb",
     namespace: 'literals',
@@ -2136,7 +2096,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.23412bc0659c",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 115,
+    "line": 122,
     kind: 'lt-call'
   },
   {
@@ -2144,7 +2104,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.23778b5f7eb2",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 242,
+    "line": 324,
     kind: 'lt-call'
   },
   {
@@ -2186,14 +2146,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/admin/promo-code-management.tsx",
     "line": 54,
     kind: 'ltvars-call'
-  },
-  {
-    "text": "username",
-    "key": "literal.249ba3600002",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 934,
-    kind: 'attr'
   },
   {
     "text": "No changes",
@@ -2332,19 +2284,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'jsx-text'
   },
   {
-    "text": "Failed to load external sources",
-    "key": "literal.2692f9b3904a",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 161,
-    kind: 'lt-call'
-  },
-  {
     "text": "Customer / Payer",
     "key": "literal.26b156980306",
     namespace: 'literals',
     "file": "src/components/transactions/transaction-editor.tsx",
     "line": 888,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Add Source",
+    "key": "literal.26bba8cd1f45",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 545,
     kind: 'lt-call'
   },
   {
@@ -2416,7 +2368,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.27aff7697af2",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 486,
+    "line": 577,
     kind: 'lt-call'
   },
   {
@@ -2552,7 +2504,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.29ebc0bfb159",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 145,
+    "line": 218,
     kind: 'lt-call'
   },
   {
@@ -2592,7 +2544,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2b01abd3fe5d",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 186,
+    "line": 193,
     kind: 'lt-call'
   },
   {
@@ -2616,7 +2568,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2b6226c6a673",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 280,
+    "line": 287,
     kind: 'lt-call'
   },
   {
@@ -2640,7 +2592,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2ba4023df482",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 280,
+    "line": 287,
     kind: 'lt-call'
   },
   {
@@ -2740,27 +2692,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Failed to load sources",
-    "key": "literal.2cd3c01bb21d",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 158,
-    kind: 'lt-call'
-  },
-  {
     "text": "Folder selected",
     "key": "literal.2cdae05d677c",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 464,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Client Key PEM (mTLS optional)",
-    "key": "literal.2ce1bcc28c91",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 955,
+    "line": 693,
     kind: 'lt-call'
   },
   {
@@ -2776,7 +2712,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2d4c9fdbbd7b",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 792,
+    "line": 538,
     kind: 'lt-call'
   },
   {
@@ -2786,14 +2722,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/admin/platform-customizer.tsx",
     "line": 384,
     kind: 'jsx-text'
-  },
-  {
-    "text": "Save Cron Config",
-    "key": "literal.2d958a52e805",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1132,
-    kind: 'lt-call'
   },
   {
     "text": "Selected:",
@@ -2828,14 +2756,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Connected. Found {count} file(s).",
-    "key": "literal.2e66273a1b2b",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 732,
-    kind: 'lt-call'
-  },
-  {
     "text": "1. Who we are",
     "key": "literal.2e8946558ffa",
     namespace: 'literals',
@@ -2856,7 +2776,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2eb42faa8629",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 695,
+    "line": 67,
     kind: 'lt-call'
   },
   {
@@ -2881,22 +2801,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
     "line": 120,
-    kind: 'lt-call'
-  },
-  {
-    "text": "• folder {folder}",
-    "key": "literal.30072c8d4227",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1196,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Failed to rotate cron secret",
-    "key": "literal.300d6327566e",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 315,
     kind: 'lt-call'
   },
   {
@@ -2952,7 +2856,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.30bda9e8d46d",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 469,
+    "line": 560,
     kind: 'lt-call'
   },
   {
@@ -2993,14 +2897,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
     "line": 885,
-    kind: 'lt-call'
-  },
-  {
-    "text": "No folders found under this location. You can still click “Select This Folder” to use the current folder (including root).",
-    "key": "literal.31bf3b3b2099",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1321,
     kind: 'lt-call'
   },
   {
@@ -3049,14 +2945,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
     "line": 1516,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Disconnect failed: {message}",
-    "key": "literal.333aa17a59e4",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 688,
     kind: 'lt-call'
   },
   {
@@ -3284,14 +3172,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Failed to save cron config",
-    "key": "literal.35d8e5c44502",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 342,
-    kind: 'lt-call'
-  },
-  {
     "text": "Copy JSON",
     "key": "literal.35db7b6e0480",
     namespace: 'literals',
@@ -3324,14 +3204,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "SFTP (SSH)",
-    "key": "literal.364560145c96",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 834,
-    kind: 'jsx-text'
-  },
-  {
     "text": "Save Override",
     "key": "literal.365381da0351",
     namespace: 'literals',
@@ -3353,14 +3225,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/user-subscription-list.tsx",
     "line": 124,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Delete failed: {message}",
-    "key": "literal.3672aeb96a31",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 716,
     kind: 'lt-call'
   },
   {
@@ -3480,7 +3344,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.38bfa647a6a0",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1174,
+    "line": 553,
     kind: 'lt-call'
   },
   {
@@ -3532,14 +3396,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Pick a folder so you know exactly what will be scanned.",
-    "key": "literal.393dfa08a123",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 975,
-    kind: 'lt-call'
-  },
-  {
     "text": "Video (mp4)",
     "key": "literal.3949324018da",
     namespace: 'literals',
@@ -3548,19 +3404,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "not connected",
-    "key": "literal.394b08fe417b",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 868,
-    kind: 'lt-call'
-  },
-  {
     "text": "Host",
     "key": "literal.3960ec4ca5fb",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 921,
+    "line": 629,
     kind: 'lt-call'
   },
   {
@@ -3772,19 +3620,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "configured",
-    "key": "literal.3be9f957f29f",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1101,
-    kind: 'lt-call'
-  },
-  {
     "text": "Enter your information to get started with LedgerAI",
     "key": "literal.3c072ea0302c",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 162,
+    "line": 169,
     kind: 'lt-call'
   },
   {
@@ -3888,7 +3728,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.3dbd4c39b0dd",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1176,
+    "line": 558,
     kind: 'lt-call'
   },
   {
@@ -3916,14 +3756,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Used when cron calls omit a limit (1–50).",
-    "key": "literal.3e29c4990f9e",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1123,
-    kind: 'lt-call'
-  },
-  {
     "text": "This will permanently delete the account and all associated data.",
     "key": "literal.3e4f202731cc",
     namespace: 'literals',
@@ -3946,14 +3778,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/admin/tenant-management.tsx",
     "line": 366,
     kind: 'toast'
-  },
-  {
-    "text": "enabled",
-    "key": "literal.3ea3f9802acc",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1192,
-    kind: 'lt-call'
   },
   {
     "text": "Template",
@@ -4044,14 +3868,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Password (optional)",
-    "key": "literal.408255ed028b",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 937,
-    kind: 'lt-call'
-  },
-  {
     "text": "Higher batch sizes process more items simultaneously but may impact system performance.",
     "key": "literal.408778ec862e",
     namespace: 'literals',
@@ -4092,6 +3908,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Preview files",
+    "key": "literal.40f3368d00e5",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 387,
+    kind: 'lt-call'
+  },
+  {
     "text": "New API key (shown once)",
     "key": "literal.4159923184fe",
     namespace: 'literals',
@@ -4122,14 +3946,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/settings/tenant-mismatch-policy-settings.tsx",
     "line": 189,
     kind: 'lt-call'
-  },
-  {
-    "text": "/api/external-sources/run",
-    "key": "literal.42a17732d2fc",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1149,
-    kind: 'jsx-text'
   },
   {
     "text": "Banks",
@@ -4280,7 +4096,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.45775f88d571",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 333,
+    "line": 424,
     kind: 'lt-call'
   },
   {
@@ -4368,7 +4184,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4637b6f77d76",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 483,
+    "line": 574,
     kind: 'lt-call'
   },
   {
@@ -4416,7 +4232,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.46baaa872952",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 128,
+    "line": 135,
     kind: 'lt-call'
   },
   {
@@ -4481,14 +4297,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
     "line": 648,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Source name",
-    "key": "literal.475b6ce898d4",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 819,
     kind: 'lt-call'
   },
   {
@@ -4576,7 +4384,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.493ef0c05912",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 266,
+    "line": 273,
     kind: 'lt-call'
   },
   {
@@ -4732,14 +4540,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Saved external source",
-    "key": "literal.4bc21aecb5b8",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 539,
-    kind: 'lt-call'
-  },
-  {
     "text": "SSO / Enterprise Security",
     "key": "literal.4bc557032ad8",
     namespace: 'literals',
@@ -4777,14 +4577,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/ui/currency-select.tsx",
     "line": 77,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Failed to load folders: {message}",
-    "key": "literal.4d088fd39b82",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 392,
     kind: 'lt-call'
   },
   {
@@ -4920,7 +4712,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4e5a2893bdcc",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 187,
+    "line": 194,
     kind: 'lt-call'
   },
   {
@@ -4960,7 +4752,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4ed8fb421312",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 711,
+    "line": 72,
     kind: 'lt-call'
   },
   {
@@ -4968,7 +4760,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4ee85a626ff6",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 321,
+    "line": 412,
     kind: 'lt-call'
   },
   {
@@ -4985,14 +4777,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
     "line": 218,
-    kind: 'lt-call'
-  },
-  {
-    "text": "• key prefix {prefix}",
-    "key": "literal.4f24c3d1a9dd",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1102,
     kind: 'lt-call'
   },
   {
@@ -5028,11 +4812,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Select bank account",
-    "key": "literal.4f74d63f3035",
+    "text": "Filter folders and files",
+    "key": "literal.4f83f7fdb6cd",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1027,
+    "line": 350,
     kind: 'lt-call'
   },
   {
@@ -5042,14 +4826,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/app/[locale]/page.tsx",
     "line": 105,
     kind: 'lt-call'
-  },
-  {
-    "text": "**/*.pdf",
-    "key": "literal.4fe3ebc6c58f",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 980,
-    kind: 'attr'
   },
   {
     "text": "year",
@@ -5120,7 +4896,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.50e2b46ef877",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 161,
+    "line": 168,
     kind: 'lt-call'
   },
   {
@@ -5140,14 +4916,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Run failed: {message}",
-    "key": "literal.5138aaba1645",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 755,
-    kind: 'lt-call'
-  },
-  {
     "text": "e.g., en-US, th-TH",
     "key": "literal.515def82304b",
     namespace: 'literals',
@@ -5164,19 +4932,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Path",
+    "key": "literal.519e39132bb9",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 340,
+    kind: 'lt-call'
+  },
+  {
     "text": "Exchange rate updated successfully",
     "key": "literal.519faff1d5a2",
     namespace: 'literals',
     "file": "src/components/settings/exchange-rate-list.tsx",
     "line": 121,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Use this as header",
-    "key": "literal.51a2608f7337",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1146,
     kind: 'lt-call'
   },
   {
@@ -5200,7 +4968,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5209f938055a",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 176,
+    "line": 183,
     kind: 'lt-call'
   },
   {
@@ -5250,14 +5018,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/app/[locale]/terms/page.tsx",
     "line": 113,
     kind: 'lt-call'
-  },
-  {
-    "text": "x-ledgerai-cron-secret",
-    "key": "literal.52daeffad30c",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1147,
-    kind: 'jsx-text'
   },
   {
     "text": "We recommend enabling 2FA for better security.",
@@ -5364,6 +5124,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Created source",
+    "key": "literal.543cc4a41869",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 57,
+    kind: 'lt-call'
+  },
+  {
     "text": "e.g., Pricing and onboarding",
     "key": "literal.543f13eb512b",
     namespace: 'literals',
@@ -5420,14 +5188,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Current folder:",
-    "key": "literal.551d92519439",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 984,
-    kind: 'lt-call'
-  },
-  {
     "text": "pk_test_...",
     "key": "literal.55925e010e76",
     namespace: 'literals',
@@ -5449,14 +5209,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/reconciliation-feed.tsx",
     "line": 469,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Important for Google Drive & OneDrive:",
-    "key": "literal.56391b011a75",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 783,
     kind: 'lt-call'
   },
   {
@@ -5548,14 +5300,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Folder:",
-    "key": "literal.57cb579c18cf",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1215,
-    kind: 'lt-call'
-  },
-  {
     "text": "Users",
     "key": "literal.57f2b181d0a5",
     namespace: 'literals',
@@ -5569,14 +5313,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/ai-settings.tsx",
     "line": 482,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Review & enable",
-    "key": "literal.582b67e1b215",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1045,
     kind: 'lt-call'
   },
   {
@@ -5608,7 +5344,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.588a11c298d8",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 41,
+    "line": 48,
     kind: 'lt-call'
   },
   {
@@ -5740,11 +5476,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Copied cron secret",
-    "key": "literal.5b10a127edba",
+    "text": "Remote path",
+    "key": "literal.5b40b3c0187e",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 356,
+    "line": 639,
     kind: 'lt-call'
   },
   {
@@ -5820,14 +5556,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "A guided setup flow to help you connect the correct account and verify what will be imported.",
-    "key": "literal.5c2af3035b35",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 794,
-    kind: 'lt-call'
-  },
-  {
     "text": "You must complete payment to access the dashboard.",
     "key": "literal.5c2cdcceb246",
     namespace: 'literals',
@@ -5840,7 +5568,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5c3ed2ca1ae7",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 117,
+    "line": 189,
     kind: 'lt-call'
   },
   {
@@ -5928,7 +5656,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5d34275a94b6",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 309,
+    "line": 400,
     kind: 'lt-call'
   },
   {
@@ -6012,14 +5740,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Pick Folder",
-    "key": "literal.5e1b74ba390d",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 996,
-    kind: 'lt-call'
-  },
-  {
     "text": "Analytics cookies (optional)",
     "key": "literal.5e2025bf5278",
     namespace: 'literals',
@@ -6034,14 +5754,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/transactions/transactions-list.tsx",
     "line": 375,
     kind: 'ltvars-call'
-  },
-  {
-    "text": "Schedule automatic document ingestion from SFTP/FTPS and cloud drives.",
-    "key": "literal.5e69c920d1a6",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 778,
-    kind: 'lt-call'
   },
   {
     "text": "Upload an invoice or bank statement to automatically create a company.",
@@ -6196,14 +5908,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Supabase Cron (per-tenant)",
-    "key": "literal.60ef96e5b14a",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1093,
-    kind: 'lt-call'
-  },
-  {
     "text": "Last 30 Days",
     "key": "literal.6118867f2125",
     namespace: 'literals',
@@ -6244,14 +5948,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "FTPS (TLS / mTLS)",
-    "key": "literal.617fa53acd94",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 835,
-    kind: 'jsx-text'
-  },
-  {
     "text": "Current Balance",
     "key": "literal.61a6163ed333",
     namespace: 'literals',
@@ -6273,14 +5969,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/domain-settings.tsx",
     "line": 208,
-    kind: 'lt-call'
-  },
-  {
-    "text": "New cron secret (shown once)",
-    "key": "literal.61d2475ec6eb",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1143,
     kind: 'lt-call'
   },
   {
@@ -6324,6 +6012,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Test & Diagnostic",
+    "key": "literal.62c68f702bea",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 531,
+    kind: 'lt-call'
+  },
+  {
     "text": "Select Tenant",
     "key": "literal.6314088c47da",
     namespace: 'literals',
@@ -6353,6 +6049,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/batch-processing-config.tsx",
     "line": 217,
+    kind: 'lt-call'
+  },
+  {
+    "text": "A small guided flow will help connect cloud drives and SFTP sources.",
+    "key": "literal.638b2beb6f74",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 543,
     kind: 'lt-call'
   },
   {
@@ -6408,7 +6112,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.64346b483c0a",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 180,
+    "line": 187,
     kind: 'lt-call'
   },
   {
@@ -6452,11 +6156,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Creating the source…",
-    "key": "literal.657e6122eaac",
+    "text": "Add External Source",
+    "key": "literal.651e03a61181",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 851,
+    "line": 600,
     kind: 'lt-call'
   },
   {
@@ -6644,14 +6348,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "not configured",
-    "key": "literal.67f2141f8c48",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1101,
-    kind: 'lt-call'
-  },
-  {
     "text": "Review draft transactions",
     "key": "literal.683eb8481163",
     namespace: 'literals',
@@ -6708,14 +6404,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Please select a folder",
-    "key": "literal.68f51e869a58",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 650,
-    kind: 'lt-call'
-  },
-  {
     "text": "KPIs",
     "key": "literal.6911b88f3e2c",
     namespace: 'literals',
@@ -6756,14 +6444,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Reconnect",
-    "key": "literal.6988b16a8fd2",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 883,
-    kind: 'lt-call'
-  },
-  {
     "text": "LedgerAI is a multi-tenant accounting platform designed to automate bookkeeping workflows while preserving control, auditability, and tenant isolation.",
     "key": "literal.698cef37e204",
     namespace: 'literals',
@@ -6780,27 +6460,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "No files found in this folder.",
-    "key": "literal.69bd943a67ff",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1353,
-    kind: 'lt-call'
-  },
-  {
     "text": "No source document attached",
     "key": "literal.69d1440618cd",
     namespace: 'literals',
     "file": "src/components/transactions/transaction-editor.tsx",
     "line": 822,
-    kind: 'lt-call'
-  },
-  {
-    "text": "when calling",
-    "key": "literal.6a18913bf704",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1148,
     kind: 'lt-call'
   },
   {
@@ -6948,6 +6612,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Username is required",
+    "key": "literal.6bad90b7a7cf",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 636,
+    kind: 'lt-call'
+  },
+  {
     "text": "Use the Service in violation of law or third-party rights.",
     "key": "literal.6bbf455937af",
     namespace: 'literals',
@@ -6984,7 +6656,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6c158ab2b9dc",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 343,
+    "line": 434,
     kind: 'lt-call'
   },
   {
@@ -6992,7 +6664,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6c282b74edd5",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 115,
+    "line": 122,
     kind: 'lt-call'
   },
   {
@@ -7012,14 +6684,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "File Pattern (glob)",
-    "key": "literal.6c39345942d1",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 979,
-    kind: 'lt-call'
-  },
-  {
     "text": "Tip: recurring imports are executed by the external-sources runner schedule.",
     "key": "literal.6c43d80dde4a",
     namespace: 'literals',
@@ -7033,6 +6697,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/ui/currency-select.tsx",
     "line": 127,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Edit External Source",
+    "key": "literal.6c50db79ed64",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 600,
     kind: 'lt-call'
   },
   {
@@ -7057,14 +6729,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
     "line": 618,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Token expired or revoked. Please reconnect.",
-    "key": "literal.6d524f5c2101",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 270,
     kind: 'lt-call'
   },
   {
@@ -7268,14 +6932,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Failed to load external sources: {message}",
-    "key": "literal.6fb648fb304e",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 161,
-    kind: 'lt-call'
-  },
-  {
     "text": "Delete Duplicate",
     "key": "literal.6fe09c020fab",
     namespace: 'literals',
@@ -7384,7 +7040,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.71edaf7caca4",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 351,
+    "line": 442,
     kind: 'lt-call'
   },
   {
@@ -7416,7 +7072,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.738e295ba331",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 148,
+    "line": 155,
     kind: 'lt-call'
   },
   {
@@ -7532,6 +7188,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Configuration",
+    "key": "literal.754164850f38",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 529,
+    kind: 'lt-call'
+  },
+  {
     "text": "Company created and document uploaded!",
     "key": "literal.7544ddb8ff8b",
     namespace: 'literals',
@@ -7545,14 +7209,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/bank-feed-integration.tsx",
     "line": 354,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Only Company Admins can manage external sources.",
-    "key": "literal.7575536fe402",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 786,
     kind: 'lt-call'
   },
   {
@@ -7576,7 +7232,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7622eb5aa42d",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 219,
+    "line": 226,
     kind: 'lt-call'
   },
   {
@@ -7593,6 +7249,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/ui/currency-select.tsx",
     "line": 62,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Folder Picker",
+    "key": "literal.76e198de1e77",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 331,
     kind: 'lt-call'
   },
   {
@@ -7625,14 +7289,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/subscription/available-plans.tsx",
     "line": 152,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Disconnected",
-    "key": "literal.771e05f27b99",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 685,
     kind: 'lt-call'
   },
   {
@@ -7672,7 +7328,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.77ab157ba3d4",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 430,
+    "line": 521,
     kind: 'lt-call'
   },
   {
@@ -7772,6 +7428,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'toast'
   },
   {
+    "text": "OAuth Relay",
+    "key": "literal.796d4853c9da",
+    namespace: 'literals',
+    "file": "src/app/oauth/relay/route.ts",
+    "line": 24,
+    kind: 'jsx-text'
+  },
+  {
     "text": "Upload invoices, receipts, or other financial documents for processing",
     "key": "literal.79eda34585a4",
     namespace: 'literals',
@@ -7809,14 +7473,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/translation-management.tsx",
     "line": 1387,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Your OAuth app must allow redirect URI:",
-    "key": "literal.7aa70806443d",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 914,
     kind: 'lt-call'
   },
   {
@@ -8064,7 +7720,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7dc4d59d18e1",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 282,
+    "line": 373,
     kind: 'lt-call'
   },
   {
@@ -8120,7 +7776,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7eae163c8e91",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 360,
+    "line": 451,
     kind: 'lt-call'
   },
   {
@@ -8316,11 +7972,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Diagnostic tools placeholder",
+    "key": "literal.82ac9ca13432",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 593,
+    kind: 'lt-call'
+  },
+  {
     "text": "Learn how to set up and manage automated data sync for your tenant.",
     "key": "literal.82b80ff85e22",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 478,
+    "line": 569,
     kind: 'lt-call'
   },
   {
@@ -8440,7 +8104,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.84add5b29527",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 157,
+    "line": 164,
     kind: 'lt-call'
   },
   {
@@ -8456,15 +8120,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.84c29015de33",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 933,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Google Drive access has expired or been revoked. Please reconnect.",
-    "key": "literal.84c8e614c8ef",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 881,
+    "line": 634,
     kind: 'lt-call'
   },
   {
@@ -8496,7 +8152,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8559034a07c9",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 283,
+    "line": 290,
     kind: 'lt-call'
   },
   {
@@ -8668,14 +8324,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Generate Cron Secret",
-    "key": "literal.89411c6bff9d",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1129,
-    kind: 'lt-call'
-  },
-  {
     "text": "Apply to tenants",
     "key": "literal.895a2f1efa85",
     namespace: 'literals',
@@ -8696,7 +8344,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.89836a870e44",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 350,
+    "line": 441,
     kind: 'lt-call'
   },
   {
@@ -8852,14 +8500,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "e.g. Finance Google Drive",
-    "key": "literal.8b1b98351880",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 824,
-    kind: 'lt-call'
-  },
-  {
     "text": "Codebase strings (hardcoded English)",
     "key": "literal.8b474fd58e30",
     namespace: 'literals',
@@ -8912,7 +8552,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8be3c943b160",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 169,
+    "line": 176,
     kind: 'lt-call'
   },
   {
@@ -9060,14 +8700,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Test failed: {message}",
-    "key": "literal.8dcfe92ac72b",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 734,
-    kind: 'lt-call'
-  },
-  {
     "text": "Landing Page",
     "key": "literal.8dec5d0b0683",
     namespace: 'literals',
@@ -9120,7 +8752,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8eae50dc7eba",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 495,
+    "line": 586,
     kind: 'lt-call'
   },
   {
@@ -9196,14 +8828,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "with",
-    "key": "literal.8fcd25a39d20",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1150,
-    kind: 'lt-call'
-  },
-  {
     "text": "Subscription",
     "key": "literal.8fde48f31aff",
     namespace: 'literals',
@@ -9225,14 +8849,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/reports/balance-sheet-report.tsx",
     "line": 302,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Connect account",
-    "key": "literal.8ff19dc85719",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 855,
     kind: 'lt-call'
   },
   {
@@ -9265,14 +8881,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/ai-agent/ai-agent-widget.tsx",
     "line": 603,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Select type",
-    "key": "literal.905d012288da",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1012,
     kind: 'lt-call'
   },
   {
@@ -9329,22 +8937,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/subscription-management.tsx",
     "line": 473,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Step 1: Connect • Step 2: Pick Folder • Step 3: Test",
-    "key": "literal.9100745d3f87",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1205,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Failed to start OAuth: {message}",
-    "key": "literal.91064e2c05a5",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 580,
     kind: 'lt-call'
   },
   {
@@ -9456,7 +9048,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9223060ddfcf",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 576,
+    "line": 205,
     kind: 'lt-call'
   },
   {
@@ -9524,6 +9116,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "No folders",
+    "key": "literal.9415d841b44a",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 358,
+    kind: 'lt-call'
+  },
+  {
     "text": "Selected {count} verified transactions",
     "key": "literal.94300eedc03e",
     namespace: 'literals',
@@ -9552,7 +9152,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9488c12731a2",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 495,
+    "line": 586,
     kind: 'lt-call'
   },
   {
@@ -9602,6 +9202,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/admin/translation-management.tsx",
     "line": 943,
     kind: 'toast'
+  },
+  {
+    "text": "Testing…",
+    "key": "literal.95c4564a945f",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 709,
+    kind: 'lt-call'
   },
   {
     "text": "Where you’ll find it",
@@ -9660,14 +9268,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Copy Secret",
-    "key": "literal.970ac9ead623",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1136,
-    kind: 'lt-call'
-  },
-  {
     "text": "Payload must include",
     "key": "literal.9782580ea03b",
     namespace: 'literals',
@@ -9720,7 +9320,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9850bceda64f",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 388,
+    "line": 479,
     kind: 'lt-call'
   },
   {
@@ -9729,14 +9329,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/transactions/transaction-editor.tsx",
     "line": 678,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Failed to rotate cron secret: {message}",
-    "key": "literal.98b4d5df2b92",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 322,
     kind: 'lt-call'
   },
   {
@@ -9868,11 +9460,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Run failed",
-    "key": "literal.9a731f3d6dec",
+    "text": "Guided setup to add a new external source.",
+    "key": "literal.9a6c648166f4",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 751,
+    "line": 539,
     kind: 'lt-call'
   },
   {
@@ -9892,19 +9484,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Failed to save folder: {message}",
-    "key": "literal.9aa5c9e51343",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 470,
-    kind: 'lt-call'
-  },
-  {
     "text": "No tenant selected",
     "key": "literal.9ad0b261fdd1",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 186,
+    "line": 259,
     kind: 'lt-call'
   },
   {
@@ -10008,7 +9592,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9be083d9d123",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 120,
+    "line": 192,
     kind: 'lt-call'
   },
   {
@@ -10056,7 +9640,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9ca43b04c3d2",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 342,
+    "line": 433,
     kind: 'lt-call'
   },
   {
@@ -10148,28 +9732,12 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Remote Path",
-    "key": "literal.9ddd7ed9af5b",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 929,
-    kind: 'lt-call'
-  },
-  {
     "text": "Void ({count})",
     "key": "literal.9de45cf2a494",
     namespace: 'literals',
     "file": "src/components/transactions/transactions-list.tsx",
     "line": 893,
     kind: 'ltvars-call'
-  },
-  {
-    "text": "Scheduled call body example:",
-    "key": "literal.9dfe5e2d8382",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1157,
-    kind: 'lt-call'
   },
   {
     "text": "Storage",
@@ -10210,14 +9778,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/admin/user-subscription-list.tsx",
     "line": 191,
     kind: 'jsx-text'
-  },
-  {
-    "text": "{size} KB",
-    "key": "literal.9e743c993c2c",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1361,
-    kind: 'lt-call'
   },
   {
     "text": "NET INCOME",
@@ -10536,7 +10096,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a330193e7ec3",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 451,
+    "line": 542,
     kind: 'lt-call'
   },
   {
@@ -10544,7 +10104,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a33a8de6225c",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 141,
+    "line": 148,
     kind: 'lt-call'
   },
   {
@@ -10570,14 +10130,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/admin/pending-subscriptions.tsx",
     "line": 74,
     kind: 'toast'
-  },
-  {
-    "text": "Allow scheduled imports for this tenant",
-    "key": "literal.a39f57435d6c",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1111,
-    kind: 'lt-call'
   },
   {
     "text": "Drag and drop files here",
@@ -10608,7 +10160,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a3c8a3190fa4",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 438,
+    "line": 529,
     kind: 'lt-call'
   },
   {
@@ -10744,7 +10296,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a645f1d5e0b5",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 141,
+    "line": 214,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Password / SSH Key (optional)",
+    "key": "literal.a64afc3d8344",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 637,
     kind: 'lt-call'
   },
   {
@@ -10992,7 +10552,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.a92eeba0b871",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 238,
+    "line": 320,
     kind: 'lt-call'
   },
   {
@@ -11112,7 +10672,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ab8ecd3f8fec",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 192,
+    "line": 265,
     kind: 'lt-call'
   },
   {
@@ -11137,6 +10697,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/ui/currency-select.tsx",
     "line": 52,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Connection test succeeded",
+    "key": "literal.abf60f586dda",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 450,
     kind: 'lt-call'
   },
   {
@@ -11220,6 +10788,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "OAuth window closed",
+    "key": "literal.ad81d052e42d",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 194,
+    kind: 'lt-call'
+  },
+  {
     "text": "Profit & Loss Snapshot",
     "key": "literal.ad980654cb5d",
     namespace: 'literals',
@@ -11248,7 +10824,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ae6e4d1209f1",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 184,
+    "line": 191,
     kind: 'lt-call'
   },
   {
@@ -11288,7 +10864,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.af1f9dbe697b",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 250,
+    "line": 332,
     kind: 'lt-call'
   },
   {
@@ -11428,11 +11004,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Default run limit",
-    "key": "literal.b09467e4e7ec",
+    "text": "Provider connected",
+    "key": "literal.b0b4a7c51b95",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1116,
+    "line": 158,
     kind: 'lt-call'
   },
   {
@@ -11441,14 +11017,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 217,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Step {step} of {total}",
-    "key": "literal.b0d2ef96c8e1",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 813,
     kind: 'lt-call'
   },
   {
@@ -11465,14 +11033,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/contact-settings.tsx",
     "line": 84,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Tip: for cloud drives, this wizard will show “Connected as” so you can confirm the exact account being used.",
-    "key": "literal.b124a193fbac",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 843,
     kind: 'lt-call'
   },
   {
@@ -11578,14 +11138,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/admin/subscription-management.tsx",
     "line": 200,
     kind: 'lt-call'
-  },
-  {
-    "text": "-----BEGIN CERTIFICATE-----",
-    "key": "literal.b2f60a22d5e8",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 952,
-    kind: 'attr'
   },
   {
     "text": "Track all system changes and user actions",
@@ -11700,19 +11252,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Start Wizard",
-    "key": "literal.b4409b9df6ad",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 800,
-    kind: 'lt-call'
-  },
-  {
     "text": "Please check your email to confirm your address.",
     "key": "literal.b4696e1ee293",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 135,
+    "line": 142,
     kind: 'lt-call'
   },
   {
@@ -11844,14 +11388,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "{provider} • every {minutes}m • {state}",
-    "key": "literal.b570037abd4f",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1189,
-    kind: 'lt-call'
-  },
-  {
     "text": "Test bank account:",
     "key": "literal.b5811059edf4",
     namespace: 'literals',
@@ -11880,7 +11416,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b5d4df4fdfab",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 174,
+    "line": 181,
     kind: 'lt-call'
   },
   {
@@ -11972,14 +11508,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Cron secret rotated",
-    "key": "literal.b6d769e4dd73",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 320,
-    kind: 'lt-call'
-  },
-  {
     "text": "Derived from last transaction",
     "key": "literal.b6db932f8b6e",
     namespace: 'literals',
@@ -12033,14 +11561,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/platform-customizer.tsx",
     "line": 819,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Finish",
-    "key": "literal.b74bdee9c34f",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1066,
     kind: 'lt-call'
   },
   {
@@ -12113,14 +11633,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/promo-code-management.tsx",
     "line": 269,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Cron configuration saved",
-    "key": "literal.b8c8902b653a",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 343,
     kind: 'lt-call'
   },
   {
@@ -12260,14 +11772,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "OAuth URL not returned",
-    "key": "literal.bc1686e27a92",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 577,
-    kind: 'lt-call'
-  },
-  {
     "text": "Verify & Enable",
     "key": "literal.bc5fd192ef7c",
     namespace: 'literals',
@@ -12296,7 +11800,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.bc981983e7f5",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1079,
+    "line": 706,
     kind: 'lt-call'
   },
   {
@@ -12412,6 +11916,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "minutes",
+    "key": "literal.be2e2bb698c7",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 677,
+    kind: 'lt-call'
+  },
+  {
     "text": "Base Currency",
     "key": "literal.be6eae0dff37",
     namespace: 'literals',
@@ -12488,7 +12000,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.bf6ea5406002",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 186,
+    "line": 193,
     kind: 'lt-call'
   },
   {
@@ -12536,7 +12048,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c017527b229f",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 274,
+    "line": 281,
     kind: 'lt-call'
   },
   {
@@ -12800,7 +12312,15 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c413802297cc",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 133,
+    "line": 140,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Name for new source",
+    "key": "literal.c441e4e2c1be",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 50,
     kind: 'lt-call'
   },
   {
@@ -12858,14 +12378,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/admin/tenant-management.tsx",
     "line": 289,
     kind: 'toast'
-  },
-  {
-    "text": "connected",
-    "key": "literal.c5e23457aa7c",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 866,
-    kind: 'lt-call'
   },
   {
     "text": "Production hardening",
@@ -13048,7 +12560,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c85112ad5f3b",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 486,
+    "line": 577,
     kind: 'lt-call'
   },
   {
@@ -13089,14 +12601,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/exchange-rate-list.tsx",
     "line": 107,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Folder: not selected",
-    "key": "literal.c8f2df3a169c",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1221,
     kind: 'lt-call'
   },
   {
@@ -13228,14 +12732,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Turn it on and optionally run a quick test.",
-    "key": "literal.cb3d3bdae2a4",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1046,
-    kind: 'lt-call'
-  },
-  {
     "text": "Changed",
     "key": "literal.cb5424f67784",
     namespace: 'literals',
@@ -13284,6 +12780,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Use the wizard to add or edit an external source.",
+    "key": "literal.cc200fa1597d",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 601,
+    kind: 'lt-call'
+  },
+  {
     "text": "AI usage for this tenant (this month)",
     "key": "literal.cc551cd2fef5",
     namespace: 'literals',
@@ -13308,11 +12812,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'toast'
   },
   {
+    "text": "No files",
+    "key": "literal.ccc17f6130a0",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 389,
+    kind: 'lt-call'
+  },
+  {
     "text": "Continue with Google",
     "key": "literal.ccc5b0edaae6",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 147,
+    "line": 154,
     kind: 'lt-call'
   },
   {
@@ -13456,7 +12968,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.cf3c61f9f33a",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 489,
+    "line": 580,
     kind: 'lt-call'
   },
   {
@@ -13474,14 +12986,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/documents/cloud-import-dialog.tsx",
     "line": 259,
     kind: 'lt-call'
-  },
-  {
-    "text": "-----BEGIN OPENSSH PRIVATE KEY-----",
-    "key": "literal.cf5fc5bc50ed",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 944,
-    kind: 'attr'
   },
   {
     "text": "Customizing",
@@ -13800,7 +13304,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d31edb7b8a94",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 211,
+    "line": 218,
     kind: 'lt-call'
   },
   {
@@ -13825,14 +13329,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/user-subscription-list.tsx",
     "line": 96,
-    kind: 'lt-call'
-  },
-  {
-    "text": "External source is ready",
-    "key": "literal.d39a23d3dd34",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 670,
     kind: 'lt-call'
   },
   {
@@ -13868,14 +13364,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Failed to load cron config",
-    "key": "literal.d4160673e011",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 173,
-    kind: 'lt-call'
-  },
-  {
     "text": "Tax settings updated",
     "key": "literal.d41abc5ae38f",
     namespace: 'literals',
@@ -13904,7 +13392,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d48e663ab2b0",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 160,
+    "line": 167,
     kind: 'lt-call'
   },
   {
@@ -13944,7 +13432,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d50745fd0bd8",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 422,
+    "line": 513,
     kind: 'lt-call'
   },
   {
@@ -14160,7 +13648,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d8871fc06c43",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 144,
+    "line": 151,
     kind: 'lt-call'
   },
   {
@@ -14236,19 +13724,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Auto/Unknown",
-    "key": "literal.da1644fcd7c8",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1015,
-    kind: 'lt-call'
-  },
-  {
     "text": "off",
     "key": "literal.da7a68734367",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 238,
+    "line": 245,
     kind: 'lt-call'
   },
   {
@@ -14488,7 +13968,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.dda6ac27b9d3",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 187,
+    "line": 194,
     kind: 'lt-call'
   },
   {
@@ -14528,7 +14008,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ddd690f52b68",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 224,
+    "line": 231,
     kind: 'lt-call'
   },
   {
@@ -14569,14 +14049,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
     "line": 286,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Browse folders (starting at root)",
-    "key": "literal.df3c02fcdc94",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1280,
     kind: 'lt-call'
   },
   {
@@ -14796,19 +14268,19 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "sftp.example.com",
-    "key": "literal.e2ba60143f65",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 922,
-    kind: 'attr'
-  },
-  {
     "text": "TRX - TRON",
     "key": "literal.e2eb63d36cad",
     namespace: 'literals',
     "file": "src/components/ui/currency-select.tsx",
     "line": 94,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Unsupported provider for OAuth",
+    "key": "literal.e32a9358579b",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 103,
     kind: 'lt-call'
   },
   {
@@ -14864,7 +14336,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e41c880e7067",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 402,
+    "line": 493,
     kind: 'lt-call'
   },
   {
@@ -14968,7 +14440,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e560c48929c7",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 352,
+    "line": 443,
     kind: 'lt-call'
   },
   {
@@ -14976,7 +14448,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e5803fe8a6bf",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 318,
+    "line": 409,
     kind: 'lt-call'
   },
   {
@@ -14993,6 +14465,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/audit-log-viewer.tsx",
     "line": 392,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Failed to delete source",
+    "key": "literal.e5f658bb9dd0",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 77,
     kind: 'lt-call'
   },
   {
@@ -15132,19 +14612,11 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Cloud storage access for this source has expired or been revoked. Scheduled jobs and manual imports will not work until you reconnect.",
-    "key": "literal.e8776ead0e14",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1270,
-    kind: 'lt-call'
-  },
-  {
     "text": "Keep your Webhook URL secret. If you think it's been exposed, use \\\"Rotate Secret\\\" to generate a new one and update your scheduler.",
     "key": "literal.e8b6b74756c2",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 489,
+    "line": 580,
     kind: 'lt-call'
   },
   {
@@ -15332,14 +14804,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Rotate Cron Secret",
-    "key": "literal.ebddf993d372",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1129,
-    kind: 'lt-call'
-  },
-  {
     "text": "Plan Name",
     "key": "literal.ec0632cbbffa",
     namespace: 'literals',
@@ -15377,14 +14841,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/promo-code-management.tsx",
     "line": 222,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Client Certificate PEM (mTLS optional)",
-    "key": "literal.ec90c449a42c",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 951,
     kind: 'lt-call'
   },
   {
@@ -15436,14 +14892,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'jsx-text'
   },
   {
-    "text": "Disconnect",
-    "key": "literal.ed28e0686e12",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 892,
-    kind: 'lt-call'
-  },
-  {
     "text": "Within your tenant/workspace, according to user roles and permissions.",
     "key": "literal.ed9f6c8848c8",
     namespace: 'literals',
@@ -15456,7 +14904,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.edce5f22ed9e",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 154,
+    "line": 227,
     kind: 'lt-call'
   },
   {
@@ -15496,7 +14944,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ee11fc159cd9",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 141,
+    "line": 148,
     kind: 'lt-call'
   },
   {
@@ -15521,6 +14969,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/promo-code-management.tsx",
     "line": 85,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Popup blocked",
+    "key": "literal.ee9be85313c1",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 139,
     kind: 'lt-call'
   },
   {
@@ -15560,7 +15016,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ef4ca5e4018d",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 311,
+    "line": 402,
     kind: 'lt-call'
   },
   {
@@ -15608,7 +15064,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.efc007a393f6",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 458,
+    "line": 549,
     kind: 'lt-call'
   },
   {
@@ -15657,14 +15113,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/bank-feed-integration.tsx",
     "line": 259,
-    kind: 'lt-call'
-  },
-  {
-    "text": "Disconnect failed",
-    "key": "literal.f1201d71e0c2",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 684,
     kind: 'lt-call'
   },
   {
@@ -15740,14 +15188,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Failed to save cron config: {message}",
-    "key": "literal.f27e986cce1d",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 346,
-    kind: 'lt-call'
-  },
-  {
     "text": "Changes saved successfully",
     "key": "literal.f280abfbdd2b",
     namespace: 'literals',
@@ -15800,7 +15240,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f3949318dfd0",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 483,
+    "line": 574,
     kind: 'lt-call'
   },
   {
@@ -15808,7 +15248,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f39b9a4a59a5",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 731,
+    "line": 455,
     kind: 'lt-call'
   },
   {
@@ -15872,7 +15312,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f427fe091d1b",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 334,
+    "line": 425,
     kind: 'lt-call'
   },
   {
@@ -15888,7 +15328,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f440f18d388d",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 337,
+    "line": 428,
     kind: 'lt-call'
   },
   {
@@ -15913,6 +15353,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/profile-settings.tsx",
     "line": 75,
+    kind: 'lt-call'
+  },
+  {
+    "text": "{count} file(s) found",
+    "key": "literal.f4876a23fb38",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 684,
     kind: 'lt-call'
   },
   {
@@ -16020,6 +15468,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Browse folders",
+    "key": "literal.f757eb7fff8f",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 659,
+    kind: 'lt-call'
+  },
+  {
     "text": "Total Expenses (YTD)",
     "key": "literal.f768cb2347de",
     namespace: 'literals',
@@ -16080,7 +15536,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f838dc11db15",
     namespace: 'literals',
     "file": "src/components/auth/login-form.tsx",
-    "line": 191,
+    "line": 198,
     kind: 'lt-call'
   },
   {
@@ -16132,28 +15588,20 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
-    "text": "Please connect the account first",
-    "key": "literal.f8fd77daa9db",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 633,
-    kind: 'lt-call'
-  },
-  {
-    "text": "-----BEGIN PRIVATE KEY-----",
-    "key": "literal.f908016d4cb9",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 956,
-    kind: 'attr'
-  },
-  {
     "text": "Net Income",
     "key": "literal.f91a95108695",
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
     "line": 771,
     kind: 'jsx-text'
+  },
+  {
+    "text": "Review settings before saving.",
+    "key": "literal.f922a1baf836",
+    namespace: 'literals',
+    "file": "src/components/settings/external-sources-settings.tsx",
+    "line": 673,
+    kind: 'lt-call'
   },
   {
     "text": "Availability depends on your subscription plan.",
@@ -16256,15 +15704,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fa7517b6b6b0",
     namespace: 'literals',
     "file": "src/components/settings/automated-sync-settings.tsx",
-    "line": 325,
-    kind: 'lt-call'
-  },
-  {
-    "text": "• last run {datetime}",
-    "key": "literal.fad1bcfe963d",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 1194,
+    "line": 416,
     kind: 'lt-call'
   },
   {
@@ -16456,7 +15896,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fe035157cda2",
     namespace: 'literals',
     "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 925,
+    "line": 632,
     kind: 'lt-call'
   },
   {
@@ -16480,7 +15920,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fe3d7acb51fd",
     namespace: 'literals',
     "file": "src/components/auth/signup-form.tsx",
-    "line": 53,
+    "line": 60,
     kind: 'lt-call'
   },
   {
@@ -16585,14 +16025,6 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/security-settings.tsx",
     "line": 78,
-    kind: 'lt-call'
-  },
-  {
-    "text": "SSH Private Key PEM (optional)",
-    "key": "literal.ff9474b09846",
-    namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 943,
     kind: 'lt-call'
   },
   {

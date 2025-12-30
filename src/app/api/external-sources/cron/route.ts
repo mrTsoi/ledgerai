@@ -66,82 +66,40 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
   try {
-    const ok = await userHasFeature(supabase, user.id, 'ai_access')
-    if (!ok) {
-      return NextResponse.json({ error: 'AI automation is not available on your plan' }, { status: 403 })
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    try {
+      const ok = await userHasFeature(supabase as any, user.id, 'ai_access')
+      if (!ok) {
+        return NextResponse.json({ error: 'AI automation is not available on your plan' }, { status: 403 })
+      }
+    } catch (e: any) {
+      return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+    }
+
+    const url = new URL(req.url)
+    const tenantId = url.searchParams.get('tenant_id')
+    if (!tenantId) return NextResponse.json({ error: 'tenant_id is required' }, { status: 400 })
+
+    try {
+      const { data: row } = await (createServiceClient().from('external_sources_cron_secrets') as any)
+        .select('enabled, key_prefix, default_run_limit')
+        .eq('tenant_id', tenantId)
+        .maybeSingle()
+
+      return NextResponse.json({ configured: !!(row as any)?.key_prefix, enabled: !!(row as any)?.enabled, key_prefix: (row as any)?.key_prefix, default_run_limit: (row as any)?.default_run_limit })
+    } catch (e: any) {
+      return NextResponse.json({ error: e?.message || 'Failed to fetch cron settings' }, { status: 500 })
     }
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? 'Failed to verify subscription' }, { status: 500 })
+    console.error('Unhandled error in /api/external-sources/cron', e)
+    return NextResponse.json({ error: e?.message || 'Internal Server Error' }, { status: 500 })
   }
-
-  let body: any
-  try {
-    body = await req.json()
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
-  }
-
-  const tenantId = body?.tenant_id as string | undefined
-  if (!tenantId) return NextResponse.json({ error: 'tenant_id is required' }, { status: 400 })
-
-  const { data: membership } = await supabase
-    .from('memberships')
-    .select('role')
-    .eq('tenant_id', tenantId)
-    .eq('user_id', user.id)
-    .eq('is_active', true)
-    .in('role', ['COMPANY_ADMIN', 'SUPER_ADMIN'])
-    .maybeSingle()
-
-  if (!membership) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-
-  const enabled = typeof body.enabled === 'boolean' ? body.enabled : undefined
-  const defaultRunLimitRaw = body.default_run_limit
-  const defaultRunLimit =
-    typeof defaultRunLimitRaw === 'number' || typeof defaultRunLimitRaw === 'string'
-      ? Math.max(1, Math.min(50, Number(defaultRunLimitRaw)))
-      : undefined
-
-  let service: ReturnType<typeof createServiceClient>
-  try {
-    service = createServiceClient()
-  } catch {
-    return NextResponse.json(
-      { error: 'Server is not configured for this action (missing SUPABASE_SERVICE_ROLE_KEY)' },
-      { status: 503 }
-    )
-  }
-
-  // Only allow updating config if already configured (key exists)
-  const { data: existing } = await service
-    .from('external_sources_cron_secrets')
-    .select('tenant_id, enabled, default_run_limit, key_prefix')
-    .eq('tenant_id', tenantId)
-    .maybeSingle()
-
-  if (!existing) {
-    return NextResponse.json({ error: 'Cron key not configured yet. Rotate/generate first.' }, { status: 400 })
-  }
-
-  const patch: any = {}
-  if (typeof enabled !== 'undefined') patch.enabled = enabled
-  if (typeof defaultRunLimit !== 'undefined') patch.default_run_limit = defaultRunLimit
-
-  if (Object.keys(patch).length === 0) {
-    return NextResponse.json({ ok: true })
-  }
-
-  const { error } = await service.from('external_sources_cron_secrets').update(patch).eq('tenant_id', tenantId)
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  return NextResponse.json({ ok: true })
 }
+

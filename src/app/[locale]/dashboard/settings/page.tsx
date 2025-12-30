@@ -124,7 +124,6 @@ export default function SettingsPage() {
         )}
 
         <TabsContent value="external-sources" className="space-y-4">
-          <AutomatedSyncSettings />
           <ExternalSourcesSettings />
         </TabsContent>
         

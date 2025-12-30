@@ -35,12 +35,14 @@ export async function middleware(request: NextRequest) {
 
         try {
           const url = new URL(redirectUrl)
-          return NextResponse.redirect(url)
+          const resp = NextResponse.redirect(url)
+          return resp
         } catch (e) {
           // fallback: simple redirect to relative path
           const url = request.nextUrl.clone()
           url.pathname = `/${locale.replace(/^\//, '')}/auth/callback`
-          return NextResponse.redirect(url)
+          const resp = NextResponse.redirect(url)
+          return resp
         }
       }
     }
@@ -59,7 +61,8 @@ export async function middleware(request: NextRequest) {
       url.host = PUBLIC_DOMAIN.replace(/^https?:\/\//, '');
       url.protocol = PUBLIC_DOMAIN.startsWith('https') ? 'https:' : 'http:';
     }
-    return NextResponse.redirect(url);
+    const resp = NextResponse.redirect(url);
+    return resp;
   }
 
   // 1. Run next-intl middleware to handle locale routing
