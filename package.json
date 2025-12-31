@@ -19,7 +19,8 @@
     "i18n:import-literals": "node scripts/i18n-import-literals.mjs",
     "i18n:import-subscription-plans": "node scripts/i18n-import-subscription-plans.mjs",
     "i18n:sync-entity-translations": "node scripts/sync-entity-translations-from-literals.mjs",
-    "rotate:internal-secret": "node scripts/rotate-internal-secret.mjs"
+    "rotate:internal-secret": "node scripts/rotate-internal-secret.mjs",
+    "thumbnails:create": "node scripts/create-thumbnails-bucket.mjs"
   },
   "dependencies": {
     "@google-cloud/documentai": "^9.5.0",
@@ -66,6 +67,7 @@
     "stripe": "^20.0.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
+    "sharp": "^0.32.3",
     "vite": "^7.2.6"
   },
   "devDependencies": {

@@ -32,6 +32,7 @@ type CloudWhoAmI = {
 }
 
 type FolderItem = { id: string; name: string }
+type FileItem = { id: string; name: string; size?: string | number }
 
 type Props = {
   tenantId: string
@@ -67,6 +68,14 @@ export function CloudImportDialog(props: Props) {
   const [parentId, setParentId] = useState<string>('root')
   const [folders, setFolders] = useState<FolderItem[]>([])
   const [loadingFolders, setLoadingFolders] = useState(false)
+  const [files, setFiles] = useState<FileItem[]>([])
+  const [selectedFileIds, setSelectedFileIds] = useState<Record<string, boolean>>({})
+  const [fileSearch, setFileSearch] = useState<string>('')
+  const [fileStatuses, setFileStatuses] = useState<Record<string, string>>({})
+  const [previewFile, setPreviewFile] = useState<FileItem | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [fileProgress, setFileProgress] = useState<Record<string, number>>({})
+  const progressTimers = useMemo(() => ({} as Record<string, number>), [])
   const [trail, setTrail] = useState<Array<{ id: string; name: string }>>([{ id: 'root', name: lt('Root') }])
 
   const [folderId, setFolderId] = useState<string | null>(null)
@@ -132,9 +141,12 @@ export function CloudImportDialog(props: Props) {
         }
         const listed = Array.isArray(json?.folders) ? (json.folders as any[]) : []
         setFolders(listed.map((f) => ({ id: String(f.id), name: String(f.name) })))
+        const listedFiles = Array.isArray(json?.files) ? (json.files as any[]) : []
+        setFiles(listedFiles.map((f) => ({ id: String(f.id), name: String(f.name), size: f.size })))
       } catch (e: any) {
         toast.error(e?.message || lt('Failed to load folders'))
         setFolders([])
+        setFiles([])
       } finally {
         setLoadingFolders(false)
       }
@@ -307,20 +319,114 @@ export function CloudImportDialog(props: Props) {
 
   const showFolderPicker = !!selectedSource && !!whoami?.connected
 
+  const toggleFile = (id: string) => {
+    setSelectedFileIds((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
+
+  const formatBytes = (b: any) => {
+    const n = Number(b || 0)
+    if (!Number.isFinite(n) || n <= 0) return ''
+    if (n < 1024) return `${n} B`
+    const units = ['KB', 'MB', 'GB', 'TB']
+    let i = -1
+    let x = n
+    do { x = x / 1024; i++ } while (x >= 1024 && i < units.length - 1)
+    return `${x.toFixed(1)} ${units[i]}`
+  }
+
+  const startSimulatedProgress = (id: string) => {
+    // avoid multiple timers
+    if (progressTimers[id]) return
+    setFileProgress((p) => ({ ...p, [id]: 0 }))
+    let val = 0
+    const tid = window.setInterval(() => {
+      val = Math.min(80, val + Math.floor(5 + Math.random() * 10))
+      setFileProgress((p) => ({ ...p, [id]: val }))
+      if (val >= 80) {
+        // stop increasing; finalization will set 100
+        clearInterval(progressTimers[id])
+        delete progressTimers[id]
+      }
+    }, 500) as unknown as number
+    progressTimers[id] = tid
+  }
+
+  const stopSimulatedProgress = (id: string) => {
+    const tid = progressTimers[id]
+    if (tid) {
+      clearInterval(tid)
+      delete progressTimers[id]
+    }
+  }
+
+  const fetchPreview = async (f: FileItem) => {
+    if (!selectedSource) return
+    try {
+      // Request server to stream bytes from our origin to avoid signed-url CORS/content-disposition issues
+      const res = await fetch(`/api/external-sources/preview?source_id=${encodeURIComponent(selectedSource.id)}&file_id=${encodeURIComponent(f.id)}&stream=1`)
+      if (!res.ok) throw new Error('Preview failed')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      // revoke previous
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+      setPreviewUrl(url)
+    } catch (e: any) {
+      toast.error(e?.message || lt('Failed to fetch preview'))
+    }
+  }
+
+  const importSelectedFiles = async () => {
+    if (!selectedSource) return
+    const selected = files.filter((f) => selectedFileIds[f.id])
+    if (selected.length === 0) {
+      toast.error(lt('Select at least one file to import'))
+      return
+    }
+
+    // Import sequentially and show per-file progress
+    for (const f of selected) {
+      setFileStatuses((s) => ({ ...s, [f.id]: 'importing' }))
+      // start simulated progress
+      startSimulatedProgress(f.id)
+      try {
+        const res = await fetch('/api/external-sources/import-file', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenant_id: tenantId, source_id: selectedSource.id, files: [f] }),
+        })
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(String(json?.error || lt('Import failed')))
+        stopSimulatedProgress(f.id)
+        setFileProgress((p) => ({ ...p, [f.id]: 100 }))
+        setFileStatuses((s) => ({ ...s, [f.id]: 'done' }))
+      } catch (e: any) {
+        stopSimulatedProgress(f.id)
+        setFileStatuses((s) => ({ ...s, [f.id]: 'error' }))
+        setFileProgress((p) => ({ ...p, [f.id]: 0 }))
+        toast.error(`${f.name}: ${e?.message || lt('Import failed')}`)
+      }
+    }
+
+    toast.success(lt('Import finished'))
+    setSelectedFileIds({})
+    if (onImported) onImported()
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button type="button" variant="outline">{triggerLabel || lt('Cloud Storage')}</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>{lt('Import from Cloud Storage')}</DialogTitle>
-          <DialogDescription>{lt('Select a connected drive folder and optionally enable recurring imports.')}</DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-2xl max-h-[80vh] p-0">
+        <div className="h-full max-h-[80vh] overflow-auto resize bg-background p-4">
+          <DialogHeader>
+            <DialogTitle>{lt('Import from Cloud Storage')}</DialogTitle>
+            <DialogDescription>{lt('Select a connected drive folder and optionally enable recurring imports.')}</DialogDescription>
+          </DialogHeader>
 
-        {sourcesError ? <div className="text-sm text-destructive">{sourcesError}</div> : null}
+          {sourcesError ? <div className="text-sm text-destructive">{sourcesError}</div> : null}
 
-        <div className="space-y-4">
+          <div className="space-y-4">
           <div className="space-y-2">
             <Label>{lt('Cloud source')}</Label>
             <Select value={selectedSourceId} onValueChange={setSelectedSourceId} disabled={loadingSources}>
@@ -461,6 +567,120 @@ export function CloudImportDialog(props: Props) {
             </div>
           ) : null}
 
+          {/* Files list + search / select-all / preview / per-file progress */}
+          {showFolderPicker ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>{lt('Files')}</Label>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Input placeholder={lt('Filter files by name')} value={fileSearch} onChange={(e) => setFileSearch(e.target.value)} />
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={
+                      files.length > 0 &&
+                      files.filter((fi) => (fi.name || '').toLowerCase().includes(fileSearch.toLowerCase())).every((fi) => selectedFileIds[fi.id])
+                    }
+                    onChange={(e) => {
+                      const visible = files.filter((fi) => (fi.name || '').toLowerCase().includes(fileSearch.toLowerCase()))
+                      if (e.target.checked) {
+                        const next = { ...selectedFileIds }
+                        visible.forEach((v) => { next[v.id] = true })
+                        setSelectedFileIds(next)
+                      } else {
+                        const next = { ...selectedFileIds }
+                        visible.forEach((v) => { delete next[v.id] })
+                        setSelectedFileIds(next)
+                      }
+                    }}
+                  />
+                  <span>{lt('Select all')}</span>
+                </label>
+              </div>
+
+              <div className="max-h-56 overflow-auto rounded-md border">
+                {files.length === 0 ? (
+                  <div className="p-2 text-sm text-muted-foreground">{lt('No files')}</div>
+                ) : (
+                  files
+                    .filter((fi) => (fi.name || '').toLowerCase().includes(fileSearch.toLowerCase()))
+                    .map((fi) => (
+                      <div key={fi.id} className="flex items-center justify-between gap-2 p-2 border-b last:border-b-0">
+                        <div className="flex items-center gap-2 flex-1">
+                          <label className="flex items-center gap-2 text-sm flex-1 cursor-pointer">
+                            <input type="checkbox" checked={!!selectedFileIds[fi.id]} onChange={() => toggleFile(fi.id)} />
+                            <div className="flex flex-col w-full">
+                              <span className="truncate font-medium">{fi.name}</span>
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-muted-foreground">{formatBytes(fi.size)}</span>
+                                {fileStatuses[fi.id] === 'importing' || fileProgress[fi.id] ? (
+                                  <span className="text-xs text-muted-foreground">{`${Math.round(fileProgress[fi.id] ?? 0)}%`}</span>
+                                ) : null}
+                              </div>
+                              {(fileStatuses[fi.id] === 'importing' || fileProgress[fi.id]) ? (
+                                <div className="w-full h-2 bg-muted rounded mt-1">
+                                  <div className="h-2 bg-primary rounded" style={{ width: `${fileProgress[fi.id] ?? 0}%` }} />
+                                </div>
+                              ) : null}
+                            </div>
+                          </label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {fileStatuses[fi.id] === 'importing' ? (
+                            <div className="text-xs text-primary">{lt('Importing…')}</div>
+                          ) : fileStatuses[fi.id] === 'done' ? (
+                            <div className="text-xs text-success">{lt('Imported')}</div>
+                          ) : fileStatuses[fi.id] === 'error' ? (
+                            <div className="text-xs text-destructive">{lt('Error')}</div>
+                          ) : null}
+
+                          <Button size="sm" variant="ghost" onClick={() => { setPreviewFile(fi); void fetchPreview(fi) }}>{lt('Preview')}</Button>
+                        </div>
+                      </div>
+                    ))
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <Button type="button" onClick={importSelectedFiles} disabled={!whoami?.connected || Object.keys(selectedFileIds).length === 0}>
+                  {lt('Import selected files')}
+                </Button>
+                <Button type="button" variant="ghost" onClick={() => setSelectedFileIds({})}>
+                  {lt('Clear selection')}
+                </Button>
+              </div>
+
+              {previewFile ? (
+                <div className="mt-2 border rounded p-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium">{previewFile.name}</div>
+                      <div className="text-xs text-muted-foreground">{formatBytes(previewFile.size)}</div>
+                    </div>
+                    <div>
+                      <Button size="sm" variant="ghost" onClick={() => { setPreviewFile(null); if (previewUrl) { URL.revokeObjectURL(previewUrl); setPreviewUrl(null) } }}>{lt('Close')}</Button>
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    {previewUrl ? (
+                      // show image inline or embed pdf/object
+                      previewUrl.endsWith('.pdf') || previewFile.name.toLowerCase().endsWith('.pdf') ? (
+                        <object data={previewUrl} type="application/pdf" width="100%" height="400">{lt('Preview not available')}</object>
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={previewUrl} alt={previewFile.name} className="max-h-80 w-auto" />
+                      )
+                    ) : (
+                      <div className="text-sm text-muted-foreground">{lt('Loading preview…')}</div>
+                    )}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
           {selectedSource ? (
             <div className="grid gap-3 rounded-md border p-3">
               <div className="grid gap-2">
@@ -510,6 +730,7 @@ export function CloudImportDialog(props: Props) {
               .
             </div>
           ) : null}
+        </div>
         </div>
       </DialogContent>
     </Dialog>

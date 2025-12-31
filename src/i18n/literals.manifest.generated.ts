@@ -172,6 +172,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "= 1024 && i",
+    "key": "literal.02b81fd36d5d",
+    namespace: 'literals',
+    "file": "src/components/documents/cloud-import-dialog.tsx",
+    "line": 333,
+    kind: 'jsx-text'
+  },
+  {
     "text": "Recent Logs",
     "key": "literal.030b73e77cb4",
     namespace: 'literals',
@@ -416,7 +424,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.07c2964c41f4",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 358,
+    "line": 464,
     kind: 'jsx-text'
   },
   {
@@ -1200,7 +1208,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.157262e9d20e",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 317,
+    "line": 423,
     kind: 'lt-call'
   },
   {
@@ -1593,6 +1601,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/tenant-mismatch-policy-settings.tsx",
     "line": 129,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Loading preview…",
+    "key": "literal.1b6d8c99db2b",
+    namespace: 'literals',
+    "file": "src/components/documents/cloud-import-dialog.tsx",
+    "line": 676,
     kind: 'lt-call'
   },
   {
@@ -2048,7 +2064,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.222c72b1959b",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 269,
+    "line": 281,
     kind: 'lt-call'
   },
   {
@@ -2217,6 +2233,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/settings/billing-settings.tsx",
     "line": 366,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Clear selection",
+    "key": "literal.247fd63183c7",
+    namespace: 'literals',
+    "file": "src/components/documents/cloud-import-dialog.tsx",
+    "line": 651,
     kind: 'lt-call'
   },
   {
@@ -2728,7 +2752,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2be75ee40a59",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 430,
+    "line": 536,
     kind: 'lt-call'
   },
   {
@@ -2824,7 +2848,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.2e0844789cb4",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 456,
+    "line": 562,
     kind: 'lt-call'
   },
   {
@@ -2952,7 +2976,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.30baa24967e0",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 391,
+    "line": 497,
     kind: 'lt-call'
   },
   {
@@ -3248,7 +3272,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.35848e759cb1",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 508,
+    "line": 728,
     kind: 'lt-call'
   },
   {
@@ -3504,7 +3528,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.39048517147d",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 328,
+    "line": 434,
     kind: 'lt-call'
   },
   {
@@ -4127,8 +4151,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Imported",
     "key": "literal.434eb26f4835",
     namespace: 'literals',
-    "file": "src/components/settings/billing-settings.tsx",
-    "line": 625,
+    "file": "src/components/documents/cloud-import-dialog.tsx",
+    "line": 634,
     kind: 'lt-call'
   },
   {
@@ -4232,7 +4256,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.44e53d5483e0",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 349,
+    "line": 455,
     kind: 'lt-call'
   },
   {
@@ -4680,7 +4704,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.4b06471d437b",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 498,
+    "line": 718,
     kind: 'lt-call'
   },
   {
@@ -5032,7 +5056,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.5004be8434c8",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 473,
+    "line": 693,
     kind: 'lt-call'
   },
   {
@@ -5328,7 +5352,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.541867a6160e",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 294,
+    "line": 306,
     kind: 'lt-call'
   },
   {
@@ -5586,6 +5610,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     "file": "src/components/documents/documents-list.tsx",
     "line": 1135,
     kind: 'ltvars-call'
+  },
+  {
+    "text": "Failed to fetch preview",
+    "key": "literal.594c1c3c8a1f",
+    namespace: 'literals',
+    "file": "src/components/documents/cloud-import-dialog.tsx",
+    "line": 374,
+    kind: 'lt-call'
   },
   {
     "text": "Download Original",
@@ -6384,7 +6416,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.64f54a579af8",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 506,
+    "line": 726,
     kind: 'lt-call'
   },
   {
@@ -6736,7 +6768,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6a8e668426c3",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 297,
+    "line": 309,
     kind: 'lt-call'
   },
   {
@@ -6880,7 +6912,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6c0169cadac9",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 240,
+    "line": 252,
     kind: 'lt-call'
   },
   {
@@ -6928,7 +6960,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6c43d80dde4a",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 491,
+    "line": 711,
     kind: 'lt-call'
   },
   {
@@ -6961,6 +6993,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/cookies/page.tsx",
     "line": 87,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Files",
+    "key": "literal.6ce6c512ea43",
+    namespace: 'literals',
+    "file": "src/components/documents/cloud-import-dialog.tsx",
+    "line": 574,
     kind: 'lt-call'
   },
   {
@@ -7048,7 +7088,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6e157c5da441",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 364,
+    "line": 470,
     kind: 'lt-call'
   },
   {
@@ -7160,7 +7200,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.6f7a5e49fc36",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 318,
+    "line": 424,
     kind: 'lt-call'
   },
   {
@@ -7640,7 +7680,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.78755bc618b6",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 428,
+    "line": 534,
     kind: 'lt-call'
   },
   {
@@ -7824,7 +7864,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7be36e4319d1",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 242,
+    "line": 254,
     kind: 'lt-call'
   },
   {
@@ -7864,7 +7904,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7ca1704ee9e5",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 483,
+    "line": 703,
     kind: 'lt-call'
   },
   {
@@ -7928,7 +7968,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.7ceee3f3615a",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 352,
+    "line": 458,
     kind: 'lt-call'
   },
   {
@@ -8092,6 +8132,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Error",
+    "key": "literal.7f2f6a15cf8d",
+    namespace: 'literals',
+    "file": "src/components/documents/cloud-import-dialog.tsx",
+    "line": 636,
+    kind: 'lt-call'
+  },
+  {
     "text": "Generate Report",
     "key": "literal.7ff2ef7dfeb8",
     namespace: 'literals',
@@ -8136,7 +8184,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.80753c986574",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 359,
+    "line": 465,
     kind: 'jsx-text'
   },
   {
@@ -8249,6 +8297,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/app/[locale]/dashboard/page.tsx",
     "line": 1055,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Importing…",
+    "key": "literal.820599da89a1",
+    namespace: 'literals',
+    "file": "src/components/documents/cloud-import-dialog.tsx",
+    "line": 632,
     kind: 'lt-call'
   },
   {
@@ -8448,7 +8504,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8598222918d3",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 447,
+    "line": 553,
     kind: 'lt-call'
   },
   {
@@ -8792,7 +8848,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.8b02f3de3906",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 374,
+    "line": 480,
     kind: 'lt-call'
   },
   {
@@ -9260,6 +9316,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'ltvars-call'
   },
   {
+    "text": "Select all",
+    "key": "literal.913afff1faf7",
+    namespace: 'literals',
+    "file": "src/components/documents/cloud-import-dialog.tsx",
+    "line": 599,
+    kind: 'lt-call'
+  },
+  {
     "text": "Check financial reports",
     "key": "literal.915363f6c353",
     namespace: 'literals',
@@ -9280,7 +9344,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.9188b1413f95",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 325,
+    "line": 431,
     kind: 'lt-call'
   },
   {
@@ -9448,7 +9512,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.94d7d8ee473f",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 364,
+    "line": 470,
     kind: 'lt-call'
   },
   {
@@ -9728,7 +9792,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.99c0db1f8d2f",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 91,
+    "line": 100,
     kind: 'lt-call'
   },
   {
@@ -11672,7 +11736,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b52b36b7269f",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 410,
+    "line": 516,
     kind: 'lt-call'
   },
   {
@@ -11816,7 +11880,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.b65463cb6a42",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 383,
+    "line": 489,
     kind: 'lt-call'
   },
   {
@@ -11935,8 +11999,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "Preview not available",
     "key": "literal.b80ba544702b",
     namespace: 'literals',
-    "file": "src/components/documents/document-verification-modal.tsx",
-    "line": 837,
+    "file": "src/components/documents/cloud-import-dialog.tsx",
+    "line": 670,
     kind: 'lt-call'
   },
   {
@@ -12592,7 +12656,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c2f9b7b4897f",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 374,
+    "line": 480,
     kind: 'lt-call'
   },
   {
@@ -12641,6 +12705,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/banking/bank-account-form.tsx",
     "line": 87,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Import finished",
+    "key": "literal.c3e89b64fcc1",
+    namespace: 'literals',
+    "file": "src/components/documents/cloud-import-dialog.tsx",
+    "line": 410,
     kind: 'lt-call'
   },
   {
@@ -12704,7 +12776,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.c514004f3261",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 467,
+    "line": 687,
     kind: 'lt-call'
   },
   {
@@ -13191,8 +13263,8 @@ export const literalsManifest: LiteralManifestItem[] = [
     "text": "No files",
     "key": "literal.ccc17f6130a0",
     namespace: 'literals',
-    "file": "src/components/settings/external-sources-settings.tsx",
-    "line": 370,
+    "file": "src/components/documents/cloud-import-dialog.tsx",
+    "line": 605,
     kind: 'lt-call'
   },
   {
@@ -13392,7 +13464,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.cf5d8e490a7f",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 260,
+    "line": 272,
     kind: 'lt-call'
   },
   {
@@ -13864,7 +13936,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d4f6924a09b6",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 402,
+    "line": 508,
     kind: 'lt-call'
   },
   {
@@ -13936,7 +14008,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.d6421db0ba93",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 459,
+    "line": 565,
     kind: 'lt-call'
   },
   {
@@ -13945,6 +14017,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     namespace: 'literals',
     "file": "src/components/admin/tenant-management.tsx",
     "line": 564,
+    kind: 'lt-call'
+  },
+  {
+    "text": "Filter files by name",
+    "key": "literal.d6640115f284",
+    namespace: 'literals',
+    "file": "src/components/documents/cloud-import-dialog.tsx",
+    "line": 578,
     kind: 'lt-call'
   },
   {
@@ -14440,7 +14520,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.ddbf3c2ba937",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 407,
+    "line": 513,
     kind: 'lt-call'
   },
   {
@@ -14784,7 +14864,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e3e77fd219b9",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 378,
+    "line": 484,
     kind: 'lt-call'
   },
   {
@@ -15136,7 +15216,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.e96857c58f71",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 70,
+    "line": 79,
     kind: 'lt-call'
   },
   {
@@ -15248,7 +15328,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.eb75e5bd2cba",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 342,
+    "line": 448,
     kind: 'lt-call'
   },
   {
@@ -15624,7 +15704,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.f1d9b5857bf2",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 486,
+    "line": 706,
     kind: 'lt-call'
   },
   {
@@ -16188,6 +16268,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Select at least one file to import",
+    "key": "literal.f9f9ea55ab96",
+    namespace: 'literals',
+    "file": "src/components/documents/cloud-import-dialog.tsx",
+    "line": 382,
+    kind: 'lt-call'
+  },
+  {
     "text": "Save Changes",
     "key": "literal.fa2984b367b8",
     namespace: 'literals',
@@ -16236,6 +16324,14 @@ export const literalsManifest: LiteralManifestItem[] = [
     kind: 'lt-call'
   },
   {
+    "text": "Import selected files",
+    "key": "literal.fb3d7fe04942",
+    namespace: 'literals',
+    "file": "src/components/documents/cloud-import-dialog.tsx",
+    "line": 648,
+    kind: 'lt-call'
+  },
+  {
     "text": "4. Third-party cookies",
     "key": "literal.fb61c0475ca9",
     namespace: 'literals',
@@ -16272,7 +16368,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fbae892997d9",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 258,
+    "line": 270,
     kind: 'lt-call'
   },
   {
@@ -16400,7 +16496,7 @@ export const literalsManifest: LiteralManifestItem[] = [
     "key": "literal.fd9999e45925",
     namespace: 'literals',
     "file": "src/components/documents/cloud-import-dialog.tsx",
-    "line": 131,
+    "line": 140,
     kind: 'lt-call'
   },
   {
